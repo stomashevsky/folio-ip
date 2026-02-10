@@ -19,7 +19,7 @@ export function Navbar() {
             F
           </span>
           <span>Acme Corp</span>
-          <ChevronsUpDown className="h-3 w-2 text-[rgb(93,93,93)]" />
+          <ChevronsUpDown className="h-3.5 w-3.5 text-[rgb(143,143,143)]" />
         </button>
 
         {/* Separator */}
@@ -33,7 +33,7 @@ export function Navbar() {
           className="relative flex h-8 items-center gap-2 rounded-lg px-2.5 text-sm font-medium text-[var(--color-text)] before:pointer-events-none before:absolute before:inset-0 before:rounded-lg before:transition-colors hover:before:bg-black/[0.08]"
         >
           <span>Default project</span>
-          <ChevronsUpDown className="h-3 w-2 text-[rgb(93,93,93)]" />
+          <ChevronsUpDown className="h-3.5 w-3.5 text-[rgb(143,143,143)]" />
         </button>
       </div>
 

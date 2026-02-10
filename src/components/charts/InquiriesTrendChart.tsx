@@ -66,7 +66,7 @@ export function InquiriesTrendChart({ data }: InquiriesTrendChartProps) {
           }}
         />
         <Area
-          type="monotone"
+          type="linear"
           dataKey="value"
           stroke="var(--color-primary-solid-bg)"
           strokeWidth={2}

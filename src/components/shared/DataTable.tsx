@@ -11,7 +11,7 @@ import {
   type SortingState,
 } from "@tanstack/react-table";
 import { useState } from "react";
-import { Input } from "@plexui/ui/components/Input";
+
 import { Button } from "@plexui/ui/components/Button";
 import {
   ChevronLeft,
@@ -79,18 +79,15 @@ export function DataTable<T>({
       )}
 
       {/* Table */}
-      <div className="overflow-hidden rounded-lg border border-[var(--color-border)]">
-        <table className="w-full">
+      <div className="overflow-auto">
+        <table className="w-full border-collapse">
           <thead>
             {table.getHeaderGroups().map((headerGroup) => (
-              <tr
-                key={headerGroup.id}
-                className="border-b border-[var(--color-border)] bg-[var(--color-surface-secondary)]"
-              >
+              <tr key={headerGroup.id}>
                 {headerGroup.headers.map((header) => (
                   <th
                     key={header.id}
-                    className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-[var(--color-text-tertiary)]"
+                    className="py-1.5 pr-2 text-left text-xs font-semibold uppercase tracking-[0.5px] text-[var(--color-text)]"
                   >
                     {header.isPlaceholder ? null : (
                       <div
@@ -128,7 +125,7 @@ export function DataTable<T>({
               <tr>
                 <td
                   colSpan={columns.length}
-                  className="px-4 py-12 text-center text-sm text-[var(--color-text-tertiary)]"
+                  className="py-12 text-center text-sm text-[var(--color-text-tertiary)]"
                 >
                   No results found.
                 </td>
@@ -137,7 +134,7 @@ export function DataTable<T>({
               table.getRowModel().rows.map((row) => (
                 <tr
                   key={row.id}
-                  className={`border-b border-[var(--color-border)] bg-[var(--color-surface)] transition-colors hover:bg-[var(--color-surface-secondary)] ${
+                  className={`border-t border-[var(--color-border)] transition-colors hover:bg-[var(--color-surface-secondary)] ${
                     onRowClick ? "cursor-pointer" : ""
                   }`}
                   onClick={() => onRowClick?.(row.original)}
@@ -145,7 +142,7 @@ export function DataTable<T>({
                   {row.getVisibleCells().map((cell) => (
                     <td
                       key={cell.id}
-                      className="px-4 py-3 text-sm text-[var(--color-text)]"
+                      className="py-2 pr-2 align-middle text-sm text-[var(--color-text)]"
                     >
                       {flexRender(
                         cell.column.columnDef.cell,

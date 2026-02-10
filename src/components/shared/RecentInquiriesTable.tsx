@@ -2,7 +2,7 @@
 
 import type { Inquiry } from "@/lib/types";
 import { StatusBadge } from "./StatusBadge";
-import { formatDateTime, truncateId, formatDuration } from "@/lib/utils/format";
+import { formatDateTime, truncateId } from "@/lib/utils/format";
 import { useRouter } from "next/navigation";
 
 interface RecentInquiriesTableProps {
@@ -13,23 +13,23 @@ export function RecentInquiriesTable({ data }: RecentInquiriesTableProps) {
   const router = useRouter();
 
   return (
-    <div className="overflow-hidden">
-      <table className="w-full">
+    <div className="overflow-auto">
+      <table className="w-full border-collapse">
         <thead>
-          <tr className="border-b border-[var(--color-border)] bg-[var(--color-surface-secondary)]">
-            <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-[var(--color-text-tertiary)]">
+          <tr>
+            <th className="py-1.5 pr-2 text-left text-xs font-semibold uppercase tracking-[0.5px] text-[var(--color-text)]">
               Name
             </th>
-            <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-[var(--color-text-tertiary)]">
+            <th className="py-1.5 pr-2 text-left text-xs font-semibold uppercase tracking-[0.5px] text-[var(--color-text)]">
               Inquiry ID
             </th>
-            <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-[var(--color-text-tertiary)]">
+            <th className="py-1.5 pr-2 text-left text-xs font-semibold uppercase tracking-[0.5px] text-[var(--color-text)]">
               Template
             </th>
-            <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-[var(--color-text-tertiary)]">
+            <th className="py-1.5 pr-2 text-left text-xs font-semibold uppercase tracking-[0.5px] text-[var(--color-text)]">
               Created at
             </th>
-            <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-[var(--color-text-tertiary)]">
+            <th className="py-1.5 pr-2 text-left text-xs font-semibold uppercase tracking-[0.5px] text-[var(--color-text)]">
               Status
             </th>
           </tr>
@@ -38,22 +38,22 @@ export function RecentInquiriesTable({ data }: RecentInquiriesTableProps) {
           {data.map((inquiry) => (
             <tr
               key={inquiry.id}
-              className="cursor-pointer border-b border-[var(--color-border)] bg-[var(--color-surface)] transition-colors hover:bg-[var(--color-surface-secondary)]"
+              className="cursor-pointer border-t border-[var(--color-border)] transition-colors hover:bg-[var(--color-surface-secondary)]"
               onClick={() => router.push(`/inquiries/${inquiry.id}`)}
             >
-              <td className="px-4 py-3 text-sm font-medium text-[var(--color-text)]">
+              <td className="py-2 pr-2 align-middle text-sm font-medium text-[var(--color-text)]">
                 {inquiry.accountName}
               </td>
-              <td className="px-4 py-3 text-sm font-mono text-[var(--color-text-secondary)]">
+              <td className="py-2 pr-2 align-middle font-mono text-sm text-[var(--color-text-secondary)]">
                 {truncateId(inquiry.id)}
               </td>
-              <td className="px-4 py-3 text-sm text-[var(--color-text-secondary)]">
+              <td className="py-2 pr-2 align-middle text-sm text-[var(--color-text-secondary)]">
                 {inquiry.templateName}
               </td>
-              <td className="px-4 py-3 text-sm text-[var(--color-text-secondary)]">
+              <td className="py-2 pr-2 align-middle text-sm text-[var(--color-text-secondary)]">
                 {formatDateTime(inquiry.createdAt)}
               </td>
-              <td className="px-4 py-3">
+              <td className="py-2 pr-2 align-middle">
                 <StatusBadge status={inquiry.status} />
               </td>
             </tr>
@@ -62,7 +62,7 @@ export function RecentInquiriesTable({ data }: RecentInquiriesTableProps) {
             <tr>
               <td
                 colSpan={5}
-                className="px-4 py-12 text-center text-sm text-[var(--color-text-tertiary)]"
+                className="py-12 text-center text-sm text-[var(--color-text-tertiary)]"
               >
                 No inquiries found.
               </td>

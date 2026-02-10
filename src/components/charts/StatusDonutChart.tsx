@@ -8,6 +8,8 @@ interface StatusDonutChartProps {
 }
 
 export function StatusDonutChart({ data }: StatusDonutChartProps) {
+  const total = data.reduce((sum, d) => sum + d.count, 0);
+
   return (
     <div className="flex items-center gap-8">
       <ResponsiveContainer width={200} height={200}>
@@ -20,6 +22,7 @@ export function StatusDonutChart({ data }: StatusDonutChartProps) {
             outerRadius={85}
             paddingAngle={2}
             dataKey="count"
+            nameKey="status"
           >
             {data.map((entry, index) => (
               <Cell key={index} fill={entry.color} />
@@ -33,7 +36,10 @@ export function StatusDonutChart({ data }: StatusDonutChartProps) {
               fontSize: "13px",
               color: "var(--color-text)",
             }}
-            formatter={(value: number, name: string) => [value, name]}
+            formatter={(value: number, name: string) => {
+              const pct = total > 0 ? ((value / total) * 100).toFixed(1) : "0";
+              return [`${value.toLocaleString()} (${pct}%)`, name];
+            }}
           />
         </PieChart>
       </ResponsiveContainer>
@@ -48,7 +54,7 @@ export function StatusDonutChart({ data }: StatusDonutChartProps) {
               {entry.status}
             </span>
             <span className="text-xs font-medium text-[var(--color-text)]">
-              {entry.count}
+              {entry.count.toLocaleString()}
             </span>
             <span className="text-xs text-[var(--color-text-tertiary)]">
               ({entry.percentage}%)

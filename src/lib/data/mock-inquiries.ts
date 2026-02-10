@@ -4,7 +4,7 @@ export const mockInquiries: Inquiry[] = [
   {
     id: "inq_Wt77vKHwYVYFciFNNDQpvggYy6jD",
     accountId: "act_3ocpY1q1aBvfWMY4YNvdi9vgtTGx",
-    accountName: "ALEXANDER J SAMPLE",
+    accountName: "Alexander J Sample",
     status: "approved",
     templateName: "KYC + AML: GovID + Selfie",
     createdAt: "2026-02-10T16:41:00.000Z",
@@ -17,7 +17,7 @@ export const mockInquiries: Inquiry[] = [
   {
     id: "inq_8kLmNpRsTuVwXyZaAbCdEfGhIjKl",
     accountId: "act_7FgHiJkLmNoPqRsTuVwXyZaBcDeF",
-    accountName: "MARIA GONZALEZ",
+    accountName: "Maria Gonzalez",
     status: "approved",
     templateName: "KYC + AML: GovID + Selfie",
     createdAt: "2026-02-10T14:22:00.000Z",
@@ -30,7 +30,7 @@ export const mockInquiries: Inquiry[] = [
   {
     id: "inq_3MnOpQrStUvWxYzAaBbCcDdEeFfGg",
     accountId: "act_9HiJkLmNoPqRsTuVwXyZaBcDeFgH",
-    accountName: "JOHN WILLIAMS",
+    accountName: "John Williams",
     status: "declined",
     templateName: "KYC + AML: GovID + Selfie",
     createdAt: "2026-02-10T12:05:00.000Z",
@@ -43,7 +43,7 @@ export const mockInquiries: Inquiry[] = [
   {
     id: "inq_5RsTuVwXyZaAbBcCdDdEeFfGgHhIi",
     accountId: "act_2AbCdEfGhIjKlMnOpQrStUvWxYz",
-    accountName: "YUKI TANAKA",
+    accountName: "Yuki Tanaka",
     status: "needs_review",
     templateName: "KYC + AML: GovID + Selfie",
     createdAt: "2026-02-10T10:33:00.000Z",
@@ -56,7 +56,7 @@ export const mockInquiries: Inquiry[] = [
   {
     id: "inq_7VwXyZaAbBcCdDdEeFfGgHhIiJjKk",
     accountId: "act_4EfGhIjKlMnOpQrStUvWxYzAbCdE",
-    accountName: "EMMA JOHNSON",
+    accountName: "Emma Johnson",
     status: "pending",
     templateName: "KYC: GovID Only",
     createdAt: "2026-02-10T09:15:00.000Z",
@@ -68,7 +68,7 @@ export const mockInquiries: Inquiry[] = [
   {
     id: "inq_9XyZaAbBcCdDdEeFfGgHhIiJjKkLl",
     accountId: "act_6GhIjKlMnOpQrStUvWxYzAbCdEfG",
-    accountName: "CARLOS MARTINEZ",
+    accountName: "Carlos Martinez",
     status: "approved",
     templateName: "KYC + AML: GovID + Selfie",
     createdAt: "2026-02-09T18:45:00.000Z",
@@ -81,7 +81,7 @@ export const mockInquiries: Inquiry[] = [
   {
     id: "inq_2ZaAbBcCdDdEeFfGgHhIiJjKkLlMm",
     accountId: "act_8IjKlMnOpQrStUvWxYzAbCdEfGhI",
-    accountName: "SOPHIE DUPONT",
+    accountName: "Sophie Dupont",
     status: "approved",
     templateName: "KYC + AML: GovID + Selfie",
     createdAt: "2026-02-09T16:20:00.000Z",
@@ -94,7 +94,7 @@ export const mockInquiries: Inquiry[] = [
   {
     id: "inq_4BcCdDdEeFfGgHhIiJjKkLlMmNnOo",
     accountId: "act_1KlMnOpQrStUvWxYzAbCdEfGhIjK",
-    accountName: "AHMED HASSAN",
+    accountName: "Ahmed Hassan",
     status: "declined",
     templateName: "KYC + AML: GovID + Selfie",
     createdAt: "2026-02-09T14:10:00.000Z",
@@ -107,7 +107,7 @@ export const mockInquiries: Inquiry[] = [
   {
     id: "inq_6DdEeFfGgHhIiJjKkLlMmNnOoPpQq",
     accountId: "act_3MnOpQrStUvWxYzAbCdEfGhIjKlM",
-    accountName: "OLIVIA SMITH",
+    accountName: "Olivia Smith",
     status: "approved",
     templateName: "KYC: GovID Only",
     createdAt: "2026-02-09T11:55:00.000Z",
@@ -120,7 +120,7 @@ export const mockInquiries: Inquiry[] = [
   {
     id: "inq_8FfGgHhIiJjKkLlMmNnOoPpQqRrSs",
     accountId: "act_5OpQrStUvWxYzAbCdEfGhIjKlMnO",
-    accountName: "LARS ERIKSSON",
+    accountName: "Lars Eriksson",
     status: "needs_review",
     templateName: "KYC + AML: GovID + Selfie",
     createdAt: "2026-02-09T09:30:00.000Z",
@@ -133,7 +133,7 @@ export const mockInquiries: Inquiry[] = [
   {
     id: "inq_1HhIiJjKkLlMmNnOoPpQqRrSsTtUu",
     accountId: "act_7QrStUvWxYzAbCdEfGhIjKlMnOpQ",
-    accountName: "PRIYA PATEL",
+    accountName: "Priya Patel",
     status: "approved",
     templateName: "KYC + AML: GovID + Selfie",
     createdAt: "2026-02-08T17:40:00.000Z",
@@ -146,7 +146,7 @@ export const mockInquiries: Inquiry[] = [
   {
     id: "inq_3JjKkLlMmNnOoPpQqRrSsTtUuVvWw",
     accountId: "act_9StUvWxYzAbCdEfGhIjKlMnOpQrS",
-    accountName: "WEI CHEN",
+    accountName: "Wei Chen",
     status: "expired",
     templateName: "KYC + AML: GovID + Selfie",
     createdAt: "2026-02-08T15:00:00.000Z",
@@ -158,7 +158,7 @@ export const mockInquiries: Inquiry[] = [
   {
     id: "inq_5LlMmNnOoPpQqRrSsTtUuVvWwXxYy",
     accountId: "act_2UvWxYzAbCdEfGhIjKlMnOpQrStU",
-    accountName: "ANNA KOWALSKI",
+    accountName: "Anna Kowalski",
     status: "approved",
     templateName: "KYC + AML: GovID + Selfie",
     createdAt: "2026-02-08T12:25:00.000Z",
@@ -171,7 +171,7 @@ export const mockInquiries: Inquiry[] = [
   {
     id: "inq_7NnOoPpQqRrSsTtUuVvWwXxYyZzAa",
     accountId: "act_4WxYzAbCdEfGhIjKlMnOpQrStUvW",
-    accountName: "JAMES BROWN",
+    accountName: "James Brown",
     status: "approved",
     templateName: "KYC: GovID Only",
     createdAt: "2026-02-08T10:10:00.000Z",
@@ -184,7 +184,7 @@ export const mockInquiries: Inquiry[] = [
   {
     id: "inq_9PpQqRrSsTtUuVvWwXxYyZzAaBbCc",
     accountId: "act_6YzAbCdEfGhIjKlMnOpQrStUvWxY",
-    accountName: "FATIMA AL-RASHID",
+    accountName: "Fatima Al-Rashid",
     status: "created",
     templateName: "KYC + AML: GovID + Selfie",
     createdAt: "2026-02-10T17:00:00.000Z",

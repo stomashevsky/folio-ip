@@ -12,14 +12,6 @@ import {
   mockTopFailureReasons,
 } from "@/lib/data";
 import { formatNumber, formatPercent, formatDuration } from "@/lib/utils/format";
-import {
-  FileSearch,
-  ShieldCheck,
-  Clock,
-  AlertTriangle,
-  Users,
-  FileText,
-} from "lucide-react";
 import { useState } from "react";
 
 const tabs = ["Overview", "Funnel"] as const;
@@ -42,13 +34,13 @@ export default function AnalyticsPage() {
             label="Total Inquiries"
             value={formatNumber(overview.totalInquiries)}
             trend={{ value: overview.inquiriesTrend, label: "vs last period" }}
-            icon={<FileSearch className="h-4 w-4" />}
+            description="Trending up"
           />
           <MetricCard
             label="Approval Rate"
             value={formatPercent(overview.approvalRate)}
             trend={{ value: overview.approvalTrend, label: "vs last period" }}
-            icon={<ShieldCheck className="h-4 w-4" />}
+            description="Strong rate"
           />
           <MetricCard
             label="Avg Completion"
@@ -57,23 +49,23 @@ export default function AnalyticsPage() {
               value: overview.completionTimeTrend,
               label: "vs last period",
             }}
-            icon={<Clock className="h-4 w-4" />}
+            description="Faster processing"
           />
           <MetricCard
             label="Pending Review"
             value={formatNumber(overview.pendingReview)}
             trend={{ value: overview.pendingReviewTrend }}
-            icon={<AlertTriangle className="h-4 w-4" />}
+            description="Needs attention"
           />
           <MetricCard
             label="Verifications"
             value={formatNumber(overview.totalVerifications)}
-            icon={<ShieldCheck className="h-4 w-4" />}
+            description="Total checks"
           />
           <MetricCard
             label="Accounts"
             value={formatNumber(overview.totalAccounts)}
-            icon={<Users className="h-4 w-4" />}
+            description="Active users"
           />
         </div>
 

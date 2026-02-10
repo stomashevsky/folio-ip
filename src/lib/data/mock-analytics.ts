@@ -19,19 +19,58 @@ export const mockAnalyticsOverview: AnalyticsOverview = {
   pendingReviewTrend: 8.7,
 };
 
-export const mockInquiriesTimeSeries: TimeSeriesPoint[] = Array.from(
-  { length: 30 },
-  (_, i) => {
-    const date = new Date("2026-01-12");
-    date.setDate(date.getDate() + i);
-    const base = 35 + Math.round(Math.sin(i * 0.3) * 10);
-    const noise = Math.round(Math.random() * 8 - 4);
+// Seeded pseudo-random for stable mock data (Mulberry32)
+function seededRandom(seed: number) {
+  let t = (seed + 0x6d2b79f5) | 0;
+  t = Math.imul(t ^ (t >>> 15), t | 1);
+  t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+  return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+}
+
+export function generateTimeSeries(
+  period: "all" | "3m" | "30d" | "7d",
+): TimeSeriesPoint[] {
+  const lengths: Record<string, number> = {
+    all: 365,
+    "3m": 90,
+    "30d": 30,
+    "7d": 7,
+  };
+  const count = lengths[period];
+  const endDate = new Date("2026-02-10");
+
+  // Gradual upward trend + weekday pattern + random walks
+  let walk = 0;
+  return Array.from({ length: count }, (_, i) => {
+    const date = new Date(endDate);
+    date.setDate(date.getDate() - (count - 1 - i));
+    const dayOfWeek = date.getDay(); // 0=Sun, 6=Sat
+
+    // Upward trend: ~15% growth over the period
+    const trend = 30 + (i / count) * 12;
+
+    // Weekend dip (Sat/Sun ~30% lower)
+    const weekendFactor = dayOfWeek === 0 || dayOfWeek === 6 ? 0.7 : 1.0;
+
+    // Random walk for organic variation
+    walk += (seededRandom(i * 7 + count) - 0.5) * 6;
+    walk = walk * 0.92; // mean-revert
+
+    // Day-to-day noise
+    const noise = (seededRandom(i * 13 + count * 3) - 0.5) * 10;
+
+    // Occasional spikes (organic-looking)
+    const spike = seededRandom(i * 31 + count * 7) > 0.93 ? 12 + seededRandom(i * 41) * 8 : 0;
+
+    const value = Math.round((trend + walk + noise + spike) * weekendFactor);
     return {
       date: date.toISOString().split("T")[0],
-      value: Math.max(15, base + noise),
+      value: Math.max(5, value),
     };
-  }
-);
+  });
+}
+
+export const mockInquiriesTimeSeries: TimeSeriesPoint[] = generateTimeSeries("30d");
 
 export const mockStatusDistribution: StatusDistribution[] = [
   { status: "Approved", count: 1079, percentage: 87.4, color: "#30a46c" },

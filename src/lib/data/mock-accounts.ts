@@ -3,7 +3,7 @@ import type { Account } from "@/lib/types";
 export const mockAccounts: Account[] = [
   {
     id: "act_3ocpY1q1aBvfWMY4YNvdi9vgtTGx",
-    name: "ALEXANDER J SAMPLE",
+    name: "Alexander J Sample",
     birthdate: "1977-07-17",
     address: "600 California Street, San Francisco, CA 94109, USA",
     age: 48,
@@ -17,7 +17,7 @@ export const mockAccounts: Account[] = [
   },
   {
     id: "act_7FgHiJkLmNoPqRsTuVwXyZaBcDeF",
-    name: "MARIA GONZALEZ",
+    name: "Maria Gonzalez",
     birthdate: "1990-03-03",
     address: "Calle Mayor 15, Madrid, Spain",
     age: 35,
@@ -32,7 +32,7 @@ export const mockAccounts: Account[] = [
   },
   {
     id: "act_9HiJkLmNoPqRsTuVwXyZaBcDeFgH",
-    name: "JOHN WILLIAMS",
+    name: "John Williams",
     birthdate: "1985-08-15",
     address: "42 Baker Street, London, UK",
     age: 40,
@@ -46,7 +46,7 @@ export const mockAccounts: Account[] = [
   },
   {
     id: "act_2AbCdEfGhIjKlMnOpQrStUvWxYz",
-    name: "YUKI TANAKA",
+    name: "Yuki Tanaka",
     birthdate: "1988-12-22",
     address: "1-1 Shibuya, Tokyo, Japan",
     age: 37,
@@ -61,7 +61,7 @@ export const mockAccounts: Account[] = [
   },
   {
     id: "act_4EfGhIjKlMnOpQrStUvWxYzAbCdE",
-    name: "EMMA JOHNSON",
+    name: "Emma Johnson",
     birthdate: "1995-06-10",
     address: "789 Elm Avenue, Chicago, IL 60601, USA",
     age: 30,
@@ -75,7 +75,7 @@ export const mockAccounts: Account[] = [
   },
   {
     id: "act_6GhIjKlMnOpQrStUvWxYzAbCdEfG",
-    name: "CARLOS MARTINEZ",
+    name: "Carlos Martinez",
     birthdate: "1982-11-28",
     address: "Av. Reforma 222, Mexico City, Mexico",
     age: 43,
@@ -89,7 +89,7 @@ export const mockAccounts: Account[] = [
   },
   {
     id: "act_8IjKlMnOpQrStUvWxYzAbCdEfGhI",
-    name: "SOPHIE DUPONT",
+    name: "Sophie Dupont",
     birthdate: "1993-04-14",
     address: "25 Rue de Rivoli, Paris, France",
     age: 32,
@@ -104,7 +104,7 @@ export const mockAccounts: Account[] = [
   },
   {
     id: "act_5OpQrStUvWxYzAbCdEfGhIjKlMnO",
-    name: "LARS ERIKSSON",
+    name: "Lars Eriksson",
     birthdate: "1979-09-05",
     address: "Drottninggatan 10, Stockholm, Sweden",
     age: 46,

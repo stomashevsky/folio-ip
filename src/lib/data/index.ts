@@ -8,4 +8,5 @@ export {
   mockStatusDistribution,
   mockFunnel,
   mockTopFailureReasons,
+  generateTimeSeries,
 } from "./mock-analytics";
