@@ -9,7 +9,7 @@ export function TopBar({ title, actions, toolbar }: TopBarProps) {
   const hasToolbar = !!toolbar;
 
   return (
-    <div className="shrink-0 border-b border-[var(--color-border)] bg-[var(--color-surface)] px-6 py-4">
+    <div className="sticky top-0 z-10 shrink-0 border-b border-[var(--color-border)] bg-[var(--color-surface)] px-6 py-4">
       {/* Row 1: title + actions (when no toolbar) */}
       <div className="flex items-center justify-between">
         <h1 className="text-xl font-semibold text-[var(--color-text)]">

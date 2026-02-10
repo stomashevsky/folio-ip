@@ -19,7 +19,7 @@ export function ChartCard({
     >
       <div className="mb-4 flex items-start justify-between">
         <div>
-          <h3 className="text-sm font-semibold text-[var(--color-text)]">
+          <h3 className="heading-sm text-[var(--color-text)]">
             {title}
           </h3>
           {description && (

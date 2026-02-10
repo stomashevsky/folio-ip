@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo, useCallback } from "react";
+import Link from "next/link";
 import { DateTime } from "luxon";
 import { TopBar } from "@/components/layout/TopBar";
 import { MetricCard, ChartCard } from "@/components/shared";
@@ -26,21 +27,21 @@ const shortcuts: DateRangeShortcut[] = [
     label: "Last 7 days",
     getDateRange: () => {
       const today = DateTime.local().endOf("day");
-      return [today.minus({ days: 7 }).startOf("day"), today];
+      return [today.minus({ days: 6 }).startOf("day"), today];
     },
   },
   {
     label: "Last 30 days",
     getDateRange: () => {
       const today = DateTime.local().endOf("day");
-      return [today.minus({ days: 30 }).startOf("day"), today];
+      return [today.minus({ days: 29 }).startOf("day"), today];
     },
   },
   {
     label: "Last 3 months",
     getDateRange: () => {
       const today = DateTime.local().endOf("day");
-      return [today.minus({ months: 3 }).startOf("day"), today];
+      return [today.minus({ months: 3 }).plus({ days: 1 }).startOf("day"), today];
     },
   },
   {
@@ -147,7 +148,8 @@ export default function DashboardHome() {
 
   const days = useMemo(() => {
     if (!dateRange) return 30;
-    return Math.max(1, Math.round(dateRange[1].diff(dateRange[0], "days").days));
+    // +1 to count both start and end days inclusively
+    return Math.max(1, Math.round(dateRange[1].diff(dateRange[0], "days").days) + 1);
   }, [dateRange]);
 
   const metrics = useMemo(() => deriveMetrics(days), [days]);
@@ -209,7 +211,7 @@ export default function DashboardHome() {
 
         {/* Recent Inquiries */}
         <div className="mt-8">
-          <h2 className="text-sm font-semibold text-[var(--color-text)]">
+          <h2 className="heading-sm text-[var(--color-text)]">
             Recent Inquiries
           </h2>
           <p className="mt-0.5 text-xs text-[var(--color-text-tertiary)]">
@@ -217,6 +219,14 @@ export default function DashboardHome() {
           </p>
           <div className="mt-4">
             <RecentInquiriesTable data={recentInquiries} />
+          </div>
+          <div className="mt-4 text-center">
+            <Link
+              href="/inquiries"
+              className="text-sm font-medium text-[var(--color-text-secondary)] hover:text-[var(--color-text)] transition-colors"
+            >
+              View all inquiries &rarr;
+            </Link>
           </div>
         </div>
       </div>
