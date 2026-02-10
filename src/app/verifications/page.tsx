@@ -1,7 +1,8 @@
 "use client";
 
+import { useState } from "react";
 import { TopBar } from "@/components/layout/TopBar";
-import { DataTable } from "@/components/shared";
+import { DataTable, TableSearch } from "@/components/shared";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import { mockVerifications } from "@/lib/data";
 import { formatDateTime, truncateId } from "@/lib/utils/format";
@@ -13,6 +14,7 @@ const columns: ColumnDef<Verification, unknown>[] = [
   {
     accessorKey: "type",
     header: "Type",
+    size: 200,
     cell: ({ row }) => (
       <span className="font-medium capitalize">
         {row.original.type.replace("_", " ")}
@@ -22,6 +24,7 @@ const columns: ColumnDef<Verification, unknown>[] = [
   {
     accessorKey: "id",
     header: "Verification ID",
+    size: 180,
     cell: ({ row }) => (
       <span className="font-mono text-[var(--color-text-secondary)]">
         {truncateId(row.original.id)}
@@ -31,6 +34,7 @@ const columns: ColumnDef<Verification, unknown>[] = [
   {
     accessorKey: "inquiryId",
     header: "Inquiry ID",
+    size: 180,
     cell: ({ row }) => (
       <span className="font-mono text-[var(--color-text-secondary)]">
         {truncateId(row.original.inquiryId)}
@@ -40,6 +44,7 @@ const columns: ColumnDef<Verification, unknown>[] = [
   {
     accessorKey: "createdAt",
     header: "Created at (UTC)",
+    size: 180,
     cell: ({ row }) => (
       <span className="text-[var(--color-text-secondary)]">
         {formatDateTime(row.original.createdAt)}
@@ -49,29 +54,36 @@ const columns: ColumnDef<Verification, unknown>[] = [
   {
     accessorKey: "status",
     header: "Status",
+    size: 120,
     cell: ({ row }) => <StatusBadge status={row.original.status} />,
   },
 ];
 
 export default function VerificationsPage() {
   const router = useRouter();
+  const [search, setSearch] = useState("");
 
   return (
-    <main className="flex-1 overflow-y-auto">
+    <div className="flex h-full flex-col overflow-hidden">
       <TopBar
         title="Verifications"
-        description="All identity verification checks"
+        toolbar={
+          <TableSearch
+            value={search}
+            onChange={setSearch}
+            placeholder="Search by type or ID..."
+          />
+        }
       />
-      <div className="px-6 pb-6">
+      <div className="flex min-h-0 flex-1 flex-col px-6 pt-4">
         <DataTable
           data={mockVerifications}
           columns={columns}
-          searchPlaceholder="Search by type or ID..."
-          searchColumn="type"
+          globalFilter={search}
           onRowClick={(row) => router.push(`/verifications/${row.id}`)}
           pageSize={10}
         />
       </div>
-    </main>
+    </div>
   );
 }

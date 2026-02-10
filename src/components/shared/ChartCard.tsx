@@ -15,7 +15,7 @@ export function ChartCard({
 }: ChartCardProps) {
   return (
     <div
-      className={`rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6 ${className}`}
+      className={`rounded-[10px] border border-black/10 p-4 dark:border-white/10 ${className}`}
     >
       <div className="mb-4 flex items-start justify-between">
         <div>

@@ -28,7 +28,7 @@ function seededRandom(seed: number) {
 }
 
 export function generateTimeSeries(
-  period: "all" | "3m" | "30d" | "7d",
+  periodOrDays: "all" | "3m" | "30d" | "7d" | number,
 ): TimeSeriesPoint[] {
   const lengths: Record<string, number> = {
     all: 365,
@@ -36,7 +36,9 @@ export function generateTimeSeries(
     "30d": 30,
     "7d": 7,
   };
-  const count = lengths[period];
+  const count = typeof periodOrDays === "number"
+    ? Math.max(1, Math.round(periodOrDays))
+    : lengths[periodOrDays];
   const endDate = new Date("2026-02-10");
 
   // Gradual upward trend + weekday pattern + random walks

@@ -1,7 +1,8 @@
 "use client";
 
+import { useState } from "react";
 import { TopBar } from "@/components/layout/TopBar";
-import { DataTable } from "@/components/shared";
+import { DataTable, TableSearch } from "@/components/shared";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import { mockAccounts } from "@/lib/data";
 import { formatDateTime, truncateId } from "@/lib/utils/format";
@@ -13,6 +14,7 @@ const columns: ColumnDef<Account, unknown>[] = [
   {
     accessorKey: "name",
     header: "Name",
+    size: 240,
     cell: ({ row }) => (
       <div className="flex items-center gap-3">
         <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--color-primary-soft-bg)] text-xs font-semibold text-[var(--color-primary-soft-text)]">
@@ -29,6 +31,7 @@ const columns: ColumnDef<Account, unknown>[] = [
   {
     accessorKey: "id",
     header: "Account ID",
+    size: 180,
     cell: ({ row }) => (
       <span className="font-mono text-[var(--color-text-secondary)]">
         {truncateId(row.original.id)}
@@ -38,6 +41,7 @@ const columns: ColumnDef<Account, unknown>[] = [
   {
     accessorKey: "type",
     header: "Type",
+    size: 100,
     cell: ({ row }) => (
       <span className="text-[var(--color-text-secondary)]">
         {row.original.type}
@@ -47,6 +51,7 @@ const columns: ColumnDef<Account, unknown>[] = [
   {
     accessorKey: "createdAt",
     header: "Created at (UTC)",
+    size: 180,
     cell: ({ row }) => (
       <span className="text-[var(--color-text-secondary)]">
         {formatDateTime(row.original.createdAt)}
@@ -56,29 +61,36 @@ const columns: ColumnDef<Account, unknown>[] = [
   {
     accessorKey: "status",
     header: "Status",
+    size: 120,
     cell: ({ row }) => <StatusBadge status={row.original.status} />,
   },
 ];
 
 export default function AccountsPage() {
   const router = useRouter();
+  const [search, setSearch] = useState("");
 
   return (
-    <main className="flex-1 overflow-y-auto">
+    <div className="flex h-full flex-col overflow-hidden">
       <TopBar
         title="Accounts"
-        description="All identity accounts"
+        toolbar={
+          <TableSearch
+            value={search}
+            onChange={setSearch}
+            placeholder="Search by name or ID..."
+          />
+        }
       />
-      <div className="px-6 pb-6">
+      <div className="flex min-h-0 flex-1 flex-col px-6 pt-4">
         <DataTable
           data={mockAccounts}
           columns={columns}
-          searchPlaceholder="Search by name or ID..."
-          searchColumn="name"
+          globalFilter={search}
           onRowClick={(row) => router.push(`/accounts/${row.id}`)}
           pageSize={10}
         />
       </div>
-    </main>
+    </div>
   );
 }

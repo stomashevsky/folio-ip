@@ -2,22 +2,35 @@ interface TopBarProps {
   title: string;
   description?: string;
   actions?: React.ReactNode;
+  toolbar?: React.ReactNode;
 }
 
-export function TopBar({ title, description, actions }: TopBarProps) {
+export function TopBar({ title, actions, toolbar }: TopBarProps) {
+  const hasToolbar = !!toolbar;
+
   return (
-    <div className="flex items-center justify-between px-6 pb-2 pt-6">
-      <div>
-        <h1 className="text-lg font-semibold text-[var(--color-text)]">
+    <div className="shrink-0 border-b border-[var(--color-border)] bg-[var(--color-surface)] px-6 py-4">
+      {/* Row 1: title + actions (when no toolbar) */}
+      <div className="flex items-center justify-between">
+        <h1 className="text-xl font-semibold text-[var(--color-text)]">
           {title}
         </h1>
-        {description && (
-          <p className="mt-0.5 text-sm text-[var(--color-text-tertiary)]">
-            {description}
-          </p>
+        {!hasToolbar && actions && (
+          <div className="flex items-center gap-2">{actions}</div>
         )}
       </div>
-      {actions && <div className="flex items-center gap-2">{actions}</div>}
+
+      {/* Row 2: toolbar (search left) + actions (right) */}
+      {hasToolbar && (
+        <div className="mt-3 flex items-center justify-between gap-3">
+          <div className="flex min-w-0 flex-1 items-center gap-2">
+            {toolbar}
+          </div>
+          {actions && (
+            <div className="flex items-center gap-2">{actions}</div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

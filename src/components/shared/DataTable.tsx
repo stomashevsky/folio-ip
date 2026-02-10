@@ -13,22 +13,61 @@ import {
 import { useState } from "react";
 
 import { Button } from "@plexui/ui/components/Button";
+import { Input } from "@plexui/ui/components/Input";
+import { Select } from "@plexui/ui/components/Select";
 import {
   ChevronLeft,
   ChevronRight,
-  ChevronsLeft,
-  ChevronsRight,
   ArrowUpDown,
   ArrowUp,
   ArrowDown,
   Search,
 } from "lucide-react";
 
+const PAGE_SIZE_OPTIONS = [
+  { value: "10", label: "10" },
+  { value: "20", label: "20" },
+  { value: "50", label: "50" },
+  { value: "100", label: "100" },
+];
+
+/* ------------------------------------------------------------------ */
+/*  Standalone search pill – used inside TopBar toolbar                */
+/* ------------------------------------------------------------------ */
+interface TableSearchProps {
+  value: string;
+  onChange: (value: string) => void;
+  placeholder?: string;
+}
+
+export function TableSearch({
+  value,
+  onChange,
+  placeholder = "Search...",
+}: TableSearchProps) {
+  return (
+    <div className="w-80">
+      <Input
+        placeholder={placeholder}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        onClear={value ? () => onChange("") : undefined}
+        startAdornment={<Search className="h-4 w-4" />}
+        size="sm"
+        pill
+      />
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/*  DataTable                                                          */
+/* ------------------------------------------------------------------ */
 interface DataTableProps<T> {
   data: T[];
   columns: ColumnDef<T, unknown>[];
-  searchPlaceholder?: string;
-  searchColumn?: string;
+  /** External filter value (controlled mode – search rendered in TopBar) */
+  globalFilter?: string;
   onRowClick?: (row: T) => void;
   pageSize?: number;
 }
@@ -36,23 +75,20 @@ interface DataTableProps<T> {
 export function DataTable<T>({
   data,
   columns,
-  searchPlaceholder = "Search...",
-  searchColumn,
+  globalFilter: externalFilter = "",
   onRowClick,
   pageSize = 10,
 }: DataTableProps<T>) {
   const [sorting, setSorting] = useState<SortingState>([]);
-  const [globalFilter, setGlobalFilter] = useState("");
 
   const table = useReactTable({
     data,
     columns,
     state: {
       sorting,
-      globalFilter,
+      globalFilter: externalFilter,
     },
     onSortingChange: setSorting,
-    onGlobalFilterChange: setGlobalFilter,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
@@ -62,31 +98,20 @@ export function DataTable<T>({
     },
   });
 
-  return (
-    <div className="space-y-4">
-      {/* Search */}
-      {searchColumn !== undefined && (
-        <div className="relative max-w-sm">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--color-text-tertiary)]" />
-          <input
-            type="text"
-            placeholder={searchPlaceholder}
-            value={globalFilter}
-            onChange={(e) => setGlobalFilter(e.target.value)}
-            className="h-9 w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] pl-9 pr-3 text-sm text-[var(--color-text)] placeholder:text-[var(--color-text-tertiary)] outline-none focus:border-[var(--color-primary-solid-bg)] focus:ring-1 focus:ring-[var(--color-primary-solid-bg)]"
-          />
-        </div>
-      )}
+  const totalRows = table.getFilteredRowModel().rows.length;
 
-      {/* Table */}
-      <div className="overflow-auto">
-        <table className="w-full border-collapse">
+  return (
+    <div className="flex min-h-0 flex-1 flex-col">
+      {/* Table – scrollable area */}
+      <div className="min-h-0 flex-1 overflow-auto">
+        <table className="w-full table-fixed border-collapse">
           <thead>
             {table.getHeaderGroups().map((headerGroup) => (
               <tr key={headerGroup.id}>
                 {headerGroup.headers.map((header) => (
                   <th
                     key={header.id}
+                    style={header.getSize() !== 150 ? { width: header.getSize() } : undefined}
                     className="py-1.5 pr-2 text-left text-xs font-semibold uppercase tracking-[0.5px] text-[var(--color-text)]"
                   >
                     {header.isPlaceholder ? null : (
@@ -157,70 +182,62 @@ export function DataTable<T>({
         </table>
       </div>
 
-      {/* Pagination */}
-      {table.getPageCount() > 1 && (
-        <div className="flex items-center justify-between">
-          <p className="text-xs text-[var(--color-text-tertiary)]">
-            Showing{" "}
-            {table.getState().pagination.pageIndex *
-              table.getState().pagination.pageSize +
-              1}
-            –
-            {Math.min(
-              (table.getState().pagination.pageIndex + 1) *
-                table.getState().pagination.pageSize,
-              table.getFilteredRowModel().rows.length
-            )}{" "}
-            of {table.getFilteredRowModel().rows.length}
-          </p>
+      {/* Pagination – pinned bottom */}
+      <div className="shrink-0 flex items-center justify-between border-t border-[var(--color-border)] bg-[var(--color-surface)] py-3">
+        {/* Rows per page */}
+        <div className="flex items-center gap-2">
+          <span className="text-sm text-[var(--color-text-secondary)]">
+            Rows per page
+          </span>
+          <div className="w-20">
+            <Select
+              options={PAGE_SIZE_OPTIONS}
+              value={String(table.getState().pagination.pageSize)}
+              onChange={(opt) => table.setPageSize(Number(opt.value))}
+              size="sm"
+              pill={false}
+              block
+            />
+          </div>
+        </div>
+
+        {/* Page info + nav */}
+        <div className="flex items-center gap-3">
+          <span className="text-sm text-[var(--color-text-secondary)]">
+            {totalRows === 0
+              ? "0 results"
+              : `${table.getState().pagination.pageIndex * table.getState().pagination.pageSize + 1}–${Math.min(
+                  (table.getState().pagination.pageIndex + 1) *
+                    table.getState().pagination.pageSize,
+                  totalRows
+                )} of ${totalRows}`}
+          </span>
           <div className="flex items-center gap-1">
             <Button
               color="secondary"
-              variant="ghost"
-              size="xs"
+              variant="outline"
+              size="sm"
               uniform
-              disabled={!table.getCanPreviousPage()}
-              onClick={() => table.setPageIndex(0)}
-            >
-              <ChevronsLeft className="h-4 w-4" />
-            </Button>
-            <Button
-              color="secondary"
-              variant="ghost"
-              size="xs"
-              uniform
+              pill={false}
               disabled={!table.getCanPreviousPage()}
               onClick={() => table.previousPage()}
             >
               <ChevronLeft className="h-4 w-4" />
             </Button>
-            <span className="px-2 text-xs text-[var(--color-text-secondary)]">
-              Page {table.getState().pagination.pageIndex + 1} of{" "}
-              {table.getPageCount()}
-            </span>
             <Button
               color="secondary"
-              variant="ghost"
-              size="xs"
+              variant="outline"
+              size="sm"
               uniform
+              pill={false}
               disabled={!table.getCanNextPage()}
               onClick={() => table.nextPage()}
             >
               <ChevronRight className="h-4 w-4" />
             </Button>
-            <Button
-              color="secondary"
-              variant="ghost"
-              size="xs"
-              uniform
-              disabled={!table.getCanNextPage()}
-              onClick={() => table.setPageIndex(table.getPageCount() - 1)}
-            >
-              <ChevronsRight className="h-4 w-4" />
-            </Button>
           </div>
         </div>
-      )}
+      </div>
     </div>
   );
 }

@@ -37,9 +37,9 @@ export default function AccountDetailPage() {
 
   if (!account) {
     return (
-      <main className="flex-1 overflow-y-auto">
+      <main className="flex-1">
         <TopBar title="Account Not Found" />
-        <div className="px-6 pb-6">
+        <div className="px-6 pb-6 pt-6">
           <div className="flex flex-col items-center justify-center py-20">
             <p className="text-sm text-[var(--color-text-secondary)]">
               The account you&apos;re looking for doesn&apos;t exist.
@@ -60,7 +60,7 @@ export default function AccountDetailPage() {
   }
 
   return (
-    <main className="flex-1 overflow-y-auto">
+    <main className="flex-1">
       <TopBar
         title={account.name}
         description={truncateId(account.id)}
@@ -76,7 +76,7 @@ export default function AccountDetailPage() {
           </Button>
         }
       />
-      <div className="px-6 pb-6">
+      <div className="px-6 pb-6 pt-6">
         {/* Profile Header */}
         <div className="flex items-center gap-6 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6">
           <div className="flex h-16 w-16 items-center justify-center rounded-full bg-[var(--color-primary-soft-bg)]">

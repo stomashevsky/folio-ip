@@ -47,9 +47,9 @@ export default function VerificationDetailPage() {
 
   if (!verification) {
     return (
-      <main className="flex-1 overflow-y-auto">
+      <main className="flex-1">
         <TopBar title="Verification Not Found" />
-        <div className="px-6 pb-6">
+        <div className="px-6 pb-6 pt-6">
           <div className="flex flex-col items-center justify-center py-20">
             <p className="text-sm text-[var(--color-text-secondary)]">
               The verification you&apos;re looking for doesn&apos;t exist.
@@ -79,7 +79,7 @@ export default function VerificationDetailPage() {
   ).length;
 
   return (
-    <main className="flex-1 overflow-y-auto">
+    <main className="flex-1">
       <TopBar
         title={`${verification.type.replace("_", " ").replace(/\b\w/g, (c) => c.toUpperCase())} Verification`}
         description={truncateId(verification.id)}
@@ -95,7 +95,7 @@ export default function VerificationDetailPage() {
           </Button>
         }
       />
-      <div className="px-6 pb-6">
+      <div className="px-6 pb-6 pt-6">
         {/* Summary */}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <div className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4">

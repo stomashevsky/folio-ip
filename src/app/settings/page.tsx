@@ -4,9 +4,9 @@ import { Shield, Globe, Key, Bell } from "lucide-react";
 
 export default function SettingsPage() {
   return (
-    <main className="flex-1 overflow-y-auto">
+    <main className="flex-1">
       <TopBar title="Settings" description="Configuration and preferences" />
-      <div className="px-6 pb-6">
+      <div className="px-6 pb-6 pt-6">
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
           <ChartCard title="General" description="Basic configuration">
             <div className="space-y-4">

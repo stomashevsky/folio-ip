@@ -140,3 +140,22 @@ export const mockVerifications: Verification[] = [
     checks: selfieChecksAllPassed,
   },
 ];
+
+/* ── Generate additional verifications ── */
+const verTypes: Verification["type"][] = ["government_id", "selfie", "government_id", "selfie", "document"];
+const verStatuses: Verification["status"][] = ["passed", "passed", "passed", "failed", "passed"];
+
+for (let i = 0; i < 40; i++) {
+  const date = new Date(2026, 0, 15 + Math.floor(i / 4), 8 + (i % 12), (i * 7) % 60);
+  const type = verTypes[i % verTypes.length];
+  const status = verStatuses[i % verStatuses.length];
+  mockVerifications.push({
+    id: `ver_gen${String(i).padStart(3, "0")}`,
+    inquiryId: `inq_gen${String(Math.floor(i / 2)).padStart(3, "0")}`,
+    type,
+    status,
+    createdAt: date.toISOString(),
+    completedAt: new Date(date.getTime() + 15000 + (i * 3000)).toISOString(),
+    checks: type === "selfie" ? selfieChecksAllPassed : (status === "failed" ? govIdChecksFailed : govIdChecksAllPassed),
+  });
+}

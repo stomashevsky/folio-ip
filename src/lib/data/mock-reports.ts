@@ -85,3 +85,35 @@ export const mockReports: Report[] = [
     matchCount: 1,
   },
 ];
+
+/* ── Generate additional reports ── */
+const reportNames = [
+  "DAVID KIM", "MEGAN FOX", "RAJ GUPTA", "ISABELLA ROSSI", "OLIVER BROWN",
+  "NADIA PETROV", "THOMAS WRIGHT", "LING ZHANG", "STEFAN MUELLER", "AISHA KHAN",
+  "LUCAS SILVA", "EVA NOVAK", "MICHAEL O'BRIEN", "HANA WATANABE", "ROBERT TAYLOR",
+  "CAMILLE BERNARD", "VIKTOR KOZLOV", "AMARA OBI", "HENRIK JOHANSSON", "CLARA VEGA",
+  "DANIEL PARK", "SARA NILSSON", "ANDREI POPESCU", "LEILA AMIRI", "GEORGE WILSON",
+  "NATASHA VOLKOV", "FELIPE MORENO", "FREYA SCHMIDT", "KENJI ITO", "ZARA HUSSAIN",
+  "PIERRE LEFEBVRE", "MAYA SINGH", "IVAN HORVAT", "ELISA TORRES", "OSCAR LINDBERG",
+];
+const repTypes: Report["type"][] = ["watchlist", "pep", "watchlist", "adverse_media"];
+const repStatuses: Report["status"][] = ["no_matches", "no_matches", "no_matches", "match"];
+const repTemplates = ["KYC + AML: Watchlist Report", "KYC + AML: PEP Report", "Manual Watchlist Screening"];
+
+for (let i = 0; i < reportNames.length; i++) {
+  const date = new Date(2026, 0, 15 + Math.floor(i / 3), 9 + (i % 10), (i * 11) % 60);
+  const status = repStatuses[i % repStatuses.length];
+  mockReports.push({
+    id: `rep_gen${String(i).padStart(3, "0")}`,
+    accountId: `act_gen${String(i).padStart(3, "0")}`,
+    type: repTypes[i % repTypes.length],
+    status,
+    primaryInput: reportNames[i],
+    templateName: repTemplates[i % repTemplates.length],
+    createdAt: date.toISOString(),
+    completedAt: new Date(date.getTime() + 1000).toISOString(),
+    continuousMonitoring: i % 3 === 0,
+    createdBy: i % 5 === 0 ? "manual" : "workflow",
+    matchCount: status === "match" ? 1 + (i % 3) : 0,
+  });
+}

@@ -22,12 +22,12 @@ export default function AnalyticsPage() {
   const [activeTab, setActiveTab] = useState<Tab>("Overview");
 
   return (
-    <main className="flex-1 overflow-y-auto">
+    <main className="flex-1">
       <TopBar
         title="Analytics"
         description="Identity verification analytics and insights"
       />
-      <div className="px-6 pb-6">
+      <div className="px-6 pb-6 pt-6">
         {/* Metric Cards */}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
           <MetricCard

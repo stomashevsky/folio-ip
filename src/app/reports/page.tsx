@@ -1,7 +1,8 @@
 "use client";
 
+import { useState } from "react";
 import { TopBar } from "@/components/layout/TopBar";
-import { DataTable } from "@/components/shared";
+import { DataTable, TableSearch } from "@/components/shared";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import { mockReports } from "@/lib/data";
 import { formatDateTime, truncateId } from "@/lib/utils/format";
@@ -21,6 +22,7 @@ const columns: ColumnDef<Report, unknown>[] = [
   {
     accessorKey: "primaryInput",
     header: "Primary Input",
+    size: 200,
     cell: ({ row }) => (
       <span className="font-medium">{row.original.primaryInput}</span>
     ),
@@ -28,6 +30,7 @@ const columns: ColumnDef<Report, unknown>[] = [
   {
     accessorKey: "type",
     header: "Type",
+    size: 220,
     cell: ({ row }) => (
       <span className="text-[var(--color-text-secondary)]">
         {typeLabels[row.original.type] ?? row.original.type}
@@ -37,6 +40,7 @@ const columns: ColumnDef<Report, unknown>[] = [
   {
     accessorKey: "id",
     header: "Report ID",
+    size: 180,
     cell: ({ row }) => (
       <span className="font-mono text-[var(--color-text-secondary)]">
         {truncateId(row.original.id)}
@@ -46,6 +50,7 @@ const columns: ColumnDef<Report, unknown>[] = [
   {
     accessorKey: "createdAt",
     header: "Created at (UTC)",
+    size: 180,
     cell: ({ row }) => (
       <span className="text-[var(--color-text-secondary)]">
         {formatDateTime(row.original.createdAt)}
@@ -55,41 +60,48 @@ const columns: ColumnDef<Report, unknown>[] = [
   {
     accessorKey: "status",
     header: "Status",
+    size: 120,
     cell: ({ row }) => <StatusBadge status={row.original.status} />,
   },
 ];
 
 export default function ReportsPage() {
   const router = useRouter();
+  const [search, setSearch] = useState("");
 
   return (
-    <main className="flex-1 overflow-y-auto">
+    <div className="flex h-full flex-col overflow-hidden">
       <TopBar
         title="Reports"
-        description="Watchlist, PEP, and adverse media reports"
         actions={
           <div className="flex items-center gap-2">
-            <Button color="secondary" variant="outline" size="sm">
+            <Button color="secondary" variant="outline" size="sm" pill={false}>
               <Download className="h-4 w-4" />
               Export
             </Button>
-            <Button color="primary" size="sm">
+            <Button color="primary" size="sm" pill={false}>
               <Plus className="h-4 w-4" />
               Create Report
             </Button>
           </div>
         }
+        toolbar={
+          <TableSearch
+            value={search}
+            onChange={setSearch}
+            placeholder="Search by name or ID..."
+          />
+        }
       />
-      <div className="px-6 pb-6">
+      <div className="flex min-h-0 flex-1 flex-col px-6 pt-4">
         <DataTable
           data={mockReports}
           columns={columns}
-          searchPlaceholder="Search by name or ID..."
-          searchColumn="primaryInput"
+          globalFilter={search}
           onRowClick={(row) => router.push(`/reports/${row.id}`)}
           pageSize={10}
         />
       </div>
-    </main>
+    </div>
   );
 }

@@ -1,12 +1,13 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
+import { DateTime } from "luxon";
 import { TopBar } from "@/components/layout/TopBar";
 import { MetricCard, ChartCard } from "@/components/shared";
 import { RecentInquiriesTable } from "@/components/shared/RecentInquiriesTable";
 import { InquiriesTrendChart } from "@/components/charts/InquiriesTrendChart";
 import { StatusDonutChart } from "@/components/charts/StatusDonutChart";
-import { SegmentedControl } from "@plexui/ui/components/SegmentedControl";
+import { DateRangePicker } from "@plexui/ui/components/DateRangePicker";
 import {
   mockInquiries,
   generateTimeSeries,
@@ -14,207 +15,185 @@ import {
 import { formatNumber, formatPercent, formatDuration } from "@/lib/utils/format";
 import type { StatusDistribution } from "@/lib/types";
 
-const periods = [
-  { value: "all", label: "All time" },
-  { value: "3m", label: "Last 3 months" },
-  { value: "30d", label: "Last 30 days" },
-  { value: "7d", label: "Last 7 days" },
-] as const;
-
-type Period = (typeof periods)[number]["value"];
-
-const periodTrendLabels: Record<Period, string> = {
-  all: "all time",
-  "3m": "vs prev 3 months",
-  "30d": "vs prev 30 days",
-  "7d": "vs prev 7 days",
+type DateRange = [DateTime, DateTime];
+type DateRangeShortcut = {
+  label: string;
+  getDateRange: () => DateRange;
 };
 
-const periodDescriptions: Record<Period, string> = {
-  all: "All time",
-  "3m": "Last 3 months",
-  "30d": "Last 30 days",
-  "7d": "Last 7 days",
-};
-
-// Simulated metrics per period (in real app this comes from API)
-const metricsByPeriod: Record<
-  Period,
+const shortcuts: DateRangeShortcut[] = [
   {
-    totalInquiries: number;
-    approvalRate: number;
-    avgCompletionTime: number;
-    pendingReview: number;
-    inquiriesTrend: number;
-    approvalTrend: number;
-    completionTimeTrend: number;
-    pendingReviewTrend: number;
-    description: {
-      inquiries: string;
-      approval: string;
-      completion: string;
-      pending: string;
-    };
-  }
-> = {
-  all: {
-    totalInquiries: 12847,
-    approvalRate: 86.2,
-    avgCompletionTime: 295,
-    pendingReview: 23,
-    inquiriesTrend: 34.1,
-    approvalTrend: 4.8,
-    completionTimeTrend: -12.3,
-    pendingReviewTrend: -2.1,
-    description: {
-      inquiries: "Since launch",
-      approval: "Overall rate",
-      completion: "Improving steadily",
-      pending: "Current backlog",
+    label: "Last 7 days",
+    getDateRange: () => {
+      const today = DateTime.local().endOf("day");
+      return [today.minus({ days: 7 }).startOf("day"), today];
     },
   },
-  "3m": {
-    totalInquiries: 3456,
-    approvalRate: 87.5,
-    avgCompletionTime: 272,
-    pendingReview: 23,
-    inquiriesTrend: 18.5,
-    approvalTrend: 3.2,
-    completionTimeTrend: -8.1,
-    pendingReviewTrend: 5.4,
-    description: {
-      inquiries: "Trending up this quarter",
-      approval: "Strong verification rate",
-      completion: "Faster processing",
-      pending: "Slight increase",
+  {
+    label: "Last 30 days",
+    getDateRange: () => {
+      const today = DateTime.local().endOf("day");
+      return [today.minus({ days: 30 }).startOf("day"), today];
     },
   },
-  "30d": {
-    totalInquiries: 1234,
-    approvalRate: 89.1,
-    avgCompletionTime: 258,
-    pendingReview: 23,
-    inquiriesTrend: 12.3,
-    approvalTrend: 2.1,
-    completionTimeTrend: -5.2,
-    pendingReviewTrend: 8.7,
-    description: {
-      inquiries: "Trending up this month",
-      approval: "Strong verification rate",
-      completion: "Faster processing",
-      pending: "Needs attention",
+  {
+    label: "Last 3 months",
+    getDateRange: () => {
+      const today = DateTime.local().endOf("day");
+      return [today.minus({ months: 3 }).startOf("day"), today];
     },
   },
-  "7d": {
-    totalInquiries: 312,
-    approvalRate: 91.3,
-    avgCompletionTime: 245,
-    pendingReview: 23,
-    inquiriesTrend: 5.8,
-    approvalTrend: 1.4,
-    completionTimeTrend: -3.1,
-    pendingReviewTrend: 15.2,
-    description: {
-      inquiries: "Steady this week",
-      approval: "Above average",
-      completion: "Processing faster",
-      pending: "Spike this week",
+  {
+    label: "All time",
+    getDateRange: () => {
+      const today = DateTime.local().endOf("day");
+      return [DateTime.fromISO("2024-01-01"), today];
     },
   },
-};
+];
 
-// Simulated status distribution per period
-const statusByPeriod: Record<Period, StatusDistribution[]> = {
-  all: [
-    { status: "Approved", count: 11072, percentage: 86.2, color: "#30a46c" },
-    { status: "Declined", count: 899, percentage: 7.0, color: "#e5484d" },
-    { status: "Needs Review", count: 23, percentage: 0.2, color: "#f5a623" },
-    { status: "Pending", count: 385, percentage: 3.0, color: "#8b8d98" },
-    { status: "Expired", count: 321, percentage: 2.5, color: "#63646e" },
-    { status: "Created", count: 147, percentage: 1.1, color: "#505159" },
-  ],
-  "3m": [
-    { status: "Approved", count: 3024, percentage: 87.5, color: "#30a46c" },
-    { status: "Declined", count: 207, percentage: 6.0, color: "#e5484d" },
-    { status: "Needs Review", count: 23, percentage: 0.7, color: "#f5a623" },
-    { status: "Pending", count: 97, percentage: 2.8, color: "#8b8d98" },
-    { status: "Expired", count: 69, percentage: 2.0, color: "#63646e" },
-    { status: "Created", count: 36, percentage: 1.0, color: "#505159" },
-  ],
-  "30d": [
-    { status: "Approved", count: 1079, percentage: 87.4, color: "#30a46c" },
-    { status: "Declined", count: 74, percentage: 6.0, color: "#e5484d" },
-    { status: "Needs Review", count: 23, percentage: 1.9, color: "#f5a623" },
-    { status: "Pending", count: 35, percentage: 2.8, color: "#8b8d98" },
-    { status: "Expired", count: 18, percentage: 1.5, color: "#63646e" },
-    { status: "Created", count: 5, percentage: 0.4, color: "#505159" },
-  ],
-  "7d": [
-    { status: "Approved", count: 285, percentage: 91.3, color: "#30a46c" },
-    { status: "Declined", count: 12, percentage: 3.8, color: "#e5484d" },
-    { status: "Needs Review", count: 8, percentage: 2.6, color: "#f5a623" },
-    { status: "Pending", count: 4, percentage: 1.3, color: "#8b8d98" },
-    { status: "Expired", count: 2, percentage: 0.6, color: "#63646e" },
-    { status: "Created", count: 1, percentage: 0.3, color: "#505159" },
-  ],
-};
+/* ── Seeded pseudo-random (Mulberry32) for stable derived data ── */
+function seededRandom(seed: number) {
+  let t = (seed + 0x6d2b79f5) | 0;
+  t = Math.imul(t ^ (t >>> 15), t | 1);
+  t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+  return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+}
+
+/** Derive all dashboard data from the number of days in the range */
+function deriveMetrics(days: number) {
+  // Scale: ~42 inquiries/day base rate
+  const dailyRate = 42;
+  const totalInquiries = Math.round(dailyRate * days * (0.9 + seededRandom(days) * 0.2));
+  const approvalRate = 85 + seededRandom(days * 3) * 7; // 85–92%
+  const avgCompletionTime = 230 + Math.round(seededRandom(days * 5) * 70); // 230–300s
+
+  // Trends: smaller periods show bigger relative swings
+  const trendScale = Math.min(1, 30 / days);
+  const inquiriesTrend = (5 + seededRandom(days * 7) * 30) * trendScale;
+  const approvalTrend = (0.5 + seededRandom(days * 11) * 5) * trendScale;
+  const completionTimeTrend = -(1 + seededRandom(days * 13) * 12) * trendScale;
+  const pendingReviewTrend = (-5 + seededRandom(days * 17) * 25) * trendScale;
+
+  return {
+    totalInquiries,
+    approvalRate: Math.round(approvalRate * 10) / 10,
+    avgCompletionTime,
+    pendingReview: 23,
+    inquiriesTrend: Math.round(inquiriesTrend * 10) / 10,
+    approvalTrend: Math.round(approvalTrend * 10) / 10,
+    completionTimeTrend: Math.round(completionTimeTrend * 10) / 10,
+    pendingReviewTrend: Math.round(pendingReviewTrend * 10) / 10,
+  };
+}
+
+function deriveStatusDistribution(days: number): StatusDistribution[] {
+  const dailyRate = 42;
+  const total = Math.round(dailyRate * days * (0.9 + seededRandom(days) * 0.2));
+  const approvalRate = 85 + seededRandom(days * 3) * 7;
+  const declinedRate = 3 + seededRandom(days * 9) * 5;
+  const needsReviewRate = 0.2 + seededRandom(days * 15) * 2.5;
+  const pendingRate = 1 + seededRandom(days * 19) * 3;
+  const expiredRate = 0.5 + seededRandom(days * 23) * 2.5;
+  const createdRate = 100 - approvalRate - declinedRate - needsReviewRate - pendingRate - expiredRate;
+
+  const rates = [
+    { status: "Approved", rate: approvalRate, color: "#30a46c" },
+    { status: "Declined", rate: declinedRate, color: "#e5484d" },
+    { status: "Needs Review", rate: needsReviewRate, color: "#f5a623" },
+    { status: "Pending", rate: pendingRate, color: "#8b8d98" },
+    { status: "Expired", rate: expiredRate, color: "#63646e" },
+    { status: "Created", rate: Math.max(0.1, createdRate), color: "#505159" },
+  ];
+
+  return rates.map((r) => ({
+    status: r.status,
+    count: Math.max(1, Math.round((r.rate / 100) * total)),
+    percentage: Math.round(r.rate * 10) / 10,
+    color: r.color,
+  }));
+}
+
+function describePeriod(days: number, shortcutLabel?: string): string {
+  if (shortcutLabel) return shortcutLabel;
+  if (days === 1) return "1 day";
+  return `${days} days`;
+}
+
+function trendLabel(days: number, shortcutLabel?: string): string {
+  if (shortcutLabel === "All time") return "all time";
+  if (shortcutLabel === "Last 7 days") return "vs prev 7 days";
+  if (shortcutLabel === "Last 30 days") return "vs prev 30 days";
+  if (shortcutLabel === "Last 3 months") return "vs prev 3 months";
+  if (days === 1) return "vs prev day";
+  return `vs prev ${days} days`;
+}
+
+// Default range: last 30 days
+const defaultRange: DateRange = shortcuts[1].getDateRange();
 
 export default function DashboardHome() {
   const recentInquiries = mockInquiries.slice(0, 10);
-  const [period, setPeriod] = useState<Period>("30d");
+  const [dateRange, setDateRange] = useState<DateRange | null>(defaultRange);
+  const [activeShortcutLabel, setActiveShortcutLabel] = useState<string | undefined>("Last 30 days");
 
-  const metrics = metricsByPeriod[period];
-  const trendLabel = periodTrendLabels[period];
-  const periodDesc = periodDescriptions[period];
-  const trendData = useMemo(() => generateTimeSeries(period), [period]);
-  const statusData = statusByPeriod[period];
+  const handleRangeChange = useCallback(
+    (next: DateRange | null, shortcut?: DateRangeShortcut) => {
+      setDateRange(next);
+      setActiveShortcutLabel(shortcut?.label);
+    },
+    [],
+  );
+
+  const days = useMemo(() => {
+    if (!dateRange) return 30;
+    return Math.max(1, Math.round(dateRange[1].diff(dateRange[0], "days").days));
+  }, [dateRange]);
+
+  const metrics = useMemo(() => deriveMetrics(days), [days]);
+  const currentTrendLabel = trendLabel(days, activeShortcutLabel);
+  const periodDesc = describePeriod(days, activeShortcutLabel);
+  const trendData = useMemo(() => generateTimeSeries(days), [days]);
+  const statusData = useMemo(() => deriveStatusDistribution(days), [days]);
 
   return (
-    <main className="flex-1 overflow-y-auto">
+    <main className="flex-1">
       <TopBar
         title="Overview"
-        description="Identity verification dashboard"
         actions={
-          <SegmentedControl
-            value={period}
-            onChange={(v: string) => setPeriod(v as Period)}
-            aria-label="Select time period"
-            size="xs"
-          >
-            {periods.map((p) => (
-              <SegmentedControl.Option key={p.value} value={p.value}>
-                {p.label}
-              </SegmentedControl.Option>
-            ))}
-          </SegmentedControl>
+          <DateRangePicker
+            value={dateRange}
+            onChange={handleRangeChange}
+            shortcuts={shortcuts}
+            size="md"
+            pill={false}
+            max={DateTime.local().endOf("day")}
+            triggerDateFormat="MM/dd/yy"
+          />
         }
       />
-      <div className="px-6 pb-6">
+      <div className="px-6 pb-6 pt-6">
         {/* Metric Cards */}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <MetricCard
             label="Total Inquiries"
             value={formatNumber(metrics.totalInquiries)}
-            trend={{ value: metrics.inquiriesTrend, label: trendLabel }}
-            description={metrics.description.inquiries}
+            trend={{ value: metrics.inquiriesTrend, label: currentTrendLabel }}
           />
           <MetricCard
             label="Approval Rate"
             value={formatPercent(metrics.approvalRate)}
-            trend={{ value: metrics.approvalTrend, label: trendLabel }}
-            description={metrics.description.approval}
+            trend={{ value: metrics.approvalTrend, label: currentTrendLabel }}
           />
           <MetricCard
             label="Avg Completion Time"
             value={formatDuration(metrics.avgCompletionTime)}
-            trend={{ value: metrics.completionTimeTrend, label: trendLabel }}
-            description={metrics.description.completion}
+            trend={{ value: metrics.completionTimeTrend, label: currentTrendLabel }}
           />
           <MetricCard
             label="Pending Review"
             value={formatNumber(metrics.pendingReview)}
-            trend={{ value: metrics.pendingReviewTrend, label: trendLabel }}
-            description={metrics.description.pending}
+            trend={{ value: metrics.pendingReviewTrend, label: currentTrendLabel }}
           />
         </div>
 

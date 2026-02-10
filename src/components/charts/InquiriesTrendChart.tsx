@@ -21,30 +21,30 @@ export function InquiriesTrendChart({ data }: InquiriesTrendChartProps) {
       <AreaChart data={data} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
         <defs>
           <linearGradient id="inquiryGradient" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="5%" stopColor="var(--color-primary-solid-bg)" stopOpacity={0.3} />
-            <stop offset="95%" stopColor="var(--color-primary-solid-bg)" stopOpacity={0} />
+            <stop offset="0%" stopColor="#0073e6" stopOpacity={0.2} />
+            <stop offset="80%" stopColor="#0073e6" stopOpacity={0} />
           </linearGradient>
         </defs>
         <CartesianGrid
-          strokeDasharray="3 3"
-          stroke="var(--color-border)"
+          stroke="#ededed"
+          strokeDasharray=""
           vertical={false}
         />
         <XAxis
           dataKey="date"
           tickFormatter={(v: string) => {
             const d = new Date(v);
-            return `${d.getMonth() + 1}/${d.getDate()}`;
+            return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
           }}
-          stroke="var(--color-text-tertiary)"
-          fontSize={11}
+          stroke="#6e6e80"
+          fontSize={13}
           tickLine={false}
           axisLine={false}
           interval="preserveStartEnd"
         />
         <YAxis
-          stroke="var(--color-text-tertiary)"
-          fontSize={11}
+          stroke="#6e6e80"
+          fontSize={13}
           tickLine={false}
           axisLine={false}
         />
@@ -59,6 +59,7 @@ export function InquiriesTrendChart({ data }: InquiriesTrendChartProps) {
           labelFormatter={(label: string) => {
             const d = new Date(label);
             return d.toLocaleDateString("en-US", {
+              weekday: "short",
               month: "short",
               day: "numeric",
               year: "numeric",
@@ -68,7 +69,7 @@ export function InquiriesTrendChart({ data }: InquiriesTrendChartProps) {
         <Area
           type="linear"
           dataKey="value"
-          stroke="var(--color-primary-solid-bg)"
+          stroke="#0073e6"
           strokeWidth={2}
           fill="url(#inquiryGradient)"
           name="Inquiries"

@@ -16,7 +16,7 @@ export function MetricCard({ label, value, trend, description }: MetricCardProps
   const isPositive = trend && trend.value >= 0;
 
   return (
-    <div className="flex flex-col justify-between rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5">
+    <div className="flex flex-col justify-between rounded-[10px] border border-black/10 bg-[var(--color-surface)] p-5 dark:border-white/10">
       {/* Top row: label + trend badge */}
       <div className="flex items-center justify-between">
         <p className="text-sm font-medium text-[var(--color-text-secondary)]">
@@ -59,15 +59,6 @@ export function MetricCard({ label, value, trend, description }: MetricCardProps
               </p>
             )}
           </div>
-          {isPositive !== undefined && (
-            <div className="text-[var(--color-text-tertiary)]">
-              {isPositive ? (
-                <TrendingUp className="h-5 w-5" />
-              ) : (
-                <TrendingDown className="h-5 w-5" />
-              )}
-            </div>
-          )}
         </div>
       )}
     </div>

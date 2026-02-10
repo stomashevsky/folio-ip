@@ -23,9 +23,9 @@ export default function ReportDetailPage() {
 
   if (!report) {
     return (
-      <main className="flex-1 overflow-y-auto">
+      <main className="flex-1">
         <TopBar title="Report Not Found" />
-        <div className="px-6 pb-6">
+        <div className="px-6 pb-6 pt-6">
           <div className="flex flex-col items-center justify-center py-20">
             <p className="text-sm text-[var(--color-text-secondary)]">
               The report you&apos;re looking for doesn&apos;t exist.
@@ -46,7 +46,7 @@ export default function ReportDetailPage() {
   }
 
   return (
-    <main className="flex-1 overflow-y-auto">
+    <main className="flex-1">
       <TopBar
         title={report.primaryInput}
         description={typeLabels[report.type] ?? report.type}
@@ -62,7 +62,7 @@ export default function ReportDetailPage() {
           </Button>
         }
       />
-      <div className="px-6 pb-6">
+      <div className="px-6 pb-6 pt-6">
         {/* Summary */}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <div className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4">

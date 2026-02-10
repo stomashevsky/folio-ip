@@ -117,3 +117,33 @@ export const mockAccounts: Account[] = [
     reportCount: 1,
   },
 ];
+
+/* ── Generate additional accounts ── */
+const moreNames = [
+  "David Kim", "Megan Fox", "Raj Gupta", "Isabella Rossi", "Oliver Brown",
+  "Nadia Petrov", "Thomas Wright", "Ling Zhang", "Stefan Mueller", "Aisha Khan",
+  "Lucas Silva", "Eva Novak", "Michael O'Brien", "Hana Watanabe", "Robert Taylor",
+  "Camille Bernard", "Viktor Kozlov", "Amara Obi", "Henrik Johansson", "Clara Vega",
+  "Daniel Park", "Sara Nilsson", "Andrei Popescu", "Leila Amiri", "George Wilson",
+  "Natasha Volkov", "Felipe Moreno", "Freya Schmidt", "Kenji Ito", "Zara Hussain",
+  "Pierre Lefebvre", "Maya Singh", "Ivan Horvat", "Elisa Torres", "Oscar Lindberg",
+  "Fatou Diallo", "Liam Murphy", "Suki Lee", "Marco Bianchi", "Ingrid Larsen",
+];
+const accStatuses: Account["status"][] = ["active", "active", "active", "default", "suspended"];
+
+for (let i = 0; i < moreNames.length; i++) {
+  const date = new Date(2026, 0, 15 + Math.floor(i / 3), 8 + (i % 12), (i * 13) % 60);
+  mockAccounts.push({
+    id: `act_gen${String(i).padStart(3, "0")}`,
+    name: moreNames[i],
+    birthdate: `${1975 + (i % 25)}-${String(1 + (i % 12)).padStart(2, "0")}-${String(1 + (i % 28)).padStart(2, "0")}`,
+    age: 51 - (i % 25),
+    status: accStatuses[i % accStatuses.length],
+    type: "User",
+    createdAt: date.toISOString(),
+    updatedAt: new Date(date.getTime() + 600000).toISOString(),
+    inquiryCount: 1 + (i % 3),
+    verificationCount: 1 + (i % 4),
+    reportCount: i % 3,
+  });
+}
