@@ -1,0 +1,53 @@
+@import "tailwindcss";
+
+/* PlexUI design tokens — import tokens only, NOT the full @plexui/ui/css bundle
+   which resets Tailwind theme tokens and overrides dark-mode variants */
+@import "../../node_modules/@plexui/ui/dist/es/styles/variables-primitive.css";
+@import "../../node_modules/@plexui/ui/dist/es/styles/variables-semantic.css";
+@import "../../node_modules/@plexui/ui/dist/es/styles/variables-components.css";
+
+/* Let Tailwind scan PlexUI component class usage */
+@source "../../node_modules/@plexui/ui";
+
+/* ─── Base ─── */
+:root {
+  color-scheme: light dark;
+}
+
+[data-theme="light"],
+html.light {
+  color-scheme: light;
+}
+
+[data-theme="dark"],
+html.dark {
+  color-scheme: dark;
+}
+
+/* ─── App globals ─── */
+body {
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-family: var(--font-sans, system-ui, -apple-system, sans-serif);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Scrollbar styling for dark theme */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-border-strong);
+}
