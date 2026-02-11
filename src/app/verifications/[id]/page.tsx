@@ -80,8 +80,7 @@ export default function VerificationDetailPage() {
   return (
     <main className="flex-1">
       <TopBar
-        title={`${verification.type.replace("_", " ").replace(/\b\w/g, (c) => c.toUpperCase())} Verification`}
-        description={truncateId(verification.id)}
+        title="Verifications"
         backHref="/verifications"
       />
       <div className="px-6 pb-6 pt-6">

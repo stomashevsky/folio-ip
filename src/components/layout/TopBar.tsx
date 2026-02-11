@@ -1,12 +1,12 @@
-import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import { ButtonLink } from "@plexui/ui/components/Button";
+import { ChevronLeft } from "lucide-react";
 
 interface TopBarProps {
   title: string;
   description?: string;
   actions?: React.ReactNode;
   toolbar?: React.ReactNode;
-  /** Renders a ← arrow before the title that links back to this href */
+  /** Renders a "< Title" back link (OpenAI-style) that links to this href */
   backHref?: string;
 }
 
@@ -14,17 +14,21 @@ export function TopBar({ title, description, actions, toolbar, backHref }: TopBa
   const hasToolbar = !!toolbar;
 
   return (
-    <div className="sticky top-0 z-10 shrink-0 border-b border-[var(--color-border)] bg-[var(--color-surface)] px-6 py-4">
+    <div className="sticky top-0 z-10 shrink-0 border-b border-[var(--color-border)] bg-[var(--color-surface)] px-6 py-3">
       {/* Row 1: title + actions (when no toolbar) */}
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-1">
           {backHref && (
-            <Link
+            <ButtonLink
               href={backHref}
-              className="flex h-8 w-8 items-center justify-center rounded-lg text-[var(--color-text-tertiary)] transition-colors hover:bg-[var(--color-surface-secondary)] hover:text-[var(--color-text)]"
+              color="secondary"
+              variant="ghost"
+              size="md"
+              pill={false}
+              data-uniform=""
             >
-              <ArrowLeft className="h-4 w-4" />
-            </Link>
+              <ChevronLeft />
+            </ButtonLink>
           )}
           <div>
             <h1 className="text-xl font-semibold text-[var(--color-text)]">

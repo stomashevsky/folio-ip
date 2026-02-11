@@ -48,8 +48,7 @@ export default function ReportDetailPage() {
   return (
     <main className="flex-1">
       <TopBar
-        title={report.primaryInput}
-        description={typeLabels[report.type] ?? report.type}
+        title="Reports"
         backHref="/reports"
       />
       <div className="px-6 pb-6 pt-6">

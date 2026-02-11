@@ -85,8 +85,7 @@ export default function InquiryDetailPage() {
   return (
     <main className="flex-1">
       <TopBar
-        title={inquiry.accountName}
-        description={truncateId(inquiry.id)}
+        title="Inquiries"
         backHref="/inquiries"
       />
       <div className="px-6 pb-6 pt-6">
