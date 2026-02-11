@@ -2,14 +2,13 @@
 
 import { TopBar } from "@/components/layout/TopBar";
 import { StatusBadge } from "@/components/shared/StatusBadge";
-import { ChartCard } from "@/components/shared";
+import { ChartCard, NotFoundPage, InlineEmpty } from "@/components/shared";
 import { mockAccounts, mockInquiries, mockVerifications, mockReports } from "@/lib/data";
 import { formatDateTime, formatDate, truncateId } from "@/lib/utils/format";
 import { useParams, useRouter } from "next/navigation";
 import { useState } from "react";
-import { Button } from "@plexui/ui/components/Button";
+import { Avatar } from "@plexui/ui/components/Avatar";
 import {
-  User,
   FileSearch,
   ShieldCheck,
   FileText,
@@ -35,27 +34,7 @@ export default function AccountDetailPage() {
   );
 
   if (!account) {
-    return (
-      <main className="flex-1">
-        <TopBar title="Account Not Found" />
-        <div className="px-6 pb-6 pt-6">
-          <div className="flex flex-col items-center justify-center py-20">
-            <p className="text-sm text-[var(--color-text-secondary)]">
-              The account you&apos;re looking for doesn&apos;t exist.
-            </p>
-            <Button
-              color="primary"
-              variant="outline"
-              size="sm"
-              className="mt-4"
-              onClick={() => router.push("/accounts")}
-            >
-              Back to Accounts
-            </Button>
-          </div>
-        </div>
-      </main>
-    );
+    return <NotFoundPage section="Accounts" backHref="/accounts" entity="Account" />;
   }
 
   return (
@@ -67,9 +46,7 @@ export default function AccountDetailPage() {
       <div className="px-6 pb-6 pt-6">
         {/* Profile Header */}
         <div className="flex items-center gap-6 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6">
-          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-[var(--color-primary-soft-bg)]">
-            <User className="h-8 w-8 text-[var(--color-primary-soft-text)]" />
-          </div>
+          <Avatar name={account.name} size={64} color="primary" />
           <div className="flex-1">
             <h2 className="text-lg font-semibold text-[var(--color-text)]">
               {account.name}
@@ -228,9 +205,7 @@ export default function AccountDetailPage() {
           {activeTab === "Inquiries" && (
             <div className="space-y-3">
               {accountInquiries.length === 0 ? (
-                <p className="py-12 text-center text-sm text-[var(--color-text-tertiary)]">
-                  No inquiries for this account.
-                </p>
+                <InlineEmpty>No inquiries for this account.</InlineEmpty>
               ) : (
                 accountInquiries.map((inq) => (
                   <div
@@ -256,9 +231,7 @@ export default function AccountDetailPage() {
           {activeTab === "Verifications" && (
             <div className="space-y-3">
               {accountVerifications.length === 0 ? (
-                <p className="py-12 text-center text-sm text-[var(--color-text-tertiary)]">
-                  No verifications for this account.
-                </p>
+                <InlineEmpty>No verifications for this account.</InlineEmpty>
               ) : (
                 accountVerifications.map((v) => (
                   <div
@@ -284,9 +257,7 @@ export default function AccountDetailPage() {
           {activeTab === "Reports" && (
             <div className="space-y-3">
               {accountReports.length === 0 ? (
-                <p className="py-12 text-center text-sm text-[var(--color-text-tertiary)]">
-                  No reports for this account.
-                </p>
+                <InlineEmpty>No reports for this account.</InlineEmpty>
               ) : (
                 accountReports.map((r) => (
                   <div

@@ -29,13 +29,13 @@ type NavGroup = {
 
 const navGroups: NavGroup[] = [
   {
-    label: "Overview",
-    items: [{ title: "Dashboard", href: "/" }],
+    label: "",
+    items: [{ title: "Overview", href: "/" }],
   },
   {
     label: "Inquiries",
     items: [
-      { title: "All Inquiries", href: "/inquiries" },
+      { title: "Inquiries", href: "/inquiries" },
       { title: "Analytics", href: "/inquiries/analytics" },
       { title: "Templates", href: "/inquiries/templates" },
     ],
@@ -43,28 +43,28 @@ const navGroups: NavGroup[] = [
   {
     label: "Verifications",
     items: [
-      { title: "All Verifications", href: "/verifications" },
+      { title: "Verifications", href: "/verifications" },
       { title: "Templates", href: "/verifications/templates" },
     ],
   },
   {
     label: "Reports",
     items: [
-      { title: "All Reports", href: "/reports" },
+      { title: "Reports", href: "/reports" },
       { title: "Templates", href: "/reports/templates" },
     ],
   },
   {
     label: "Accounts",
     items: [
-      { title: "All Accounts", href: "/accounts" },
+      { title: "Accounts", href: "/accounts" },
       { title: "Types", href: "/accounts/types" },
     ],
   },
   {
     label: "Transactions",
     items: [
-      { title: "All Transactions", href: "/transactions" },
+      { title: "Transactions", href: "/transactions" },
       { title: "Analytics", href: "/transactions/analytics" },
       { title: "Types", href: "/transactions/types" },
     ],
@@ -84,8 +84,8 @@ export function AppSidebar() {
     <Sidebar>
       <SidebarContent>
         {navGroups.map((group) => (
-          <SidebarGroup key={group.label}>
-            <SidebarGroupLabel size="lg">{group.label}</SidebarGroupLabel>
+          <SidebarGroup key={group.label || "top"}>
+            {group.label && <SidebarGroupLabel size="lg">{group.label}</SidebarGroupLabel>}
             <SidebarGroupContent>
               <SidebarMenu>
                 {group.items.map((item) => (

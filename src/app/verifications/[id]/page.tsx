@@ -2,11 +2,10 @@
 
 import { TopBar } from "@/components/layout/TopBar";
 import { StatusBadge } from "@/components/shared/StatusBadge";
-import { ChartCard } from "@/components/shared";
+import { ChartCard, NotFoundPage } from "@/components/shared";
 import { mockVerifications } from "@/lib/data";
 import { formatDateTime, truncateId } from "@/lib/utils/format";
-import { useParams, useRouter } from "next/navigation";
-import { Button } from "@plexui/ui/components/Button";
+import { useParams } from "next/navigation";
 import {
   CheckCircle2,
   XCircle,
@@ -40,32 +39,11 @@ function CheckRow({ check }: { check: Check }) {
 
 export default function VerificationDetailPage() {
   const params = useParams();
-  const router = useRouter();
 
   const verification = mockVerifications.find((v) => v.id === params.id);
 
   if (!verification) {
-    return (
-      <main className="flex-1">
-        <TopBar title="Verification Not Found" />
-        <div className="px-6 pb-6 pt-6">
-          <div className="flex flex-col items-center justify-center py-20">
-            <p className="text-sm text-[var(--color-text-secondary)]">
-              The verification you&apos;re looking for doesn&apos;t exist.
-            </p>
-            <Button
-              color="primary"
-              variant="outline"
-              size="sm"
-              className="mt-4"
-              onClick={() => router.push("/verifications")}
-            >
-              Back to Verifications
-            </Button>
-          </div>
-        </div>
-      </main>
-    );
+    return <NotFoundPage section="Verifications" backHref="/verifications" entity="Verification" />;
   }
 
   const requiredChecks = verification.checks.filter((c) => c.required);

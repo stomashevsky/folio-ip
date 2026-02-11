@@ -2,12 +2,12 @@
 
 import { TopBar } from "@/components/layout/TopBar";
 import { StatusBadge } from "@/components/shared/StatusBadge";
-import { ChartCard } from "@/components/shared";
+import { ChartCard, NotFoundPage } from "@/components/shared";
 import { mockReports } from "@/lib/data";
 import { formatDateTime, truncateId } from "@/lib/utils/format";
-import { useParams, useRouter } from "next/navigation";
-import { Button } from "@plexui/ui/components/Button";
-import { Eye, Shield } from "lucide-react";
+import { useParams } from "next/navigation";
+import { EmptyMessage } from "@plexui/ui/components/EmptyMessage";
+import { ShieldCheck, ExclamationMarkCircleFilled } from "@plexui/ui/components/Icon";
 
 const typeLabels: Record<string, string> = {
   watchlist: "🌐 Watchlist Report",
@@ -17,32 +17,11 @@ const typeLabels: Record<string, string> = {
 
 export default function ReportDetailPage() {
   const params = useParams();
-  const router = useRouter();
 
   const report = mockReports.find((r) => r.id === params.id);
 
   if (!report) {
-    return (
-      <main className="flex-1">
-        <TopBar title="Report Not Found" />
-        <div className="px-6 pb-6 pt-6">
-          <div className="flex flex-col items-center justify-center py-20">
-            <p className="text-sm text-[var(--color-text-secondary)]">
-              The report you&apos;re looking for doesn&apos;t exist.
-            </p>
-            <Button
-              color="primary"
-              variant="outline"
-              size="sm"
-              className="mt-4"
-              onClick={() => router.push("/reports")}
-            >
-              Back to Reports
-            </Button>
-          </div>
-        </div>
-      </main>
-    );
+    return <NotFoundPage section="Reports" backHref="/reports" entity="Report" />;
   }
 
   return (
@@ -121,26 +100,17 @@ export default function ReportDetailPage() {
 
           <ChartCard title="Screening Results">
             {report.matchCount === 0 ? (
-              <div className="flex flex-col items-center justify-center py-8">
-                <Shield className="h-10 w-10 text-[var(--color-success-soft-text)]" />
-                <p className="mt-3 text-sm font-medium text-[var(--color-text)]">
-                  No matches found
-                </p>
-                <p className="mt-1 text-xs text-[var(--color-text-tertiary)]">
-                  The subject was screened against all available databases.
-                </p>
-              </div>
+              <EmptyMessage fill="none">
+                <EmptyMessage.Icon size="sm"><ShieldCheck /></EmptyMessage.Icon>
+                <EmptyMessage.Title>No matches found</EmptyMessage.Title>
+                <EmptyMessage.Description>The subject was screened against all available databases.</EmptyMessage.Description>
+              </EmptyMessage>
             ) : (
-              <div className="flex flex-col items-center justify-center py-8">
-                <Eye className="h-10 w-10 text-[var(--color-danger-soft-text)]" />
-                <p className="mt-3 text-sm font-medium text-[var(--color-text)]">
-                  {report.matchCount} match{report.matchCount > 1 ? "es" : ""}{" "}
-                  found
-                </p>
-                <p className="mt-1 text-xs text-[var(--color-text-tertiary)]">
-                  Review required. Match details available via API.
-                </p>
-              </div>
+              <EmptyMessage fill="none">
+                <EmptyMessage.Icon size="sm" color="danger"><ExclamationMarkCircleFilled /></EmptyMessage.Icon>
+                <EmptyMessage.Title color="danger">{report.matchCount} match{report.matchCount > 1 ? "es" : ""} found</EmptyMessage.Title>
+                <EmptyMessage.Description>Review required. Match details available via API.</EmptyMessage.Description>
+              </EmptyMessage>
             )}
           </ChartCard>
         </div>

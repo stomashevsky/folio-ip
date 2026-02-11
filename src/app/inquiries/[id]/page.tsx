@@ -2,7 +2,7 @@
 
 import { TopBar } from "@/components/layout/TopBar";
 import { StatusBadge } from "@/components/shared/StatusBadge";
-import { ChartCard } from "@/components/shared";
+import { ChartCard, NotFoundPage, InlineEmpty } from "@/components/shared";
 import { mockInquiries } from "@/lib/data";
 import { mockVerifications } from "@/lib/data";
 import {
@@ -10,11 +10,11 @@ import {
   formatDuration,
   truncateId,
 } from "@/lib/utils/format";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import { useState } from "react";
-import { Button } from "@plexui/ui/components/Button";
+import { Avatar } from "@plexui/ui/components/Avatar";
+import { ShieldCheck } from "@plexui/ui/components/Icon";
 import {
-  User,
   CheckCircle2,
   XCircle,
 } from "lucide-react";
@@ -50,7 +50,6 @@ function CheckRow({ check }: { check: Check }) {
 
 export default function InquiryDetailPage() {
   const params = useParams();
-  const router = useRouter();
   const [activeTab, setActiveTab] = useState<Tab>("Overview");
 
   const inquiry = mockInquiries.find((i) => i.id === params.id);
@@ -59,27 +58,7 @@ export default function InquiryDetailPage() {
   );
 
   if (!inquiry) {
-    return (
-      <main className="flex-1">
-        <TopBar title="Inquiry Not Found" />
-        <div className="px-6 pb-6 pt-6">
-          <div className="flex flex-col items-center justify-center py-20">
-            <p className="text-sm text-[var(--color-text-secondary)]">
-              The inquiry you&apos;re looking for doesn&apos;t exist.
-            </p>
-            <Button
-              color="primary"
-              variant="outline"
-              size="sm"
-              className="mt-4"
-              onClick={() => router.push("/inquiries")}
-            >
-              Back to Inquiries
-            </Button>
-          </div>
-        </div>
-      </main>
-    );
+    return <NotFoundPage section="Inquiries" backHref="/inquiries" entity="Inquiry" />;
   }
 
   return (
@@ -188,10 +167,8 @@ export default function InquiryDetailPage() {
               </ChartCard>
 
               <ChartCard title="Linked Account">
-                <div className="flex items-center gap-4">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[var(--color-primary-soft-bg)]">
-                    <User className="h-6 w-6 text-[var(--color-primary-soft-text)]" />
-                  </div>
+                <div className="flex items-center gap-3">
+                  <Avatar name={inquiry.accountName} size={40} color="primary" />
                   <div>
                     <p className="text-sm font-semibold text-[var(--color-text)]">
                       {inquiry.accountName}
@@ -208,9 +185,7 @@ export default function InquiryDetailPage() {
           {activeTab === "Verifications" && (
             <div className="space-y-4">
               {verifications.length === 0 ? (
-                <p className="py-12 text-center text-sm text-[var(--color-text-tertiary)]">
-                  No verifications linked to this inquiry.
-                </p>
+                <InlineEmpty icon={<ShieldCheck />}>No verifications linked to this inquiry.</InlineEmpty>
               ) : (
                 verifications.map((v) => (
                   <ChartCard
@@ -235,14 +210,7 @@ export default function InquiryDetailPage() {
           )}
 
           {activeTab === "Signals" && (
-            <ChartCard
-              title="Behavioral Signals"
-              description="Risk signals from this inquiry"
-            >
-              <p className="py-8 text-center text-sm text-[var(--color-text-tertiary)]">
-                Signal data will be available when connected to a live API.
-              </p>
-            </ChartCard>
+            <InlineEmpty icon={<ShieldCheck />}>Signal data will be available when connected to a live API.</InlineEmpty>
           )}
         </div>
       </div>
