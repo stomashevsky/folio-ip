@@ -1,15 +1,25 @@
 # Agents Configuration — Folio App
 
+## CRITICAL RULE: Use @plexui/ui for ALL UI
+
+**@plexui/ui is the PRIMARY and MANDATORY UI library for this project.** It is installed from npm (`@plexui/ui`). Every UI element MUST use Plex UI components before considering any alternative.
+
+### Mandatory rules:
+
+1. **ALWAYS use `@plexui/ui` components first.** Before reaching for any other library (lucide-react, custom HTML, etc.), check if Plex UI has the component or icon.
+2. **NEVER install alternative UI libraries** (shadcn/ui, Chakra, MUI, Ant Design, Headless UI, etc.). Plex UI covers: Button, Input, Select, Badge, Avatar, Alert, Menu, Popover, Tooltip, Sidebar, Switch, Checkbox, RadioGroup, Slider, SegmentedControl, DatePicker, DateRangePicker, TagInput, Textarea, FloatingLabelInput, Skeleton, EmptyMessage, ProgressSteps, CodeBlock, Markdown, ShimmerText, TextLink, Icon (467+ icons), and more.
+3. **ALWAYS use Plex UI icons** (`@plexui/ui/components/Icon`) instead of lucide-react or other icon libraries. Plex UI has 467+ icons covering all common needs. Only fall back to lucide-react if a specific icon truly does not exist in Plex UI.
+4. **ALWAYS import via subpath** — `import { Button } from "@plexui/ui/components/Button"`, never from a barrel/index.
+5. **ALWAYS use Plex UI design tokens** (CSS custom properties like `var(--color-*)`) and typography classes (`heading-*`, `text-*`) instead of arbitrary Tailwind values.
+
+### Online docs: https://plexui.com/docs
+
+---
+
 ## Project Context
 
 Building a KYC Analytics Dashboard (Folio) using Next.js 16 + PlexUI + Tailwind CSS 4.
 Dev server runs on port 3100.
-
-## UI Kit Reference
-
-The PlexUI component library is at `/Users/sergey/github/plexui-docs/packages/ui/src/components/`.
-Documentation site: `/Users/sergey/github/plexui-docs/content/docs/`.
-Online docs: https://plexui.com/docs
 
 ---
 
@@ -17,6 +27,7 @@ Online docs: https://plexui.com/docs
 
 ### Installation & Setup
 
+Installed from npm:
 ```bash
 npm install @plexui/ui
 ```
@@ -40,6 +51,11 @@ import { Button } from "@plexui/ui/components/Button";
 import { Badge } from "@plexui/ui/components/Badge";
 import { Select } from "@plexui/ui/components/Select";
 import { Input } from "@plexui/ui/components/Input";
+```
+
+**Types import:**
+```tsx
+import type { ControlSize, SemanticColors, Variants } from "@plexui/ui/types";
 ```
 
 **Provider setup:**
