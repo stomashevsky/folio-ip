@@ -16,16 +16,7 @@ const columns: ColumnDef<Account, unknown>[] = [
     header: "Name",
     size: 240,
     cell: ({ row }) => (
-      <div className="flex items-center gap-3">
-        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--color-primary-soft-bg)] text-xs font-semibold text-[var(--color-primary-soft-text)]">
-          {row.original.name
-            .split(" ")
-            .map((n) => n[0])
-            .join("")
-            .slice(0, 2)}
-        </div>
-        <span className="font-medium">{row.original.name}</span>
-      </div>
+      <span className="font-medium">{row.original.name}</span>
     ),
   },
   {
