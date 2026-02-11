@@ -1,5 +1,5 @@
 import { ButtonLink } from "@plexui/ui/components/Button";
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeftLg } from "@plexui/ui/components/Icon";
 
 interface TopBarProps {
   title: string;
@@ -27,7 +27,7 @@ export function TopBar({ title, description, actions, toolbar, backHref }: TopBa
               pill={false}
               data-uniform=""
             >
-              <ChevronLeft />
+              <ChevronLeftLg />
             </ButtonLink>
           )}
           <div>
