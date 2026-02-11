@@ -1,7 +1,9 @@
 "use client";
 
 import { Avatar } from "@plexui/ui/components/Avatar";
-import { ChevronsUpDown, Settings } from "lucide-react";
+import { Button } from "@plexui/ui/components/Button";
+import { SettingsCog } from "@plexui/ui/components/Icon";
+import { ChevronsUpDown } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 export function Navbar() {
@@ -38,14 +40,16 @@ export function Navbar() {
 
       {/* Right: Settings + Profile */}
       <div className="flex items-center gap-4">
-        <button
-          type="button"
+        <Button
+          color="primary"
+          variant="ghost"
+          size="md"
+          uniform
           onClick={() => router.push("/settings")}
-          className="flex h-7 w-7 items-center justify-center rounded-full text-[var(--color-text)] transition-colors hover:bg-black/[0.08]"
           aria-label="Settings"
         >
-          <Settings className="h-5 w-5" />
-        </button>
+          <SettingsCog />
+        </Button>
         <Avatar name="Alex" size={28} color="primary" variant="solid" />
       </div>
     </header>
