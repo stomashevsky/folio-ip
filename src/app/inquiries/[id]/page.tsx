@@ -512,7 +512,7 @@ function OverviewTab({
             {viewerItems.map((item, i) => (
               <button
                 key={item.photo.label + i}
-                className="group flex min-w-[100px] cursor-pointer flex-col gap-1.5"
+                className="group flex min-w-[100px] cursor-pointer flex-col gap-1.5 outline-none"
                 onClick={() => setLightboxIndex(i)}
               >
                 <img

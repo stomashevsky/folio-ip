@@ -41,7 +41,7 @@ export function DocumentViewer({
     setRotation(0);
   }, [index]);
 
-  // Lock body scroll
+  // Lock body scroll on mount
   useEffect(() => {
     const prev = document.body.style.overflow;
     document.body.style.overflow = "hidden";
@@ -204,7 +204,7 @@ export function DocumentViewer({
           {/* Nav arrows */}
           {hasPrev && (
             <button
-              className="absolute left-4 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/10 text-white backdrop-blur-sm transition-colors hover:bg-white/20"
+              className="absolute left-4 top-1/2 flex h-10 w-10 cursor-pointer -translate-y-1/2 items-center justify-center rounded-full bg-white/10 text-white backdrop-blur-sm transition-colors hover:bg-white/20"
               onClick={goPrev}
             >
               <ChevronLeftMd />
@@ -212,7 +212,7 @@ export function DocumentViewer({
           )}
           {hasNext && (
             <button
-              className="absolute right-4 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/10 text-white backdrop-blur-sm transition-colors hover:bg-white/20"
+              className="absolute right-4 top-1/2 flex h-10 w-10 cursor-pointer -translate-y-1/2 items-center justify-center rounded-full bg-white/10 text-white backdrop-blur-sm transition-colors hover:bg-white/20"
               onClick={goNext}
             >
               <ChevronRightMd />
