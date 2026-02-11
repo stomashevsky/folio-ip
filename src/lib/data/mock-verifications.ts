@@ -35,13 +35,45 @@ const selfieChecksAllPassed: Check[] = [
   { name: "Portrait quality", status: "passed", category: "user_behavior", required: false },
 ];
 
-const govIdPhotos: VerificationPhoto[] = [
-  { url: "/images/id-front-placeholder.svg", label: "Front", captureMethod: "manual" },
-];
+// ─── Per-person photo sets (document + selfie must match the same person) ───
 
-const selfiePhotos: VerificationPhoto[] = [
-  { url: "/images/selfie-placeholder.svg", label: "Look ahead", captureMethod: "auto" },
-];
+const personPhotos = [
+  {
+    govId: [
+      { url: "/images/id-andre-front.png", label: "Front", captureMethod: "manual" as const },
+      { url: "/images/id-andre-back.png", label: "Back", captureMethod: "manual" as const },
+    ],
+    selfie: [
+      { url: "/images/selfie-andre-look-ahead.png", label: "Look ahead", captureMethod: "auto" as const },
+      { url: "/images/selfie-andre-look-left.png", label: "Look left", captureMethod: "auto" as const },
+      { url: "/images/selfie-andre-look-right.png", label: "Look right", captureMethod: "auto" as const },
+    ],
+  },
+  {
+    govId: [
+      { url: "/images/id-maria-front.png", label: "Front", captureMethod: "manual" as const },
+      { url: "/images/id-maria-back.png", label: "Back", captureMethod: "manual" as const },
+    ],
+    selfie: [
+      { url: "/images/selfie-maria-look-ahead.png", label: "Look ahead", captureMethod: "auto" as const },
+      { url: "/images/selfie-maria-look-left.png", label: "Look left", captureMethod: "auto" as const },
+      { url: "/images/selfie-maria-look-right.png", label: "Look right", captureMethod: "auto" as const },
+    ],
+  },
+  {
+    govId: [{ url: "/images/passport-carmen.png", label: "Front", captureMethod: "manual" as const }],
+    selfie: [
+      { url: "/images/selfie-carmen-look-ahead.png", label: "Look ahead", captureMethod: "auto" as const },
+      { url: "/images/selfie-carmen-look-left.png", label: "Look left", captureMethod: "auto" as const },
+      { url: "/images/selfie-carmen-look-right.png", label: "Look right", captureMethod: "auto" as const },
+    ],
+  },
+] satisfies { govId: VerificationPhoto[]; selfie: VerificationPhoto[] }[];
+
+/** Get photo set for a person index (cycles through 3 people) */
+function getPersonPhotos(personIndex: number) {
+  return personPhotos[personIndex % personPhotos.length];
+}
 
 const govIdChecksFailed: Check[] = govIdChecksAllPassed.map((c) =>
   c.name === "ID image tampering"
@@ -52,6 +84,7 @@ const govIdChecksFailed: Check[] = govIdChecksAllPassed.map((c) =>
 );
 
 export const mockVerifications: Verification[] = [
+  // Inquiry 1: Alexander J Sample → person 0 (Andre)
   {
     id: "ver_51kzkptBT2GGHMTQCZPgGv1BEiRy",
     inquiryId: "inq_Wt77vKHwYVYFciFNNDQpvggYy6jD",
@@ -60,7 +93,7 @@ export const mockVerifications: Verification[] = [
     createdAt: "2026-02-10T16:53:00.000Z",
     completedAt: "2026-02-10T16:53:09.000Z",
     checks: govIdChecksAllPassed,
-    photos: govIdPhotos,
+    photos: getPersonPhotos(0).govId,
     extractedData: {
       "Full name": "ALEXANDER J SAMPLE",
       "Birthdate": "17 Jul 1977",
@@ -78,8 +111,9 @@ export const mockVerifications: Verification[] = [
     createdAt: "2026-02-10T16:54:01.000Z",
     completedAt: "2026-02-10T16:54:02.000Z",
     checks: selfieChecksAllPassed,
-    photos: selfiePhotos,
+    photos: getPersonPhotos(0).selfie,
   },
+  // Inquiry 2: Maria Gonzalez → person 1 (Maria)
   {
     id: "ver_A2bCdEfGhIjKlMnOpQrStUvWxYzA",
     inquiryId: "inq_8kLmNpRsTuVwXyZaAbCdEfGhIjKl",
@@ -88,7 +122,7 @@ export const mockVerifications: Verification[] = [
     createdAt: "2026-02-10T14:25:00.000Z",
     completedAt: "2026-02-10T14:25:30.000Z",
     checks: govIdChecksAllPassed,
-    photos: govIdPhotos,
+    photos: getPersonPhotos(1).govId,
     extractedData: {
       "Full name": "MARIA GONZALEZ",
       "Birthdate": "03 Mar 1990",
@@ -104,8 +138,9 @@ export const mockVerifications: Verification[] = [
     createdAt: "2026-02-10T14:26:00.000Z",
     completedAt: "2026-02-10T14:26:15.000Z",
     checks: selfieChecksAllPassed,
-    photos: selfiePhotos,
+    photos: getPersonPhotos(1).selfie,
   },
+  // Inquiry 3: John Williams → person 2 (Carmen)
   {
     id: "ver_C4dEfGhIjKlMnOpQrStUvWxYzAbC",
     inquiryId: "inq_3MnOpQrStUvWxYzAaBbCcDdEeFfGg",
@@ -114,7 +149,7 @@ export const mockVerifications: Verification[] = [
     createdAt: "2026-02-10T12:10:00.000Z",
     completedAt: "2026-02-10T12:12:00.000Z",
     checks: govIdChecksFailed,
-    photos: govIdPhotos,
+    photos: getPersonPhotos(2).govId,
     extractedData: {
       "Full name": "JOHN WILLIAMS",
       "Birthdate": "15 Aug 1985",
@@ -128,8 +163,9 @@ export const mockVerifications: Verification[] = [
     createdAt: "2026-02-10T12:13:00.000Z",
     completedAt: "2026-02-10T12:13:20.000Z",
     checks: selfieChecksAllPassed,
-    photos: selfiePhotos,
+    photos: getPersonPhotos(2).selfie,
   },
+  // Inquiry 4: Yuki Tanaka → person 0 (Andre)
   {
     id: "ver_E6fGhIjKlMnOpQrStUvWxYzAbCdE",
     inquiryId: "inq_5RsTuVwXyZaAbBcCdDdEeFfGgHhIi",
@@ -138,7 +174,7 @@ export const mockVerifications: Verification[] = [
     createdAt: "2026-02-10T10:36:00.000Z",
     completedAt: "2026-02-10T10:36:40.000Z",
     checks: govIdChecksAllPassed,
-    photos: govIdPhotos,
+    photos: getPersonPhotos(0).govId,
     extractedData: {
       "Full name": "YUKI TANAKA",
       "Birthdate": "22 Dec 1988",
@@ -154,7 +190,7 @@ export const mockVerifications: Verification[] = [
     createdAt: "2026-02-10T10:37:00.000Z",
     completedAt: "2026-02-10T10:37:15.000Z",
     checks: selfieChecksAllPassed,
-    photos: selfiePhotos,
+    photos: getPersonPhotos(0).selfie,
   },
 ];
 
@@ -166,14 +202,16 @@ for (let i = 0; i < 40; i++) {
   const date = new Date(2026, 0, 15 + Math.floor(i / 4), 8 + (i % 12), (i * 7) % 60);
   const type = verTypes[i % verTypes.length];
   const status = verStatuses[i % verStatuses.length];
+  const inquiryIndex = Math.floor(i / 2);
+  const person = getPersonPhotos(inquiryIndex);
   mockVerifications.push({
     id: generateId("ver", 200 + i),
-    inquiryId: generateId("inq", 100 + Math.floor(i / 2)),
+    inquiryId: generateId("inq", 100 + inquiryIndex),
     type,
     status,
     createdAt: date.toISOString(),
     completedAt: new Date(date.getTime() + 15000 + (i * 3000)).toISOString(),
     checks: type === "selfie" ? selfieChecksAllPassed : (status === "failed" ? govIdChecksFailed : govIdChecksAllPassed),
-    photos: type === "selfie" ? selfiePhotos : type === "government_id" ? govIdPhotos : undefined,
+    photos: type === "selfie" ? person.selfie : type === "government_id" ? person.govId : undefined,
   });
 }

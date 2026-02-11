@@ -2,7 +2,7 @@
 
 import { TopBar } from "@/components/layout/TopBar";
 import { StatusBadge } from "@/components/shared/StatusBadge";
-import { NotFoundPage, InlineEmpty, EventTimeline } from "@/components/shared";
+import { NotFoundPage, InlineEmpty, EventTimeline, DocumentViewer } from "@/components/shared";
 import {
   mockInquiries,
   mockVerifications,
@@ -23,14 +23,15 @@ import { Badge } from "@plexui/ui/components/Badge";
 import { Button } from "@plexui/ui/components/Button";
 import { CopyTooltip, Tooltip } from "@plexui/ui/components/Tooltip";
 import {
-  CheckCircle2,
-  XCircle,
+  CheckCircle,
+  Copy,
   Globe,
-  Monitor,
+  Desktop,
+  MapPin,
   Tag,
   Search,
-} from "lucide-react";
-import type { Check, InquirySignal, SignalCategory } from "@/lib/types";
+} from "@plexui/ui/components/Icon";
+import type { Check, DocumentViewerItem, InquirySignal, SignalCategory } from "@/lib/types";
 
 const tabs = [
   "Overview",
@@ -60,7 +61,51 @@ function CheckRow({ check }: { check: Check }) {
         {check.category.replace("_", " ")}
       </span>
       {check.required && (
-        <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-[var(--color-text-quaternary)]" />
+        <CheckCircle className="h-3.5 w-3.5 shrink-0 text-[var(--color-text-tertiary)]" />
+      )}
+    </div>
+  );
+}
+
+// ─── Map Embed (blocks scroll-zoom until clicked) ───
+
+function MapEmbed({ latitude, longitude }: { latitude: number; longitude: number }) {
+  const [interactive, setInteractive] = useState(false);
+  const [resetKey, setResetKey] = useState(0);
+  const src = `https://www.openstreetmap.org/export/embed.html?bbox=${longitude - 0.05},${latitude - 0.05},${longitude + 0.05},${latitude + 0.05}&layer=mapnik&marker=${latitude},${longitude}`;
+
+  return (
+    <div
+      className="relative"
+      onMouseLeave={() => setInteractive(false)}
+    >
+      <iframe
+        key={resetKey}
+        title="Session location"
+        width="100%"
+        height="300"
+        className="border-0"
+        loading="lazy"
+        suppressHydrationWarning
+        src={src}
+      />
+      {!interactive && (
+        <div
+          className="absolute inset-0 cursor-pointer"
+          onClick={() => setInteractive(true)}
+        />
+      )}
+      {interactive && (
+        <Button
+          color="secondary"
+          variant="ghost"
+          size="sm"
+          uniform
+          className="absolute right-2 top-2 bg-white/90 shadow-sm backdrop-blur-sm hover:bg-white"
+          onClick={() => { setResetKey((k) => k + 1); setInteractive(false); }}
+        >
+          <MapPin className="h-4 w-4" />
+        </Button>
       )}
     </div>
   );
@@ -71,14 +116,27 @@ function CheckRow({ check }: { check: Check }) {
 function InfoRow({
   label,
   children,
+  copyValue,
 }: {
   label: string;
   children: React.ReactNode;
+  copyValue?: string;
 }) {
   return (
     <div className="py-2">
       <div className="text-xs text-[var(--color-text-tertiary)]">{label}</div>
-      <div className="mt-0.5 text-sm text-[var(--color-text)]">{children}</div>
+      <div className="mt-0.5 flex items-center gap-1.5 text-sm text-[var(--color-text)]">
+        <span className="min-w-0 break-all">{children}</span>
+        {copyValue && (
+          <CopyTooltip copyValue={copyValue}>
+            <Tooltip.TriggerDecorator>
+              <button className="shrink-0 text-[var(--color-text-tertiary)] hover:text-[var(--color-text-secondary)]">
+                <Copy className="h-3.5 w-3.5" />
+              </button>
+            </Tooltip.TriggerDecorator>
+          </CopyTooltip>
+        )}
+      </div>
     </div>
   );
 }
@@ -287,19 +345,15 @@ export default function InquiryDetailPage() {
             {/* Info section */}
             <h3 className="heading-sm text-[var(--color-text)]">Info</h3>
             <div className="mt-3 space-y-1">
-              <InfoRow label="Inquiry ID">
-                <CopyTooltip copyValue={inquiry.id}>
-                  <Tooltip.TriggerDecorator>
-                    {inquiry.id}
-                  </Tooltip.TriggerDecorator>
-                </CopyTooltip>
+              <InfoRow label="Inquiry ID" copyValue={inquiry.id}>
+                {inquiry.id}
               </InfoRow>
-              <InfoRow label="Reference ID">
+              <InfoRow label="Reference ID" copyValue={inquiry.referenceId}>
                 {inquiry.referenceId ?? (
                   <span className="text-[var(--color-text-tertiary)]">No reference ID</span>
                 )}
               </InfoRow>
-              <InfoRow label="Account ID">
+              <InfoRow label="Account ID" copyValue={inquiry.accountId}>
                 <span className="text-sm text-[var(--color-primary-solid-bg)]">
                   {inquiry.accountId}
                 </span>
@@ -390,12 +444,25 @@ function OverviewTab({
   signals: InquirySignal[];
   flaggedCount: number;
 }) {
-  // Collect photos from verifications
+  // Collect photos from verifications with extraction data
   const govIdVer = verifications.find((v) => v.type === "government_id");
   const selfieVer = verifications.find((v) => v.type === "selfie");
-  const hasPhotos =
-    (govIdVer?.photos && govIdVer.photos.length > 0) ||
-    (selfieVer?.photos && selfieVer.photos.length > 0);
+  const viewerItems: DocumentViewerItem[] = [
+    ...(govIdVer?.photos ?? []).map((photo) => ({
+      photo,
+      extractedData: govIdVer?.extractedData,
+      verificationType: "Government ID",
+    })),
+    ...(selfieVer?.photos ?? []).map((photo) => ({
+      photo,
+      extractedData: undefined,
+      verificationType: "Selfie",
+    })),
+  ];
+  const hasPhotos = viewerItems.length > 0;
+
+  // Lightbox state
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
   // Get first session for location
   const session = sessions[0];
@@ -453,33 +520,34 @@ function OverviewTab({
               {verTypeLabels.join(" + ")}
             </p>
           )}
-          <div className="flex gap-4">
-            {govIdVer?.photos?.map((photo) => (
-              <div key={photo.label} className="relative">
+          <div className="flex flex-wrap gap-4">
+            {viewerItems.map((item, i) => (
+              <button
+                key={item.photo.label + i}
+                className="group flex min-w-[100px] cursor-pointer flex-col gap-1.5"
+                onClick={() => setLightboxIndex(i)}
+              >
                 <img
-                  src={photo.url}
-                  alt={photo.label}
-                  className="h-[180px] w-auto rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] object-contain"
+                  src={item.photo.url}
+                  alt={item.photo.label}
+                  className="h-[160px] w-auto rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] object-contain transition-opacity group-hover:opacity-90"
                 />
-                <span className="absolute right-2 top-2 rounded-md bg-black/60 px-2 py-0.5 text-xs text-white">
-                  {photo.label}
+                <span className="w-full truncate text-center text-xs text-[var(--color-text-tertiary)]">
+                  {item.photo.label}
                 </span>
-              </div>
-            ))}
-            {selfieVer?.photos?.map((photo) => (
-              <div key={photo.label} className="relative">
-                <img
-                  src={photo.url}
-                  alt={photo.label}
-                  className="h-[180px] w-auto rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] object-contain"
-                />
-                <span className="absolute right-2 top-2 rounded-md bg-black/60 px-2 py-0.5 text-xs text-white">
-                  {photo.label}
-                </span>
-              </div>
+              </button>
             ))}
           </div>
         </div>
+      )}
+
+      {/* Document viewer */}
+      {lightboxIndex !== null && (
+        <DocumentViewer
+          items={viewerItems}
+          initialIndex={lightboxIndex}
+          onClose={() => setLightboxIndex(null)}
+        />
       )}
 
       {/* Attributes */}
@@ -521,13 +589,9 @@ function OverviewTab({
         <div>
           <h2 className="heading-sm mb-3 text-[var(--color-text)]">Location</h2>
           <div className="overflow-hidden rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]">
-            <iframe
-              title="Session location"
-              width="100%"
-              height="300"
-              className="border-0"
-              loading="lazy"
-              src={`https://www.openstreetmap.org/export/embed.html?bbox=${session.longitude - 0.05},${session.latitude - 0.05},${session.longitude + 0.05},${session.latitude + 0.05}&layer=mapnik&marker=${session.latitude},${session.longitude}`}
+            <MapEmbed
+              latitude={session.latitude}
+              longitude={session.longitude}
             />
             <div className="flex items-center gap-4 border-t border-[var(--color-border)] px-4 py-3">
               <div className="flex items-center gap-2 text-sm text-[var(--color-text)]">
@@ -714,7 +778,7 @@ function SessionsTab({
               >
                 <td className="w-2/5 px-4 py-3 text-sm text-[var(--color-text)]">
                   <div className="flex items-center gap-2">
-                    <Monitor className="h-4 w-4 shrink-0 text-[var(--color-text-tertiary)]" />
+                    <Desktop className="h-4 w-4 shrink-0 text-[var(--color-text-tertiary)]" />
                     {s.deviceType}
                   </div>
                   <span className="ml-6 font-mono text-xs text-[var(--color-text-tertiary)]">

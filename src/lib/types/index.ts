@@ -68,6 +68,12 @@ export interface VerificationPhoto {
   captureMethod: "manual" | "auto";
 }
 
+export interface DocumentViewerItem {
+  photo: VerificationPhoto;
+  extractedData?: Record<string, string>;
+  verificationType: string; // "Government ID", "Selfie"
+}
+
 export interface Check {
   name: string;
   status: CheckStatus;
