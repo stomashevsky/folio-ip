@@ -21,6 +21,7 @@ import { useState } from "react";
 import { Avatar } from "@plexui/ui/components/Avatar";
 import { Badge } from "@plexui/ui/components/Badge";
 import { Button } from "@plexui/ui/components/Button";
+import { Tabs } from "@plexui/ui/components/Tabs";
 import { CopyTooltip, Tooltip } from "@plexui/ui/components/Tooltip";
 import {
   CheckCircle,
@@ -260,12 +261,6 @@ export default function InquiryDetailPage() {
   const sessions = getSessionsForInquiry(inquiry.id);
   const signals = getSignalsForInquiry(inquiry.id);
 
-  const tabCounts: Record<string, number | undefined> = {
-    Verifications: verifications.length || undefined,
-    Sessions: sessions.length || undefined,
-    Reports: reports.length || undefined,
-  };
-
   const featuredSignals = signals.filter((s) => s.category === "featured");
   const flaggedCount = featuredSignals.filter((s) => s.flagged).length;
 
@@ -293,26 +288,19 @@ export default function InquiryDetailPage() {
         <div className="flex flex-1 flex-col overflow-auto">
           {/* Tabs */}
           <div className="shrink-0 px-6 pt-4">
-            <div className="flex gap-1 border-b border-[var(--color-border)]">
-              {tabs.map((tab) => (
-                <button
-                  key={tab}
-                  onClick={() => setActiveTab(tab)}
-                  className={`px-4 py-2.5 text-sm font-medium transition-colors ${
-                    activeTab === tab
-                      ? "border-b-2 border-[var(--color-primary-solid-bg)] text-[var(--color-text)]"
-                      : "text-[var(--color-text-tertiary)] hover:text-[var(--color-text-secondary)]"
-                  }`}
-                >
-                  {tab}
-                  {tabCounts[tab] != null && (
-                    <span className="ml-1.5 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-[var(--color-surface-secondary)] px-1.5 text-xs text-[var(--color-text-tertiary)]">
-                      {tabCounts[tab]}
-                    </span>
-                  )}
-                </button>
-              ))}
-            </div>
+            <Tabs
+              value={activeTab}
+              onChange={(v) => setActiveTab(v as Tab)}
+              variant="underline"
+              aria-label="Inquiry sections"
+              size="md"
+            >
+              <Tabs.Tab value="Overview">Overview</Tabs.Tab>
+              <Tabs.Tab value="Verifications" badge={verifications.length ? { content: verifications.length, pill: true } : undefined}>Verifications</Tabs.Tab>
+              <Tabs.Tab value="Sessions" badge={sessions.length ? { content: sessions.length, pill: true } : undefined}>Sessions</Tabs.Tab>
+              <Tabs.Tab value="Signals">Signals</Tabs.Tab>
+              <Tabs.Tab value="Reports" badge={reports.length ? { content: reports.length, pill: true } : undefined}>Reports</Tabs.Tab>
+            </Tabs>
           </div>
 
           {/* Tab content */}

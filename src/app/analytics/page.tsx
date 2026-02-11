@@ -13,6 +13,7 @@ import {
 } from "@/lib/data";
 import { formatNumber, formatPercent, formatDuration } from "@/lib/utils/format";
 import { useState } from "react";
+import { Tabs } from "@plexui/ui/components/Tabs";
 
 const tabs = ["Overview", "Funnel"] as const;
 type Tab = (typeof tabs)[number];
@@ -70,20 +71,17 @@ export default function AnalyticsPage() {
         </div>
 
         {/* Tabs */}
-        <div className="mt-6 flex gap-1 border-b border-[var(--color-border)]">
-          {tabs.map((tab) => (
-            <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              className={`px-4 py-2 text-sm font-medium transition-colors ${
-                activeTab === tab
-                  ? "border-b-2 border-[var(--color-primary-solid-bg)] text-[var(--color-text)]"
-                  : "text-[var(--color-text-tertiary)] hover:text-[var(--color-text-secondary)]"
-              }`}
-            >
-              {tab}
-            </button>
-          ))}
+        <div className="mt-6">
+          <Tabs
+            value={activeTab}
+            onChange={(v) => setActiveTab(v as Tab)}
+            variant="underline"
+            aria-label="Analytics views"
+            size="md"
+          >
+            <Tabs.Tab value="Overview">Overview</Tabs.Tab>
+            <Tabs.Tab value="Funnel">Funnel</Tabs.Tab>
+          </Tabs>
         </div>
 
         {/* Tab Content */}

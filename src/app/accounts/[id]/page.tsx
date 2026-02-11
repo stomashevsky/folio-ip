@@ -8,6 +8,7 @@ import { formatDateTime, formatDate, truncateId } from "@/lib/utils/format";
 import { useParams, useRouter } from "next/navigation";
 import { useState } from "react";
 import { Avatar } from "@plexui/ui/components/Avatar";
+import { Tabs } from "@plexui/ui/components/Tabs";
 import {
   FileSearch,
   ShieldCheck,
@@ -92,35 +93,19 @@ export default function AccountDetailPage() {
         </div>
 
         {/* Tabs */}
-        <div className="mt-6 flex gap-1 border-b border-[var(--color-border)]">
-          {tabs.map((tab) => {
-            const count =
-              tab === "Inquiries"
-                ? accountInquiries.length
-                : tab === "Verifications"
-                  ? accountVerifications.length
-                  : tab === "Reports"
-                    ? accountReports.length
-                    : null;
-            return (
-              <button
-                key={tab}
-                onClick={() => setActiveTab(tab)}
-                className={`px-4 py-2 text-sm font-medium transition-colors ${
-                  activeTab === tab
-                    ? "border-b-2 border-[var(--color-primary-solid-bg)] text-[var(--color-text)]"
-                    : "text-[var(--color-text-tertiary)] hover:text-[var(--color-text-secondary)]"
-                }`}
-              >
-                {tab}
-                {count !== null && (
-                  <span className="ml-1.5 text-xs text-[var(--color-text-tertiary)]">
-                    ({count})
-                  </span>
-                )}
-              </button>
-            );
-          })}
+        <div className="mt-6">
+          <Tabs
+            value={activeTab}
+            onChange={(v) => setActiveTab(v as Tab)}
+            variant="underline"
+            aria-label="Account sections"
+            size="md"
+          >
+            <Tabs.Tab value="Overview">Overview</Tabs.Tab>
+            <Tabs.Tab value="Inquiries" badge={accountInquiries.length ? { content: accountInquiries.length, pill: true } : undefined}>Inquiries</Tabs.Tab>
+            <Tabs.Tab value="Verifications" badge={accountVerifications.length ? { content: accountVerifications.length, pill: true } : undefined}>Verifications</Tabs.Tab>
+            <Tabs.Tab value="Reports" badge={accountReports.length ? { content: accountReports.length, pill: true } : undefined}>Reports</Tabs.Tab>
+          </Tabs>
         </div>
 
         {/* Tab Content */}
