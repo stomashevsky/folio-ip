@@ -216,9 +216,6 @@ export default function DashboardHome() {
               <h2 className="heading-sm text-[var(--color-text)]">
                 Recent Inquiries
               </h2>
-              <p className="mt-0.5 text-xs text-[var(--color-text-tertiary)]">
-                Last 10 inquiries
-              </p>
             </div>
             <ButtonLink href="/inquiries" color="secondary" variant="soft" size="sm" pill={false}>
               View all
