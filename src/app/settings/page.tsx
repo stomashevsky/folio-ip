@@ -1,91 +1,78 @@
+"use client";
+
 import { TopBar } from "@/components/layout/TopBar";
-import { ChartCard } from "@/components/shared";
-import { Shield, Globe, Key, Bell } from "lucide-react";
+import { Input } from "@plexui/ui/components/Input";
+import { Button } from "@plexui/ui/components/Button";
+import { Avatar } from "@plexui/ui/components/Avatar";
 
-export default function SettingsPage() {
+export default function YourProfilePage() {
   return (
-    <main className="flex-1">
-      <TopBar title="Settings" description="Configuration and preferences" />
-      <div className="px-6 pb-6 pt-6">
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-          <ChartCard title="General" description="Basic configuration">
-            <div className="space-y-4">
-              {[
-                {
-                  icon: Globe,
-                  label: "Environment",
-                  value: "Sandbox",
-                  description: "Using simulated data for testing",
-                },
-                {
-                  icon: Key,
-                  label: "API Key",
-                  value: "sk_test_•••••••••",
-                  description: "Test mode API key",
-                },
-                {
-                  icon: Shield,
-                  label: "Security",
-                  value: "Standard",
-                  description: "Default security configuration",
-                },
-                {
-                  icon: Bell,
-                  label: "Notifications",
-                  value: "Enabled",
-                  description: "Email notifications for completed inquiries",
-                },
-              ].map((item) => (
-                <div
-                  key={item.label}
-                  className="flex items-center gap-4 rounded-lg bg-[var(--color-surface-secondary)] p-4"
-                >
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[var(--color-surface)]">
-                    <item.icon className="h-5 w-5 text-[var(--color-text-tertiary)]" />
-                  </div>
-                  <div className="flex-1">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium text-[var(--color-text)]">
-                        {item.label}
-                      </span>
-                      <span className="text-sm text-[var(--color-text-secondary)]">
-                        {item.value}
-                      </span>
-                    </div>
-                    <p className="mt-0.5 text-xs text-[var(--color-text-tertiary)]">
-                      {item.description}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </ChartCard>
-
-          <ChartCard
-            title="About"
-            description="Dashboard information"
-          >
-            <div className="space-y-3">
-              {[
-                ["Application", "Folio — Identity Dashboard"],
-                ["Version", "1.0.0"],
-                ["Framework", "Next.js 16 (App Router)"],
-                ["UI Kit", "PlexUI"],
-                ["Data Source", "Mock (Sandbox)"],
-              ].map(([label, value]) => (
-                <div key={label} className="flex items-start justify-between">
-                  <span className="text-sm text-[var(--color-text-tertiary)]">
-                    {label}
-                  </span>
-                  <span className="text-sm font-medium text-[var(--color-text)]">
-                    {value}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </ChartCard>
+    <div className="flex h-full flex-col overflow-auto">
+      <TopBar title="Your profile" />
+      <div className="mx-auto w-full max-w-2xl px-6 py-8">
+        {/* Avatar */}
+        <div className="mb-8 flex items-center gap-4">
+          <Avatar name="Alex Smith" size={64} color="primary" variant="solid" />
+          <div>
+            <p className="heading-xs text-[var(--color-text)]">Alex Smith</p>
+            <p className="text-sm text-[var(--color-text-secondary)]">
+              alex.smith@acmecorp.com
+            </p>
+          </div>
         </div>
+
+        {/* Name */}
+        <div className="mb-6">
+          <label className="text-sm font-medium text-[var(--color-text)]">
+            Name
+          </label>
+          <p className="mb-2 text-sm text-[var(--color-text-secondary)]">
+            The name associated with this account
+          </p>
+          <Input defaultValue="Alex Smith" size="md" />
+        </div>
+
+        {/* Email */}
+        <div className="mb-6">
+          <label className="text-sm font-medium text-[var(--color-text)]">
+            Email address
+          </label>
+          <p className="mb-2 text-sm text-[var(--color-text-secondary)]">
+            The email address associated with this account
+          </p>
+          <Input defaultValue="alex.smith@acmecorp.com" size="md" disabled />
+        </div>
+
+        {/* Timezone */}
+        <div className="mb-6">
+          <label className="text-sm font-medium text-[var(--color-text)]">
+            Timezone
+          </label>
+          <p className="mb-2 text-sm text-[var(--color-text-secondary)]">
+            Timezone used for displaying dates and times
+          </p>
+          <Input
+            defaultValue="(UTC+00:00) Coordinated Universal Time"
+            size="md"
+            disabled
+          />
+        </div>
+
+        {/* Default organization */}
+        <div className="mb-8">
+          <label className="text-sm font-medium text-[var(--color-text)]">
+            Default organization
+          </label>
+          <p className="mb-2 text-sm text-[var(--color-text-secondary)]">
+            The organization used by default when making API requests
+          </p>
+          <Input defaultValue="Acme Corp" size="md" disabled />
+        </div>
+
+        <Button color="primary" pill={false}>
+          Save
+        </Button>
       </div>
-    </main>
+    </div>
   );
 }

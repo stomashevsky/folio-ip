@@ -4,7 +4,7 @@ import "./globals.css";
 
 import { Providers } from "@/components/providers/Providers";
 import { SidebarProvider, SidebarInset, SidebarLayout } from "@plexui/ui/components/Sidebar";
-import { AppSidebar } from "@/components/layout/AppSidebar";
+import { SidebarSwitch } from "@/components/layout/SidebarSwitch";
 import { Navbar } from "@/components/layout/Navbar";
 
 const geistSans = Geist({
@@ -37,7 +37,7 @@ export default function RootLayout({
             <Navbar />
             <SidebarProvider collapsible="none" className="flex-1 overflow-hidden">
               <SidebarLayout className="flex-1 overflow-hidden">
-                <AppSidebar />
+                <SidebarSwitch />
                 <SidebarInset>{children}</SidebarInset>
               </SidebarLayout>
             </SidebarProvider>
