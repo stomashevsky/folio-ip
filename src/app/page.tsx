@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useMemo, useCallback } from "react";
-import Link from "next/link";
 import { DateTime } from "luxon";
+import { ButtonLink } from "@plexui/ui/components/Button";
 import { TopBar } from "@/components/layout/TopBar";
 import { MetricCard, ChartCard } from "@/components/shared";
 import { RecentInquiriesTable } from "@/components/shared/RecentInquiriesTable";
@@ -211,22 +211,21 @@ export default function DashboardHome() {
 
         {/* Recent Inquiries */}
         <div className="mt-8">
-          <h2 className="heading-sm text-[var(--color-text)]">
-            Recent Inquiries
-          </h2>
-          <p className="mt-0.5 text-xs text-[var(--color-text-tertiary)]">
-            Last 10 inquiries
-          </p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="heading-sm text-[var(--color-text)]">
+                Recent Inquiries
+              </h2>
+              <p className="mt-0.5 text-xs text-[var(--color-text-tertiary)]">
+                Last 10 inquiries
+              </p>
+            </div>
+            <ButtonLink href="/inquiries" color="secondary" variant="soft" size="sm">
+              View all
+            </ButtonLink>
+          </div>
           <div className="mt-4">
             <RecentInquiriesTable data={recentInquiries} />
-          </div>
-          <div className="mt-4 text-center">
-            <Link
-              href="/inquiries"
-              className="text-sm font-medium text-[var(--color-text-secondary)] hover:text-[var(--color-text)] transition-colors"
-            >
-              View all inquiries &rarr;
-            </Link>
           </div>
         </div>
       </div>
