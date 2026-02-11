@@ -11,7 +11,7 @@ export const mockInquiries: Inquiry[] = [
     createdAt: "2026-02-10T16:41:00.000Z",
     completedAt: "2026-02-10T16:54:03.000Z",
     timeToFinish: 591,
-    listMatches: 0,
+
     verificationAttempts: { governmentId: 1, selfie: 1 },
     tags: [],
   },
@@ -24,7 +24,7 @@ export const mockInquiries: Inquiry[] = [
     createdAt: "2026-02-10T14:22:00.000Z",
     completedAt: "2026-02-10T14:28:15.000Z",
     timeToFinish: 375,
-    listMatches: 0,
+
     verificationAttempts: { governmentId: 1, selfie: 1 },
     tags: ["premium"],
   },
@@ -37,7 +37,7 @@ export const mockInquiries: Inquiry[] = [
     createdAt: "2026-02-10T12:05:00.000Z",
     completedAt: "2026-02-10T12:15:42.000Z",
     timeToFinish: 642,
-    listMatches: 0,
+
     verificationAttempts: { governmentId: 2, selfie: 1 },
     tags: [],
   },
@@ -50,7 +50,7 @@ export const mockInquiries: Inquiry[] = [
     createdAt: "2026-02-10T10:33:00.000Z",
     completedAt: "2026-02-10T10:41:20.000Z",
     timeToFinish: 500,
-    listMatches: 2,
+
     verificationAttempts: { governmentId: 1, selfie: 1 },
     tags: ["high-risk"],
   },
@@ -62,7 +62,7 @@ export const mockInquiries: Inquiry[] = [
     templateName: "KYC: GovID Only",
     createdAt: "2026-02-10T09:15:00.000Z",
     timeToFinish: undefined,
-    listMatches: 0,
+
     verificationAttempts: { governmentId: 0, selfie: 0 },
     tags: [],
   },
@@ -75,7 +75,7 @@ export const mockInquiries: Inquiry[] = [
     createdAt: "2026-02-09T18:45:00.000Z",
     completedAt: "2026-02-09T18:52:30.000Z",
     timeToFinish: 450,
-    listMatches: 0,
+
     verificationAttempts: { governmentId: 1, selfie: 1 },
     tags: [],
   },
@@ -88,7 +88,7 @@ export const mockInquiries: Inquiry[] = [
     createdAt: "2026-02-09T16:20:00.000Z",
     completedAt: "2026-02-09T16:26:45.000Z",
     timeToFinish: 405,
-    listMatches: 0,
+
     verificationAttempts: { governmentId: 1, selfie: 1 },
     tags: ["premium"],
   },
@@ -101,7 +101,7 @@ export const mockInquiries: Inquiry[] = [
     createdAt: "2026-02-09T14:10:00.000Z",
     completedAt: "2026-02-09T14:22:18.000Z",
     timeToFinish: 738,
-    listMatches: 0,
+
     verificationAttempts: { governmentId: 3, selfie: 1 },
     tags: [],
   },
@@ -114,7 +114,7 @@ export const mockInquiries: Inquiry[] = [
     createdAt: "2026-02-09T11:55:00.000Z",
     completedAt: "2026-02-09T12:01:10.000Z",
     timeToFinish: 370,
-    listMatches: 0,
+
     verificationAttempts: { governmentId: 1, selfie: 0 },
     tags: [],
   },
@@ -127,7 +127,7 @@ export const mockInquiries: Inquiry[] = [
     createdAt: "2026-02-09T09:30:00.000Z",
     completedAt: "2026-02-09T09:38:55.000Z",
     timeToFinish: 535,
-    listMatches: 1,
+
     verificationAttempts: { governmentId: 1, selfie: 2 },
     tags: ["eu-resident"],
   },
@@ -140,7 +140,7 @@ export const mockInquiries: Inquiry[] = [
     createdAt: "2026-02-08T17:40:00.000Z",
     completedAt: "2026-02-08T17:46:20.000Z",
     timeToFinish: 380,
-    listMatches: 0,
+
     verificationAttempts: { governmentId: 1, selfie: 1 },
     tags: [],
   },
@@ -152,7 +152,7 @@ export const mockInquiries: Inquiry[] = [
     templateName: "KYC + AML: GovID + Selfie",
     createdAt: "2026-02-08T15:00:00.000Z",
     timeToFinish: undefined,
-    listMatches: 0,
+
     verificationAttempts: { governmentId: 0, selfie: 0 },
     tags: [],
   },
@@ -165,7 +165,7 @@ export const mockInquiries: Inquiry[] = [
     createdAt: "2026-02-08T12:25:00.000Z",
     completedAt: "2026-02-08T12:31:40.000Z",
     timeToFinish: 400,
-    listMatches: 0,
+
     verificationAttempts: { governmentId: 1, selfie: 1 },
     tags: ["premium"],
   },
@@ -178,7 +178,7 @@ export const mockInquiries: Inquiry[] = [
     createdAt: "2026-02-08T10:10:00.000Z",
     completedAt: "2026-02-08T10:16:05.000Z",
     timeToFinish: 365,
-    listMatches: 0,
+
     verificationAttempts: { governmentId: 1, selfie: 0 },
     tags: [],
   },
@@ -190,7 +190,7 @@ export const mockInquiries: Inquiry[] = [
     templateName: "KYC + AML: GovID + Selfie",
     createdAt: "2026-02-10T17:00:00.000Z",
     timeToFinish: undefined,
-    listMatches: 0,
+
     verificationAttempts: { governmentId: 0, selfie: 0 },
     tags: [],
   },
@@ -233,7 +233,7 @@ for (let i = 0; i < names.length; i++) {
     createdAt: iso,
     completedAt,
     timeToFinish: ttf,
-    listMatches: status === "needs_review" ? 1 + (i % 2) : 0,
+
     verificationAttempts: {
       governmentId: finished ? 1 + (i % 3 === 0 ? 1 : 0) : 0,
       selfie: finished && templates[i % templates.length].includes("Selfie") ? 1 : 0,

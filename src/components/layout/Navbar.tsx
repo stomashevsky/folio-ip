@@ -38,8 +38,16 @@ export function Navbar() {
         </button>
       </div>
 
-      {/* Right: Settings + Profile */}
+      {/* Right: Dashboard + Settings + Profile */}
       <div className="flex items-center gap-4">
+        <Button
+          color="primary"
+          variant="ghost"
+          pill={false}
+          onClick={() => router.push("/")}
+        >
+          Dashboard
+        </Button>
         <Button
           color="primary"
           variant="ghost"

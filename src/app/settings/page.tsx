@@ -4,6 +4,7 @@ import { TopBar } from "@/components/layout/TopBar";
 import { Input } from "@plexui/ui/components/Input";
 import { Button } from "@plexui/ui/components/Button";
 import { Avatar } from "@plexui/ui/components/Avatar";
+import { Field } from "@plexui/ui/components/Field";
 
 export default function YourProfilePage() {
   return (
@@ -21,52 +22,28 @@ export default function YourProfilePage() {
           </div>
         </div>
 
-        {/* Name */}
         <div className="mb-6">
-          <label className="text-sm font-medium text-[var(--color-text)]">
-            Name
-          </label>
-          <p className="mb-2 text-sm text-[var(--color-text-secondary)]">
-            The name associated with this account
-          </p>
-          <Input defaultValue="Alex Smith" size="md" />
+          <Field label="Name" description="The name associated with this account">
+            <Input defaultValue="Alex Smith" />
+          </Field>
         </div>
 
-        {/* Email */}
         <div className="mb-6">
-          <label className="text-sm font-medium text-[var(--color-text)]">
-            Email address
-          </label>
-          <p className="mb-2 text-sm text-[var(--color-text-secondary)]">
-            The email address associated with this account
-          </p>
-          <Input defaultValue="alex.smith@acmecorp.com" size="md" disabled />
+          <Field label="Email address" description="The email address associated with this account">
+            <Input defaultValue="alex.smith@acmecorp.com" disabled />
+          </Field>
         </div>
 
-        {/* Timezone */}
         <div className="mb-6">
-          <label className="text-sm font-medium text-[var(--color-text)]">
-            Timezone
-          </label>
-          <p className="mb-2 text-sm text-[var(--color-text-secondary)]">
-            Timezone used for displaying dates and times
-          </p>
-          <Input
-            defaultValue="(UTC+00:00) Coordinated Universal Time"
-            size="md"
-            disabled
-          />
+          <Field label="Timezone" description="Timezone used for displaying dates and times">
+            <Input defaultValue="(UTC+00:00) Coordinated Universal Time" disabled />
+          </Field>
         </div>
 
-        {/* Default organization */}
         <div className="mb-8">
-          <label className="text-sm font-medium text-[var(--color-text)]">
-            Default organization
-          </label>
-          <p className="mb-2 text-sm text-[var(--color-text-secondary)]">
-            The organization used by default when making API requests
-          </p>
-          <Input defaultValue="Acme Corp" size="md" disabled />
+          <Field label="Default organization" description="The organization used by default when making API requests">
+            <Input defaultValue="Acme Corp" disabled />
+          </Field>
         </div>
 
         <Button color="primary" pill={false}>

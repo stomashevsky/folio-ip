@@ -12,24 +12,28 @@ const mockTeamMembers = [
     email: "alex.smith@acmecorp.com",
     role: "Owner",
     joined: "Jan 15, 2026",
+    avatarColor: "primary" as const,
   },
   {
     name: "Maria Gonzalez",
     email: "maria.gonzalez@acmecorp.com",
     role: "Admin",
     joined: "Jan 20, 2026",
+    avatarColor: "discovery" as const,
   },
   {
     name: "John Williams",
     email: "john.williams@acmecorp.com",
     role: "Member",
     joined: "Feb 01, 2026",
+    avatarColor: "info" as const,
   },
   {
     name: "Sophie Dupont",
     email: "sophie.dupont@acmecorp.com",
     role: "Member",
     joined: "Feb 05, 2026",
+    avatarColor: "success" as const,
   },
 ];
 
@@ -76,7 +80,7 @@ export default function TeamPage() {
                       <Avatar
                         name={member.name}
                         size={32}
-                        color="primary"
+                        color={member.avatarColor}
                         variant="solid"
                       />
                       <div>

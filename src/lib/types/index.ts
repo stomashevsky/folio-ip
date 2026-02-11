@@ -43,7 +43,6 @@ export interface Inquiry {
   createdAt: string; // ISO 8601
   completedAt?: string;
   timeToFinish?: number; // seconds
-  listMatches: number;
   verificationAttempts: {
     governmentId: number;
     selfie: number;
@@ -200,10 +199,43 @@ export interface FilterState {
 
 // ─── Event Timeline ───
 
+export type TimelineEventLevel = "info" | "success" | "error" | "warning";
+
 export interface TimelineEvent {
   id: string;
   timestamp: string;
   type: string;
+  level: TimelineEventLevel;
   description: string;
   actor?: string; // "workflow", "system", "user"
+}
+
+// ─── Inquiry Session ───
+
+export interface InquirySession {
+  id: string;
+  inquiryId: string;
+  deviceType: string; // "Mac desktop, Chrome"
+  deviceId: string; // dev_FuFC...
+  ipAddress: string;
+  networkThreatLevel: string; // "Low"
+  latitude: number;
+  longitude: number;
+  location: string; // "California"
+  country: string; // "United States of America"
+  createdAt: string;
+  startedAt: string;
+  expiredAt?: string;
+}
+
+// ─── Inquiry Signal ───
+
+export type SignalCategory = "featured" | "network" | "behavioral" | "device";
+
+export interface InquirySignal {
+  name: string;
+  value: string;
+  type: "Processed" | "Raw";
+  flagged: boolean;
+  category: SignalCategory;
 }

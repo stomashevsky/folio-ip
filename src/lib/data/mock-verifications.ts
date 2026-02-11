@@ -1,4 +1,4 @@
-import type { Verification, Check } from "@/lib/types";
+import type { Verification, Check, VerificationPhoto } from "@/lib/types";
 import { generateId } from "./id-generator";
 
 const govIdChecksAllPassed: Check[] = [
@@ -35,6 +35,14 @@ const selfieChecksAllPassed: Check[] = [
   { name: "Portrait quality", status: "passed", category: "user_behavior", required: false },
 ];
 
+const govIdPhotos: VerificationPhoto[] = [
+  { url: "/images/id-front-placeholder.svg", label: "Front", captureMethod: "manual" },
+];
+
+const selfiePhotos: VerificationPhoto[] = [
+  { url: "/images/selfie-placeholder.svg", label: "Look ahead", captureMethod: "auto" },
+];
+
 const govIdChecksFailed: Check[] = govIdChecksAllPassed.map((c) =>
   c.name === "ID image tampering"
     ? { ...c, status: "failed" as const, reasons: ["Suspected digital alteration detected"] }
@@ -52,6 +60,7 @@ export const mockVerifications: Verification[] = [
     createdAt: "2026-02-10T16:53:00.000Z",
     completedAt: "2026-02-10T16:53:09.000Z",
     checks: govIdChecksAllPassed,
+    photos: govIdPhotos,
     extractedData: {
       "Full name": "ALEXANDER J SAMPLE",
       "Birthdate": "17 Jul 1977",
@@ -69,6 +78,7 @@ export const mockVerifications: Verification[] = [
     createdAt: "2026-02-10T16:54:01.000Z",
     completedAt: "2026-02-10T16:54:02.000Z",
     checks: selfieChecksAllPassed,
+    photos: selfiePhotos,
   },
   {
     id: "ver_A2bCdEfGhIjKlMnOpQrStUvWxYzA",
@@ -78,6 +88,7 @@ export const mockVerifications: Verification[] = [
     createdAt: "2026-02-10T14:25:00.000Z",
     completedAt: "2026-02-10T14:25:30.000Z",
     checks: govIdChecksAllPassed,
+    photos: govIdPhotos,
     extractedData: {
       "Full name": "MARIA GONZALEZ",
       "Birthdate": "03 Mar 1990",
@@ -93,6 +104,7 @@ export const mockVerifications: Verification[] = [
     createdAt: "2026-02-10T14:26:00.000Z",
     completedAt: "2026-02-10T14:26:15.000Z",
     checks: selfieChecksAllPassed,
+    photos: selfiePhotos,
   },
   {
     id: "ver_C4dEfGhIjKlMnOpQrStUvWxYzAbC",
@@ -102,6 +114,7 @@ export const mockVerifications: Verification[] = [
     createdAt: "2026-02-10T12:10:00.000Z",
     completedAt: "2026-02-10T12:12:00.000Z",
     checks: govIdChecksFailed,
+    photos: govIdPhotos,
     extractedData: {
       "Full name": "JOHN WILLIAMS",
       "Birthdate": "15 Aug 1985",
@@ -115,6 +128,7 @@ export const mockVerifications: Verification[] = [
     createdAt: "2026-02-10T12:13:00.000Z",
     completedAt: "2026-02-10T12:13:20.000Z",
     checks: selfieChecksAllPassed,
+    photos: selfiePhotos,
   },
   {
     id: "ver_E6fGhIjKlMnOpQrStUvWxYzAbCdE",
@@ -124,6 +138,7 @@ export const mockVerifications: Verification[] = [
     createdAt: "2026-02-10T10:36:00.000Z",
     completedAt: "2026-02-10T10:36:40.000Z",
     checks: govIdChecksAllPassed,
+    photos: govIdPhotos,
     extractedData: {
       "Full name": "YUKI TANAKA",
       "Birthdate": "22 Dec 1988",
@@ -139,6 +154,7 @@ export const mockVerifications: Verification[] = [
     createdAt: "2026-02-10T10:37:00.000Z",
     completedAt: "2026-02-10T10:37:15.000Z",
     checks: selfieChecksAllPassed,
+    photos: selfiePhotos,
   },
 ];
 
@@ -158,5 +174,6 @@ for (let i = 0; i < 40; i++) {
     createdAt: date.toISOString(),
     completedAt: new Date(date.getTime() + 15000 + (i * 3000)).toISOString(),
     checks: type === "selfie" ? selfieChecksAllPassed : (status === "failed" ? govIdChecksFailed : govIdChecksAllPassed),
+    photos: type === "selfie" ? selfiePhotos : type === "government_id" ? govIdPhotos : undefined,
   });
 }
