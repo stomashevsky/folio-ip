@@ -32,7 +32,7 @@ export default function WebhooksPage() {
       <TopBar
         title="Webhooks"
         actions={
-          <Button color="primary" pill={false} size="sm">
+          <Button color="primary" pill={false} size="md">
             <Plus />
             Add endpoint
           </Button>

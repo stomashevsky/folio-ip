@@ -35,7 +35,7 @@ export default function ApiKeysPage() {
       <TopBar
         title="API keys"
         actions={
-          <Button color="primary" pill={false} size="sm">
+          <Button color="primary" pill={false} size="md">
             <Plus />
             Create new key
           </Button>

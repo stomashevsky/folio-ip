@@ -43,7 +43,7 @@ export default function TeamPage() {
       <TopBar
         title="Team"
         actions={
-          <Button color="primary" pill={false} size="sm">
+          <Button color="primary" pill={false} size="md">
             <Plus />
             Invite member
           </Button>

@@ -187,6 +187,47 @@ function CopyButton({ value }: { value: string }) {
   );
 }
 
+// ─── Location Table (field-name | value rows under map) ───
+
+function LocationTable({
+  title,
+  session,
+  lat,
+  lng,
+  borderLeft,
+}: {
+  title: string;
+  session: { deviceOs: string; deviceType: string; networkRegion: string; networkCountry: string };
+  lat: number;
+  lng: number;
+  borderLeft?: boolean;
+}) {
+  const rows = [
+    { label: "Device", value: `${session.deviceOs}, ${session.deviceType}` },
+    { label: "Coordinates", value: `${lat.toFixed(4)}° N ${Math.abs(lng).toFixed(4)}° ${lng >= 0 ? "E" : "W"}` },
+    { label: "Region", value: session.networkRegion },
+    { label: "Country", value: session.networkCountry },
+  ];
+
+  return (
+    <div className={borderLeft ? "border-l border-[var(--color-border)]" : ""}>
+      <div className="border-b border-[var(--color-border)] bg-[var(--color-surface-secondary)] px-4 py-2">
+        <span className="text-xs font-medium text-[var(--color-text-tertiary)]">{title}</span>
+      </div>
+      <table className="w-full">
+        <tbody>
+          {rows.map((row) => (
+            <tr key={row.label} className="border-b border-[var(--color-border)] last:border-b-0">
+              <td className="w-2/5 px-4 py-2 text-sm text-[var(--color-text-tertiary)]">{row.label}</td>
+              <td className="px-4 py-2 text-sm text-[var(--color-text)]">{row.value}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
 // ─── Section Heading ───
 
 function SectionHeading({ children, badge }: { children: React.ReactNode; badge?: number }) {
@@ -412,10 +453,10 @@ export default function InquiryDetailPage() {
         backHref="/inquiries"
         actions={
           <div className="flex items-center gap-2">
-            <Button color="primary" size="sm" pill={false}>
+            <Button color="primary" size="md" pill={false}>
               Review
             </Button>
-            <Button color="secondary" variant="outline" size="sm" pill={false}>
+            <Button color="secondary" variant="outline" size="md" pill={false}>
               More
             </Button>
           </div>
@@ -427,7 +468,7 @@ export default function InquiryDetailPage() {
         {/* Main content */}
         <div className="flex flex-1 flex-col overflow-auto">
           {/* Tabs */}
-          <div className="shrink-0 px-6 pt-4">
+          <div className="shrink-0 px-6 pt-4" style={{ "--color-ring": "transparent" } as React.CSSProperties}>
             <Tabs
               value={activeTab}
               onChange={(v) => setActiveTab(v as Tab)}
@@ -828,17 +869,21 @@ function OverviewTab({
               latitude={session.ipLatitude}
               longitude={session.ipLongitude}
             />
-            <div className="flex items-center gap-4 border-t border-[var(--color-border)] px-4 py-3">
-              <div className="flex items-center gap-2 text-sm text-[var(--color-text)]">
-                <Globe className="h-4 w-4 shrink-0 text-[var(--color-text-tertiary)]" />
-                {session.networkRegion}, {session.networkCountry}
-              </div>
-              <span className="text-sm text-[var(--color-text-tertiary)]">
-                {session.ipLatitude.toFixed(4)}° N, {Math.abs(session.ipLongitude).toFixed(4)}° {session.ipLongitude >= 0 ? "E" : "W"}
-              </span>
-              <span className="text-sm text-[var(--color-text-tertiary)]">
-                {session.deviceType}
-              </span>
+            {/* Two-column detail: IP Lookup | GPS */}
+            <div className="grid grid-cols-2 border-t border-[var(--color-border)]">
+              <LocationTable
+                title="IP Lookup"
+                session={session}
+                lat={session.ipLatitude}
+                lng={session.ipLongitude}
+              />
+              <LocationTable
+                title="GPS"
+                session={session}
+                lat={session.gpsLatitude}
+                lng={session.gpsLongitude}
+                borderLeft
+              />
             </div>
           </div>
         </div>
@@ -1108,33 +1153,41 @@ function SessionsTab({
             key={s.id}
             className="overflow-hidden rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]"
           >
-            <table className="w-full table-fixed">
+            <CardHeader
+              icon={<Desktop className="h-4 w-4" />}
+              title={`Session ${idx + 1}`}
+              startedAt={s.createdAt}
+              endedAt={s.expiredAt ?? undefined}
+            />
+
+            {/* Map + Location tables */}
+            <MapEmbed latitude={s.ipLatitude} longitude={s.ipLongitude} />
+            <div className="grid grid-cols-2 border-t border-[var(--color-border)]">
+              <LocationTable
+                title="IP Lookup"
+                session={s}
+                lat={s.ipLatitude}
+                lng={s.ipLongitude}
+              />
+              <LocationTable
+                title="GPS"
+                session={s}
+                lat={s.gpsLatitude}
+                lng={s.gpsLongitude}
+                borderLeft
+              />
+            </div>
+
+            {/* Network details */}
+            <table className="w-full table-fixed border-t border-[var(--color-border)]">
               <colgroup>
                 <col className="w-2/5" />
                 <col />
               </colgroup>
               <tbody>
-                <SessionSectionHeader
-                  icon={<Desktop className="h-4 w-4" />}
-                  title={`Session ${idx + 1}`}
-                  subtitle={
-                    s.expiredAt
-                      ? `${formatDateTime(s.createdAt)} – ${formatDateTime(s.expiredAt)}`
-                      : formatDateTime(s.createdAt)
-                  }
-                />
-                <SessionDataRow label="Lat/Lng">
-                    {s.gpsLatitude.toFixed(4)}° N {Math.abs(s.gpsLongitude).toFixed(4)}° {s.gpsLongitude >= 0 ? "E" : "W"}
-                  </SessionDataRow>
-
-                  {/* Network details */}
                   <SessionSectionHeader icon={<Globe className="h-4 w-4" />} title="Network details" />
                   <SessionDataRow label="IP address">{s.ipAddress}</SessionDataRow>
                   <SessionDataRow label="Network threat level">{s.networkThreatLevel}</SessionDataRow>
-                  <SessionDataRow label="Network country">{s.networkCountry}</SessionDataRow>
-                  <SessionDataRow label="Network region">{s.networkRegion}</SessionDataRow>
-                  <SessionDataRow label="IP Latitude">{s.ipLatitude}</SessionDataRow>
-                  <SessionDataRow label="IP Longitude">{s.ipLongitude}</SessionDataRow>
                   <SessionDataRow label="Tor connection">{s.torConnection ? "Yes" : "No"}</SessionDataRow>
                   <SessionDataRow label="VPN">{s.vpn ? "Yes" : "No"}</SessionDataRow>
                   <SessionDataRow label="Public proxy">{s.publicProxy ? "Yes" : "No"}</SessionDataRow>
@@ -1151,8 +1204,6 @@ function SessionsTab({
                   <SessionDataRow label="Device OS">{s.deviceOs}</SessionDataRow>
                   <SessionDataRow label="Browser">{s.browser}</SessionDataRow>
                   <SessionDataRow label="Browser fingerprint" mono>{s.browserFingerprint}</SessionDataRow>
-                  <SessionDataRow label="GPS Latitude">{s.gpsLatitude}</SessionDataRow>
-                  <SessionDataRow label="GPS Longitude">{s.gpsLongitude}</SessionDataRow>
                 </tbody>
               </table>
             </div>

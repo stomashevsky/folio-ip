@@ -245,13 +245,13 @@ export default function InquiriesPage() {
             <Button
               color="secondary"
               variant="outline"
-              size="sm"
+              size="md"
               pill={false}
             >
               <Download className="h-4 w-4" />
               Export
             </Button>
-            <Button color="primary" size="sm" pill={false}>
+            <Button color="primary" size="md" pill={false}>
               <Plus />
               Create Inquiry
             </Button>

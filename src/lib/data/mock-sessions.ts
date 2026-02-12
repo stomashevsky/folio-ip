@@ -109,8 +109,8 @@ export function getSessionsForInquiry(inquiryId: string): InquirySession[] {
       deviceOs: device.os,
       browser: device.browser,
       browserFingerprint: deterministicHex(idx * 31 + 7, 32),
-      gpsLatitude: loc.lat,
-      gpsLongitude: loc.lng,
+      gpsLatitude: +(loc.lat + 0.0023).toFixed(4),
+      gpsLongitude: +(loc.lng - 0.0017).toFixed(4),
     },
   ];
 }

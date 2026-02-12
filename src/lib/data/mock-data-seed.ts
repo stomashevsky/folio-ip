@@ -395,15 +395,15 @@ const templateWeights: [string, number][] = [
 
 const tagWeights: [string[], number][] = [
   [[], 50],
-  [["premium"], 10],
+  [["Premium"], 10],
   [["High-risk"], 8],
-  [["eu-resident"], 7],
-  [["vip"], 5],
+  [["EU-resident"], 7],
+  [["VIP"], 5],
   [["Re-verification"], 5],
   [["Expedited"], 4],
   [["Manual-review"], 4],
   [["API-created"], 3],
-  [["premium", "vip"], 2],
+  [["Premium", "VIP"], 2],
   [["High-risk", "Manual-review"], 2],
 ];
 

@@ -6,7 +6,6 @@ import { Badge } from "@plexui/ui/components/Badge";
 import { Button } from "@plexui/ui/components/Button";
 import { Field } from "@plexui/ui/components/Field";
 import { TagInput, type Tag } from "@plexui/ui/components/TagInput";
-import { X } from "@plexui/ui/components/Icon";
 
 interface TagEditModalProps {
   open: boolean;
@@ -88,14 +87,8 @@ export function TagEditModal({
       {/* Content */}
       <div className="relative z-10 w-full max-w-md rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] shadow-lg">
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4">
+        <div className="px-5 pt-5 pb-4">
           <h2 className="heading-sm text-[var(--color-text)]">Update tags</h2>
-          <button
-            onClick={handleCancel}
-            className="text-[var(--color-text-tertiary)] hover:text-[var(--color-text-secondary)]"
-          >
-            <X className="h-4 w-4" />
-          </button>
         </div>
 
         {/* Fields */}
@@ -131,11 +124,11 @@ export function TagEditModal({
         </div>
 
         {/* Footer */}
-        <div className="flex justify-end gap-2 border-t border-[var(--color-border)] px-5 py-3">
+        <div className="flex justify-end gap-2 px-5 py-4">
           <Button
             color="secondary"
-            variant="outline"
-            size="sm"
+            variant="soft"
+            size="md"
             pill={false}
             onClick={handleCancel}
           >
@@ -143,7 +136,7 @@ export function TagEditModal({
           </Button>
           <Button
             color="primary"
-            size="sm"
+            size="md"
             pill={false}
             onClick={handleSave}
           >
