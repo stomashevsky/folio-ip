@@ -256,8 +256,8 @@ function InfoRow({
 }) {
   return (
     <div className="py-2">
-      <div className="text-xs text-[var(--color-text-tertiary)]">{label}</div>
-      <div className={`mt-0.5 flex items-center gap-1.5 text-sm text-[var(--color-text)]${mono ? " font-mono" : ""}`}>
+      <div className="text-sm text-[var(--color-text-tertiary)]">{label}</div>
+      <div className={`mt-1 flex items-center gap-1.5 text-md text-[var(--color-text)]${mono ? " font-mono" : ""}`}>
         <span className="min-w-0 break-all">{children}</span>
         {copyValue && <CopyButton value={copyValue} />}
       </div>
@@ -474,13 +474,13 @@ export default function InquiryDetailPage() {
               </InfoRow>
               <InfoRow label="Reference ID" copyValue={inquiry.referenceId} mono={!!inquiry.referenceId}>
                 {inquiry.referenceId ?? (
-                  <span className="text-[var(--color-text-tertiary)]">No reference ID</span>
+                  <span className="text-[var(--color-text-tertiary)]">—</span>
                 )}
               </InfoRow>
               <InfoRow label="Account ID" copyValue={inquiry.accountId} mono>
                 <Link
                   href={`/accounts/${inquiry.accountId}`}
-                  className="text-sm text-[var(--color-primary-solid-bg)] hover:underline"
+                  className="text-[var(--color-primary-solid-bg)] hover:underline"
                 >
                   {inquiry.accountId}
                 </Link>
@@ -489,7 +489,7 @@ export default function InquiryDetailPage() {
                 {formatDateTime(inquiry.createdAt)} UTC
               </InfoRow>
               <InfoRow label="Template">
-                <span className="text-sm text-[var(--color-primary-solid-bg)]">
+                <span className="text-[var(--color-primary-solid-bg)]">
                   {inquiry.templateName}
                 </span>
               </InfoRow>
@@ -499,7 +499,7 @@ export default function InquiryDetailPage() {
                     <StatusBadge status={inquiry.status} />
                   </div>
                   {inquiry.status !== "created" && inquiry.status !== "pending" && (
-                    <p className="mt-1 text-xs text-[var(--color-text-tertiary)]">
+                    <p className="mt-1 text-sm text-[var(--color-text-tertiary)]">
                       by Workflow: {inquiry.templateName}
                     </p>
                   )}
@@ -1198,7 +1198,7 @@ function ReportsTab({ reports }: { reports: typeof mockReports }) {
   }
 
   return (
-    <div className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]">
+    <div className="overflow-hidden rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]">
       <table className="w-full table-fixed">
         <colgroup>
           <col className="w-[30%]" />
@@ -1253,8 +1253,7 @@ function ReportsTab({ reports }: { reports: typeof mockReports }) {
                     <p className="text-sm font-medium text-[var(--color-text)]">
                       {r.primaryInput}
                     </p>
-                    <p className="mt-0.5 flex items-center gap-1.5 text-xs text-[var(--color-text-tertiary)]">
-                      <Globe style={{ width: 12, height: 12 }} className="shrink-0" />
+                    <p className="mt-0.5 text-xs text-[var(--color-text-tertiary)]">
                       {typeLabel}
                     </p>
                   </div>

@@ -28,17 +28,15 @@ export function EventTimeline({ events }: EventTimelineProps) {
   const lastEventId = allEvents[allEvents.length - 1]?.id;
 
   return (
-    <div className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]">
-      <div className="border-b border-[var(--color-border)] px-4 py-3">
-        <span className="heading-xs text-[var(--color-text)]">
-          Event timeline (UTC)
-        </span>
-      </div>
-      <div className="px-4 py-4">
+    <div>
+      <h3 className="heading-sm text-[var(--color-text)]">
+        Event timeline (UTC)
+      </h3>
+      <div className="mt-3">
         {groupEntries.map(([date, dayEvents]) => (
           <div key={date}>
             {/* Date header */}
-            <div className="mb-3 text-xs font-medium text-[var(--color-text-tertiary)]">
+            <div className="mb-3 text-sm font-medium text-[var(--color-text-tertiary)]">
               {date}
             </div>
 
