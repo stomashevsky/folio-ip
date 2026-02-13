@@ -2,24 +2,24 @@
 
 import { TopBar } from "@/components/layout/TopBar";
 import { StatusBadge } from "@/components/shared/StatusBadge";
-import { ChartCard, NotFoundPage } from "@/components/shared";
+import { ChartCard, NotFoundPage, SummaryCard, DetailInfoList } from "@/components/shared";
 import { mockVerifications } from "@/lib/data";
-import { formatDateTime, truncateId } from "@/lib/utils/format";
+import { formatDateTime } from "@/lib/utils/format";
 import { useParams } from "next/navigation";
 import {
-  CheckCircle2,
-  XCircle,
-} from "lucide-react";
+  CheckCircle,
+  ExclamationMarkCircle,
+} from "@plexui/ui/components/Icon";
 import type { Check } from "@/lib/types";
 
 function CheckRow({ check }: { check: Check }) {
   return (
-    <div className="flex items-center justify-between py-2 px-3 rounded-md hover:bg-[var(--color-surface-secondary)]">
+    <div className="flex items-center justify-between rounded-md px-3 py-2 hover:bg-[var(--color-surface-secondary)]">
       <div className="flex items-center gap-2">
         {check.status === "passed" ? (
-          <CheckCircle2 className="h-4 w-4 text-[var(--color-success-soft-text)]" />
+          <CheckCircle className="h-4 w-4 text-[var(--color-success-soft-text)]" />
         ) : check.status === "failed" ? (
-          <XCircle className="h-4 w-4 text-[var(--color-danger-soft-text)]" />
+          <ExclamationMarkCircle className="h-4 w-4 text-[var(--color-danger-soft-text)]" />
         ) : (
           <div className="h-4 w-4 rounded-full bg-[var(--color-surface-secondary)]" />
         )}
@@ -56,56 +56,42 @@ export default function VerificationDetailPage() {
   ).length;
 
   return (
-    <main className="flex-1">
+    <div className="flex-1">
       <TopBar
         title="Verifications"
         backHref="/verifications"
       />
-      <div className="px-6 pb-6 pt-6">
+      <div className="px-4 pb-6 pt-6 md:px-6">
         {/* Summary */}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <div className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4">
-            <span className="text-xs font-medium uppercase tracking-wider text-[var(--color-text-tertiary)]">
-              Status
-            </span>
-            <div className="mt-2">
-              <StatusBadge status={verification.status} />
-            </div>
-          </div>
-          <div className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4">
-            <span className="text-xs font-medium uppercase tracking-wider text-[var(--color-text-tertiary)]">
-              Created At
-            </span>
-            <p className="mt-2 text-sm font-medium text-[var(--color-text)]">
+          <SummaryCard label="Status">
+            <StatusBadge status={verification.status} />
+          </SummaryCard>
+          <SummaryCard label="Created At">
+            <p className="text-sm font-medium text-[var(--color-text)]">
               {formatDateTime(verification.createdAt)}
             </p>
-          </div>
-          <div className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4">
-            <span className="text-xs font-medium uppercase tracking-wider text-[var(--color-text-tertiary)]">
-              Checks Passed
-            </span>
-            <p className="mt-2 text-lg font-semibold text-[var(--color-success-soft-text)]">
+          </SummaryCard>
+          <SummaryCard label="Checks Passed">
+            <p className="heading-sm text-[var(--color-success-soft-text)]">
               {passedCount}{" "}
               <span className="text-sm font-normal text-[var(--color-text-tertiary)]">
                 / {verification.checks.length}
               </span>
             </p>
-          </div>
-          <div className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4">
-            <span className="text-xs font-medium uppercase tracking-wider text-[var(--color-text-tertiary)]">
-              Checks Failed
-            </span>
-            <p className={`mt-2 text-lg font-semibold ${failedCount > 0 ? "text-[var(--color-danger-soft-text)]" : "text-[var(--color-text)]"}`}>
+          </SummaryCard>
+          <SummaryCard label="Checks Failed">
+            <p className={`heading-sm ${failedCount > 0 ? "text-[var(--color-danger-soft-text)]" : "text-[var(--color-text)]"}`}>
               {failedCount}
             </p>
-          </div>
+          </SummaryCard>
         </div>
 
         {/* Details */}
         <div className="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-2">
           <ChartCard title="Verification Details">
-            <div className="space-y-3">
-              {[
+            <DetailInfoList
+              items={[
                 ["Verification ID", verification.id],
                 ["Inquiry ID", verification.inquiryId],
                 ["Type", verification.type.replace("_", " ")],
@@ -116,39 +102,22 @@ export default function VerificationDetailPage() {
                     ? formatDateTime(verification.completedAt)
                     : "—",
                 ],
-              ].map(([label, value]) => (
-                <div key={label} className="flex items-start justify-between">
-                  <span className="text-sm text-[var(--color-text-tertiary)]">
-                    {label}
-                  </span>
-                  <span className="text-sm font-medium text-[var(--color-text)] text-right max-w-[60%] font-mono">
-                    {value}
-                  </span>
-                </div>
-              ))}
-            </div>
+              ]}
+            />
           </ChartCard>
 
           {verification.extractedData &&
             Object.keys(verification.extractedData).length > 0 && (
               <ChartCard title="Extracted Data">
-                <div className="space-y-3">
-                  {Object.entries(verification.extractedData).map(
-                    ([key, value]) => (
-                      <div
-                        key={key}
-                        className="flex items-start justify-between"
-                      >
-                        <span className="text-sm text-[var(--color-text-tertiary)] capitalize">
-                          {key.replace(/_/g, " ")}
-                        </span>
-                        <span className="text-sm font-medium text-[var(--color-text)] text-right max-w-[60%]">
-                          {value}
-                        </span>
-                      </div>
-                    )
+                <DetailInfoList
+                  items={Object.entries(verification.extractedData).map(
+                    ([key, value]) => [
+                      key.replace(/_/g, " "),
+                      value,
+                    ]
                   )}
-                </div>
+                  mono={false}
+                />
               </ChartCard>
             )}
         </div>
@@ -182,6 +151,6 @@ export default function VerificationDetailPage() {
           )}
         </div>
       </div>
-    </main>
+    </div>
   );
 }

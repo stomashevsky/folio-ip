@@ -25,6 +25,19 @@ html.dark {
   color-scheme: dark;
 }
 
+/* ─── App tokens ─── */
+:root {
+  --navbar-height: 54px;
+  --color-nav-active-bg: rgb(0 0 0 / 0.08);
+  --color-nav-hover-bg: rgb(0 0 0 / 0.04);
+}
+
+[data-theme="dark"],
+html.dark {
+  --color-nav-active-bg: rgb(255 255 255 / 0.08);
+  --color-nav-hover-bg: rgb(255 255 255 / 0.04);
+}
+
 /* ─── App globals ─── */
 body {
   background: var(--color-surface);
@@ -51,4 +64,22 @@ body {
 
 ::-webkit-scrollbar-thumb:hover {
   background: var(--color-border-strong);
+}
+
+/* ─── Mobile overrides ─── */
+@media (max-width: 767px) {
+  /* SidebarInset has margin-left:0 (flush with sidebar on desktop).
+     On mobile the sidebar is hidden, so add left margin for symmetric gutter. */
+  main {
+    margin-left: var(--sidebar-gutter-sm) !important;
+  }
+
+  /* Hide scrollbars on mobile (content still scrolls) */
+  * {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  *::-webkit-scrollbar {
+    display: none;
+  }
 }

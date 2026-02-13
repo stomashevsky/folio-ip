@@ -2,7 +2,7 @@
 
 import { TopBar } from "@/components/layout/TopBar";
 import { StatusBadge } from "@/components/shared/StatusBadge";
-import { ChartCard, NotFoundPage, InlineEmpty } from "@/components/shared";
+import { ChartCard, NotFoundPage, InlineEmpty, DetailInfoList, EntityCard, ActivityItem } from "@/components/shared";
 import { mockAccounts, mockInquiries, mockVerifications, mockReports } from "@/lib/data";
 import { formatDateTime, formatDate, truncateId } from "@/lib/utils/format";
 import { useParams, useRouter } from "next/navigation";
@@ -39,17 +39,17 @@ export default function AccountDetailPage() {
   }
 
   return (
-    <main className="flex-1">
+    <div className="flex-1">
       <TopBar
         title="Accounts"
         backHref="/accounts"
       />
-      <div className="px-6 pb-6 pt-6">
+      <div className="px-4 pb-6 pt-6 md:px-6">
         {/* Profile Header */}
         <div className="flex items-center gap-6 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6">
           <Avatar name={account.name} size={64} color="primary" />
           <div className="flex-1">
-            <h2 className="text-lg font-semibold text-[var(--color-text)]">
+            <h2 className="heading-sm text-[var(--color-text)]">
               {account.name}
             </h2>
             <p className="font-mono text-xs text-[var(--color-text-tertiary)]">
@@ -64,30 +64,20 @@ export default function AccountDetailPage() {
           <div className="flex items-center gap-4">
             <StatusBadge status={account.status} />
             <div className="flex gap-6 text-center">
-              <div>
-                <p className="text-lg font-semibold text-[var(--color-text)]">
-                  {account.inquiryCount}
-                </p>
-                <p className="text-xs text-[var(--color-text-tertiary)]">
-                  Inquiries
-                </p>
-              </div>
-              <div>
-                <p className="text-lg font-semibold text-[var(--color-text)]">
-                  {account.verificationCount}
-                </p>
-                <p className="text-xs text-[var(--color-text-tertiary)]">
-                  Verifications
-                </p>
-              </div>
-              <div>
-                <p className="text-lg font-semibold text-[var(--color-text)]">
-                  {account.reportCount}
-                </p>
-                <p className="text-xs text-[var(--color-text-tertiary)]">
-                  Reports
-                </p>
-              </div>
+              {[
+                { value: account.inquiryCount, label: "Inquiries" },
+                { value: account.verificationCount, label: "Verifications" },
+                { value: account.reportCount, label: "Reports" },
+              ].map((stat) => (
+                <div key={stat.label}>
+                  <p className="heading-sm text-[var(--color-text)]">
+                    {stat.value}
+                  </p>
+                  <p className="text-xs text-[var(--color-text-tertiary)]">
+                    {stat.label}
+                  </p>
+                </div>
+              ))}
             </div>
           </div>
         </div>
@@ -113,8 +103,8 @@ export default function AccountDetailPage() {
           {activeTab === "Overview" && (
             <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
               <ChartCard title="Profile">
-                <div className="space-y-3">
-                  {[
+                <DetailInfoList
+                  items={[
                     ["Account ID", account.id],
                     ["Reference ID", account.referenceId ?? "—"],
                     ["Type", account.type],
@@ -123,65 +113,27 @@ export default function AccountDetailPage() {
                     ["Address", account.address ?? "—"],
                     ["Created At", formatDateTime(account.createdAt)],
                     ["Updated At", formatDateTime(account.updatedAt)],
-                  ].map(([label, value]) => (
-                    <div
-                      key={label}
-                      className="flex items-start justify-between"
-                    >
-                      <span className="text-sm text-[var(--color-text-tertiary)]">
-                        {label}
-                      </span>
-                      <span className="text-sm font-medium text-[var(--color-text)] text-right max-w-[60%] font-mono">
-                        {value}
-                      </span>
-                    </div>
-                  ))}
-                </div>
+                  ]}
+                />
               </ChartCard>
 
               <ChartCard title="Activity Summary">
                 <div className="space-y-4">
-                  <div className="flex items-center gap-3 rounded-lg bg-[var(--color-surface-secondary)] p-3">
-                    <FileSearch className="h-5 w-5 text-[var(--color-text-tertiary)]" />
-                    <div className="flex-1">
-                      <p className="text-sm font-medium text-[var(--color-text)]">
-                        {accountInquiries.length} Inquiries
-                      </p>
-                      <p className="text-xs text-[var(--color-text-tertiary)]">
-                        {accountInquiries.filter((i) => i.status === "approved")
-                          .length}{" "}
-                        approved
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3 rounded-lg bg-[var(--color-surface-secondary)] p-3">
-                    <ShieldCheck className="h-5 w-5 text-[var(--color-text-tertiary)]" />
-                    <div className="flex-1">
-                      <p className="text-sm font-medium text-[var(--color-text)]">
-                        {accountVerifications.length} Verifications
-                      </p>
-                      <p className="text-xs text-[var(--color-text-tertiary)]">
-                        {accountVerifications.filter(
-                          (v) => v.status === "passed"
-                        ).length}{" "}
-                        passed
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3 rounded-lg bg-[var(--color-surface-secondary)] p-3">
-                    <FileText className="h-5 w-5 text-[var(--color-text-tertiary)]" />
-                    <div className="flex-1">
-                      <p className="text-sm font-medium text-[var(--color-text)]">
-                        {accountReports.length} Reports
-                      </p>
-                      <p className="text-xs text-[var(--color-text-tertiary)]">
-                        {accountReports.filter(
-                          (r) => r.status === "no_matches"
-                        ).length}{" "}
-                        clean
-                      </p>
-                    </div>
-                  </div>
+                  <ActivityItem
+                    icon={<FileSearch className="h-5 w-5" />}
+                    title={`${accountInquiries.length} Inquiries`}
+                    subtitle={`${accountInquiries.filter((i) => i.status === "approved").length} approved`}
+                  />
+                  <ActivityItem
+                    icon={<ShieldCheck className="h-5 w-5" />}
+                    title={`${accountVerifications.length} Verifications`}
+                    subtitle={`${accountVerifications.filter((v) => v.status === "passed").length} passed`}
+                  />
+                  <ActivityItem
+                    icon={<FileText className="h-5 w-5" />}
+                    title={`${accountReports.length} Reports`}
+                    subtitle={`${accountReports.filter((r) => r.status === "no_matches").length} clean`}
+                  />
                 </div>
               </ChartCard>
             </div>
@@ -193,21 +145,13 @@ export default function AccountDetailPage() {
                 <InlineEmpty>No inquiries for this account.</InlineEmpty>
               ) : (
                 accountInquiries.map((inq) => (
-                  <div
+                  <EntityCard
                     key={inq.id}
-                    className="flex cursor-pointer items-center justify-between rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] p-4 transition-colors hover:bg-[var(--color-surface-secondary)]"
+                    title={inq.templateName}
+                    subtitle={`${truncateId(inq.id)} · ${formatDateTime(inq.createdAt)}`}
+                    status={inq.status}
                     onClick={() => router.push(`/inquiries/${inq.id}`)}
-                  >
-                    <div>
-                      <p className="text-sm font-medium text-[var(--color-text)]">
-                        {inq.templateName}
-                      </p>
-                      <p className="font-mono text-xs text-[var(--color-text-tertiary)]">
-                        {truncateId(inq.id)} · {formatDateTime(inq.createdAt)}
-                      </p>
-                    </div>
-                    <StatusBadge status={inq.status} />
-                  </div>
+                  />
                 ))
               )}
             </div>
@@ -219,21 +163,14 @@ export default function AccountDetailPage() {
                 <InlineEmpty>No verifications for this account.</InlineEmpty>
               ) : (
                 accountVerifications.map((v) => (
-                  <div
+                  <EntityCard
                     key={v.id}
-                    className="flex cursor-pointer items-center justify-between rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] p-4 transition-colors hover:bg-[var(--color-surface-secondary)]"
+                    title={`${v.type.replace("_", " ")} Verification`}
+                    subtitle={`${truncateId(v.id)} · ${formatDateTime(v.createdAt)}`}
+                    status={v.status}
                     onClick={() => router.push(`/verifications/${v.id}`)}
-                  >
-                    <div>
-                      <p className="text-sm font-medium capitalize text-[var(--color-text)]">
-                        {v.type.replace("_", " ")} Verification
-                      </p>
-                      <p className="font-mono text-xs text-[var(--color-text-tertiary)]">
-                        {truncateId(v.id)} · {formatDateTime(v.createdAt)}
-                      </p>
-                    </div>
-                    <StatusBadge status={v.status} />
-                  </div>
+                    titleClassName="capitalize"
+                  />
                 ))
               )}
             </div>
@@ -245,27 +182,19 @@ export default function AccountDetailPage() {
                 <InlineEmpty>No reports for this account.</InlineEmpty>
               ) : (
                 accountReports.map((r) => (
-                  <div
+                  <EntityCard
                     key={r.id}
-                    className="flex cursor-pointer items-center justify-between rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] p-4 transition-colors hover:bg-[var(--color-surface-secondary)]"
+                    title={r.templateName}
+                    subtitle={`${truncateId(r.id)} · ${formatDateTime(r.createdAt)}`}
+                    status={r.status}
                     onClick={() => router.push(`/reports/${r.id}`)}
-                  >
-                    <div>
-                      <p className="text-sm font-medium text-[var(--color-text)]">
-                        {r.templateName}
-                      </p>
-                      <p className="font-mono text-xs text-[var(--color-text-tertiary)]">
-                        {truncateId(r.id)} · {formatDateTime(r.createdAt)}
-                      </p>
-                    </div>
-                    <StatusBadge status={r.status} />
-                  </div>
+                  />
                 ))
               )}
             </div>
           )}
         </div>
       </div>
-    </main>
+    </div>
   );
 }

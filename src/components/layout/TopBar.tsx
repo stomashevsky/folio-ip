@@ -14,7 +14,7 @@ export function TopBar({ title, description, actions, toolbar, backHref }: TopBa
   const hasToolbar = !!toolbar;
 
   return (
-    <div className="sticky top-0 z-10 shrink-0 border-b border-[var(--color-border)] bg-[var(--color-surface)] px-6 py-3">
+    <div className="sticky top-0 z-10 shrink-0 border-b border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 md:px-6">
       {/* Row 1: title + actions (always in title row) */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-1">
@@ -31,7 +31,7 @@ export function TopBar({ title, description, actions, toolbar, backHref }: TopBa
             </ButtonLink>
           )}
           <div>
-            <h1 className="text-xl font-semibold text-[var(--color-text)]">
+            <h1 className="heading-md text-[var(--color-text)]">
               {title}
             </h1>
             {description && (

@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useEffect } from "react";
 import { createPortal } from "react-dom";
+import { useScrollLock } from "@/lib/hooks/useScrollLock";
 import { Button } from "@plexui/ui/components/Button";
 import {
   ArrowLeftLg,
@@ -42,13 +43,7 @@ export function DocumentViewer({
   }, [index]);
 
   // Lock body scroll on mount
-  useEffect(() => {
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = prev;
-    };
-  }, []);
+  useScrollLock(true);
 
   const goPrev = useCallback(() => {
     if (hasPrev) setIndex((i) => i - 1);

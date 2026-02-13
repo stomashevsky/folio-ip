@@ -3,9 +3,8 @@
 import { useState } from "react";
 import { TopBar } from "@/components/layout/TopBar";
 import { DataTable, TableSearch } from "@/components/shared";
-import { StatusBadge } from "@/components/shared/StatusBadge";
 import { mockAccounts } from "@/lib/data";
-import { formatDateTime, truncateId } from "@/lib/utils/format";
+import { idCell, dateTimeCell, statusCell } from "@/lib/utils/columnHelpers";
 import { useRouter } from "next/navigation";
 import type { ColumnDef } from "@tanstack/react-table";
 import type { Account } from "@/lib/types";
@@ -23,11 +22,7 @@ const columns: ColumnDef<Account, unknown>[] = [
     accessorKey: "id",
     header: "Account ID",
     size: 220,
-    cell: ({ row }) => (
-      <span className="font-mono text-[var(--color-text-secondary)]">
-        {truncateId(row.original.id)}
-      </span>
-    ),
+    cell: idCell<Account>((r) => r.id),
   },
   {
     accessorKey: "type",
@@ -43,17 +38,13 @@ const columns: ColumnDef<Account, unknown>[] = [
     accessorKey: "createdAt",
     header: "Created at (UTC)",
     size: 180,
-    cell: ({ row }) => (
-      <span className="text-[var(--color-text-secondary)]">
-        {formatDateTime(row.original.createdAt)}
-      </span>
-    ),
+    cell: dateTimeCell<Account>((r) => r.createdAt),
   },
   {
     accessorKey: "status",
     header: "Status",
     size: 120,
-    cell: ({ row }) => <StatusBadge status={row.original.status} />,
+    cell: statusCell<Account>((r) => r.status),
   },
 ];
 
@@ -73,13 +64,17 @@ export default function AccountsPage() {
           />
         }
       />
-      <div className="flex min-h-0 flex-1 flex-col px-6 pt-4">
+      <div className="flex min-h-0 flex-1 flex-col px-4 pt-4 md:px-6">
         <DataTable
           data={mockAccounts}
           columns={columns}
           globalFilter={search}
           onRowClick={(row) => router.push(`/accounts/${row.id}`)}
           pageSize={10}
+          mobileColumnVisibility={{
+            id: false,
+            createdAt: false,
+          }}
         />
       </div>
     </div>

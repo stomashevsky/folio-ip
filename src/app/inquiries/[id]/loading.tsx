@@ -26,7 +26,7 @@ export default function InquiryDetailLoading() {
   return (
     <div className="flex h-full flex-col">
       {/* TopBar skeleton */}
-      <div className="sticky top-0 z-10 shrink-0 border-b border-[var(--color-border)] bg-[var(--color-surface)] px-6 py-3">
+      <div className="sticky top-0 z-10 shrink-0 border-b border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 md:px-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-1">
             <Skeleton className="h-8 w-8 rounded-lg" />
@@ -40,11 +40,11 @@ export default function InquiryDetailLoading() {
       </div>
 
       {/* Content + Sidebar */}
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex flex-1 flex-col overflow-auto md:flex-row md:overflow-hidden">
         {/* Main content */}
-        <div className="flex flex-1 flex-col overflow-auto">
+        <div className="flex shrink-0 flex-col md:min-w-0 md:flex-1 md:overflow-auto">
           {/* Tabs skeleton */}
-          <div className="shrink-0 border-b border-[var(--color-border)] px-6 pt-4 pb-0">
+          <div className="shrink-0 overflow-x-auto border-b border-[var(--color-border)] px-4 pt-4 pb-0 md:px-6">
             <div className="flex gap-4 pb-3">
               <Skeleton className="h-5 w-[72px]" />
               <Skeleton className="h-5 w-[108px]" />
@@ -55,7 +55,7 @@ export default function InquiryDetailLoading() {
           </div>
 
           {/* Overview tab content skeleton */}
-          <div className="flex-1 overflow-auto px-6 py-6">
+          <div className="flex-1 overflow-auto px-4 py-6 md:px-6">
             <div className="space-y-6">
               {/* Summary section */}
               <div>
@@ -102,7 +102,7 @@ export default function InquiryDetailLoading() {
         </div>
 
         {/* Right sidebar skeleton */}
-        <div className="w-[440px] shrink-0 overflow-auto border-l border-[var(--color-border)] bg-[var(--color-surface)]">
+        <div className="w-full border-t border-[var(--color-border)] bg-[var(--color-surface)] md:w-[440px] md:min-w-[280px] md:shrink md:overflow-auto md:border-l md:border-t-0">
           <div className="px-5 py-5">
             <Skeleton className="h-5 w-12" />
             <div className="mt-3 space-y-1">

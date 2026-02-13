@@ -14,44 +14,10 @@ import {
   generateTimeSeries,
 } from "@/lib/data";
 import { formatNumber, formatPercent, formatDuration } from "@/lib/utils/format";
+import { DASHBOARD_DATE_SHORTCUTS, type DateRangeShortcut } from "@/lib/constants/date-shortcuts";
+import { STATUS_COLORS } from "@/lib/constants/status-colors";
 import type { StatusDistribution } from "@/lib/types";
-
-type DateRange = [DateTime, DateTime];
-type DateRangeShortcut = {
-  label: string;
-  getDateRange: () => DateRange;
-};
-
-const shortcuts: DateRangeShortcut[] = [
-  {
-    label: "Last 7 days",
-    getDateRange: () => {
-      const today = DateTime.local().endOf("day");
-      return [today.minus({ days: 6 }).startOf("day"), today];
-    },
-  },
-  {
-    label: "Last 30 days",
-    getDateRange: () => {
-      const today = DateTime.local().endOf("day");
-      return [today.minus({ days: 29 }).startOf("day"), today];
-    },
-  },
-  {
-    label: "Last 3 months",
-    getDateRange: () => {
-      const today = DateTime.local().endOf("day");
-      return [today.minus({ months: 3 }).plus({ days: 1 }).startOf("day"), today];
-    },
-  },
-  {
-    label: "All time",
-    getDateRange: () => {
-      const today = DateTime.local().endOf("day");
-      return [DateTime.fromISO("2024-01-01"), today];
-    },
-  },
-];
+import type { DateRange } from "@/lib/constants/date-shortcuts";
 
 /* ── Seeded pseudo-random (Mulberry32) for stable derived data ── */
 function seededRandom(seed: number) {
@@ -99,12 +65,12 @@ function deriveStatusDistribution(days: number): StatusDistribution[] {
   const createdRate = 100 - approvalRate - declinedRate - needsReviewRate - pendingRate - expiredRate;
 
   const rates = [
-    { status: "Approved", rate: approvalRate, color: "#30a46c" },
-    { status: "Declined", rate: declinedRate, color: "#e5484d" },
-    { status: "Needs Review", rate: needsReviewRate, color: "#f5a623" },
-    { status: "Pending", rate: pendingRate, color: "#8b8d98" },
-    { status: "Expired", rate: expiredRate, color: "#63646e" },
-    { status: "Created", rate: Math.max(0.1, createdRate), color: "#505159" },
+    { status: "Approved", rate: approvalRate, color: STATUS_COLORS["Approved"] },
+    { status: "Declined", rate: declinedRate, color: STATUS_COLORS["Declined"] },
+    { status: "Needs Review", rate: needsReviewRate, color: STATUS_COLORS["Needs Review"] },
+    { status: "Pending", rate: pendingRate, color: STATUS_COLORS["Pending"] },
+    { status: "Expired", rate: expiredRate, color: STATUS_COLORS["Expired"] },
+    { status: "Created", rate: Math.max(0.1, createdRate), color: STATUS_COLORS["Created"] },
   ];
 
   return rates.map((r) => ({
@@ -131,7 +97,7 @@ function trendLabel(days: number, shortcutLabel?: string): string {
 }
 
 // Default range: last 30 days
-const defaultRange: DateRange = shortcuts[1].getDateRange();
+const defaultRange: DateRange = DASHBOARD_DATE_SHORTCUTS[1].getDateRange();
 
 export default function DashboardHome() {
   const recentInquiries = mockInquiries.slice(0, 10);
@@ -166,7 +132,7 @@ export default function DashboardHome() {
           <DateRangePicker
             value={dateRange}
             onChange={handleRangeChange}
-            shortcuts={shortcuts}
+            shortcuts={DASHBOARD_DATE_SHORTCUTS}
             size="md"
             pill={false}
             max={DateTime.local().endOf("day")}
@@ -174,7 +140,7 @@ export default function DashboardHome() {
           />
         }
       />
-      <div className="px-6 pb-6 pt-6">
+      <div className="px-4 pb-6 pt-6 md:px-6">
         {/* Metric Cards */}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <MetricCard

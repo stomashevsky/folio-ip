@@ -1,22 +1,24 @@
 "use client";
 
 import { TopBar } from "@/components/layout/TopBar";
+import { SectionHeading } from "@/components/shared";
 import { Input } from "@plexui/ui/components/Input";
 import { Button } from "@plexui/ui/components/Button";
 import { Badge } from "@plexui/ui/components/Badge";
 import { Field } from "@plexui/ui/components/Field";
+import { MOCK_USER } from "@/lib/constants/mock-user";
 
 export default function OrganizationGeneralPage() {
   return (
     <div className="flex h-full flex-col overflow-auto">
       <TopBar title="Organization settings" />
-      <div className="mx-auto w-full max-w-2xl px-6 py-8">
+      <div className="mx-auto w-full max-w-2xl px-4 py-8 md:px-6">
         {/* Details */}
-        <h2 className="heading-xs mb-4 text-[var(--color-text)]">Details</h2>
+        <SectionHeading size="xs">Details</SectionHeading>
 
         <div className="mb-6">
           <Field label="Organization name" description="Human-friendly label for your organization, shown in user interfaces">
-            <Input defaultValue="Acme Corp" />
+            <Input defaultValue={MOCK_USER.organization} />
           </Field>
           <div className="mt-3">
             <Button color="primary" pill={false} size="sm">
@@ -27,14 +29,12 @@ export default function OrganizationGeneralPage() {
 
         <div className="mb-8">
           <Field label="Organization ID" description="Identifier for this organization used in API requests">
-            <Input defaultValue="org_AcmeCorp2024xYz" disabled />
+            <Input defaultValue="org_LunaCorp2024xYz" disabled />
           </Field>
         </div>
 
         {/* Environment */}
-        <h2 className="heading-xs mb-4 text-[var(--color-text)]">
-          Environment
-        </h2>
+        <SectionHeading size="xs">Environment</SectionHeading>
 
         <div className="mb-6 rounded-lg border border-[var(--color-border)] p-4">
           <div className="flex items-center justify-between">

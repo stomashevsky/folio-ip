@@ -3,20 +3,14 @@
 import { useState } from "react";
 import { TopBar } from "@/components/layout/TopBar";
 import { DataTable, TableSearch } from "@/components/shared";
-import { StatusBadge } from "@/components/shared/StatusBadge";
 import { mockReports } from "@/lib/data";
-import { formatDateTime, truncateId } from "@/lib/utils/format";
+import { idCell, dateTimeCell, statusCell } from "@/lib/utils/columnHelpers";
 import { useRouter } from "next/navigation";
 import type { ColumnDef } from "@tanstack/react-table";
 import type { Report } from "@/lib/types";
 import { Button } from "@plexui/ui/components/Button";
-import { Plus, Download } from "lucide-react";
-
-const typeLabels: Record<string, string> = {
-  watchlist: "🌐 Watchlist Report",
-  pep: "🏛️ Politically Exposed Person",
-  adverse_media: "📰 Adverse Media",
-};
+import { Plus, Download } from "@plexui/ui/components/Icon";
+import { REPORT_TYPE_LABELS } from "@/lib/constants/report-type-labels";
 
 const columns: ColumnDef<Report, unknown>[] = [
   {
@@ -33,7 +27,7 @@ const columns: ColumnDef<Report, unknown>[] = [
     size: 220,
     cell: ({ row }) => (
       <span className="text-[var(--color-text-secondary)]">
-        {typeLabels[row.original.type] ?? row.original.type}
+        {REPORT_TYPE_LABELS[row.original.type] ?? row.original.type}
       </span>
     ),
   },
@@ -41,27 +35,19 @@ const columns: ColumnDef<Report, unknown>[] = [
     accessorKey: "id",
     header: "Report ID",
     size: 220,
-    cell: ({ row }) => (
-      <span className="font-mono text-[var(--color-text-secondary)]">
-        {truncateId(row.original.id)}
-      </span>
-    ),
+    cell: idCell<Report>((r) => r.id),
   },
   {
     accessorKey: "createdAt",
     header: "Created at (UTC)",
     size: 180,
-    cell: ({ row }) => (
-      <span className="text-[var(--color-text-secondary)]">
-        {formatDateTime(row.original.createdAt)}
-      </span>
-    ),
+    cell: dateTimeCell<Report>((r) => r.createdAt),
   },
   {
     accessorKey: "status",
     header: "Status",
     size: 120,
-    cell: ({ row }) => <StatusBadge status={row.original.status} />,
+    cell: statusCell<Report>((r) => r.status),
   },
 ];
 
@@ -76,11 +62,11 @@ export default function ReportsPage() {
         actions={
           <div className="flex items-center gap-2">
             <Button color="secondary" variant="outline" size="md" pill={false}>
-              <Download className="h-4 w-4" />
+              <Download />
               Export
             </Button>
             <Button color="primary" size="md" pill={false}>
-              <Plus className="h-4 w-4" />
+              <Plus />
               Create Report
             </Button>
           </div>
@@ -93,13 +79,17 @@ export default function ReportsPage() {
           />
         }
       />
-      <div className="flex min-h-0 flex-1 flex-col px-6 pt-4">
+      <div className="flex min-h-0 flex-1 flex-col px-4 pt-4 md:px-6">
         <DataTable
           data={mockReports}
           columns={columns}
           globalFilter={search}
           onRowClick={(row) => router.push(`/reports/${row.id}`)}
           pageSize={10}
+          mobileColumnVisibility={{
+            id: false,
+            createdAt: false,
+          }}
         />
       </div>
     </div>

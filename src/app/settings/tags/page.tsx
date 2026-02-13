@@ -2,11 +2,18 @@
 
 import { useMemo, useState } from "react";
 import { TopBar } from "@/components/layout/TopBar";
-import { InlineEmpty } from "@/components/shared";
+import {
+  InlineEmpty,
+  Modal,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+} from "@/components/shared";
 import { mockInquiries } from "@/lib/data";
 import { Badge } from "@plexui/ui/components/Badge";
 import { Button } from "@plexui/ui/components/Button";
 import { Input } from "@plexui/ui/components/Input";
+import { Field } from "@plexui/ui/components/Field";
 import { EditPencil, Trash } from "@plexui/ui/components/Icon";
 
 export default function TagsPage() {
@@ -21,40 +28,44 @@ export default function TagsPage() {
   }, []);
 
   const [tags, setTags] = useState(initialTags);
-  const [confirming, setConfirming] = useState<string | null>(null);
-  const [editing, setEditing] = useState<{
+
+  // Rename modal state
+  const [renaming, setRenaming] = useState<{
     name: string;
     draft: string;
   } | null>(null);
 
-  const handleDelete = (name: string) => {
-    setTags((prev) => prev.filter((t) => t.name !== name));
-    setConfirming(null);
-  };
+  // Delete modal state
+  const [deleting, setDeleting] = useState<string | null>(null);
 
   const handleRename = () => {
-    if (!editing || !editing.draft.trim()) return;
-    const trimmed = editing.draft.trim();
-    // Don't rename if unchanged or conflicts with existing tag
+    if (!renaming || !renaming.draft.trim()) return;
+    const trimmed = renaming.draft.trim();
     if (
-      trimmed === editing.name ||
-      tags.some((t) => t.name === trimmed && t.name !== editing.name)
+      trimmed === renaming.name ||
+      tags.some((t) => t.name === trimmed && t.name !== renaming.name)
     )
       return;
     setTags((prev) =>
       prev
         .map((t) =>
-          t.name === editing.name ? { ...t, name: trimmed } : t,
+          t.name === renaming.name ? { ...t, name: trimmed } : t,
         )
         .sort((a, b) => a.name.localeCompare(b.name)),
     );
-    setEditing(null);
+    setRenaming(null);
+  };
+
+  const handleDelete = () => {
+    if (!deleting) return;
+    setTags((prev) => prev.filter((t) => t.name !== deleting));
+    setDeleting(null);
   };
 
   return (
     <div className="flex h-full flex-col overflow-auto">
       <TopBar title="Tags" />
-      <div className="px-6 py-8">
+      <div className="px-4 py-8 md:px-6">
         <p className="mb-6 text-sm text-[var(--color-text-secondary)]">
           Tags help you organize and filter inquiries. Tags are created from
           individual inquiry pages and can be removed here.
@@ -63,101 +74,47 @@ export default function TagsPage() {
         {tags.length === 0 ? (
           <InlineEmpty>No tags have been created yet.</InlineEmpty>
         ) : (
-          <div className="overflow-hidden rounded-lg border border-[var(--color-border)]">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-[var(--color-border)] bg-[var(--color-surface-secondary)]">
-                  <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-[var(--color-text-tertiary)]">
-                    Tag
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-[var(--color-text-tertiary)]">
-                    Inquiries
-                  </th>
-                  <th className="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-[var(--color-text-tertiary)]">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {tags.map((tag) => (
-                  <tr
-                    key={tag.name}
-                    className="border-b border-[var(--color-border)] last:border-b-0"
-                  >
-                    <td className="px-4 py-3">
-                      {editing?.name === tag.name ? (
-                        <Input
-                          size="sm"
-                          value={editing.draft}
-                          onChange={(e) =>
-                            setEditing({ ...editing, draft: e.target.value })
-                          }
-                          onKeyDown={(e) => {
-                            if (e.key === "Enter") handleRename();
-                            if (e.key === "Escape") setEditing(null);
-                          }}
-                          autoFocus
-                          autoSelect
-                        />
-                      ) : (
+          <>
+            {/* Desktop table */}
+            <div className="hidden overflow-x-auto rounded-lg border border-[var(--color-border)] md:block">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-[var(--color-border)] bg-[var(--color-surface-secondary)]">
+                    <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-[var(--color-text-tertiary)]">
+                      Tag
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-[var(--color-text-tertiary)]">
+                      Inquiries
+                    </th>
+                    <th className="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-[var(--color-text-tertiary)]">
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {tags.map((tag) => (
+                    <tr
+                      key={tag.name}
+                      className="border-b border-[var(--color-border)] last:border-b-0"
+                    >
+                      <td className="px-4 py-3">
                         <Badge color="secondary" size="sm">
                           {tag.name}
                         </Badge>
-                      )}
-                    </td>
-                    <td className="px-4 py-3 text-sm text-[var(--color-text-secondary)]">
-                      {tag.count}
-                    </td>
-                    <td className="px-4 py-3 text-right">
-                      {confirming === tag.name ? (
-                        <div className="flex items-center justify-end gap-2">
-                          <Button
-                            color="secondary"
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => setConfirming(null)}
-                          >
-                            Cancel
-                          </Button>
-                          <Button
-                            color="danger"
-                            size="sm"
-                            pill={false}
-                            onClick={() => handleDelete(tag.name)}
-                          >
-                            Delete
-                          </Button>
-                        </div>
-                      ) : editing?.name === tag.name ? (
-                        <div className="flex items-center justify-end gap-2">
-                          <Button
-                            color="secondary"
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => setEditing(null)}
-                          >
-                            Cancel
-                          </Button>
-                          <Button
-                            color="primary"
-                            size="sm"
-                            pill={false}
-                            onClick={handleRename}
-                          >
-                            Save
-                          </Button>
-                        </div>
-                      ) : (
+                      </td>
+                      <td className="px-4 py-3 text-sm text-[var(--color-text-secondary)]">
+                        {tag.count}
+                      </td>
+                      <td className="px-4 py-3 text-right">
                         <div className="flex items-center justify-end gap-1">
                           <Button
                             color="secondary"
                             variant="ghost"
                             size="sm"
                             uniform
-                            onClick={() => {
-                              setEditing({ name: tag.name, draft: tag.name });
-                              setConfirming(null);
-                            }}
+                            onClick={() =>
+                              setRenaming({ name: tag.name, draft: tag.name })
+                            }
                           >
                             <EditPencil />
                           </Button>
@@ -166,23 +123,156 @@ export default function TagsPage() {
                             variant="ghost"
                             size="sm"
                             uniform
-                            onClick={() => {
-                              setConfirming(tag.name);
-                              setEditing(null);
-                            }}
+                            onClick={() => setDeleting(tag.name)}
                           >
                             <Trash />
                           </Button>
                         </div>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Mobile card list */}
+            <div className="space-y-3 md:hidden">
+              {tags.map((tag) => (
+                <div
+                  key={tag.name}
+                  className="rounded-lg border border-[var(--color-border)] p-4"
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <Badge color="secondary" size="sm">
+                        {tag.name}
+                      </Badge>
+                      <span className="text-xs text-[var(--color-text-tertiary)]">
+                        {tag.count} inquiries
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Button
+                        color="secondary"
+                        variant="ghost"
+                        size="sm"
+                        uniform
+                        onClick={() =>
+                          setRenaming({ name: tag.name, draft: tag.name })
+                        }
+                      >
+                        <EditPencil />
+                      </Button>
+                      <Button
+                        color="secondary"
+                        variant="ghost"
+                        size="sm"
+                        uniform
+                        onClick={() => setDeleting(tag.name)}
+                      >
+                        <Trash />
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
         )}
       </div>
+
+      {/* Rename tag modal */}
+      <Modal
+        open={renaming !== null}
+        onOpenChange={(open) => {
+          if (!open) setRenaming(null);
+        }}
+      >
+        <ModalHeader>
+          <h2 className="heading-sm text-[var(--color-text)]">Rename tag</h2>
+        </ModalHeader>
+        <ModalBody>
+          <Field label="Tag name" size="xl">
+            <Input
+              value={renaming?.draft ?? ""}
+              onChange={(e) =>
+                setRenaming((prev) =>
+                  prev ? { ...prev, draft: e.target.value } : prev,
+                )
+              }
+              onKeyDown={(e) => {
+                if (e.key === "Enter") handleRename();
+              }}
+              size="xl"
+              autoFocus
+              autoSelect
+            />
+          </Field>
+        </ModalBody>
+        <ModalFooter>
+          <Button
+            color="secondary"
+            variant="soft"
+            size="md"
+            pill={false}
+            onClick={() => setRenaming(null)}
+          >
+            Cancel
+          </Button>
+          <Button
+            color="primary"
+            size="md"
+            pill={false}
+            onClick={handleRename}
+            disabled={
+              !renaming?.draft.trim() ||
+              renaming.draft.trim() === renaming.name
+            }
+          >
+            Save
+          </Button>
+        </ModalFooter>
+      </Modal>
+
+      {/* Delete tag confirmation modal */}
+      <Modal
+        open={deleting !== null}
+        onOpenChange={(open) => {
+          if (!open) setDeleting(null);
+        }}
+      >
+        <ModalHeader>
+          <h2 className="heading-sm text-[var(--color-text)]">Delete tag</h2>
+        </ModalHeader>
+        <ModalBody>
+          <span className="text-sm text-[var(--color-text-secondary)]">
+            Are you sure you want to delete the tag{" "}
+            <Badge color="secondary" size="sm">
+              {deleting}
+            </Badge>
+            ? This will remove it from all inquiries.
+          </span>
+        </ModalBody>
+        <ModalFooter>
+          <Button
+            color="secondary"
+            variant="soft"
+            size="md"
+            pill={false}
+            onClick={() => setDeleting(null)}
+          >
+            Cancel
+          </Button>
+          <Button
+            color="danger"
+            size="md"
+            pill={false}
+            onClick={handleDelete}
+          >
+            Delete
+          </Button>
+        </ModalFooter>
+      </Modal>
     </div>
   );
 }

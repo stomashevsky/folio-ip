@@ -6,6 +6,8 @@ import { Providers } from "@/components/providers/Providers";
 import { SidebarProvider, SidebarInset, SidebarLayout } from "@plexui/ui/components/Sidebar";
 import { SidebarSwitch } from "@/components/layout/SidebarSwitch";
 import { Navbar } from "@/components/layout/Navbar";
+import { MobileLayoutWrapper } from "@/components/layout/MobileLayoutWrapper";
+import { MobileMenuOverlay } from "@/components/layout/MobileSidebarContent";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -33,15 +35,17 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <Providers>
-          <div className="flex h-dvh flex-col">
-            <Navbar />
-            <SidebarProvider collapsible="none" className="flex-1 overflow-hidden">
+          <SidebarProvider collapsible="offcanvas" className="flex h-dvh flex-col">
+            <MobileLayoutWrapper>
+              <Navbar />
               <SidebarLayout className="flex-1 overflow-hidden">
                 <SidebarSwitch />
-                <SidebarInset>{children}</SidebarInset>
+                <SidebarInset>
+                  <MobileMenuOverlay>{children}</MobileMenuOverlay>
+                </SidebarInset>
               </SidebarLayout>
-            </SidebarProvider>
-          </div>
+            </MobileLayoutWrapper>
+          </SidebarProvider>
         </Providers>
       </body>
     </html>

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { TopBar } from "@/components/layout/TopBar";
+import { SectionHeading } from "@/components/shared";
 import { Switch } from "@plexui/ui/components/Switch";
 
 interface NotificationSetting {
@@ -74,7 +75,7 @@ function NotificationGroup({
 
   return (
     <div className="mb-8">
-      <h2 className="heading-xs mb-4 text-[var(--color-text)]">{title}</h2>
+      <SectionHeading size="xs">{title}</SectionHeading>
       <div className="divide-y divide-[var(--color-border)] rounded-lg border border-[var(--color-border)]">
         {settings.map((setting) => (
           <div
@@ -106,7 +107,7 @@ export default function NotificationsPage() {
   return (
     <div className="flex h-full flex-col overflow-auto">
       <TopBar title="Notifications" />
-      <div className="mx-auto w-full max-w-2xl px-6 py-8">
+      <div className="mx-auto w-full max-w-2xl px-4 py-8 md:px-6">
         <p className="mb-6 text-sm text-[var(--color-text-secondary)]">
           Choose which notifications you want to receive and how you want to be
           notified.

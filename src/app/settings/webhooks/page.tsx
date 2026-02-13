@@ -1,30 +1,34 @@
 "use client";
 
 import { TopBar } from "@/components/layout/TopBar";
+import { SettingsTable } from "@/components/shared";
+import { getActiveBadgeColor } from "@/lib/utils/format";
 import { Button } from "@plexui/ui/components/Button";
 import { Badge } from "@plexui/ui/components/Badge";
 import { Plus } from "@plexui/ui/components/Icon";
 
 const mockWebhooks = [
   {
-    url: "https://api.acmecorp.com/webhooks/persona",
+    url: "https://api.lunacorp.com/webhooks/persona",
     events: ["inquiry.completed", "inquiry.failed"],
     status: "active" as const,
     created: "Jan 20, 2026",
   },
   {
-    url: "https://staging.acmecorp.com/hooks/kyc",
+    url: "https://staging.lunacorp.com/hooks/kyc",
     events: ["verification.passed", "verification.failed"],
     status: "active" as const,
     created: "Feb 01, 2026",
   },
   {
-    url: "https://old.acmecorp.com/callback",
+    url: "https://old.lunacorp.com/callback",
     events: ["inquiry.completed"],
     status: "disabled" as const,
     created: "Jan 10, 2026",
   },
 ];
+
+type Webhook = (typeof mockWebhooks)[number];
 
 export default function WebhooksPage() {
   return (
@@ -38,65 +42,80 @@ export default function WebhooksPage() {
           </Button>
         }
       />
-      <div className="px-6 py-8">
+      <div className="px-4 py-8 md:px-6">
         <p className="mb-6 text-sm text-[var(--color-text-secondary)]">
           Webhook endpoints receive real-time notifications when events occur in
           your organization.
         </p>
 
-        <div className="overflow-hidden rounded-lg border border-[var(--color-border)]">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-[var(--color-border)] bg-[var(--color-surface-secondary)]">
-                <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-[var(--color-text-tertiary)]">
-                  Endpoint URL
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-[var(--color-text-tertiary)]">
-                  Events
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-[var(--color-text-tertiary)]">
-                  Created
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-[var(--color-text-tertiary)]">
-                  Status
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {mockWebhooks.map((webhook) => (
-                <tr
-                  key={webhook.url}
-                  className="border-b border-[var(--color-border)] last:border-b-0"
-                >
-                  <td className="px-4 py-3 font-mono text-sm text-[var(--color-text)]">
-                    {webhook.url}
-                  </td>
-                  <td className="px-4 py-3">
-                    <div className="flex flex-wrap gap-1">
-                      {webhook.events.map((event) => (
-                        <Badge key={event} color="secondary">
-                          {event}
-                        </Badge>
-                      ))}
-                    </div>
-                  </td>
-                  <td className="px-4 py-3 text-sm text-[var(--color-text-secondary)]">
-                    {webhook.created}
-                  </td>
-                  <td className="px-4 py-3">
-                    <Badge
-                      color={
-                        webhook.status === "active" ? "success" : "secondary"
-                      }
-                    >
-                      {webhook.status === "active" ? "Active" : "Disabled"}
+        <SettingsTable<Webhook>
+          data={mockWebhooks}
+          keyExtractor={(w) => w.url}
+          columns={[
+            {
+              header: "Endpoint URL",
+              render: (webhook) => (
+                <span className="font-mono text-sm text-[var(--color-text)]">
+                  {webhook.url}
+                </span>
+              ),
+            },
+            {
+              header: "Events",
+              render: (webhook) => (
+                <div className="flex flex-wrap gap-1">
+                  {webhook.events.map((event) => (
+                    <Badge key={event} color="secondary">
+                      {event}
                     </Badge>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+                  ))}
+                </div>
+              ),
+            },
+            {
+              header: "Created",
+              render: (webhook) => (
+                <span className="text-sm text-[var(--color-text-secondary)]">
+                  {webhook.created}
+                </span>
+              ),
+            },
+            {
+              header: "Status",
+              render: (webhook) => (
+                <Badge
+                  color={getActiveBadgeColor(webhook.status === "active") as "success" | "secondary"}
+                >
+                  {webhook.status === "active" ? "Active" : "Disabled"}
+                </Badge>
+              ),
+            },
+          ]}
+          renderMobileCard={(webhook) => (
+            <>
+              <div className="flex items-center justify-between">
+                <Badge
+                  color={getActiveBadgeColor(webhook.status === "active") as "success" | "secondary"}
+                >
+                  {webhook.status === "active" ? "Active" : "Disabled"}
+                </Badge>
+                <span className="text-xs text-[var(--color-text-tertiary)]">
+                  {webhook.created}
+                </span>
+              </div>
+              <p className="mt-1.5 truncate font-mono text-xs text-[var(--color-text)]">
+                {webhook.url}
+              </p>
+              <div className="mt-2 flex flex-wrap gap-1">
+                {webhook.events.map((event) => (
+                  <Badge key={event} color="secondary">
+                    {event}
+                  </Badge>
+                ))}
+              </div>
+            </>
+          )}
+        />
       </div>
     </div>
   );

@@ -72,3 +72,15 @@ export function getStatusColor(status: string): string {
   };
   return map[status] ?? "secondary";
 }
+
+export function getRoleBadgeColor(role: string): string {
+  const map: Record<string, string> = {
+    Owner: "discovery",
+    Admin: "info",
+  };
+  return map[role] ?? "secondary";
+}
+
+export function getActiveBadgeColor(active: boolean): string {
+  return active ? "success" : "secondary";
+}

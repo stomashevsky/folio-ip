@@ -2,18 +2,13 @@
 
 import { TopBar } from "@/components/layout/TopBar";
 import { StatusBadge } from "@/components/shared/StatusBadge";
-import { ChartCard, NotFoundPage } from "@/components/shared";
+import { ChartCard, NotFoundPage, SummaryCard, DetailInfoList } from "@/components/shared";
 import { mockReports } from "@/lib/data";
 import { formatDateTime, truncateId } from "@/lib/utils/format";
 import { useParams } from "next/navigation";
 import { EmptyMessage } from "@plexui/ui/components/EmptyMessage";
 import { ShieldCheck, ExclamationMarkCircleFilled } from "@plexui/ui/components/Icon";
-
-const typeLabels: Record<string, string> = {
-  watchlist: "🌐 Watchlist Report",
-  pep: "🏛️ Politically Exposed Person",
-  adverse_media: "📰 Adverse Media",
-};
+import { REPORT_TYPE_LABELS } from "@/lib/constants/report-type-labels";
 
 export default function ReportDetailPage() {
   const params = useParams();
@@ -25,55 +20,41 @@ export default function ReportDetailPage() {
   }
 
   return (
-    <main className="flex-1">
+    <div className="flex-1">
       <TopBar
         title="Reports"
         backHref="/reports"
       />
-      <div className="px-6 pb-6 pt-6">
+      <div className="px-4 pb-6 pt-6 md:px-6">
         {/* Summary */}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <div className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4">
-            <span className="text-xs font-medium uppercase tracking-wider text-[var(--color-text-tertiary)]">
-              Status
-            </span>
-            <div className="mt-2">
-              <StatusBadge status={report.status} />
-            </div>
-          </div>
-          <div className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4">
-            <span className="text-xs font-medium uppercase tracking-wider text-[var(--color-text-tertiary)]">
-              Matches
-            </span>
-            <p className={`mt-2 text-lg font-semibold ${report.matchCount > 0 ? "text-[var(--color-danger-soft-text)]" : "text-[var(--color-success-soft-text)]"}`}>
+          <SummaryCard label="Status">
+            <StatusBadge status={report.status} />
+          </SummaryCard>
+          <SummaryCard label="Matches">
+            <p className={`heading-sm ${report.matchCount > 0 ? "text-[var(--color-danger-soft-text)]" : "text-[var(--color-success-soft-text)]"}`}>
               {report.matchCount}
             </p>
-          </div>
-          <div className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4">
-            <span className="text-xs font-medium uppercase tracking-wider text-[var(--color-text-tertiary)]">
-              Continuous Monitoring
-            </span>
-            <p className="mt-2 text-sm font-medium text-[var(--color-text)]">
+          </SummaryCard>
+          <SummaryCard label="Continuous Monitoring">
+            <p className="text-sm font-medium text-[var(--color-text)]">
               {report.continuousMonitoring ? "Enabled" : "Disabled"}
             </p>
-          </div>
-          <div className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4">
-            <span className="text-xs font-medium uppercase tracking-wider text-[var(--color-text-tertiary)]">
-              Created By
-            </span>
-            <p className="mt-2 text-sm font-medium capitalize text-[var(--color-text)]">
+          </SummaryCard>
+          <SummaryCard label="Created By">
+            <p className="text-sm font-medium capitalize text-[var(--color-text)]">
               {report.createdBy}
             </p>
-          </div>
+          </SummaryCard>
         </div>
 
         {/* Details */}
         <div className="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-2">
           <ChartCard title="Report Details">
-            <div className="space-y-3">
-              {[
+            <DetailInfoList
+              items={[
                 ["Report ID", report.id],
-                ["Type", typeLabels[report.type] ?? report.type],
+                ["Type", REPORT_TYPE_LABELS[report.type] ?? report.type],
                 ["Primary Input", report.primaryInput],
                 ["Template", report.templateName],
                 ["Created At", formatDateTime(report.createdAt)],
@@ -85,17 +66,8 @@ export default function ReportDetailPage() {
                 ],
                 ["Inquiry ID", report.inquiryId ? truncateId(report.inquiryId) : "—"],
                 ["Account ID", report.accountId ? truncateId(report.accountId) : "—"],
-              ].map(([label, value]) => (
-                <div key={label} className="flex items-start justify-between">
-                  <span className="text-sm text-[var(--color-text-tertiary)]">
-                    {label}
-                  </span>
-                  <span className="text-sm font-medium text-[var(--color-text)] text-right max-w-[60%] font-mono">
-                    {value}
-                  </span>
-                </div>
-              ))}
-            </div>
+              ]}
+            />
           </ChartCard>
 
           <ChartCard title="Screening Results">
@@ -115,6 +87,6 @@ export default function ReportDetailPage() {
           </ChartCard>
         </div>
       </div>
-    </main>
+    </div>
   );
 }

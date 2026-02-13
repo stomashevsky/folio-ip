@@ -1,13 +1,11 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { DateTime } from "luxon";
 import { TopBar } from "@/components/layout/TopBar";
 import { DataTable, TableSearch } from "@/components/shared";
-import { StatusBadge } from "@/components/shared/StatusBadge";
 import { ColumnSettings, type ColumnConfig } from "@/components/shared/ColumnSettings";
 import { mockInquiries } from "@/lib/data";
-import { formatDateTime, truncateId } from "@/lib/utils/format";
+import { idCell, dateTimeCell, statusCell } from "@/lib/utils/columnHelpers";
 import { applyInquiryFilters } from "@/lib/utils/filters";
 import { useRouter } from "next/navigation";
 import type { ColumnDef, VisibilityState } from "@tanstack/react-table";
@@ -20,7 +18,8 @@ import {
   type DateRange,
 } from "@plexui/ui/components/DateRangePicker";
 import { Plus } from "@plexui/ui/components/Icon";
-import { Download } from "lucide-react";
+import { Download } from "@plexui/ui/components/Icon";
+import { LIST_PAGE_DATE_SHORTCUTS } from "@/lib/constants/date-shortcuts";
 
 // ─── Filter options ───
 
@@ -45,37 +44,6 @@ const TAG_OPTIONS = Array.from(
   .filter(Boolean)
   .sort()
   .map((tag) => ({ value: tag, label: tag }));
-
-const DATE_SHORTCUTS = [
-  {
-    label: "Today",
-    getDateRange: (): DateRange => {
-      const today = DateTime.local();
-      return [today.startOf("day"), today.endOf("day")];
-    },
-  },
-  {
-    label: "Last 7 days",
-    getDateRange: (): DateRange => [
-      DateTime.local().minus({ days: 6 }).startOf("day"),
-      DateTime.local().endOf("day"),
-    ],
-  },
-  {
-    label: "Last 30 days",
-    getDateRange: (): DateRange => [
-      DateTime.local().minus({ days: 29 }).startOf("day"),
-      DateTime.local().endOf("day"),
-    ],
-  },
-  {
-    label: "Last 90 days",
-    getDateRange: (): DateRange => [
-      DateTime.local().minus({ days: 89 }).startOf("day"),
-      DateTime.local().endOf("day"),
-    ],
-  },
-];
 
 // ─── Column config for ColumnSettings panel ───
 
@@ -116,11 +84,7 @@ const columns: ColumnDef<Inquiry, unknown>[] = [
     accessorKey: "id",
     header: "Inquiry ID",
     size: 220,
-    cell: ({ row }) => (
-      <span className="font-mono text-[var(--color-text-secondary)]">
-        {truncateId(row.original.id)}
-      </span>
-    ),
+    cell: idCell<Inquiry>((r) => r.id),
   },
   {
     accessorKey: "templateName",
@@ -136,17 +100,13 @@ const columns: ColumnDef<Inquiry, unknown>[] = [
     accessorKey: "createdAt",
     header: "Created at (UTC)",
     size: 180,
-    cell: ({ row }) => (
-      <span className="text-[var(--color-text-secondary)]">
-        {formatDateTime(row.original.createdAt)}
-      </span>
-    ),
+    cell: dateTimeCell<Inquiry>((r) => r.createdAt),
   },
   {
     accessorKey: "status",
     header: "Status",
     size: 120,
-    cell: ({ row }) => <StatusBadge status={row.original.status} />,
+    cell: statusCell<Inquiry>((r) => r.status),
   },
   {
     accessorKey: "referenceId",
@@ -162,13 +122,7 @@ const columns: ColumnDef<Inquiry, unknown>[] = [
     accessorKey: "completedAt",
     header: "Completed at (UTC)",
     size: 180,
-    cell: ({ row }) => (
-      <span className="text-[var(--color-text-secondary)]">
-        {row.original.completedAt
-          ? formatDateTime(row.original.completedAt)
-          : "—"}
-      </span>
-    ),
+    cell: dateTimeCell<Inquiry>((r) => r.completedAt),
   },
   {
     accessorKey: "tags",
@@ -248,7 +202,7 @@ export default function InquiriesPage() {
               size="md"
               pill={false}
             >
-              <Download className="h-4 w-4" />
+              <Download />
               Export
             </Button>
             <Button color="primary" size="md" pill={false}>
@@ -299,7 +253,7 @@ export default function InquiriesPage() {
               clearable
               value={dateRange}
               onChange={(range) => setDateRange(range)}
-              shortcuts={DATE_SHORTCUTS}
+              shortcuts={LIST_PAGE_DATE_SHORTCUTS}
               placeholder="Created at"
               variant="outline"
               size="sm"
@@ -312,7 +266,7 @@ export default function InquiriesPage() {
                 clearable
                 value={completedRange}
                 onChange={(range) => setCompletedRange(range)}
-                shortcuts={DATE_SHORTCUTS}
+                shortcuts={LIST_PAGE_DATE_SHORTCUTS}
                 placeholder="Completed at"
                 variant="outline"
                 size="sm"
@@ -352,7 +306,7 @@ export default function InquiriesPage() {
         }
       />
 
-      <div className="flex min-h-0 flex-1 flex-col px-6 pt-2">
+      <div className="flex min-h-0 flex-1 flex-col px-4 pt-2 md:px-6">
         <DataTable
           data={filteredData}
           columns={columns}
@@ -362,6 +316,13 @@ export default function InquiriesPage() {
           initialSorting={[{ id: "createdAt", desc: true }]}
           columnVisibility={columnVisibility}
           onColumnVisibilityChange={setColumnVisibility}
+          mobileColumnVisibility={{
+            id: false,
+            templateName: false,
+            referenceId: false,
+            completedAt: false,
+            tags: false,
+          }}
         />
       </div>
     </div>

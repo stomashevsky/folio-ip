@@ -11,19 +11,20 @@ import {
   type SortingState,
   type VisibilityState,
 } from "@tanstack/react-table";
-import { useState } from "react";
+import { useState, useMemo } from "react";
+import { useIsMobile } from "@/lib/hooks/useIsMobile";
 
 import { Button } from "@plexui/ui/components/Button";
 import { Input } from "@plexui/ui/components/Input";
 import { Select } from "@plexui/ui/components/Select";
 import {
-  ChevronLeft,
-  ChevronRight,
-  ArrowUpDown,
-  ArrowUp,
-  ArrowDown,
+  ChevronLeftMd,
+  ChevronRightMd,
+  ArrowUpSm,
+  ArrowDownSm,
+  Sort,
   Search,
-} from "lucide-react";
+} from "@plexui/ui/components/Icon";
 
 const PAGE_SIZE_OPTIONS = [
   { value: "10", label: "10" },
@@ -53,7 +54,7 @@ export function TableSearch({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         onClear={value ? () => onChange("") : undefined}
-        startAdornment={<Search className="h-4 w-4" />}
+        startAdornment={<Search style={{ width: 16, height: 16 }} />}
         size="sm"
         pill
       />
@@ -76,6 +77,8 @@ interface DataTableProps<T> {
   /** Controlled column visibility state */
   columnVisibility?: VisibilityState;
   onColumnVisibilityChange?: (visibility: VisibilityState) => void;
+  /** Columns to hide on mobile (<768px). Merged with columnVisibility. */
+  mobileColumnVisibility?: VisibilityState;
 }
 
 export function DataTable<T>({
@@ -87,8 +90,16 @@ export function DataTable<T>({
   initialSorting = [],
   columnVisibility,
   onColumnVisibilityChange,
+  mobileColumnVisibility,
 }: DataTableProps<T>) {
   const [sorting, setSorting] = useState<SortingState>(initialSorting);
+  const isMobile = useIsMobile();
+
+  // Merge desktop visibility with mobile overrides
+  const mergedVisibility = useMemo(() => {
+    if (!isMobile || !mobileColumnVisibility) return columnVisibility;
+    return { ...columnVisibility, ...mobileColumnVisibility };
+  }, [isMobile, mobileColumnVisibility, columnVisibility]);
 
   const table = useReactTable({
     data,
@@ -96,14 +107,14 @@ export function DataTable<T>({
     state: {
       sorting,
       globalFilter: externalFilter,
-      ...(columnVisibility !== undefined && { columnVisibility }),
+      ...(mergedVisibility !== undefined && { columnVisibility: mergedVisibility }),
     },
     onSortingChange: setSorting,
     ...(onColumnVisibilityChange && {
       onColumnVisibilityChange: (updater) => {
         const next =
           typeof updater === "function"
-            ? updater(columnVisibility ?? {})
+            ? updater(mergedVisibility ?? {})
             : updater;
         onColumnVisibilityChange(next);
       },
@@ -149,11 +160,11 @@ export function DataTable<T>({
                         {header.column.getCanSort() && (
                           <span className="ml-1">
                             {header.column.getIsSorted() === "asc" ? (
-                              <ArrowUp className="h-3 w-3" />
+                              <ArrowUpSm style={{ width: 12, height: 12 }} />
                             ) : header.column.getIsSorted() === "desc" ? (
-                              <ArrowDown className="h-3 w-3" />
+                              <ArrowDownSm style={{ width: 12, height: 12 }} />
                             ) : (
-                              <ArrowUpDown className="h-3 w-3 opacity-40" />
+                              <Sort style={{ width: 12, height: 12 }} className="opacity-40" />
                             )}
                           </span>
                         )}
@@ -241,7 +252,7 @@ export function DataTable<T>({
               disabled={!table.getCanPreviousPage()}
               onClick={() => table.previousPage()}
             >
-              <ChevronLeft className="h-4 w-4" />
+              <ChevronLeftMd />
             </Button>
             <Button
               color="secondary"
@@ -252,7 +263,7 @@ export function DataTable<T>({
               disabled={!table.getCanNextPage()}
               onClick={() => table.nextPage()}
             >
-              <ChevronRight className="h-4 w-4" />
+              <ChevronRightMd />
             </Button>
           </div>
         </div>
