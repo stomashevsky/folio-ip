@@ -171,6 +171,29 @@ export interface FunnelStep {
   dropoff: number; // % dropped from previous step
 }
 
+// Volume chart: each day has a count (bar) + rate % (line)
+export interface VolumeTimeSeriesPoint {
+  date: string; // ISO 8601 date
+  volume: number;
+  rate: number; // percentage 0-100
+}
+
+// A volume chart section (e.g. "Created", "Started", "Finished")
+export interface VolumeChartSection {
+  title: string;
+  data: VolumeTimeSeriesPoint[];
+  volumeLabel: string; // legend label for bar
+  rateLabel: string; // legend label for line
+  rateSublabel?: string; // secondary rate legend (grayed out)
+}
+
+// Highlights strip: compact metrics shown in a horizontal row
+export interface HighlightMetric {
+  label: string;
+  value: string;
+  tooltip?: string;
+}
+
 // ─── Table & UI Types ───
 
 export interface PaginationState {

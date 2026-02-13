@@ -11,5 +11,7 @@ export {
   mockStatusDistribution,
   mockFunnel,
   mockTopFailureReasons,
+  mockVolumeChartSections,
+  mockHighlights,
   generateTimeSeries,
 } from "./mock-analytics";

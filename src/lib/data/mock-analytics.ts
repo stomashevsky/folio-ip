@@ -3,6 +3,9 @@ import type {
   TimeSeriesPoint,
   StatusDistribution,
   FunnelStep,
+  VolumeChartSection,
+  VolumeTimeSeriesPoint,
+  HighlightMetric,
 } from "@/lib/types";
 
 export const mockAnalyticsOverview: AnalyticsOverview = {
@@ -100,4 +103,86 @@ export const mockTopFailureReasons = [
   { reason: "Name mismatch", count: 9, percentage: 9.5 },
   { reason: "Face not matching ID", count: 7, percentage: 7.4 },
   { reason: "Unsupported document type", count: 5, percentage: 5.3 },
+];
+
+// ─── Persona-style Volume Analytics ───
+
+function generateVolumeTimeSeries(
+  days: number,
+  baseVolume: number,
+  rateCenter: number,
+  rateVariance: number,
+  seed: number,
+): VolumeTimeSeriesPoint[] {
+  const endDate = new Date("2026-02-10");
+  let walk = 0;
+
+  return Array.from({ length: days }, (_, i) => {
+    const date = new Date(endDate);
+    date.setDate(date.getDate() - (days - 1 - i));
+    const dayOfWeek = date.getDay();
+
+    // Volume with trend + weekend dips
+    const trend = baseVolume + (i / days) * (baseVolume * 0.15);
+    const weekendFactor = dayOfWeek === 0 || dayOfWeek === 6 ? 0.7 : 1.0;
+    walk += (seededRandom(i * 7 + seed) - 0.5) * 6;
+    walk = walk * 0.92;
+    const noise = (seededRandom(i * 13 + seed * 3) - 0.5) * 10;
+    const spike =
+      seededRandom(i * 31 + seed * 7) > 0.93
+        ? 12 + seededRandom(i * 41 + seed) * 8
+        : 0;
+    const volume = Math.max(3, Math.round((trend + walk + noise + spike) * weekendFactor));
+
+    // Rate fluctuating around center
+    const rateNoise = (seededRandom(i * 19 + seed * 11) - 0.5) * rateVariance;
+    const rate = Math.max(0, Math.min(100, rateCenter + rateNoise));
+
+    return {
+      date: date.toISOString().split("T")[0],
+      volume,
+      rate: Math.round(rate * 10) / 10,
+    };
+  });
+}
+
+export const mockVolumeChartSections: VolumeChartSection[] = [
+  {
+    title: "Created",
+    data: generateVolumeTimeSeries(30, 35, 95, 8, 100),
+    volumeLabel: "Created volume",
+    rateLabel: "Started rate",
+    rateSublabel: "Expiration rate",
+  },
+  {
+    title: "Started",
+    data: generateVolumeTimeSeries(30, 33, 92, 10, 200),
+    volumeLabel: "Started volume",
+    rateLabel: "Finished rate",
+    rateSublabel: "Expiration rate (started)",
+  },
+  {
+    title: "Finished",
+    data: generateVolumeTimeSeries(30, 30, 88, 12, 300),
+    volumeLabel: "Finished volume",
+    rateLabel: "Success rate",
+    rateSublabel: "Needs review rate",
+  },
+  {
+    title: "Marked for Review",
+    data: generateVolumeTimeSeries(30, 4, 75, 20, 400),
+    volumeLabel: "Marked for review volume",
+    rateLabel: "Decisioned rate",
+    rateSublabel: "Approved rate",
+  },
+];
+
+export const mockHighlights: HighlightMetric[] = [
+  { label: "Inquiries created", value: "1,234", tooltip: "Total inquiries created in the selected period" },
+  { label: "Started rate", value: "95.6%", tooltip: "% of created inquiries that were started" },
+  { label: "Interacted rate", value: "93.2%", tooltip: "% of started inquiries where user interacted" },
+  { label: "Finished rate", value: "89.3%", tooltip: "% of started inquiries that finished" },
+  { label: "Success rate", value: "87.4%", tooltip: "% of finished inquiries that passed" },
+  { label: "Rejected rate", value: "6.0%", tooltip: "% of finished inquiries that were declined" },
+  { label: "Time to finish (median)", value: "4m 32s", tooltip: "Median time from creation to completion" },
 ];
