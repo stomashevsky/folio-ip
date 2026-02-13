@@ -220,33 +220,38 @@ export default function InquiriesPage() {
             />
 
             {/* ── Status filter ── */}
-            <Select
-              multiple
-              clearable
-              block={false}
-              pill
-              listMinWidth={180}
-              options={STATUS_OPTIONS}
-              value={statusFilter}
-              onChange={(opts) => setStatusFilter(opts.map((o) => o.value))}
-              placeholder="Status"
-              variant="outline"
-              size="sm"
-            />
+            <div className="w-36">
+              <Select
+                multiple
+                clearable
+                block
+                pill
+                listMinWidth={180}
+                options={STATUS_OPTIONS}
+                value={statusFilter}
+                onChange={(opts) => setStatusFilter(opts.map((o) => o.value))}
+                placeholder="Status"
+                variant="outline"
+                size="sm"
+              />
+            </div>
 
             {/* ── Template filter ── */}
-            <Select
-              multiple
-              clearable
-              block={false}
-              pill
-              options={TEMPLATE_OPTIONS}
-              value={templateFilter}
-              onChange={(opts) => setTemplateFilter(opts.map((o) => o.value))}
-              placeholder="Template"
-              variant="outline"
-              size="sm"
-            />
+            <div className="w-36">
+              <Select
+                multiple
+                clearable
+                block
+                pill
+                listMinWidth={220}
+                options={TEMPLATE_OPTIONS}
+                value={templateFilter}
+                onChange={(opts) => setTemplateFilter(opts.map((o) => o.value))}
+                placeholder="Template"
+                variant="outline"
+                size="sm"
+              />
+            </div>
 
             {/* ── Date filter ── */}
             <DateRangePicker
@@ -275,19 +280,21 @@ export default function InquiriesPage() {
             )}
 
             {columnVisibility.tags !== false && (
-              <Select
-                multiple
-                clearable
-                block={false}
-                pill
-                listMinWidth={180}
-                options={TAG_OPTIONS}
-                value={tagFilter}
-                onChange={(opts) => setTagFilter(opts.map((o) => o.value))}
-                placeholder="Tags"
-                variant="outline"
-                size="sm"
-              />
+              <div className="w-36">
+                <Select
+                  multiple
+                  clearable
+                  block
+                  pill
+                  listMinWidth={180}
+                  options={TAG_OPTIONS}
+                  value={tagFilter}
+                  onChange={(opts) => setTagFilter(opts.map((o) => o.value))}
+                  placeholder="Tags"
+                  variant="outline"
+                  size="sm"
+                />
+              </div>
             )}
 
             {/* ── Clear all filters ── */}
@@ -306,7 +313,7 @@ export default function InquiriesPage() {
         }
       />
 
-      <div className="flex min-h-0 flex-1 flex-col px-4 pt-2 md:px-6">
+      <div className="flex min-h-0 flex-1 flex-col px-4 pt-4 md:px-6">
         <DataTable
           data={filteredData}
           columns={columns}

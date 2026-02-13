@@ -5,6 +5,7 @@ import { StatusBadge } from "@/components/shared/StatusBadge";
 import { ChartCard, NotFoundPage, SummaryCard, DetailInfoList } from "@/components/shared";
 import { mockVerifications } from "@/lib/data";
 import { formatDateTime, toTitleCase } from "@/lib/utils/format";
+import { VERIFICATION_TYPE_LABELS } from "@/lib/constants/verification-type-labels";
 import { useParams } from "next/navigation";
 import {
   CheckCircle,
@@ -94,7 +95,7 @@ export default function VerificationDetailPage() {
               items={[
                 ["Verification ID", verification.id],
                 ["Inquiry ID", verification.inquiryId],
-                ["Type", verification.type.replace("_", " ")],
+                ["Type", VERIFICATION_TYPE_LABELS[verification.type] ?? verification.type],
                 ["Created At", formatDateTime(verification.createdAt)],
                 [
                   "Completed At",

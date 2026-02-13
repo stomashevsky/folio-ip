@@ -125,7 +125,7 @@ export default function DashboardHome() {
   const statusData = useMemo(() => deriveStatusDistribution(days), [days]);
 
   return (
-    <main className="flex-1">
+    <div className="flex-1">
       <TopBar
         title="Overview"
         actions={
@@ -192,6 +192,6 @@ export default function DashboardHome() {
           </div>
         </div>
       </div>
-    </main>
+    </div>
   );
 }

@@ -2,7 +2,7 @@
 
 import type { Inquiry } from "@/lib/types";
 import { StatusBadge } from "./StatusBadge";
-import { formatDateTime, truncateId } from "@/lib/utils/format";
+import { formatDateTime } from "@/lib/utils/format";
 import { useRouter } from "next/navigation";
 
 interface RecentInquiriesTableProps {
@@ -45,7 +45,7 @@ export function RecentInquiriesTable({ data }: RecentInquiriesTableProps) {
                 {inquiry.accountName}
               </td>
               <td className="py-2 pr-2 align-middle font-mono text-sm text-[var(--color-text-secondary)]">
-                {truncateId(inquiry.id)}
+                {inquiry.id}
               </td>
               <td className="py-2 pr-2 align-middle text-sm text-[var(--color-text-secondary)]">
                 {inquiry.templateName}

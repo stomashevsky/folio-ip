@@ -231,6 +231,10 @@ All imported from `@plexui/ui/hooks/{hookName}`:
 
 **Relationships:** Account 1→N Inquiries 1→N Verifications, Reports
 
+### Features We Do NOT Implement
+- **Cases** — Persona has a Cases feature. We do NOT implement this.
+- **Transactions** — Persona has a Transactions feature. We do NOT implement this. No pages, nav items, types, or references.
+
 ### Status Badge Colors
 | Status | Color |
 |--------|-------|

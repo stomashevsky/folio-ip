@@ -98,7 +98,6 @@ Core entities (prefix = ID format):
 - **Verification** (`ver_`) — individual check: government_id, selfie — passed/failed
 - **Report** (`rep_`) — AML report: watchlist, PEP — no_matches/match
 - **Account** (`act_`) — user profile aggregating all data
-- **Transaction** (`txn_`) — financial monitoring (API-created)
 
 Relationships: Account 1→N Inquiries 1→N Verifications, Reports
 

@@ -19,7 +19,6 @@ export const dashboardNavItems: NavItem[] = [
   { title: "Verifications", href: "/verifications" },
   { title: "Reports", href: "/reports" },
   { title: "Accounts", href: "/accounts" },
-  { title: "Transactions", href: "/transactions" },
 ];
 
 /** Analytics sidebar — analytics per entity type. */
@@ -27,7 +26,6 @@ export const analyticsNavItems: NavItem[] = [
   { title: "Inquiries", href: "/analytics/inquiries" },
   { title: "Verifications", href: "/analytics/verifications" },
   { title: "Reports", href: "/analytics/reports" },
-  { title: "Transactions", href: "/analytics/transactions" },
 ];
 
 /** Templates sidebar — templates per entity type. */
@@ -84,7 +82,6 @@ const dashboardPrefixes = [
   "/verifications",
   "/reports",
   "/accounts",
-  "/transactions",
 ];
 
 /**

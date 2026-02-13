@@ -188,6 +188,7 @@ export default function InquiryDetailPage() {
                   color="secondary"
                   variant="ghost"
                   size="sm"
+                  pill={false}
                   onClick={() => setTagModalOpen(true)}
                 >
                   {tags.length > 0 ? "Edit" : "Add"}

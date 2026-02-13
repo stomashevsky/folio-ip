@@ -1,12 +1,12 @@
 import type { CellContext } from "@tanstack/react-table";
-import { formatDateTime, truncateId } from "./format";
+import { formatDateTime } from "./format";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 
-/** Renders a truncated monospace ID cell */
+/** Renders a monospace ID cell */
 export function idCell<T>(accessor: (row: T) => string) {
   return ({ row }: CellContext<T, unknown>) => (
     <span className="font-mono text-[var(--color-text-secondary)]">
-      {truncateId(accessor(row.original))}
+      {accessor(row.original)}
     </span>
   );
 }

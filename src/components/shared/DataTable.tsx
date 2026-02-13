@@ -197,7 +197,8 @@ export function DataTable<T>({
                   {row.getVisibleCells().map((cell) => (
                     <td
                       key={cell.id}
-                      className="truncate max-w-0 py-2 pr-2 align-middle text-sm text-[var(--color-text)]"
+                      style={cell.column.getSize() !== 150 ? { minWidth: cell.column.getSize(), width: cell.column.getSize() } : undefined}
+                      className="truncate py-2 pr-2 align-middle text-sm text-[var(--color-text)]"
                     >
                       {flexRender(
                         cell.column.columnDef.cell,

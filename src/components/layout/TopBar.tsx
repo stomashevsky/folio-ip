@@ -15,8 +15,8 @@ export function TopBar({ title, description, actions, toolbar, backHref }: TopBa
 
   return (
     <div className="sticky top-0 z-10 shrink-0 border-b border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 md:px-6">
-      {/* Row 1: title + actions (always in title row) */}
-      <div className="flex items-center justify-between">
+      {/* Row 1: title + actions — min-h-9 keeps height stable with or without action buttons */}
+      <div className="flex min-h-9 items-center justify-between">
         <div className="flex items-center gap-1">
           {backHref && (
             <ButtonLink

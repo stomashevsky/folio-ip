@@ -7,7 +7,6 @@
 2. **Verifications** — All Verifications, Analytics, Templates
 3. **Reports** — All Reports, Templates, Analytics
 4. **Accounts** — All Accounts, Types
-5. **Transactions** — All Transactions, Analytics, Types
 
 ### PLATFORM Section
 - Cases, Workflows, Graph, Data, Utilities, Integrations

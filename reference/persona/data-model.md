@@ -93,13 +93,6 @@ User profile aggregating all verification data.
 - Documents (1:many)
 - List matches
 
-### 5. Transaction (txn_...)
-Financial transaction monitoring (created via API).
-
-**Key fields:**
-- Transaction ID, Reference ID, Type
-- Status, Created at, Updated at
-
 ---
 
 ## Relationships
@@ -113,7 +106,6 @@ Account (act_...)
 │   ├── Session [1:many]
 │   ├── Signals [1:many]
 │   └── List matches [1:many]
-└── Transaction (txn_...) [1:many]
 ```
 
 ---

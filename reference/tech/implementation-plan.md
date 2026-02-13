@@ -37,7 +37,7 @@
 
 ## Phase 3: Mock Data & Types (Day 4)
 - [ ] TypeScript interfaces for all entities:
-  - Inquiry, Verification, Report, Account, Transaction
+  - Inquiry, Verification, Report, Account
   - Check, Signal, Session
   - Analytics aggregates
 - [ ] JSON fixture files:

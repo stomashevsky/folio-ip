@@ -114,18 +114,6 @@ export interface Account {
   reportCount: number;
 }
 
-export interface Transaction {
-  id: string; // txn_...
-  referenceId?: string;
-  accountId: string;
-  type: string;
-  status: string;
-  amount?: number;
-  currency?: string;
-  createdAt: string;
-  updatedAt: string;
-}
-
 // ─── Signals ───
 
 export interface Signal {
