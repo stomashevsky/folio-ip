@@ -22,22 +22,24 @@ export default function InquiryAnalyticsPage() {
 
   return (
     <div className="flex min-h-full flex-col">
-      <TopBar title="Inquiry Analytics" />
-      <div className="px-4 pb-6 md:px-6">
-        {/* Tabs */}
-        <Tabs
-          value={activeTab}
-          onChange={(v) => setActiveTab(v as Tab)}
-          variant="underline"
-          aria-label="Analytics views"
-          size="md"
-        >
-          <Tabs.Tab value="Overview">Overview</Tabs.Tab>
-          <Tabs.Tab value="Funnel">Funnel</Tabs.Tab>
-        </Tabs>
-
+      <TopBar
+        title="Inquiry Analytics"
+        toolbar={
+          <Tabs
+            value={activeTab}
+            onChange={(v) => setActiveTab(v as Tab)}
+            variant="underline"
+            aria-label="Analytics views"
+            size="md"
+          >
+            <Tabs.Tab value="Overview">Overview</Tabs.Tab>
+            <Tabs.Tab value="Funnel">Funnel</Tabs.Tab>
+          </Tabs>
+        }
+      />
+      <div className="px-4 pb-6 pt-6 md:px-6">
         {/* Tab Content */}
-        <div className="mt-6">
+        <div>
           {activeTab === "Overview" && (
             <>
               {/* Highlights */}
