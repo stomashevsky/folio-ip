@@ -3,7 +3,7 @@ import { Tooltip } from "@plexui/ui/components/Tooltip";
 import { InfoCircle } from "@plexui/ui/components/Icon";
 import { InlineEmpty } from "@/components/shared";
 import { StatusBadge } from "@/components/shared/StatusBadge";
-import { formatDateTime } from "@/lib/utils/format";
+import { formatDateTime, toTitleCase } from "@/lib/utils/format";
 import type { mockReports } from "@/lib/data";
 
 export function ReportsTab({ reports }: { reports: typeof mockReports }) {
@@ -67,7 +67,7 @@ export function ReportsTab({ reports }: { reports: typeof mockReports }) {
                 <td className="px-4 py-3">
                   <div>
                     <p className="text-sm font-medium text-[var(--color-text)]">
-                      {r.primaryInput}
+                      {toTitleCase(r.primaryInput)}
                     </p>
                     <p className="mt-0.5 text-xs text-[var(--color-text-tertiary)]">
                       {typeLabel}

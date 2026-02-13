@@ -8,6 +8,7 @@ import {
 } from "@/components/shared";
 import {
   formatDuration,
+  toTitleCase,
 } from "@/lib/utils/format";
 import type { BehavioralRisk, DocumentViewerItem, InquirySignal } from "@/lib/types";
 import type { mockInquiries, mockVerifications } from "@/lib/data";
@@ -117,7 +118,13 @@ export function OverviewTab({
         {verifications.length > 0 && verifications[0].extractedData ? (
           <KeyValueTable
             rows={Object.entries(verifications[0].extractedData).map(
-              ([key, val]) => ({ label: key, value: val })
+              ([key, val]) => ({
+                label: key,
+                value:
+                  (key === "Full name" || key === "Address") && typeof val === "string"
+                    ? toTitleCase(val)
+                    : val,
+              })
             )}
           />
         ) : (

@@ -4,7 +4,7 @@ import { TopBar } from "@/components/layout/TopBar";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import { ChartCard, NotFoundPage, SummaryCard, DetailInfoList } from "@/components/shared";
 import { mockVerifications } from "@/lib/data";
-import { formatDateTime } from "@/lib/utils/format";
+import { formatDateTime, toTitleCase } from "@/lib/utils/format";
 import { useParams } from "next/navigation";
 import {
   CheckCircle,
@@ -113,7 +113,9 @@ export default function VerificationDetailPage() {
                   items={Object.entries(verification.extractedData).map(
                     ([key, value]) => [
                       key.replace(/_/g, " "),
-                      value,
+                      (key === "Full name" || key === "Address") && typeof value === "string"
+                        ? toTitleCase(value)
+                        : value,
                     ]
                   )}
                   mono={false}

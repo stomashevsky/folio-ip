@@ -4,7 +4,7 @@ import { TopBar } from "@/components/layout/TopBar";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import { ChartCard, NotFoundPage, SummaryCard, DetailInfoList } from "@/components/shared";
 import { mockReports } from "@/lib/data";
-import { formatDateTime, truncateId } from "@/lib/utils/format";
+import { formatDateTime, truncateId, toTitleCase } from "@/lib/utils/format";
 import { useParams } from "next/navigation";
 import { EmptyMessage } from "@plexui/ui/components/EmptyMessage";
 import { ShieldCheck, ExclamationMarkCircleFilled } from "@plexui/ui/components/Icon";
@@ -55,7 +55,7 @@ export default function ReportDetailPage() {
               items={[
                 ["Report ID", report.id],
                 ["Type", REPORT_TYPE_LABELS[report.type] ?? report.type],
-                ["Primary Input", report.primaryInput],
+                ["Primary Input", toTitleCase(report.primaryInput)],
                 ["Template", report.templateName],
                 ["Created At", formatDateTime(report.createdAt)],
                 [

@@ -5,6 +5,7 @@ import { TopBar } from "@/components/layout/TopBar";
 import { DataTable, TableSearch } from "@/components/shared";
 import { mockReports } from "@/lib/data";
 import { idCell, dateTimeCell, statusCell } from "@/lib/utils/columnHelpers";
+import { toTitleCase } from "@/lib/utils/format";
 import { useRouter } from "next/navigation";
 import type { ColumnDef } from "@tanstack/react-table";
 import type { Report } from "@/lib/types";
@@ -18,7 +19,7 @@ const columns: ColumnDef<Report, unknown>[] = [
     header: "Primary Input",
     size: 200,
     cell: ({ row }) => (
-      <span className="font-medium">{row.original.primaryInput}</span>
+      <span className="font-medium">{toTitleCase(row.original.primaryInput)}</span>
     ),
   },
   {
