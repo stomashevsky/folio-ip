@@ -47,7 +47,7 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Scrollbar styling for dark theme */
+/* Scrollbar: hidden by default, visible when .is-scrolling class is present */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
@@ -58,12 +58,31 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--color-border);
+  background: transparent;
   border-radius: 4px;
+  transition: background 0.3s;
 }
 
-::-webkit-scrollbar-thumb:hover {
+.is-scrolling ::-webkit-scrollbar-thumb,
+.is-scrolling::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+}
+
+.is-scrolling ::-webkit-scrollbar-thumb:hover,
+.is-scrolling::-webkit-scrollbar-thumb:hover {
   background: var(--color-border-strong);
+}
+
+/* Firefox: thin overlay scrollbar */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+  transition: scrollbar-color 0.3s;
+}
+
+.is-scrolling,
+.is-scrolling * {
+  scrollbar-color: var(--color-border) transparent;
 }
 
 /* ─── Mobile overrides ─── */

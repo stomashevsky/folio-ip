@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState, useMemo, useCallback } from "react";
+import React, { Suspense, useState, useMemo, useCallback } from "react";
+import { useTabParam } from "@/lib/hooks/useTabParam";
 import { DateTime } from "luxon";
 import { TopBar } from "@/components/layout/TopBar";
 import { ChartCard, MetricCard } from "@/components/shared";
@@ -52,7 +53,15 @@ const FUNNEL_METRIC_DESCRIPTIONS: Record<SankeyMetric, string> = {
 const defaultRange: DateRange = DASHBOARD_DATE_SHORTCUTS[1].getDateRange(); // Last 30 days
 
 export default function InquiryAnalyticsPage() {
-  const [activeTab, setActiveTab] = useState<Tab>("Overview");
+  return (
+    <Suspense>
+      <InquiryAnalyticsContent />
+    </Suspense>
+  );
+}
+
+function InquiryAnalyticsContent() {
+  const [activeTab, setActiveTab] = useTabParam(tabs, "Overview");
   const [dateRange, setDateRange] = useState<DateRange | null>(defaultRange);
   const [interval, setInterval] = useState<AnalyticsInterval>("daily");
   const [funnelMetric, setFunnelMetric] = useState<SankeyMetric>("counts");

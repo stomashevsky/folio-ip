@@ -15,7 +15,8 @@ import {
 import { formatDateTime } from "@/lib/utils/format";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { useMemo, useState } from "react";
+import { Suspense, useMemo, useState } from "react";
+import { useTabParam } from "@/lib/hooks/useTabParam";
 import { Badge } from "@plexui/ui/components/Badge";
 import { Button } from "@plexui/ui/components/Button";
 import { Tabs } from "@plexui/ui/components/Tabs";
@@ -38,8 +39,16 @@ const tabs = [
 type Tab = (typeof tabs)[number];
 
 export default function InquiryDetailPage() {
+  return (
+    <Suspense>
+      <InquiryDetailContent />
+    </Suspense>
+  );
+}
+
+function InquiryDetailContent() {
   const params = useParams();
-  const [activeTab, setActiveTab] = useState<Tab>("Overview");
+  const [activeTab, setActiveTab] = useTabParam(tabs, "Overview");
 
   const inquiry = mockInquiries.find((i) => i.id === params.id);
   const [tags, setTags] = useState<string[]>(() => inquiry?.tags ?? []);

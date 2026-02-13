@@ -6,7 +6,8 @@ import { ChartCard, NotFoundPage, InlineEmpty, DetailInfoList, EntityCard, Activ
 import { mockAccounts, mockInquiries, mockVerifications, mockReports } from "@/lib/data";
 import { formatDateTime, formatDate, truncateId } from "@/lib/utils/format";
 import { useParams, useRouter } from "next/navigation";
-import { useState } from "react";
+import { Suspense } from "react";
+import { useTabParam } from "@/lib/hooks/useTabParam";
 import { Avatar } from "@plexui/ui/components/Avatar";
 import { Tabs } from "@plexui/ui/components/Tabs";
 import {
@@ -19,9 +20,17 @@ const tabs = ["Overview", "Inquiries", "Verifications", "Reports"] as const;
 type Tab = (typeof tabs)[number];
 
 export default function AccountDetailPage() {
+  return (
+    <Suspense>
+      <AccountDetailContent />
+    </Suspense>
+  );
+}
+
+function AccountDetailContent() {
   const params = useParams();
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<Tab>("Overview");
+  const [activeTab, setActiveTab] = useTabParam(tabs, "Overview");
 
   const account = mockAccounts.find((a) => a.id === params.id);
   const accountInquiries = mockInquiries.filter(
