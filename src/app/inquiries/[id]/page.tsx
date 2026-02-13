@@ -19,6 +19,7 @@ import { useMemo, useState } from "react";
 import { Badge } from "@plexui/ui/components/Badge";
 import { Button } from "@plexui/ui/components/Button";
 import { Tabs } from "@plexui/ui/components/Tabs";
+import { Eye, DotsHorizontal } from "@plexui/ui/components/Icon";
 import {
   OverviewTab,
   VerificationsTab,
@@ -82,10 +83,12 @@ export default function InquiryDetailPage() {
         actions={
           <div className="flex items-center gap-2">
             <Button color="primary" size="md" pill={false}>
-              Review
+              <Eye />
+              <span className="hidden md:inline">Review</span>
             </Button>
             <Button color="secondary" variant="outline" size="md" pill={false}>
-              More
+              <DotsHorizontal />
+              <span className="hidden md:inline">More</span>
             </Button>
           </div>
         }

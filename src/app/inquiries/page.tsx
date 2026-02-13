@@ -203,11 +203,11 @@ export default function InquiriesPage() {
               pill={false}
             >
               <Download />
-              Export
+              <span className="hidden md:inline">Export</span>
             </Button>
             <Button color="primary" size="md" pill={false}>
               <Plus />
-              Create Inquiry
+              <span className="hidden md:inline">Create Inquiry</span>
             </Button>
           </div>
         }

@@ -3,10 +3,10 @@
  * Uses CSS variable tokens so colors respond to theme changes.
  */
 export const STATUS_COLORS: Record<string, string> = {
-  Approved: "var(--color-background-success-solid)",
-  Declined: "var(--color-background-danger-solid)",
-  "Needs Review": "var(--color-background-warning-solid)",
-  Pending: "var(--color-text-tertiary)",
-  Expired: "var(--color-text-tertiary)",
-  Created: "var(--color-text-tertiary)",
+  Approved: "#30a46c",
+  Declined: "#e5484d",
+  "Needs Review": "#f5a623",
+  Pending: "#3b82f6",
+  Expired: "#8b5cf6",
+  Created: "#06b6d4",
 };

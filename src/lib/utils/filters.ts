@@ -1,4 +1,4 @@
-import type { Inquiry, Verification, Report } from "@/lib/types";
+import type { Inquiry, Verification, Report, Account } from "@/lib/types";
 import { DateTime } from "luxon";
 
 export interface InquiryFilterValues {
@@ -123,6 +123,43 @@ export function applyReportFilters(
       if (!item.completedAt) return false;
       const completed = DateTime.fromISO(item.completedAt);
       if (completed < completedFrom || completed > completedTo) return false;
+    }
+    return true;
+  });
+}
+
+// ─── Account filters ───
+
+export interface AccountFilterValues {
+  statuses: string[];
+  dateFrom: DateTime | null;
+  dateTo: DateTime | null;
+  updatedFrom: DateTime | null;
+  updatedTo: DateTime | null;
+}
+
+export function applyAccountFilters(
+  data: Account[],
+  filters: AccountFilterValues
+): Account[] {
+  const { statuses, dateFrom, dateTo, updatedFrom, updatedTo } = filters;
+
+  const hasAny =
+    statuses.length > 0 ||
+    !!dateFrom ||
+    !!updatedFrom;
+
+  if (!hasAny) return data;
+
+  return data.filter((item) => {
+    if (statuses.length && !statuses.includes(item.status)) return false;
+    if (dateFrom && dateTo) {
+      const created = DateTime.fromISO(item.createdAt);
+      if (created < dateFrom || created > dateTo) return false;
+    }
+    if (updatedFrom && updatedTo) {
+      const updated = DateTime.fromISO(item.updatedAt);
+      if (updated < updatedFrom || updated > updatedTo) return false;
     }
     return true;
   });

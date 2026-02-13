@@ -166,25 +166,49 @@ export interface StatusDistribution {
 
 export interface FunnelStep {
   name: string;
+  key: string; // machine key, e.g. "doc_uploaded"
   count: number;
   percentage: number; // relative to first step
   dropoff: number; // % dropped from previous step
+  color: string; // hex color for chart rendering
 }
 
-// Volume chart: each day has a count (bar) + rate % (line)
-export interface VolumeTimeSeriesPoint {
+// ─── Sankey Funnel ───
+
+export type SankeyLinkType = "success" | "failure" | "abandon";
+
+export interface SankeyNode {
+  name: string;
+  color: string;
+  count: number;
+}
+
+export interface SankeyLink {
+  source: number; // index into nodes array
+  target: number;
+  value: number; // flow count
+  type: SankeyLinkType;
+}
+
+export interface SankeyFunnelData {
+  nodes: SankeyNode[];
+  links: SankeyLink[];
+}
+
+// Funnel time series: each day has a conversion rate (0-100) per funnel step
+export interface FunnelTimeSeriesPoint {
   date: string; // ISO 8601 date
-  volume: number;
-  rate: number; // percentage 0-100
+  [stepKey: string]: number | string; // step keys map to rates
 }
 
-// A volume chart section (e.g. "Created", "Started", "Finished")
-export interface VolumeChartSection {
-  title: string;
-  data: VolumeTimeSeriesPoint[];
-  volumeLabel: string; // legend label for bar
-  rateLabel: string; // legend label for line
-  rateSublabel?: string; // secondary rate legend (grayed out)
+// Analytics interval for chart granularity
+export type AnalyticsInterval = "daily" | "weekly" | "monthly";
+
+// Rate time series: each day has completion + approval rates
+export interface RateTimeSeriesPoint {
+  date: string; // ISO 8601 date
+  completionRate: number; // 0-100
+  approvalRate: number; // 0-100
 }
 
 // Highlights strip: compact metrics shown in a horizontal row

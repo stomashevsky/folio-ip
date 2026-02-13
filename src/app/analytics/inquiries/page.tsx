@@ -1,34 +1,116 @@
 "use client";
 
+import React, { useState, useMemo, useCallback } from "react";
+import { DateTime } from "luxon";
 import { TopBar } from "@/components/layout/TopBar";
-import { ChartCard } from "@/components/shared";
-import { VolumeChart } from "@/components/charts/VolumeChart";
+import { ChartCard, MetricCard } from "@/components/shared";
+import { SimpleBarChart } from "@/components/charts/SimpleBarChart";
+import { RatesLineChart } from "@/components/charts/RatesLineChart";
+import { FunnelSankey, type SankeyMetric } from "@/components/charts/FunnelSankey";
+import { FunnelTrendChart } from "@/components/charts/FunnelTrendChart";
 import {
-  mockVolumeChartSections,
-  mockHighlights,
-  mockFunnel,
+  deriveHighlights,
+  generateTimeSeries,
+  generateRateTimeSeries,
+  generateFunnelSteps,
+  generateFunnelTimeSeries,
+  deriveFunnelHighlights,
+  generateSankeyFunnel,
 } from "@/lib/data";
-import { formatNumber } from "@/lib/utils/format";
-import { useState } from "react";
+import { aggregateVolume, aggregateRates, aggregateFunnelRates } from "@/lib/utils/analytics";
+import { DASHBOARD_DATE_SHORTCUTS, type DateRangeShortcut, type DateRange } from "@/lib/constants/date-shortcuts";
+import type { AnalyticsInterval } from "@/lib/types";
 import { Tabs } from "@plexui/ui/components/Tabs";
-import { Tooltip } from "@plexui/ui/components/Tooltip";
-import { Info } from "lucide-react";
+import { Select } from "@plexui/ui/components/Select";
+import { DateRangePicker } from "@plexui/ui/components/DateRangePicker";
 
 const tabs = ["Overview", "Funnel"] as const;
 type Tab = (typeof tabs)[number];
 
+const INTERVAL_OPTIONS = [
+  { value: "daily", label: "Daily" },
+  { value: "weekly", label: "Weekly" },
+  { value: "monthly", label: "Monthly" },
+];
+
+const OptionDesc = ({ children }: { children: React.ReactNode }) => (
+  <div className="text-xs text-[var(--color-text-secondary)]">
+    {children}
+  </div>
+);
+
+const FUNNEL_METRIC_OPTIONS = [
+  { value: "counts", label: "Counts", description: <OptionDesc>Absolute count at each step</OptionDesc> },
+  { value: "rates", label: "Rates", description: <OptionDesc>% of created inquiries reaching each step</OptionDesc> },
+];
+
+const FUNNEL_METRIC_DESCRIPTIONS: Record<SankeyMetric, string> = {
+  counts: "Absolute inquiry counts at each verification step",
+  rates: "Percentage of total created inquiries reaching each step",
+};
+
+const defaultRange: DateRange = DASHBOARD_DATE_SHORTCUTS[1].getDateRange(); // Last 30 days
+
 export default function InquiryAnalyticsPage() {
   const [activeTab, setActiveTab] = useState<Tab>("Overview");
+  const [dateRange, setDateRange] = useState<DateRange | null>(defaultRange);
+  const [interval, setInterval] = useState<AnalyticsInterval>("daily");
+  const [funnelMetric, setFunnelMetric] = useState<SankeyMetric>("counts");
+
+  const handleRangeChange = useCallback(
+    (next: DateRange | null, _shortcut?: DateRangeShortcut) => {
+      setDateRange(next);
+    },
+    [],
+  );
+
+  const days = useMemo(() => {
+    if (!dateRange) return 30;
+    return Math.max(1, Math.round(dateRange[1].diff(dateRange[0], "days").days) + 1);
+  }, [dateRange]);
+
+  const highlights = useMemo(() => deriveHighlights(days), [days]);
+  const volumeData = useMemo(
+    () => aggregateVolume(generateTimeSeries(days), interval),
+    [days, interval],
+  );
+  const ratesData = useMemo(
+    () => aggregateRates(generateRateTimeSeries(days), interval),
+    [days, interval],
+  );
+
+  const funnelSteps = useMemo(() => generateFunnelSteps(days), [days]);
+  const funnelHighlights = useMemo(
+    () => deriveFunnelHighlights(funnelSteps),
+    [funnelSteps],
+  );
+  const funnelTrendData = useMemo(
+    () => aggregateFunnelRates(generateFunnelTimeSeries(days), interval),
+    [days, interval],
+  );
+  const sankeyData = useMemo(() => generateSankeyFunnel(days), [days]);
 
   return (
     <div className="flex min-h-full flex-col">
       <TopBar
         title="Inquiry Analytics"
-        toolbar={
+        actions={
+          <DateRangePicker
+            value={dateRange}
+            onChange={handleRangeChange}
+            shortcuts={DASHBOARD_DATE_SHORTCUTS}
+            size="md"
+            pill={false}
+            max={DateTime.local().endOf("day")}
+            triggerDateFormat="MM/dd/yy"
+          />
+        }
+        tabs={
           <Tabs
             value={activeTab}
             onChange={(v) => setActiveTab(v as Tab)}
             variant="underline"
+            flush
             aria-label="Analytics views"
             size="md"
           >
@@ -38,91 +120,133 @@ export default function InquiryAnalyticsPage() {
         }
       />
       <div className="px-4 pb-6 pt-6 md:px-6">
-        {/* Tab Content */}
-        <div>
-          {activeTab === "Overview" && (
-            <>
-              {/* Highlights */}
-              <div>
-                <h3 className="heading-sm text-[var(--color-text)] mb-3">Highlights</h3>
-                <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7">
-                  {mockHighlights.map((metric) => (
-                    <div
-                      key={metric.label}
-                      className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3"
-                    >
-                      <div className="flex items-center gap-1">
-                        <p className="text-xs text-[var(--color-text-secondary)] truncate">
-                          {metric.label}
-                        </p>
-                        {metric.tooltip && (
-                          <Tooltip content={metric.tooltip}>
-                            <Info className="h-3.5 w-3.5 shrink-0 text-[var(--color-text-tertiary)] cursor-help" />
-                          </Tooltip>
-                        )}
-                      </div>
-                      <p className="mt-1.5 heading-md text-[var(--color-text)]">
-                        {metric.value}
-                      </p>
-                    </div>
-                  ))}
-                </div>
+        {activeTab === "Overview" && (
+          <>
+            {/* Highlights */}
+            <div>
+              <h3 className="heading-sm text-[var(--color-text)] mb-3">Highlights</h3>
+              <div className="grid grid-cols-3 gap-3 xl:grid-cols-6">
+                {highlights.map((metric) => (
+                  <MetricCard
+                    key={metric.label}
+                    label={metric.label}
+                    value={metric.value}
+                    tooltip={metric.tooltip}
+                    variant="compact"
+                  />
+                ))}
               </div>
+            </div>
 
-              {/* Volume chart sections */}
-              <div className="mt-4 space-y-4">
-                {mockVolumeChartSections.map((section) => (
-                  <ChartCard key={section.title} title={section.title}>
-                    <VolumeChart
-                      data={section.data}
-                      volumeLabel={section.volumeLabel}
-                      rateLabel={section.rateLabel}
-                      rateSublabel={section.rateSublabel}
+            {/* Interval selector */}
+            <div className="mt-6 flex items-center">
+              <div className="w-[120px]">
+                <Select
+                  options={INTERVAL_OPTIONS}
+                  value={interval}
+                  onChange={(opt) => {
+                    if (opt) setInterval(opt.value as AnalyticsInterval);
+                  }}
+                  size="sm"
+                  pill={false}
+                  variant="outline"
+                  listMinWidth={120}
+                />
+              </div>
+            </div>
+
+            {/* Charts */}
+            <div className="mt-3 space-y-4">
+              <ChartCard
+                title="Inquiry Volume"
+                description="Number of verifications created"
+              >
+                <SimpleBarChart data={volumeData} />
+              </ChartCard>
+
+              <ChartCard
+                title="Approval & Completion Rates"
+                description="Percentage trends over time"
+              >
+                <RatesLineChart data={ratesData} />
+              </ChartCard>
+            </div>
+          </>
+        )}
+
+        {activeTab === "Funnel" && (
+          <>
+            {/* Funnel Highlights */}
+            <div>
+              <h3 className="heading-sm text-[var(--color-text)] mb-3">Highlights</h3>
+              <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+                {funnelHighlights.map((metric) => (
+                  <MetricCard
+                    key={metric.label}
+                    label={metric.label}
+                    value={metric.value}
+                    tooltip={metric.tooltip}
+                    variant="compact"
+                  />
+                ))}
+              </div>
+            </div>
+
+            {/* Main Funnel Chart — Sankey */}
+            <div className="mt-6">
+              <ChartCard
+                title="Verification Flow"
+                description={FUNNEL_METRIC_DESCRIPTIONS[funnelMetric]}
+                actions={
+                  <div className="w-[120px]">
+                    <Select
+                      options={FUNNEL_METRIC_OPTIONS}
+                      value={funnelMetric}
+                      onChange={(opt) => {
+                        if (opt) setFunnelMetric(opt.value as SankeyMetric);
+                      }}
+                      size="sm"
+                      pill={false}
+                      variant="outline"
+                      align="end"
+                      listMinWidth={340}
+                      optionClassName="!font-medium"
                     />
-                  </ChartCard>
-                ))}
-              </div>
-            </>
-          )}
-
-          {activeTab === "Funnel" && (
-            <ChartCard
-              title="Verification Funnel"
-              description="Drop-off analysis across verification steps"
-            >
-              <div className="space-y-4">
-                {mockFunnel.map((step, i) => (
-                  <div key={i} className="relative">
-                    <div className="mb-1.5 flex items-center justify-between">
-                      <span className="text-sm text-[var(--color-text)]">
-                        {step.name}
-                      </span>
-                      <div className="flex items-center gap-3">
-                        <span className="heading-xs text-[var(--color-text)]">
-                          {formatNumber(step.count)}
-                        </span>
-                        <span className="text-xs text-[var(--color-text-tertiary)]">
-                          {step.percentage}%
-                        </span>
-                        {step.dropoff > 0 && (
-                          <span className="text-xs text-[var(--color-danger-soft-text)]">
-                            −{step.dropoff}%
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                    <div className="h-8 w-full overflow-hidden rounded-lg bg-[var(--color-surface-secondary)]">
-                      <div
-                        className="h-full rounded-lg bg-[var(--color-primary-soft-bg)] transition-all duration-500"
-                        style={{ width: `${step.percentage}%` }}
-                      />
-                    </div>
                   </div>
-                ))}
+                }
+              >
+                <FunnelSankey data={sankeyData} metric={funnelMetric} />
+              </ChartCard>
+            </div>
+
+            {/* Interval selector for trend chart */}
+            <div className="mt-6 flex items-center">
+              <div className="w-[120px]">
+                <Select
+                  options={INTERVAL_OPTIONS}
+                  value={interval}
+                  onChange={(opt) => {
+                    if (opt) setInterval(opt.value as AnalyticsInterval);
+                  }}
+                  size="sm"
+                  pill={false}
+                  variant="outline"
+                  listMinWidth={120}
+                />
               </div>
-            </ChartCard>
-          )}
-        </div>
+            </div>
+
+            {/* Funnel Trends */}
+            <div className="mt-3">
+              <ChartCard
+                title="Funnel Trends"
+                description="Step conversion rates over time"
+              >
+                <FunnelTrendChart data={funnelTrendData} />
+              </ChartCard>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );

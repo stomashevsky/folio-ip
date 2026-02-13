@@ -50,7 +50,7 @@ export function ColumnSettings({
           pill={false}
         >
           <SettingsSlider />
-          Columns
+          <span className="hidden md:inline">Columns</span>
         </Button>
       </Popover.Trigger>
       <Popover.Content align="end" width={280} minWidth={280}>
