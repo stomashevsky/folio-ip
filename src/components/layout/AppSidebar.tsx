@@ -7,103 +7,39 @@ import {
   SidebarCardTitleLink,
   SidebarContent,
   SidebarFooter,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarGroupLabel,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuButtonLabel,
   SidebarMenuItem,
 } from "@plexui/ui/components/Sidebar";
 import { usePathname, useRouter } from "next/navigation";
+import { type NavItem, isRouteActive } from "@/lib/constants/nav-config";
 
-type NavItem = {
-  title: string;
-  href: string;
-};
-
-type NavGroup = {
-  label: string;
+interface AppSidebarProps {
   items: NavItem[];
-};
+}
 
-const navGroups: NavGroup[] = [
-  {
-    label: "",
-    items: [{ title: "Overview", href: "/" }],
-  },
-  {
-    label: "Inquiries",
-    items: [
-      { title: "Inquiries", href: "/inquiries" },
-      { title: "Analytics", href: "/inquiries/analytics" },
-      { title: "Templates", href: "/inquiries/templates" },
-    ],
-  },
-  {
-    label: "Verifications",
-    items: [
-      { title: "Verifications", href: "/verifications" },
-      { title: "Templates", href: "/verifications/templates" },
-    ],
-  },
-  {
-    label: "Reports",
-    items: [
-      { title: "Reports", href: "/reports" },
-      { title: "Templates", href: "/reports/templates" },
-    ],
-  },
-  {
-    label: "Accounts",
-    items: [
-      { title: "Accounts", href: "/accounts" },
-      { title: "Types", href: "/accounts/types" },
-    ],
-  },
-  {
-    label: "Transactions",
-    items: [
-      { title: "Transactions", href: "/transactions" },
-      { title: "Analytics", href: "/transactions/analytics" },
-      { title: "Types", href: "/transactions/types" },
-    ],
-  },
-];
-
-export function AppSidebar() {
+export function AppSidebar({ items }: AppSidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
-
-  const isActive = (href: string) => {
-    if (href === "/") return pathname === "/";
-    return pathname === href || pathname.startsWith(href + "/");
-  };
 
   return (
     <Sidebar>
       <SidebarContent>
-        {navGroups.map((group) => (
-          <SidebarGroup key={group.label || "top"}>
-            {group.label && <SidebarGroupLabel size="lg">{group.label}</SidebarGroupLabel>}
-            <SidebarGroupContent>
-              <SidebarMenu>
-                {group.items.map((item) => (
-                  <SidebarMenuItem key={item.href}>
-                    <SidebarMenuButton
-                      isActive={isActive(item.href)}
-                      onClick={() => router.push(item.href)}
-                    >
-                      <SidebarMenuButtonLabel>
-                        {item.title}
-                      </SidebarMenuButtonLabel>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                ))}
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-        ))}
+        <SidebarMenu>
+          {items.map((item) => (
+            <SidebarMenuItem key={item.href}>
+              <SidebarMenuButton
+                isActive={isRouteActive(pathname, item.href)}
+                onClick={() => router.push(item.href)}
+              >
+                <SidebarMenuButtonLabel>
+                  {item.title}
+                </SidebarMenuButtonLabel>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          ))}
+        </SidebarMenu>
       </SidebarContent>
 
       <SidebarFooter>

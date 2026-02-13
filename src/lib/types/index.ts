@@ -157,9 +157,6 @@ export interface AnalyticsOverview {
   approvalRate: number;
   avgCompletionTime: number; // seconds
   pendingReview: number;
-  totalVerifications: number;
-  totalReports: number;
-  totalAccounts: number;
   inquiriesTrend: number; // % change
   approvalTrend: number;
   completionTimeTrend: number;
