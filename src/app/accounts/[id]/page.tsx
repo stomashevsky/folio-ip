@@ -22,6 +22,7 @@ import { formatDateTime } from "@/lib/utils/format";
 import { Badge } from "@plexui/ui/components/Badge";
 import { Button } from "@plexui/ui/components/Button";
 import { DotsHorizontal, Plus } from "@plexui/ui/components/Icon";
+import { Menu } from "@plexui/ui/components/Menu";
 import { Tabs } from "@plexui/ui/components/Tabs";
 import { useParams } from "next/navigation";
 import { Suspense, useMemo, useState, type CSSProperties } from "react";
@@ -94,15 +95,22 @@ function AccountDetailContent() {
               <Plus />
               <span className="hidden md:inline">Create inquiry</span>
             </Button>
-            <Button
-              color="secondary"
-              variant="outline"
-              size="md"
-              pill={false}
-            >
-              <DotsHorizontal />
-              <span className="hidden md:inline">More</span>
-            </Button>
+            <Menu>
+              <Menu.Trigger>
+                <Button color="secondary" variant="outline" size="md" pill={false}>
+                  <DotsHorizontal />
+                  <span className="hidden md:inline">More</span>
+                </Button>
+              </Menu.Trigger>
+              <Menu.Content align="end" minWidth="auto">
+                <Menu.Item onSelect={() => {}}>Suspend account</Menu.Item>
+                <Menu.Item onSelect={() => {}}>Close account</Menu.Item>
+                <Menu.Separator />
+                <Menu.Item onSelect={() => {}}>Archive</Menu.Item>
+                <Menu.Separator />
+                <Menu.Item onSelect={() => {}} className="text-[var(--color-text-danger-ghost)]">Delete</Menu.Item>
+              </Menu.Content>
+            </Menu>
           </div>
         }
       />

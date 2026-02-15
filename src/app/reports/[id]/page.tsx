@@ -6,6 +6,7 @@ import { useParams } from "next/navigation";
 import { Button } from "@plexui/ui/components/Button";
 import { Badge } from "@plexui/ui/components/Badge";
 import { DotsHorizontal } from "@plexui/ui/components/Icon";
+import { Menu } from "@plexui/ui/components/Menu";
 import { TopBar } from "@/components/layout/TopBar";
 import {
   NotFoundPage,
@@ -61,15 +62,21 @@ function ReportDetailContent() {
         title="Report"
         backHref="/reports"
         actions={
-          <Button
-            color="secondary"
-            variant="outline"
-            size="md"
-            pill={false}
-          >
-            <DotsHorizontal />
-            <span className="hidden md:inline">More</span>
-          </Button>
+          <Menu>
+            <Menu.Trigger>
+              <Button color="secondary" variant="outline" size="md" pill={false}>
+                <DotsHorizontal />
+                <span className="hidden md:inline">More</span>
+              </Button>
+            </Menu.Trigger>
+            <Menu.Content align="end" minWidth="auto">
+              <Menu.Item onSelect={() => {}}>Rerun report</Menu.Item>
+              <Menu.Separator />
+              <Menu.Item onSelect={() => {}}>Archive</Menu.Item>
+              <Menu.Separator />
+              <Menu.Item onSelect={() => {}} className="text-[var(--color-text-danger-ghost)]">Delete</Menu.Item>
+            </Menu.Content>
+          </Menu>
         }
       />
 

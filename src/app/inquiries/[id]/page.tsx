@@ -21,6 +21,7 @@ import { Badge } from "@plexui/ui/components/Badge";
 import { Button } from "@plexui/ui/components/Button";
 import { Tabs } from "@plexui/ui/components/Tabs";
 import { Eye, DotsHorizontal } from "@plexui/ui/components/Icon";
+import { Menu } from "@plexui/ui/components/Menu";
 import {
   OverviewTab,
   VerificationsTab,
@@ -95,10 +96,23 @@ function InquiryDetailContent() {
               <Eye />
               <span className="hidden md:inline">Review</span>
             </Button>
-            <Button color="secondary" variant="outline" size="md" pill={false}>
-              <DotsHorizontal />
-              <span className="hidden md:inline">More</span>
-            </Button>
+            <Menu>
+              <Menu.Trigger>
+                <Button color="secondary" variant="outline" size="md" pill={false}>
+                  <DotsHorizontal />
+                  <span className="hidden md:inline">More</span>
+                </Button>
+              </Menu.Trigger>
+              <Menu.Content align="end" minWidth="auto">
+                <Menu.Item onSelect={() => {}}>Approve</Menu.Item>
+                <Menu.Item onSelect={() => {}}>Decline</Menu.Item>
+                <Menu.Item onSelect={() => {}}>Mark as needs review</Menu.Item>
+                <Menu.Separator />
+                <Menu.Item onSelect={() => {}}>Archive</Menu.Item>
+                <Menu.Separator />
+                <Menu.Item onSelect={() => {}} className="text-[var(--color-text-danger-ghost)]">Delete</Menu.Item>
+              </Menu.Content>
+            </Menu>
           </div>
         }
       />

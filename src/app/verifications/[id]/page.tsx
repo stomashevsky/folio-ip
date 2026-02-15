@@ -7,6 +7,7 @@ import { useParams } from "next/navigation";
 import { Button } from "@plexui/ui/components/Button";
 import { Badge } from "@plexui/ui/components/Badge";
 import { DotsHorizontal, Plus, Search } from "@plexui/ui/components/Icon";
+import { Menu } from "@plexui/ui/components/Menu";
 import { Input } from "@plexui/ui/components/Input";
 import { Select } from "@plexui/ui/components/Select";
 import { TopBar } from "@/components/layout/TopBar";
@@ -108,15 +109,23 @@ function VerificationDetailContent() {
         title="Verification"
         backHref="/verifications"
         actions={
-          <Button
-            color="secondary"
-            variant="outline"
-            size="md"
-            pill={false}
-          >
-            <DotsHorizontal />
-            <span className="hidden md:inline">More</span>
-          </Button>
+          <Menu>
+            <Menu.Trigger>
+              <Button color="secondary" variant="outline" size="md" pill={false}>
+                <DotsHorizontal />
+                <span className="hidden md:inline">More</span>
+              </Button>
+            </Menu.Trigger>
+            <Menu.Content align="end" minWidth="auto">
+              <Menu.Item onSelect={() => {}}>Mark as passed</Menu.Item>
+              <Menu.Item onSelect={() => {}}>Mark as failed</Menu.Item>
+              <Menu.Item onSelect={() => {}}>Requires retry</Menu.Item>
+              <Menu.Separator />
+              <Menu.Item onSelect={() => {}}>Archive</Menu.Item>
+              <Menu.Separator />
+              <Menu.Item onSelect={() => {}} className="text-[var(--color-text-danger-ghost)]">Delete</Menu.Item>
+            </Menu.Content>
+          </Menu>
         }
       />
 
