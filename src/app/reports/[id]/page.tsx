@@ -64,9 +64,8 @@ function ReportDetailContent() {
         actions={
           <Menu>
             <Menu.Trigger>
-              <Button color="secondary" variant="outline" size="md" pill={false}>
+              <Button color="secondary" variant="soft" size="md" pill={false}>
                 <DotsHorizontal />
-                <span className="hidden md:inline">More</span>
               </Button>
             </Menu.Trigger>
             <Menu.Content align="end" minWidth="auto">

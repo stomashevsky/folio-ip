@@ -20,7 +20,7 @@ import { useTabParam } from "@/lib/hooks/useTabParam";
 import { Badge } from "@plexui/ui/components/Badge";
 import { Button } from "@plexui/ui/components/Button";
 import { Tabs } from "@plexui/ui/components/Tabs";
-import { Eye, DotsHorizontal } from "@plexui/ui/components/Icon";
+import { DotsHorizontal } from "@plexui/ui/components/Icon";
 import { Menu } from "@plexui/ui/components/Menu";
 import {
   OverviewTab,
@@ -92,15 +92,10 @@ function InquiryDetailContent() {
         backHref="/inquiries"
         actions={
           <div className="flex items-center gap-2">
-            <Button color="primary" size="md" pill={false}>
-              <Eye />
-              <span className="hidden md:inline">Review</span>
-            </Button>
             <Menu>
               <Menu.Trigger>
-                <Button color="secondary" variant="outline" size="md" pill={false}>
+                <Button color="secondary" variant="soft" size="md" pill={false}>
                   <DotsHorizontal />
-                  <span className="hidden md:inline">More</span>
                 </Button>
               </Menu.Trigger>
               <Menu.Content align="end" minWidth="auto">
@@ -113,6 +108,7 @@ function InquiryDetailContent() {
                 <Menu.Item onSelect={() => {}} className="text-[var(--color-text-danger-ghost)]">Delete</Menu.Item>
               </Menu.Content>
             </Menu>
+            <Button color="primary" size="md" pill={false}>Review</Button>
           </div>
         }
       />
