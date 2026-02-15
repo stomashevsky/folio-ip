@@ -192,13 +192,13 @@ export default function VerificationTemplateDetailPage() {
                 </Menu.Trigger>
                 <Menu.Content>
                   {canPublish && (
-                    <Menu.Item onClick={() => setStatus("active")}>Publish</Menu.Item>
+                    <Menu.Item onSelect={() => setStatus("active")}>Publish</Menu.Item>
                   )}
                   {canArchive && (
-                    <Menu.Item onClick={() => setStatus("archived")}>Archive</Menu.Item>
+                    <Menu.Item onSelect={() => setStatus("archived")}>Archive</Menu.Item>
                   )}
                   <Menu.Separator />
-                  <Menu.Item onClick={handleDelete}>Delete</Menu.Item>
+                  <Menu.Item onSelect={handleDelete}>Delete</Menu.Item>
                 </Menu.Content>
               </Menu>
             )}

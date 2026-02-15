@@ -227,16 +227,16 @@ export default function WebhooksPage() {
                     </Button>
                   </Menu.Trigger>
                   <Menu.Content align="end">
-                    <Menu.Item onClick={() => openEdit(webhook)}>
+                    <Menu.Item onSelect={() => openEdit(webhook)}>
                       Edit
                     </Menu.Item>
-                    <Menu.Item onClick={() => handleToggleStatus(webhook.id)}>
+                    <Menu.Item onSelect={() => handleToggleStatus(webhook.id)}>
                       {webhook.status === "active" ? "Disable" : "Enable"}
                     </Menu.Item>
                     <Menu.Separator />
                     <Menu.Item
-                      onClick={() => setDeleting(webhook)}
-                      className="text-[var(--color-text-danger-solid)]"
+                      onSelect={() => setDeleting(webhook)}
+                      className="text-[var(--color-text-danger)]"
                     >
                       Delete
                     </Menu.Item>
@@ -273,18 +273,18 @@ export default function WebhooksPage() {
                       </Button>
                     </Menu.Trigger>
                     <Menu.Content align="end">
-                      <Menu.Item onClick={() => openEdit(webhook)}>
+                      <Menu.Item onSelect={() => openEdit(webhook)}>
                         Edit
                       </Menu.Item>
                       <Menu.Item
-                        onClick={() => handleToggleStatus(webhook.id)}
+                        onSelect={() => handleToggleStatus(webhook.id)}
                       >
                         {webhook.status === "active" ? "Disable" : "Enable"}
                       </Menu.Item>
                       <Menu.Separator />
                       <Menu.Item
-                        onClick={() => setDeleting(webhook)}
-                        className="text-[var(--color-text-danger-solid)]"
+                        onSelect={() => setDeleting(webhook)}
+                        className="text-[var(--color-text-danger)]"
                       >
                         Delete
                       </Menu.Item>

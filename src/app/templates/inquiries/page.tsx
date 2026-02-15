@@ -57,7 +57,7 @@ const columns: ColumnDef<InquiryTemplate, unknown>[] = [
   },
   {
     accessorKey: "lastPublishedAt",
-    header: "Last published at (UTC)",
+    header: "Published (UTC)",
     size: 180,
     cell: dateTimeCell<InquiryTemplate>((r) => r.lastPublishedAt),
   },

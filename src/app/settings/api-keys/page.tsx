@@ -213,19 +213,19 @@ export default function ApiKeysPage() {
                   </Menu.Trigger>
                   <Menu.Content align="end">
                     <Menu.Item
-                      onClick={() =>
+                      onSelect={() =>
                         navigator.clipboard.writeText(apiKey.fullKey)
                       }
                     >
                       Copy key
                     </Menu.Item>
-                    <Menu.Item onClick={() => handleToggleActive(apiKey.id)}>
+                    <Menu.Item onSelect={() => handleToggleActive(apiKey.id)}>
                       {apiKey.active ? "Disable" : "Enable"}
                     </Menu.Item>
                     <Menu.Separator />
                     <Menu.Item
-                      onClick={() => setRevoking(apiKey)}
-                      className="text-[var(--color-text-danger-solid)]"
+                      onSelect={() => setRevoking(apiKey)}
+                      className="text-[var(--color-text-danger)]"
                     >
                       Revoke key
                     </Menu.Item>
@@ -263,19 +263,19 @@ export default function ApiKeysPage() {
                     </Menu.Trigger>
                     <Menu.Content align="end">
                       <Menu.Item
-                        onClick={() =>
+                        onSelect={() =>
                           navigator.clipboard.writeText(apiKey.fullKey)
                         }
                       >
                         Copy key
                       </Menu.Item>
-                      <Menu.Item onClick={() => handleToggleActive(apiKey.id)}>
+                      <Menu.Item onSelect={() => handleToggleActive(apiKey.id)}>
                         {apiKey.active ? "Disable" : "Enable"}
                       </Menu.Item>
                       <Menu.Separator />
                       <Menu.Item
-                        onClick={() => setRevoking(apiKey)}
-                        className="text-[var(--color-text-danger-solid)]"
+                        onSelect={() => setRevoking(apiKey)}
+                        className="text-[var(--color-text-danger)]"
                       >
                         Revoke key
                       </Menu.Item>

@@ -331,7 +331,7 @@ export default function TagsPage() {
           </Field>
           {createDraft.trim() &&
             tags.some((t) => t.name === createDraft.trim()) && (
-              <p className="text-xs text-[var(--color-text-danger-solid)]">
+              <p className="text-xs text-[var(--color-text-danger)]">
                 A tag with this name already exists.
               </p>
             )}

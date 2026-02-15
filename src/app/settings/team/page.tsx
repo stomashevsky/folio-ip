@@ -220,7 +220,7 @@ export default function TeamPage() {
                     </Menu.Trigger>
                     <Menu.Content align="end">
                       <Menu.Item
-                        onClick={() =>
+                        onSelect={() =>
                           handleChangeRole(
                             member.id,
                             member.role === "Admin" ? "Member" : "Admin",
@@ -232,8 +232,8 @@ export default function TeamPage() {
                       </Menu.Item>
                       <Menu.Separator />
                       <Menu.Item
-                        onClick={() => setRemoving(member)}
-                        className="text-[var(--color-text-danger-solid)]"
+                        onSelect={() => setRemoving(member)}
+                        className="text-[var(--color-text-danger)]"
                       >
                         Remove member
                       </Menu.Item>
@@ -281,7 +281,7 @@ export default function TeamPage() {
                           </Menu.Trigger>
                           <Menu.Content align="end">
                             <Menu.Item
-                              onClick={() =>
+                              onSelect={() =>
                                 handleChangeRole(
                                   member.id,
                                   member.role === "Admin" ? "Member" : "Admin",
@@ -293,8 +293,8 @@ export default function TeamPage() {
                             </Menu.Item>
                             <Menu.Separator />
                             <Menu.Item
-                              onClick={() => setRemoving(member)}
-                              className="text-[var(--color-text-danger-solid)]"
+                              onSelect={() => setRemoving(member)}
+                              className="text-[var(--color-text-danger)]"
                             >
                               Remove member
                             </Menu.Item>

@@ -80,7 +80,7 @@ export const INQUIRY_TEMPLATE_COLUMN_CONFIG: ColumnConfig[] = [
   { id: "id", label: "Template ID" },
   { id: "description", label: "Description" },
   { id: "status", label: "Status" },
-  { id: "lastPublishedAt", label: "Last published at" },
+  { id: "lastPublishedAt", label: "Published (UTC)" },
   { id: "updatedAt", label: "Last updated at" },
 ];
 
@@ -100,7 +100,7 @@ export const VERIFICATION_TEMPLATE_COLUMN_CONFIG: ColumnConfig[] = [
   { id: "id", label: "Template ID" },
   { id: "type", label: "Type" },
   { id: "status", label: "Status" },
-  { id: "lastPublishedAt", label: "Last published at" },
+  { id: "lastPublishedAt", label: "Published (UTC)" },
   { id: "updatedAt", label: "Last updated at" },
 ];
 
