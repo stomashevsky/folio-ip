@@ -14,7 +14,7 @@ import { Badge } from "@plexui/ui/components/Badge";
 import { Button } from "@plexui/ui/components/Button";
 import { Input } from "@plexui/ui/components/Input";
 import { Field } from "@plexui/ui/components/Field";
-import { Plus } from "@plexui/ui/components/Icon";
+import { EditPencil, Plus, Trash } from "@plexui/ui/components/Icon";
 
 export default function TagsPage() {
   const initialTags = useMemo(() => {
@@ -135,26 +135,26 @@ export default function TagsPage() {
                         {tag.count}
                       </td>
                       <td className="px-4 py-3 text-right">
-                        <div className="flex items-center justify-end gap-2">
+                        <div className="flex items-center justify-end gap-1">
                           <Button
                             color="secondary"
-                            variant="soft"
+                            variant="ghost"
                             size="sm"
                             pill={false}
                             onClick={() =>
                               setRenaming({ name: tag.name, draft: tag.name })
                             }
                           >
-                            Edit
+                            <EditPencil />
                           </Button>
                           <Button
                             color="danger"
-                            variant="soft"
+                            variant="ghost"
                             size="sm"
                             pill={false}
                             onClick={() => setDeleting(tag.name)}
                           >
-                            Delete
+                            <Trash />
                           </Button>
                         </div>
                       </td>
@@ -180,26 +180,26 @@ export default function TagsPage() {
                         {tag.count} inquiries
                       </span>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1">
                       <Button
                         color="secondary"
-                        variant="soft"
+                        variant="ghost"
                         size="sm"
                         pill={false}
                         onClick={() =>
                           setRenaming({ name: tag.name, draft: tag.name })
                         }
                       >
-                        Edit
+                        <EditPencil />
                       </Button>
                       <Button
                         color="danger"
-                        variant="soft"
+                        variant="ghost"
                         size="sm"
                         pill={false}
                         onClick={() => setDeleting(tag.name)}
                       >
-                        Delete
+                        <Trash />
                       </Button>
                     </div>
                   </div>
