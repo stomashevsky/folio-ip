@@ -193,7 +193,7 @@ export default function InquiryTemplateDetailPage() {
             {!isNew && (
               <Menu>
                 <Menu.Trigger>
-                  <Button color="secondary" variant="ghost" size="sm" pill={false}>
+                  <Button color="secondary" variant="soft" size="sm" pill={false}>
                     <DotsHorizontal />
                   </Button>
                 </Menu.Trigger>
