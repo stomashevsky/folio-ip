@@ -16,7 +16,7 @@ import { Badge } from "@plexui/ui/components/Badge";
 import { Input } from "@plexui/ui/components/Input";
 import { Field } from "@plexui/ui/components/Field";
 import { Menu } from "@plexui/ui/components/Menu";
-import { DotsVertical, Plus } from "@plexui/ui/components/Icon";
+import { DotsHorizontal, Plus } from "@plexui/ui/components/Icon";
 
 interface ApiKeyItem {
   id: string;
@@ -206,12 +206,11 @@ export default function ApiKeysPage() {
                       color="secondary"
                       variant="ghost"
                       size="sm"
-                      uniform
                     >
-                      <DotsVertical />
+                      <DotsHorizontal />
                     </Button>
                   </Menu.Trigger>
-                  <Menu.Content align="end">
+                  <Menu.Content align="end" minWidth="auto">
                     <Menu.Item
                       onSelect={() =>
                         navigator.clipboard.writeText(apiKey.fullKey)
@@ -225,7 +224,7 @@ export default function ApiKeysPage() {
                     <Menu.Separator />
                     <Menu.Item
                       onSelect={() => setRevoking(apiKey)}
-                      className="text-[var(--color-text-danger)]"
+                      className="text-[var(--color-text-danger-ghost)]"
                     >
                       Revoke key
                     </Menu.Item>
@@ -256,12 +255,11 @@ export default function ApiKeysPage() {
                         color="secondary"
                         variant="ghost"
                         size="sm"
-                        uniform
                       >
-                        <DotsVertical />
+                        <DotsHorizontal />
                       </Button>
                     </Menu.Trigger>
-                    <Menu.Content align="end">
+                    <Menu.Content align="end" minWidth="auto">
                       <Menu.Item
                         onSelect={() =>
                           navigator.clipboard.writeText(apiKey.fullKey)
@@ -275,7 +273,7 @@ export default function ApiKeysPage() {
                       <Menu.Separator />
                       <Menu.Item
                         onSelect={() => setRevoking(apiKey)}
-                        className="text-[var(--color-text-danger)]"
+                        className="text-[var(--color-text-danger-ghost)]"
                       >
                         Revoke key
                       </Menu.Item>

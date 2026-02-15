@@ -190,7 +190,7 @@ export default function VerificationTemplateDetailPage() {
                     More actions <ChevronDownSm />
                   </Button>
                 </Menu.Trigger>
-                <Menu.Content>
+                <Menu.Content minWidth="auto">
                   {canPublish && (
                     <Menu.Item onSelect={() => setStatus("active")}>Publish</Menu.Item>
                   )}
@@ -198,7 +198,7 @@ export default function VerificationTemplateDetailPage() {
                     <Menu.Item onSelect={() => setStatus("archived")}>Archive</Menu.Item>
                   )}
                   <Menu.Separator />
-                  <Menu.Item onSelect={handleDelete}>Delete</Menu.Item>
+                  <Menu.Item onSelect={handleDelete} className="text-[var(--color-text-danger-ghost)]">Delete</Menu.Item>
                 </Menu.Content>
               </Menu>
             )}

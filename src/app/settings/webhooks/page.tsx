@@ -16,7 +16,7 @@ import { Input } from "@plexui/ui/components/Input";
 import { Field } from "@plexui/ui/components/Field";
 import { Checkbox } from "@plexui/ui/components/Checkbox";
 import { Menu } from "@plexui/ui/components/Menu";
-import { DotsVertical, Plus } from "@plexui/ui/components/Icon";
+import { DotsHorizontal, Plus } from "@plexui/ui/components/Icon";
 
 const WEBHOOK_EVENTS = [
   { value: "inquiry.created", label: "Inquiry created" },
@@ -221,12 +221,11 @@ export default function WebhooksPage() {
                       color="secondary"
                       variant="ghost"
                       size="sm"
-                      uniform
                     >
-                      <DotsVertical />
+                      <DotsHorizontal />
                     </Button>
                   </Menu.Trigger>
-                  <Menu.Content align="end">
+                  <Menu.Content align="end" minWidth="auto">
                     <Menu.Item onSelect={() => openEdit(webhook)}>
                       Edit
                     </Menu.Item>
@@ -236,7 +235,7 @@ export default function WebhooksPage() {
                     <Menu.Separator />
                     <Menu.Item
                       onSelect={() => setDeleting(webhook)}
-                      className="text-[var(--color-text-danger)]"
+                      className="text-[var(--color-text-danger-ghost)]"
                     >
                       Delete
                     </Menu.Item>
@@ -267,12 +266,11 @@ export default function WebhooksPage() {
                         color="secondary"
                         variant="ghost"
                         size="sm"
-                        uniform
                       >
-                        <DotsVertical />
+                        <DotsHorizontal />
                       </Button>
                     </Menu.Trigger>
-                    <Menu.Content align="end">
+                    <Menu.Content align="end" minWidth="auto">
                       <Menu.Item onSelect={() => openEdit(webhook)}>
                         Edit
                       </Menu.Item>
@@ -284,7 +282,7 @@ export default function WebhooksPage() {
                       <Menu.Separator />
                       <Menu.Item
                         onSelect={() => setDeleting(webhook)}
-                        className="text-[var(--color-text-danger)]"
+                        className="text-[var(--color-text-danger-ghost)]"
                       >
                         Delete
                       </Menu.Item>

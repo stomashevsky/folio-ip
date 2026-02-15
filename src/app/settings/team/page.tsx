@@ -17,7 +17,7 @@ import { Input } from "@plexui/ui/components/Input";
 import { Field } from "@plexui/ui/components/Field";
 import { Select } from "@plexui/ui/components/Select";
 import { Menu } from "@plexui/ui/components/Menu";
-import { DotsVertical, Plus } from "@plexui/ui/components/Icon";
+import { DotsHorizontal, Plus } from "@plexui/ui/components/Icon";
 import { MOCK_USER } from "@/lib/constants/mock-user";
 
 const AVATAR_COLORS = [
@@ -213,12 +213,11 @@ export default function TeamPage() {
                         color="secondary"
                         variant="ghost"
                         size="sm"
-                        uniform
                       >
-                        <DotsVertical />
+                        <DotsHorizontal />
                       </Button>
                     </Menu.Trigger>
-                    <Menu.Content align="end">
+                    <Menu.Content align="end" minWidth="auto">
                       <Menu.Item
                         onSelect={() =>
                           handleChangeRole(
@@ -233,7 +232,7 @@ export default function TeamPage() {
                       <Menu.Separator />
                       <Menu.Item
                         onSelect={() => setRemoving(member)}
-                        className="text-[var(--color-text-danger)]"
+                        className="text-[var(--color-text-danger-ghost)]"
                       >
                         Remove member
                       </Menu.Item>
@@ -274,12 +273,11 @@ export default function TeamPage() {
                               color="secondary"
                               variant="ghost"
                               size="sm"
-                              uniform
                             >
-                              <DotsVertical />
+                              <DotsHorizontal />
                             </Button>
                           </Menu.Trigger>
-                          <Menu.Content align="end">
+                          <Menu.Content align="end" minWidth="auto">
                             <Menu.Item
                               onSelect={() =>
                                 handleChangeRole(
@@ -294,7 +292,7 @@ export default function TeamPage() {
                             <Menu.Separator />
                             <Menu.Item
                               onSelect={() => setRemoving(member)}
-                              className="text-[var(--color-text-danger)]"
+                              className="text-[var(--color-text-danger-ghost)]"
                             >
                               Remove member
                             </Menu.Item>
