@@ -213,6 +213,7 @@ export default function TeamPage() {
                         color="secondary"
                         variant="ghost"
                         size="sm"
+                        pill={false}
                       >
                         <DotsHorizontal />
                       </Button>
@@ -273,6 +274,7 @@ export default function TeamPage() {
                               color="secondary"
                               variant="ghost"
                               size="sm"
+                              pill={false}
                             >
                               <DotsHorizontal />
                             </Button>

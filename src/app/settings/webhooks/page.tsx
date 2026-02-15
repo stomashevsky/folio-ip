@@ -221,6 +221,7 @@ export default function WebhooksPage() {
                       color="secondary"
                       variant="ghost"
                       size="sm"
+                      pill={false}
                     >
                       <DotsHorizontal />
                     </Button>

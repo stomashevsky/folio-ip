@@ -206,6 +206,7 @@ export default function ApiKeysPage() {
                       color="secondary"
                       variant="ghost"
                       size="sm"
+                      pill={false}
                     >
                       <DotsHorizontal />
                     </Button>
