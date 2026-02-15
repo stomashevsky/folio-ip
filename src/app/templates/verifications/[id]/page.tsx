@@ -25,7 +25,7 @@ import { Input } from "@plexui/ui/components/Input";
 import { Menu } from "@plexui/ui/components/Menu";
 import { Select } from "@plexui/ui/components/Select";
 import { Switch } from "@plexui/ui/components/Switch";
-import { ChevronDownSm } from "@plexui/ui/components/Icon";
+import { DotsHorizontal } from "@plexui/ui/components/Icon";
 
 const CAPTURE_METHOD_OPTIONS = [
   { value: "auto", label: "Auto" },
@@ -186,8 +186,8 @@ export default function VerificationTemplateDetailPage() {
             {!isNew && (
               <Menu>
                 <Menu.Trigger>
-                  <Button color="secondary" variant="outline" size="sm" pill={false}>
-                    More actions <ChevronDownSm />
+                  <Button color="secondary" variant="ghost" size="sm" pill={false}>
+                    <DotsHorizontal />
                   </Button>
                 </Menu.Trigger>
                 <Menu.Content minWidth="auto">

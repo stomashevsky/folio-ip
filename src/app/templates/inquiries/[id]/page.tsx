@@ -27,7 +27,7 @@ import { Menu } from "@plexui/ui/components/Menu";
 import { Select } from "@plexui/ui/components/Select";
 import { Switch } from "@plexui/ui/components/Switch";
 import { Textarea } from "@plexui/ui/components/Textarea";
-import { ArrowDownSm, ArrowUpSm, ChevronDownSm, Plus, Trash } from "@plexui/ui/components/Icon";
+import { ArrowDownSm, ArrowUpSm, DotsHorizontal, Plus, Trash } from "@plexui/ui/components/Icon";
 
 const PASS_OPTIONS: { value: StepPassAction; label: string }[] = [
   { value: "continue", label: "Continue to next step" },
@@ -193,8 +193,8 @@ export default function InquiryTemplateDetailPage() {
             {!isNew && (
               <Menu>
                 <Menu.Trigger>
-                  <Button color="secondary" variant="outline" size="sm" pill={false}>
-                    More actions <ChevronDownSm />
+                  <Button color="secondary" variant="ghost" size="sm" pill={false}>
+                    <DotsHorizontal />
                   </Button>
                 </Menu.Trigger>
                 <Menu.Content minWidth="auto">

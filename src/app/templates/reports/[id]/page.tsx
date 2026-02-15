@@ -20,7 +20,7 @@ import { Menu } from "@plexui/ui/components/Menu";
 import { Select } from "@plexui/ui/components/Select";
 import { Slider } from "@plexui/ui/components/Slider";
 import { Switch } from "@plexui/ui/components/Switch";
-import { ChevronDownSm } from "@plexui/ui/components/Icon";
+import { DotsHorizontal } from "@plexui/ui/components/Icon";
 
 const REPORT_TYPE_OPTIONS = Object.entries(REPORT_TYPE_LABELS).map(([value, label]) => ({ value, label }));
 
@@ -161,8 +161,8 @@ export default function ReportTemplateDetailPage() {
             {!isNew && (
               <Menu>
                 <Menu.Trigger>
-                  <Button color="secondary" variant="outline" size="sm" pill={false}>
-                    More actions <ChevronDownSm />
+                  <Button color="secondary" variant="ghost" size="sm" pill={false}>
+                    <DotsHorizontal />
                   </Button>
                 </Menu.Trigger>
                 <Menu.Content minWidth="auto">
