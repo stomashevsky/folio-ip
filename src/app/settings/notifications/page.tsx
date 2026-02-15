@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { TopBar } from "@/components/layout/TopBar";
 import { SectionHeading } from "@/components/shared";
 import { Switch } from "@plexui/ui/components/Switch";
+import { Button } from "@plexui/ui/components/Button";
 
 interface NotificationSetting {
   id: string;
@@ -62,17 +63,23 @@ const alertNotifications: NotificationSetting[] = [
   },
 ];
 
+const allSettings = [...emailNotifications, ...alertNotifications];
+
+function buildInitialState() {
+  return Object.fromEntries(allSettings.map((s) => [s.id, s.defaultEnabled]));
+}
+
 function NotificationGroup({
   title,
   settings,
+  enabled,
+  onToggle,
 }: {
   title: string;
   settings: NotificationSetting[];
+  enabled: Record<string, boolean>;
+  onToggle: (id: string, checked: boolean) => void;
 }) {
-  const [enabled, setEnabled] = useState<Record<string, boolean>>(
-    Object.fromEntries(settings.map((s) => [s.id, s.defaultEnabled]))
-  );
-
   return (
     <div className="mb-8">
       <SectionHeading size="xs">{title}</SectionHeading>
@@ -92,9 +99,7 @@ function NotificationGroup({
             </div>
             <Switch
               checked={enabled[setting.id]}
-              onCheckedChange={(checked) =>
-                setEnabled((prev) => ({ ...prev, [setting.id]: checked }))
-              }
+              onCheckedChange={(checked) => onToggle(setting.id, checked)}
             />
           </div>
         ))}
@@ -104,6 +109,36 @@ function NotificationGroup({
 }
 
 export default function NotificationsPage() {
+  const [enabled, setEnabled] = useState<Record<string, boolean>>(
+    buildInitialState,
+  );
+  const [savedSnapshot, setSavedSnapshot] = useState<Record<string, boolean>>(
+    buildInitialState,
+  );
+  const [saveState, setSaveState] = useState<"idle" | "saving" | "saved">(
+    "idle",
+  );
+  const timerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+
+  const hasChanges = allSettings.some(
+    (s) => enabled[s.id] !== savedSnapshot[s.id],
+  );
+
+  const handleToggle = (id: string, checked: boolean) => {
+    setEnabled((prev) => ({ ...prev, [id]: checked }));
+  };
+
+  const handleSave = () => {
+    if (!hasChanges) return;
+    setSaveState("saving");
+    clearTimeout(timerRef.current);
+    timerRef.current = setTimeout(() => {
+      setSavedSnapshot({ ...enabled });
+      setSaveState("saved");
+      timerRef.current = setTimeout(() => setSaveState("idle"), 1500);
+    }, 600);
+  };
+
   return (
     <div className="flex h-full flex-col overflow-auto">
       <TopBar title="Notifications" />
@@ -116,11 +151,25 @@ export default function NotificationsPage() {
         <NotificationGroup
           title="Email notifications"
           settings={emailNotifications}
+          enabled={enabled}
+          onToggle={handleToggle}
         />
         <NotificationGroup
           title="Alerts"
           settings={alertNotifications}
+          enabled={enabled}
+          onToggle={handleToggle}
         />
+
+        <Button
+          color="primary"
+          pill={false}
+          onClick={handleSave}
+          loading={saveState === "saving"}
+          disabled={!hasChanges || saveState !== "idle"}
+        >
+          {saveState === "saved" ? "Saved!" : "Save"}
+        </Button>
       </div>
     </div>
   );

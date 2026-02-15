@@ -14,7 +14,7 @@ import { Badge } from "@plexui/ui/components/Badge";
 import { Button } from "@plexui/ui/components/Button";
 import { Input } from "@plexui/ui/components/Input";
 import { Field } from "@plexui/ui/components/Field";
-import { EditPencil, Trash } from "@plexui/ui/components/Icon";
+import { EditPencil, Plus, Trash } from "@plexui/ui/components/Icon";
 
 export default function TagsPage() {
   const initialTags = useMemo(() => {
@@ -37,6 +37,10 @@ export default function TagsPage() {
 
   // Delete modal state
   const [deleting, setDeleting] = useState<string | null>(null);
+
+  // Create modal state
+  const [creating, setCreating] = useState(false);
+  const [createDraft, setCreateDraft] = useState("");
 
   const handleRename = () => {
     if (!renaming || !renaming.draft.trim()) return;
@@ -62,9 +66,34 @@ export default function TagsPage() {
     setDeleting(null);
   };
 
+  const handleCreate = () => {
+    const trimmed = createDraft.trim();
+    if (!trimmed || tags.some((t) => t.name === trimmed)) return;
+    setTags((prev) =>
+      [...prev, { name: trimmed, count: 0 }].sort((a, b) =>
+        a.name.localeCompare(b.name),
+      ),
+    );
+    setCreateDraft("");
+    setCreating(false);
+  };
+
   return (
     <div className="flex h-full flex-col overflow-auto">
-      <TopBar title="Tags" />
+      <TopBar
+        title="Tags"
+        actions={
+          <Button
+            color="primary"
+            pill={false}
+            size="md"
+            onClick={() => setCreating(true)}
+          >
+            <Plus />
+            Create tag
+          </Button>
+        }
+      />
       <div className="px-4 py-8 md:px-6">
         <p className="mb-6 text-sm text-[var(--color-text-secondary)]">
           Tags help you organize and filter inquiries. Tags are created from
@@ -270,6 +299,67 @@ export default function TagsPage() {
             onClick={handleDelete}
           >
             Delete
+          </Button>
+        </ModalFooter>
+      </Modal>
+
+      {/* Create tag modal */}
+      <Modal
+        open={creating}
+        onOpenChange={(open) => {
+          if (!open) {
+            setCreating(false);
+            setCreateDraft("");
+          }
+        }}
+      >
+        <ModalHeader>
+          <h2 className="heading-sm text-[var(--color-text)]">Create tag</h2>
+        </ModalHeader>
+        <ModalBody>
+          <Field label="Tag name" size="xl">
+            <Input
+              value={createDraft}
+              onChange={(e) => setCreateDraft(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") handleCreate();
+              }}
+              size="xl"
+              autoFocus
+              placeholder="Enter tag name"
+            />
+          </Field>
+          {createDraft.trim() &&
+            tags.some((t) => t.name === createDraft.trim()) && (
+              <p className="text-xs text-[var(--color-text-danger-solid)]">
+                A tag with this name already exists.
+              </p>
+            )}
+        </ModalBody>
+        <ModalFooter>
+          <Button
+            color="secondary"
+            variant="soft"
+            size="md"
+            pill={false}
+            onClick={() => {
+              setCreating(false);
+              setCreateDraft("");
+            }}
+          >
+            Cancel
+          </Button>
+          <Button
+            color="primary"
+            size="md"
+            pill={false}
+            onClick={handleCreate}
+            disabled={
+              !createDraft.trim() ||
+              tags.some((t) => t.name === createDraft.trim())
+            }
+          >
+            Create
           </Button>
         </ModalFooter>
       </Modal>

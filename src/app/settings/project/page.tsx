@@ -1,12 +1,34 @@
 "use client";
 
+import { useRef, useState } from "react";
 import { TopBar } from "@/components/layout/TopBar";
 import { SectionHeading } from "@/components/shared";
 import { Input } from "@plexui/ui/components/Input";
 import { Button } from "@plexui/ui/components/Button";
 import { Field } from "@plexui/ui/components/Field";
 
+const INITIAL_PROJECT_NAME = "Default project";
+
 export default function ProjectGeneralPage() {
+  const [projectName, setProjectName] = useState(INITIAL_PROJECT_NAME);
+  const [saveState, setSaveState] = useState<"idle" | "saving" | "saved">(
+    "idle",
+  );
+  const timerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+
+  const hasChanges =
+    projectName.trim() !== "" && projectName !== INITIAL_PROJECT_NAME;
+
+  const handleSave = () => {
+    if (!hasChanges) return;
+    setSaveState("saving");
+    clearTimeout(timerRef.current);
+    timerRef.current = setTimeout(() => {
+      setSaveState("saved");
+      timerRef.current = setTimeout(() => setSaveState("idle"), 1500);
+    }, 600);
+  };
+
   return (
     <div className="flex h-full flex-col overflow-auto">
       <TopBar title="Project settings" />
@@ -16,11 +38,21 @@ export default function ProjectGeneralPage() {
 
         <div className="mb-6">
           <Field label="Project name" description="A friendly name for this project, visible across dashboards and reports">
-            <Input defaultValue="Default project" />
+            <Input
+              value={projectName}
+              onChange={(e) => setProjectName(e.target.value)}
+            />
           </Field>
           <div className="mt-3">
-            <Button color="primary" pill={false} size="sm">
-              Save
+            <Button
+              color="primary"
+              pill={false}
+              size="sm"
+              onClick={handleSave}
+              loading={saveState === "saving"}
+              disabled={!hasChanges || saveState !== "idle"}
+            >
+              {saveState === "saved" ? "Saved!" : "Save"}
             </Button>
           </div>
         </div>

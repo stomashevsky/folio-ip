@@ -1,5 +1,6 @@
 "use client";
 
+import { useRef, useState } from "react";
 import { TopBar } from "@/components/layout/TopBar";
 import { SectionHeading } from "@/components/shared";
 import { Input } from "@plexui/ui/components/Input";
@@ -9,6 +10,24 @@ import { Field } from "@plexui/ui/components/Field";
 import { MOCK_USER } from "@/lib/constants/mock-user";
 
 export default function OrganizationGeneralPage() {
+  const [orgName, setOrgName] = useState(MOCK_USER.organization);
+  const [saveState, setSaveState] = useState<"idle" | "saving" | "saved">(
+    "idle",
+  );
+  const timerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+
+  const hasChanges = orgName.trim() !== "" && orgName !== MOCK_USER.organization;
+
+  const handleSave = () => {
+    if (!hasChanges) return;
+    setSaveState("saving");
+    clearTimeout(timerRef.current);
+    timerRef.current = setTimeout(() => {
+      setSaveState("saved");
+      timerRef.current = setTimeout(() => setSaveState("idle"), 1500);
+    }, 600);
+  };
+
   return (
     <div className="flex h-full flex-col overflow-auto">
       <TopBar title="Organization settings" />
@@ -18,11 +37,18 @@ export default function OrganizationGeneralPage() {
 
         <div className="mb-6">
           <Field label="Organization name" description="Human-friendly label for your organization, shown in user interfaces">
-            <Input defaultValue={MOCK_USER.organization} />
+            <Input value={orgName} onChange={(e) => setOrgName(e.target.value)} />
           </Field>
           <div className="mt-3">
-            <Button color="primary" pill={false} size="sm">
-              Save
+            <Button
+              color="primary"
+              pill={false}
+              size="sm"
+              onClick={handleSave}
+              loading={saveState === "saving"}
+              disabled={!hasChanges || saveState !== "idle"}
+            >
+              {saveState === "saved" ? "Saved!" : "Save"}
             </Button>
           </div>
         </div>

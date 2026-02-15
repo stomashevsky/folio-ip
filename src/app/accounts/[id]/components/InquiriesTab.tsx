@@ -13,13 +13,7 @@ export function InquiriesTab({ inquiries }: { inquiries: Inquiry[] }) {
 
   return (
     <div className="overflow-x-auto rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]">
-      <table className="w-full table-fixed">
-        <colgroup>
-          <col className="w-[35%]" />
-          <col className="w-[100px]" />
-          <col />
-          <col className="w-[180px]" />
-        </colgroup>
+      <table className="w-full">
         <thead>
           <tr className="border-b border-[var(--color-border)]">
             <th className="px-4 py-2.5 text-left text-xs font-semibold uppercase tracking-[0.5px] text-[var(--color-text-tertiary)]">
@@ -68,7 +62,7 @@ export function InquiriesTab({ inquiries }: { inquiries: Inquiry[] }) {
               <td className="px-4 py-3">
                 <StatusBadge status={inquiry.status} />
               </td>
-              <td className="px-4 py-3">
+              <td className="max-w-[180px] px-4 py-3">
                 <Link
                   href={`/inquiries/${inquiry.id}`}
                   className="block truncate font-mono text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-primary-solid-bg)] hover:underline"

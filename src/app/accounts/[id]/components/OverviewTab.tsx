@@ -26,8 +26,7 @@ export function OverviewTab({
       <div>
         <SectionHeading>Profile</SectionHeading>
         <div className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5">
-          <div className="flex gap-6">
-            {/* Photo */}
+          <div className="flex flex-col gap-5 sm:flex-row sm:gap-6">
             <div className="shrink-0">
               {profilePhoto ? (
                 <Image
@@ -42,39 +41,40 @@ export function OverviewTab({
               )}
             </div>
 
-            {/* Info grid — 2 columns */}
-            <div className="grid flex-1 grid-cols-2 gap-x-8 gap-y-4 self-center">
-              <div>
-                <p className="text-xs text-[var(--color-text-tertiary)]">
-                  Name
-                </p>
-                <p className="text-sm font-medium text-[var(--color-text)]">
-                  {toTitleCase(account.name)}
-                </p>
-              </div>
-              <div>
-                <p className="text-xs text-[var(--color-text-tertiary)]">
-                  Address
-                </p>
-                <p className="text-sm text-[var(--color-text)]">
-                  {account.address ?? "—"}
-                </p>
-              </div>
-              <div>
-                <p className="text-xs text-[var(--color-text-tertiary)]">
-                  Birthdate
-                </p>
-                <p className="text-sm text-[var(--color-text)]">
-                  {account.birthdate ? formatDate(account.birthdate) : "—"}
-                </p>
-              </div>
-              <div>
-                <p className="text-xs text-[var(--color-text-tertiary)]">
-                  Age
-                </p>
-                <p className="text-sm text-[var(--color-text)]">
-                  {account.age ? `${account.age}` : "—"}
-                </p>
+            <div className="min-w-0 flex-1 self-center">
+              <div className="grid grid-cols-2 gap-x-8 gap-y-4">
+                <div>
+                  <p className="text-xs text-[var(--color-text-tertiary)]">
+                    Name
+                  </p>
+                  <p className="text-sm font-medium text-[var(--color-text)]">
+                    {toTitleCase(account.name)}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-xs text-[var(--color-text-tertiary)]">
+                    Address
+                  </p>
+                  <p className="text-sm text-[var(--color-text)]">
+                    {account.address ?? "—"}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-xs text-[var(--color-text-tertiary)]">
+                    Birthdate
+                  </p>
+                  <p className="text-sm text-[var(--color-text)]">
+                    {account.birthdate ? formatDate(account.birthdate) : "—"}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-xs text-[var(--color-text-tertiary)]">
+                    Age
+                  </p>
+                  <p className="text-sm text-[var(--color-text)]">
+                    {account.age ? `${account.age}` : "—"}
+                  </p>
+                </div>
               </div>
             </div>
           </div>

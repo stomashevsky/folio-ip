@@ -1,5 +1,6 @@
 "use client";
 
+import { useRef, useState } from "react";
 import { TopBar } from "@/components/layout/TopBar";
 import { Input } from "@plexui/ui/components/Input";
 import { Button } from "@plexui/ui/components/Button";
@@ -8,15 +9,33 @@ import { Field } from "@plexui/ui/components/Field";
 import { MOCK_USER } from "@/lib/constants/mock-user";
 
 export default function YourProfilePage() {
+  const [name, setName] = useState(MOCK_USER.name);
+  const [saveState, setSaveState] = useState<"idle" | "saving" | "saved">(
+    "idle",
+  );
+  const timerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+
+  const hasChanges = name.trim() !== "" && name !== MOCK_USER.name;
+
+  const handleSave = () => {
+    if (!hasChanges) return;
+    setSaveState("saving");
+    clearTimeout(timerRef.current);
+    timerRef.current = setTimeout(() => {
+      setSaveState("saved");
+      timerRef.current = setTimeout(() => setSaveState("idle"), 1500);
+    }, 600);
+  };
+
   return (
     <div className="flex h-full flex-col overflow-auto">
       <TopBar title="Your profile" />
       <div className="mx-auto w-full max-w-2xl px-4 py-8 md:px-6">
         {/* Avatar */}
         <div className="mb-8 flex items-center gap-4">
-          <Avatar name={MOCK_USER.name} size={64} color={MOCK_USER.avatarColor} variant="solid" />
+          <Avatar name={name || MOCK_USER.name} size={64} color={MOCK_USER.avatarColor} variant="solid" />
           <div>
-            <p className="heading-xs text-[var(--color-text)]">{MOCK_USER.name}</p>
+            <p className="heading-xs text-[var(--color-text)]">{name || MOCK_USER.name}</p>
             <p className="text-sm text-[var(--color-text-secondary)]">
               {MOCK_USER.email}
             </p>
@@ -25,7 +44,7 @@ export default function YourProfilePage() {
 
         <div className="mb-6">
           <Field label="Name" description="The name associated with this account">
-            <Input defaultValue={MOCK_USER.name} />
+            <Input value={name} onChange={(e) => setName(e.target.value)} />
           </Field>
         </div>
 
@@ -47,8 +66,14 @@ export default function YourProfilePage() {
           </Field>
         </div>
 
-        <Button color="primary" pill={false}>
-          Save
+        <Button
+          color="primary"
+          pill={false}
+          onClick={handleSave}
+          loading={saveState === "saving"}
+          disabled={!hasChanges || saveState !== "idle"}
+        >
+          {saveState === "saved" ? "Saved!" : "Save"}
         </Button>
       </div>
     </div>
