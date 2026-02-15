@@ -1,19 +1,16 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 
 import { TopBar } from "@/components/layout/TopBar";
 import { NotFoundPage, SectionHeading } from "@/components/shared";
-import { TEMPLATE_STATUS_OPTIONS } from "@/lib/constants/filter-options";
 import { REPORT_TYPE_LABELS } from "@/lib/constants/report-type-labels";
 import { useTemplateStore } from "@/lib/stores/template-store";
-import type {
-  ReportTemplate,
-  ReportType,
-  TemplateStatus,
-} from "@/lib/types";
+import { getStatusColor } from "@/lib/utils/format";
+import type { ReportTemplate, ReportType, TemplateStatus } from "@/lib/types";
 
+import { Badge } from "@plexui/ui/components/Badge";
 import { Button } from "@plexui/ui/components/Button";
 import { Checkbox } from "@plexui/ui/components/Checkbox";
 import { Field } from "@plexui/ui/components/Field";
@@ -22,7 +19,15 @@ import { Select } from "@plexui/ui/components/Select";
 import { Slider } from "@plexui/ui/components/Slider";
 import { Switch } from "@plexui/ui/components/Switch";
 
-type ReportTemplateForm = {
+const REPORT_TYPE_OPTIONS = Object.entries(REPORT_TYPE_LABELS).map(([value, label]) => ({ value, label }));
+
+const SCREENING_SOURCES: Record<ReportType, string[]> = {
+  watchlist: ["OFAC SDN", "UN Consolidated", "EU Sanctions", "UK HMT", "FBI Most Wanted", "Interpol Red Notices"],
+  pep: ["World PEP Database", "National PEP Lists", "State-owned Enterprises", "Government Officials DB"],
+  adverse_media: ["Global Media Archive", "Financial Crime News", "Regulatory Actions DB", "Court Records"],
+};
+
+interface ReportForm {
   name: string;
   type: ReportType;
   status: TemplateStatus;
@@ -33,37 +38,27 @@ type ReportTemplateForm = {
     monitoringFrequencyDays: number;
     enableFuzzyMatch: boolean;
   };
-};
+}
 
-const REPORT_TYPE_OPTIONS = Object.entries(REPORT_TYPE_LABELS).map(([value, label]) => ({
-  value,
-  label,
-}));
-
-const DEFAULT_REPORT_FORM: ReportTemplateForm = {
+const DEFAULT_FORM: ReportForm = {
   name: "",
   type: "watchlist",
   status: "draft",
-  screeningSources: [],
-  settings: {
-    matchThreshold: 80,
-    continuousMonitoring: false,
-    monitoringFrequencyDays: 30,
-    enableFuzzyMatch: true,
-  },
+  screeningSources: [...SCREENING_SOURCES.watchlist],
+  settings: { matchThreshold: 80, continuousMonitoring: false, monitoringFrequencyDays: 30, enableFuzzyMatch: true },
 };
 
-function normalizeReportTemplate(template: ReportTemplate): ReportTemplateForm {
+function toForm(t: ReportTemplate): ReportForm {
   return {
-    name: template.name,
-    type: template.type,
-    status: template.status,
-    screeningSources: template.screeningSources,
+    name: t.name,
+    type: t.type,
+    status: t.status,
+    screeningSources: t.screeningSources,
     settings: {
-      matchThreshold: template.settings.matchThreshold,
-      continuousMonitoring: template.settings.continuousMonitoring,
-      monitoringFrequencyDays: template.settings.monitoringFrequencyDays,
-      enableFuzzyMatch: template.settings.enableFuzzyMatch,
+      matchThreshold: t.settings.matchThreshold,
+      continuousMonitoring: t.settings.continuousMonitoring,
+      monitoringFrequencyDays: t.settings.monitoringFrequencyDays,
+      enableFuzzyMatch: t.settings.enableFuzzyMatch,
     },
   };
 }
@@ -73,66 +68,32 @@ export default function ReportTemplateDetailPage() {
   const router = useRouter();
   const { reportTemplates } = useTemplateStore();
 
-  const isCreateMode = id === "new";
-  const allTemplates = reportTemplates.getAll();
-  const existingTemplate = isCreateMode ? undefined : reportTemplates.getById(id);
+  const isNew = id === "new";
+  const existing = isNew ? undefined : reportTemplates.getById(id);
 
-  const availableSourcesByType = useMemo(() => {
-    return allTemplates.reduce<Record<ReportType, string[]>>(
-      (acc, template) => {
-        template.screeningSources.forEach((source) => {
-          if (!acc[template.type].includes(source)) {
-            acc[template.type].push(source);
-          }
-        });
-        return acc;
-      },
-      {
-        watchlist: [],
-        pep: [],
-        adverse_media: [],
-      },
-    );
-  }, [allTemplates]);
-
-  const [form, setForm] = useState<ReportTemplateForm>(() => {
-    if (isCreateMode || !existingTemplate) {
-      return {
-        ...DEFAULT_REPORT_FORM,
-        screeningSources: availableSourcesByType.watchlist,
-      };
-    }
-    return normalizeReportTemplate(existingTemplate);
-  });
-
+  const [form, setForm] = useState<ReportForm>(() => (existing ? toForm(existing) : DEFAULT_FORM));
   const [prevId, setPrevId] = useState(id);
   if (prevId !== id) {
     setPrevId(id);
-    if (isCreateMode || !existingTemplate) {
-      setForm({
-        ...DEFAULT_REPORT_FORM,
-        screeningSources: availableSourcesByType.watchlist,
-      });
-    } else {
-      setForm(normalizeReportTemplate(existingTemplate));
-    }
+    setForm(existing ? toForm(existing) : DEFAULT_FORM);
   }
 
-  if (!isCreateMode && !existingTemplate) {
-    return (
-      <NotFoundPage
-        section="Report Templates"
-        backHref="/templates/reports"
-        entity="Report template"
-      />
-    );
+  if (!isNew && !existing) {
+    return <NotFoundPage section="Report Templates" backHref="/templates/reports" entity="Report template" />;
   }
 
-  function setStatus(status: TemplateStatus) {
-    setForm((prev) => ({
-      ...prev,
-      status,
-    }));
+  function patch(p: Partial<ReportForm>) {
+    setForm((prev) => ({ ...prev, ...p }));
+  }
+  function patchSettings(p: Partial<ReportForm["settings"]>) {
+    setForm((prev) => ({ ...prev, settings: { ...prev.settings, ...p } }));
+  }
+  function setStatus(s: TemplateStatus) {
+    patch({ status: s });
+  }
+
+  function changeType(type: ReportType) {
+    patch({ type, screeningSources: [...SCREENING_SOURCES[type]] });
   }
 
   function toggleSource(source: string, checked: boolean) {
@@ -140,34 +101,26 @@ export default function ReportTemplateDetailPage() {
       ...prev,
       screeningSources: checked
         ? [...prev.screeningSources, source]
-        : prev.screeningSources.filter((item) => item !== source),
+        : prev.screeningSources.filter((s) => s !== source),
     }));
   }
 
-  function saveTemplate() {
+  function save() {
     const payload: Omit<ReportTemplate, "id" | "createdAt" | "updatedAt"> = {
       ...form,
       name: form.name.trim() || "Untitled report template",
-      screeningSources: form.screeningSources,
       settings: {
         ...form.settings,
-        monitoringFrequencyDays: form.settings.continuousMonitoring
-          ? form.settings.monitoringFrequencyDays
-          : 30,
+        monitoringFrequencyDays: form.settings.continuousMonitoring ? form.settings.monitoringFrequencyDays : 30,
       },
     };
-
-    if (isCreateMode) {
-      reportTemplates.create(payload);
-    } else {
-      reportTemplates.update(id, payload);
-    }
-
+    if (isNew) reportTemplates.create(payload);
+    else reportTemplates.update(id, payload);
     router.push("/templates/reports");
   }
 
-  const sourceOptions = availableSourcesByType[form.type];
-  const title = isCreateMode ? "New Report Template" : existingTemplate?.name ?? "Report Template";
+  const sourceOptions = SCREENING_SOURCES[form.type];
+  const title = isNew ? "New report template" : (existing?.name ?? "Report template");
   const canPublish = form.status === "draft";
   const canArchive = form.status === "draft" || form.status === "active";
 
@@ -176,79 +129,38 @@ export default function ReportTemplateDetailPage() {
       <TopBar
         title={title}
         backHref="/templates/reports"
-        actions={(
-          <>
-            <Button color="primary" size="sm" pill={false} onClick={saveTemplate}>
-              Save
-            </Button>
+        actions={
+          <div className="flex items-center gap-2">
+            {!isNew && (
+              <Badge color={getStatusColor(form.status) as "warning" | "success" | "secondary"} size="sm">
+                {form.status}
+              </Badge>
+            )}
             {canPublish && (
-              <Button
-                color="secondary"
-                variant="outline"
-                size="sm"
-                pill={false}
-                onClick={() => setStatus("active")}
-              >
-                Publish
-              </Button>
+              <Button color="secondary" variant="outline" size="sm" pill={false} onClick={() => setStatus("active")}>Publish</Button>
             )}
             {canArchive && (
-              <Button
-                color="secondary"
-                variant="outline"
-                size="sm"
-                pill={false}
-                onClick={() => setStatus("archived")}
-              >
-                Archive
-              </Button>
+              <Button color="secondary" variant="outline" size="sm" pill={false} onClick={() => setStatus("archived")}>Archive</Button>
             )}
-          </>
-        )}
+            <Button color="primary" size="sm" pill={false} onClick={save}>Save</Button>
+          </div>
+        }
       />
 
       <div className="mx-auto w-full max-w-2xl px-4 py-8 md:px-6">
         <SectionHeading size="xs">General</SectionHeading>
-        <div className="mb-8 space-y-4">
-          <Field label="Name">
-            <Input
-              value={form.name}
-              onChange={(event) => setForm((prev) => ({ ...prev, name: event.target.value }))}
-              placeholder="Template name"
-            />
+        <div className="mb-6">
+          <Field label="Name" description="A descriptive name for this report template">
+            <Input value={form.name} onChange={(e) => patch({ name: e.target.value })} placeholder="e.g. Global Watchlist Screen" />
           </Field>
-
-          <Field label="Type">
-            <div className="w-60">
+        </div>
+        <div className="mb-8">
+          <Field label="Type" description="The category of screening this report performs">
+            <div className="w-48">
               <Select
                 options={REPORT_TYPE_OPTIONS}
                 value={form.type}
-                onChange={(option) => {
-                  if (option) {
-                    const nextType = option.value as ReportType;
-                    setForm((prev) => ({
-                      ...prev,
-                      type: nextType,
-                      screeningSources: availableSourcesByType[nextType],
-                    }));
-                  }
-                }}
-                pill={false}
-                block
-              />
-            </div>
-          </Field>
-
-          <Field label="Status">
-            <div className="w-48">
-              <Select
-                options={TEMPLATE_STATUS_OPTIONS}
-                value={form.status}
-                onChange={(option) => {
-                  if (option) {
-                    setStatus(option.value as TemplateStatus);
-                  }
-                }}
+                onChange={(o) => { if (o) changeType(o.value as ReportType); }}
                 pill={false}
                 block
               />
@@ -256,88 +168,65 @@ export default function ReportTemplateDetailPage() {
           </Field>
         </div>
 
-        <SectionHeading size="xs">Configuration</SectionHeading>
-        <div className="mb-8 rounded-lg border border-[var(--color-border)] p-4">
-          <div className="space-y-3">
-            {sourceOptions.map((source) => (
+        <SectionHeading size="xs">Screening sources</SectionHeading>
+        <div className="mb-8 divide-y divide-[var(--color-border)] rounded-lg border border-[var(--color-border)]">
+          {sourceOptions.map((source) => (
+            <div key={source} className="px-4 py-3">
               <Checkbox
-                key={source}
                 label={source}
                 checked={form.screeningSources.includes(source)}
                 onCheckedChange={(checked) => toggleSource(source, checked)}
               />
-            ))}
-          </div>
+            </div>
+          ))}
         </div>
 
         <SectionHeading size="xs">Settings</SectionHeading>
-        <div className="space-y-5">
-          <Field
-            label="Match threshold"
-            description={`Current threshold: ${form.settings.matchThreshold}`}
-          >
-            <Slider
-              min={0}
-              max={100}
-              step={1}
-              value={form.settings.matchThreshold}
-              onChange={(value) =>
-                setForm((prev) => ({
-                  ...prev,
-                  settings: {
-                    ...prev.settings,
-                    matchThreshold: value,
-                  },
-                }))
-              }
-            />
-          </Field>
-
-          <Switch
-            label="Continuous monitoring"
-            checked={form.settings.continuousMonitoring}
-            onCheckedChange={(checked) =>
-              setForm((prev) => ({
-                ...prev,
-                settings: {
-                  ...prev.settings,
-                  continuousMonitoring: checked,
-                },
-              }))
-            }
-          />
-
-          {form.settings.continuousMonitoring && (
-            <Field label="Monitoring frequency (days)">
-              <Input
-                type="number"
-                value={String(form.settings.monitoringFrequencyDays)}
-                onChange={(event) =>
-                  setForm((prev) => ({
-                    ...prev,
-                    settings: {
-                      ...prev.settings,
-                      monitoringFrequencyDays: Number(event.target.value) || 1,
-                    },
-                  }))
-                }
+        <div className="divide-y divide-[var(--color-border)] rounded-lg border border-[var(--color-border)]">
+          <div className="flex items-center justify-between px-4 py-4">
+            <div className="mr-4">
+              <p className="text-sm font-medium text-[var(--color-text)]">Match threshold</p>
+              <p className="text-sm text-[var(--color-text-secondary)]">Minimum confidence score (0–100): {form.settings.matchThreshold}</p>
+            </div>
+            <div className="w-48 shrink-0">
+              <Slider
+                min={0}
+                max={100}
+                step={1}
+                value={form.settings.matchThreshold}
+                onChange={(v) => patchSettings({ matchThreshold: v })}
               />
-            </Field>
+            </div>
+          </div>
+          <div className="flex items-center justify-between px-4 py-4">
+            <div className="mr-4">
+              <p className="text-sm font-medium text-[var(--color-text)]">Continuous monitoring</p>
+              <p className="text-sm text-[var(--color-text-secondary)]">Automatically re-screen on a recurring schedule</p>
+            </div>
+            <Switch checked={form.settings.continuousMonitoring} onCheckedChange={(c) => patchSettings({ continuousMonitoring: c })} />
+          </div>
+          {form.settings.continuousMonitoring && (
+            <div className="flex items-center justify-between px-4 py-4">
+              <div className="mr-4">
+                <p className="text-sm font-medium text-[var(--color-text)]">Monitoring frequency</p>
+                <p className="text-sm text-[var(--color-text-secondary)]">Days between re-screens</p>
+              </div>
+              <div className="w-20 shrink-0">
+                <Input
+                  type="number"
+                  value={String(form.settings.monitoringFrequencyDays)}
+                  onChange={(e) => patchSettings({ monitoringFrequencyDays: Number(e.target.value) || 1 })}
+                />
+              </div>
+            </div>
           )}
-
-          <Switch
-            label="Enable fuzzy match"
-            checked={form.settings.enableFuzzyMatch}
-            onCheckedChange={(checked) =>
-              setForm((prev) => ({
-                ...prev,
-                settings: {
-                  ...prev.settings,
-                  enableFuzzyMatch: checked,
-                },
-              }))
-            }
-          />
+          <div className="flex items-center justify-between px-4 py-4">
+            <div className="mr-4">
+              <p className="text-sm font-medium text-[var(--color-text)]">Fuzzy matching</p>
+              <p className="text-sm text-[var(--color-text-secondary)]">Allow approximate name matching for broader coverage</p>
+            </div>
+            <Switch checked={form.settings.enableFuzzyMatch} onCheckedChange={(c) => patchSettings({ enableFuzzyMatch: c })} />
+          </div>
         </div>
       </div>
     </div>
