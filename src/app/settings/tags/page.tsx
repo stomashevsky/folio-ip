@@ -14,7 +14,8 @@ import { Badge } from "@plexui/ui/components/Badge";
 import { Button } from "@plexui/ui/components/Button";
 import { Input } from "@plexui/ui/components/Input";
 import { Field } from "@plexui/ui/components/Field";
-import { EditPencil, Plus, Trash } from "@plexui/ui/components/Icon";
+import { DotsHorizontal, Plus } from "@plexui/ui/components/Icon";
+import { Menu } from "@plexui/ui/components/Menu";
 
 export default function TagsPage() {
   const initialTags = useMemo(() => {
@@ -135,28 +136,34 @@ export default function TagsPage() {
                         {tag.count}
                       </td>
                       <td className="px-4 py-3 text-right">
-                        <div className="flex items-center justify-end gap-1">
-                          <Button
-                            color="secondary"
-                            variant="ghost"
-                            size="sm"
-                            uniform
-                            onClick={() =>
-                              setRenaming({ name: tag.name, draft: tag.name })
-                            }
-                          >
-                            <EditPencil />
-                          </Button>
-                          <Button
-                            color="secondary"
-                            variant="ghost"
-                            size="sm"
-                            uniform
-                            onClick={() => setDeleting(tag.name)}
-                          >
-                            <Trash />
-                          </Button>
-                        </div>
+                        <Menu>
+                          <Menu.Trigger>
+                            <Button
+                              color="secondary"
+                              variant="ghost"
+                              size="sm"
+                              pill={false}
+                            >
+                              <DotsHorizontal />
+                            </Button>
+                          </Menu.Trigger>
+                          <Menu.Content align="end" minWidth="auto">
+                            <Menu.Item
+                              onSelect={() =>
+                                setRenaming({ name: tag.name, draft: tag.name })
+                              }
+                            >
+                              Edit
+                            </Menu.Item>
+                            <Menu.Separator />
+                            <Menu.Item
+                              onSelect={() => setDeleting(tag.name)}
+                              className="text-[var(--color-text-danger-ghost)]"
+                            >
+                              Delete
+                            </Menu.Item>
+                          </Menu.Content>
+                        </Menu>
                       </td>
                     </tr>
                   ))}
@@ -180,28 +187,34 @@ export default function TagsPage() {
                         {tag.count} inquiries
                       </span>
                     </div>
-                    <div className="flex items-center gap-1">
-                      <Button
-                        color="secondary"
-                        variant="ghost"
-                        size="sm"
-                        uniform
-                        onClick={() =>
-                          setRenaming({ name: tag.name, draft: tag.name })
-                        }
-                      >
-                        <EditPencil />
-                      </Button>
-                      <Button
-                        color="secondary"
-                        variant="ghost"
-                        size="sm"
-                        uniform
-                        onClick={() => setDeleting(tag.name)}
-                      >
-                        <Trash />
-                      </Button>
-                    </div>
+                    <Menu>
+                      <Menu.Trigger>
+                        <Button
+                          color="secondary"
+                          variant="ghost"
+                          size="sm"
+                          pill={false}
+                        >
+                          <DotsHorizontal />
+                        </Button>
+                      </Menu.Trigger>
+                      <Menu.Content align="end" minWidth="auto">
+                        <Menu.Item
+                          onSelect={() =>
+                            setRenaming({ name: tag.name, draft: tag.name })
+                          }
+                        >
+                          Edit
+                        </Menu.Item>
+                        <Menu.Separator />
+                        <Menu.Item
+                          onSelect={() => setDeleting(tag.name)}
+                          className="text-[var(--color-text-danger-ghost)]"
+                        >
+                          Delete
+                        </Menu.Item>
+                      </Menu.Content>
+                    </Menu>
                   </div>
                 </div>
               ))}
