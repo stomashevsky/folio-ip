@@ -19,4 +19,10 @@ export {
   generateFunnelTimeSeries,
   deriveFunnelHighlights,
   generateSankeyFunnel,
+  generateVerificationTimeSeries,
+  generateVerificationRateTimeSeries,
+  deriveVerificationHighlights,
+  generateReportTimeSeries,
+  generateReportRateTimeSeries,
+  deriveReportHighlights,
 } from "./mock-analytics";

@@ -1,26 +1,26 @@
 "use client";
 
 import {
-  BarChart,
-  Bar,
+  LineChart,
+  Line,
   XAxis,
   YAxis,
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
+  Legend,
 } from "recharts";
-import type { TimeSeriesPoint } from "@/lib/types";
+import type { ReportRatePoint } from "@/lib/types";
 import { CHART_COLORS } from "@/lib/constants/chart-colors";
 
-interface SimpleBarChartProps {
-  data: TimeSeriesPoint[];
-  label?: string;
+interface ReportRatesChartProps {
+  data: ReportRatePoint[];
 }
 
-export function SimpleBarChart({ data, label = "Inquiries" }: SimpleBarChartProps) {
+export function ReportRatesChart({ data }: ReportRatesChartProps) {
   return (
     <ResponsiveContainer width="100%" height={280}>
-      <BarChart data={data} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
+      <LineChart data={data} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
         <CartesianGrid
           stroke="var(--color-border)"
           strokeDasharray=""
@@ -39,6 +39,8 @@ export function SimpleBarChart({ data, label = "Inquiries" }: SimpleBarChartProp
           interval="preserveStartEnd"
         />
         <YAxis
+          domain={[0, 100]}
+          tickFormatter={(v: number) => `${v}%`}
           stroke="var(--color-text-tertiary)"
           fontSize={13}
           tickLine={false}
@@ -52,7 +54,6 @@ export function SimpleBarChart({ data, label = "Inquiries" }: SimpleBarChartProp
             fontSize: "13px",
             color: "var(--color-text)",
           }}
-          itemStyle={{ color: "var(--color-text)" }}
           labelStyle={{ color: "var(--color-text)" }}
           labelFormatter={(label: string) => {
             const d = new Date(label);
@@ -63,17 +64,34 @@ export function SimpleBarChart({ data, label = "Inquiries" }: SimpleBarChartProp
               year: "numeric",
             });
           }}
-          formatter={(value: number) => [value, label]}
-          cursor={{ fill: "var(--color-surface-secondary)" }}
+          formatter={(value: number) => [`${value}%`]}
         />
-        <Bar
-          dataKey="value"
-          fill={CHART_COLORS.accent}
-          radius={[2, 2, 0, 0]}
-          maxBarSize={14}
-          name={label}
+        <Legend
+          verticalAlign="top"
+          align="right"
+          iconType="circle"
+          iconSize={8}
+          wrapperStyle={{ fontSize: "13px", color: "var(--color-text-secondary)" }}
         />
-      </BarChart>
+        <Line
+          type="monotone"
+          dataKey="readyRate"
+          stroke={CHART_COLORS.primary}
+          strokeWidth={2}
+          dot={false}
+          activeDot={{ r: 4 }}
+          name="Ready Rate"
+        />
+        <Line
+          type="monotone"
+          dataKey="matchRate"
+          stroke={CHART_COLORS.danger}
+          strokeWidth={2}
+          dot={false}
+          activeDot={{ r: 4 }}
+          name="Match Rate"
+        />
+      </LineChart>
     </ResponsiveContainer>
   );
 }

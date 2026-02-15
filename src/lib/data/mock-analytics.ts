@@ -5,6 +5,8 @@ import type {
   FunnelStep,
   HighlightMetric,
   RateTimeSeriesPoint,
+  VerificationRatePoint,
+  ReportRatePoint,
   FunnelTimeSeriesPoint,
   SankeyFunnelData,
   SankeyLinkType,
@@ -329,4 +331,148 @@ export function generateRateTimeSeries(days: number): RateTimeSeriesPoint[] {
       approvalRate: Math.round(approvalRate * 10) / 10,
     };
   });
+}
+
+// ─── Verification Analytics ───
+
+export function generateVerificationTimeSeries(
+  periodOrDays: "all" | "3m" | "30d" | "7d" | number,
+): TimeSeriesPoint[] {
+  const lengths: Record<string, number> = { all: 365, "3m": 90, "30d": 30, "7d": 7 };
+  const count = typeof periodOrDays === "number"
+    ? Math.max(1, Math.round(periodOrDays))
+    : lengths[periodOrDays];
+  const endDate = new Date("2026-02-10");
+
+  let walk = 0;
+  return Array.from({ length: count }, (_, i) => {
+    const date = new Date(endDate);
+    date.setDate(date.getDate() - (count - 1 - i));
+    const dayOfWeek = date.getDay();
+
+    const trend = 58 + (i / count) * 18;
+    const weekendFactor = dayOfWeek === 0 || dayOfWeek === 6 ? 0.65 : 1.0;
+    walk += (seededRandom(i * 11 + count * 2) - 0.5) * 8;
+    walk = walk * 0.9;
+    const noise = (seededRandom(i * 17 + count * 5) - 0.5) * 12;
+    const spike = seededRandom(i * 37 + count * 9) > 0.94 ? 15 + seededRandom(i * 47) * 10 : 0;
+    const value = Math.round((trend + walk + noise + spike) * weekendFactor);
+
+    return {
+      date: date.toISOString().split("T")[0],
+      value: Math.max(8, value),
+    };
+  });
+}
+
+export function generateVerificationRateTimeSeries(days: number): VerificationRatePoint[] {
+  const endDate = new Date("2026-02-10");
+
+  return Array.from({ length: days }, (_, i) => {
+    const date = new Date(endDate);
+    date.setDate(date.getDate() - (days - 1 - i));
+
+    const passNoise = (seededRandom(i * 29 + 1100) - 0.5) * 10;
+    const passRate = Math.max(55, Math.min(100, 82 + passNoise));
+
+    const processedNoise = (seededRandom(i * 31 + 1300) - 0.5) * 8;
+    const processedRate = Math.max(70, Math.min(100, 94 + processedNoise));
+
+    return {
+      date: date.toISOString().split("T")[0],
+      passRate: Math.round(passRate * 10) / 10,
+      processedRate: Math.round(processedRate * 10) / 10,
+    };
+  });
+}
+
+export function deriveVerificationHighlights(days: number): HighlightMetric[] {
+  const dailyRate = 72;
+  const total = Math.round(dailyRate * days * (0.85 + seededRandom(days * 2) * 0.3));
+  const govIdCount = Math.round(total * (0.48 + seededRandom(days * 4) * 0.06));
+  const selfieCount = Math.round(total * (0.46 + seededRandom(days * 6) * 0.06));
+  const passRate = 78 + seededRandom(days * 8) * 12;
+  const failRate = 4 + seededRandom(days * 10) * 8;
+  const avgSeconds = 12 + Math.round(seededRandom(days * 12) * 25);
+
+  return [
+    { label: "Total Verifications", value: total.toLocaleString(), tooltip: "All verifications processed in this period" },
+    { label: "Government ID", value: govIdCount.toLocaleString(), tooltip: "Government ID verifications" },
+    { label: "Selfie", value: selfieCount.toLocaleString(), tooltip: "Selfie verifications" },
+    { label: "Pass Rate", value: `${Math.round(passRate * 10) / 10}%`, tooltip: "% of verifications that passed" },
+    { label: "Fail Rate", value: `${Math.round(failRate * 10) / 10}%`, tooltip: "% of verifications that failed" },
+    { label: "Avg Processing", value: `${avgSeconds}s`, tooltip: "Average time to process a verification" },
+  ];
+}
+
+// ─── Report Analytics ───
+
+export function generateReportTimeSeries(
+  periodOrDays: "all" | "3m" | "30d" | "7d" | number,
+): TimeSeriesPoint[] {
+  const lengths: Record<string, number> = { all: 365, "3m": 90, "30d": 30, "7d": 7 };
+  const count = typeof periodOrDays === "number"
+    ? Math.max(1, Math.round(periodOrDays))
+    : lengths[periodOrDays];
+  const endDate = new Date("2026-02-10");
+
+  let walk = 0;
+  return Array.from({ length: count }, (_, i) => {
+    const date = new Date(endDate);
+    date.setDate(date.getDate() - (count - 1 - i));
+    const dayOfWeek = date.getDay();
+
+    const trend = 18 + (i / count) * 8;
+    const weekendFactor = dayOfWeek === 0 || dayOfWeek === 6 ? 0.55 : 1.0;
+    walk += (seededRandom(i * 13 + count * 3) - 0.5) * 5;
+    walk = walk * 0.88;
+    const noise = (seededRandom(i * 19 + count * 6) - 0.5) * 7;
+    const spike = seededRandom(i * 43 + count * 11) > 0.95 ? 8 + seededRandom(i * 53) * 6 : 0;
+    const value = Math.round((trend + walk + noise + spike) * weekendFactor);
+
+    return {
+      date: date.toISOString().split("T")[0],
+      value: Math.max(2, value),
+    };
+  });
+}
+
+export function generateReportRateTimeSeries(days: number): ReportRatePoint[] {
+  const endDate = new Date("2026-02-10");
+
+  return Array.from({ length: days }, (_, i) => {
+    const date = new Date(endDate);
+    date.setDate(date.getDate() - (days - 1 - i));
+
+    const matchNoise = (seededRandom(i * 37 + 1500) - 0.5) * 10;
+    const matchRate = Math.max(1, Math.min(40, 12 + matchNoise));
+
+    const readyNoise = (seededRandom(i * 41 + 1700) - 0.5) * 8;
+    const readyRate = Math.max(75, Math.min(100, 96 + readyNoise));
+
+    return {
+      date: date.toISOString().split("T")[0],
+      matchRate: Math.round(matchRate * 10) / 10,
+      readyRate: Math.round(readyRate * 10) / 10,
+    };
+  });
+}
+
+export function deriveReportHighlights(days: number): HighlightMetric[] {
+  const dailyRate = 24;
+  const total = Math.round(dailyRate * days * (0.8 + seededRandom(days * 3) * 0.4));
+  const watchlistCount = Math.round(total * (0.55 + seededRandom(days * 5) * 0.1));
+  const pepCount = total - watchlistCount;
+  const matchRate = 8 + seededRandom(days * 7) * 10;
+  const noMatchRate = 100 - matchRate;
+  const avgSeconds = 3 + Math.round(seededRandom(days * 13) * 8);
+
+  return [
+    { label: "Total Reports", value: total.toLocaleString(), tooltip: "All screening reports run in this period" },
+    { label: "Watchlist", value: watchlistCount.toLocaleString(), tooltip: "Watchlist screening reports" },
+    { label: "PEP", value: pepCount.toLocaleString(), tooltip: "Politically Exposed Persons screening reports" },
+    { label: "Match Rate", value: `${Math.round(matchRate * 10) / 10}%`, tooltip: "% of reports with at least one match" },
+    { label: "No Match Rate", value: `${Math.round(noMatchRate * 10) / 10}%`, tooltip: "% of reports with no matches" },
+    { label: "Avg Processing", value: `${avgSeconds}s`, tooltip: "Average time to complete a report" },
+  ];
 }

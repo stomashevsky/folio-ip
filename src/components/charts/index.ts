@@ -5,5 +5,7 @@ export type { SankeyMetric } from "./FunnelSankey";
 export { FunnelTrendChart } from "./FunnelTrendChart";
 export { InquiriesTrendChart } from "./InquiriesTrendChart";
 export { RatesLineChart } from "./RatesLineChart";
+export { ReportRatesChart } from "./ReportRatesChart";
 export { SimpleBarChart } from "./SimpleBarChart";
 export { StatusDonutChart } from "./StatusDonutChart";
+export { VerificationRatesChart } from "./VerificationRatesChart";

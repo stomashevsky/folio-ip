@@ -1,4 +1,11 @@
-import type { TimeSeriesPoint, RateTimeSeriesPoint, FunnelTimeSeriesPoint, AnalyticsInterval } from "@/lib/types";
+import type {
+  TimeSeriesPoint,
+  RateTimeSeriesPoint,
+  VerificationRatePoint,
+  ReportRatePoint,
+  FunnelTimeSeriesPoint,
+  AnalyticsInterval,
+} from "@/lib/types";
 import { FUNNEL_STEPS } from "@/lib/data/mock-analytics";
 
 /** Group daily volume data into weekly or monthly buckets (summed) */
@@ -95,7 +102,60 @@ export function aggregateFunnelRates(
   });
 }
 
-/** Produce a bucket key (ISO week start for weekly, month start for monthly) */
+export function aggregateVerificationRates(
+  data: VerificationRatePoint[],
+  interval: AnalyticsInterval,
+): VerificationRatePoint[] {
+  if (interval === "daily") return data;
+
+  const buckets = new Map<string, { passSum: number; processedSum: number; count: number }>();
+
+  for (const point of data) {
+    const key = bucketKey(point.date, interval);
+    const existing = buckets.get(key);
+    if (existing) {
+      existing.passSum += point.passRate;
+      existing.processedSum += point.processedRate;
+      existing.count += 1;
+    } else {
+      buckets.set(key, { passSum: point.passRate, processedSum: point.processedRate, count: 1 });
+    }
+  }
+
+  return Array.from(buckets.entries()).map(([date, b]) => ({
+    date,
+    passRate: Math.round((b.passSum / b.count) * 10) / 10,
+    processedRate: Math.round((b.processedSum / b.count) * 10) / 10,
+  }));
+}
+
+export function aggregateReportRates(
+  data: ReportRatePoint[],
+  interval: AnalyticsInterval,
+): ReportRatePoint[] {
+  if (interval === "daily") return data;
+
+  const buckets = new Map<string, { matchSum: number; readySum: number; count: number }>();
+
+  for (const point of data) {
+    const key = bucketKey(point.date, interval);
+    const existing = buckets.get(key);
+    if (existing) {
+      existing.matchSum += point.matchRate;
+      existing.readySum += point.readyRate;
+      existing.count += 1;
+    } else {
+      buckets.set(key, { matchSum: point.matchRate, readySum: point.readyRate, count: 1 });
+    }
+  }
+
+  return Array.from(buckets.entries()).map(([date, b]) => ({
+    date,
+    matchRate: Math.round((b.matchSum / b.count) * 10) / 10,
+    readyRate: Math.round((b.readySum / b.count) * 10) / 10,
+  }));
+}
+
 function bucketKey(dateStr: string, interval: AnalyticsInterval): string {
   const d = new Date(dateStr);
   if (interval === "weekly") {

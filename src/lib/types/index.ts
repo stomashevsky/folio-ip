@@ -224,6 +224,20 @@ export interface RateTimeSeriesPoint {
   approvalRate: number; // 0-100
 }
 
+// Verification rate time series: pass + processed rates per day
+export interface VerificationRatePoint {
+  date: string; // ISO 8601 date
+  passRate: number; // 0-100
+  processedRate: number; // 0-100
+}
+
+// Report rate time series: match + ready rates per day
+export interface ReportRatePoint {
+  date: string; // ISO 8601 date
+  matchRate: number; // 0-100
+  readyRate: number; // 0-100
+}
+
 // Highlights strip: compact metrics shown in a horizontal row
 export interface HighlightMetric {
   label: string;
