@@ -160,10 +160,6 @@ function VerificationTemplateDetailContent() {
   function patchSettings(p: Partial<VerificationForm["settings"]>) {
     setForm((prev) => ({ ...prev, settings: { ...prev.settings, ...p } }));
   }
-  function setStatus(s: TemplateStatus) {
-    patch({ status: s, lastPublishedAt: s === "active" ? new Date().toISOString() : form.lastPublishedAt });
-  }
-
   function changeType(type: VerificationType) {
     setForm((prev) => ({ ...prev, type, checks: checksForType(type) }));
   }
@@ -172,13 +168,15 @@ function VerificationTemplateDetailContent() {
     setForm((prev) => ({ ...prev, checks: prev.checks.map((c, idx) => (idx === i ? next : c)) }));
   }
 
-  function save() {
+  function save(formOverride?: VerificationForm) {
+    const f = formOverride ?? form;
+    if (formOverride) setForm(f);
     setSaveState("saving");
     clearTimeout(saveTimerRef.current);
     const payload: Omit<VerificationTemplate, "id" | "createdAt" | "updatedAt"> = {
-      ...form,
-      name: form.name.trim() || "Untitled verification template",
-      checks: form.checks.filter((c) => c.enabled),
+      ...f,
+      name: f.name.trim() || "Untitled verification template",
+      checks: f.checks.filter((c) => c.enabled),
     };
     if (isNew) {
       const created = verificationTemplates.create(payload);
@@ -186,7 +184,7 @@ function VerificationTemplateDetailContent() {
     } else {
       verificationTemplates.update(id, payload);
     }
-    setInitialForm(form);
+    setInitialForm(f);
     saveTimerRef.current = setTimeout(() => {
       setSaveState("saved");
       saveTimerRef.current = setTimeout(() => setSaveState("idle"), 1500);
@@ -202,7 +200,7 @@ function VerificationTemplateDetailContent() {
 
   const title = isNew ? "New verification template" : (existing?.name ?? "Verification template");
   const canPublish = form.status === "draft";
-  const canArchive = form.status === "draft" || form.status === "active";
+  const canUnpublish = form.status === "active";
   const backHref = "/templates/verifications";
 
   return (
@@ -216,23 +214,23 @@ function VerificationTemplateDetailContent() {
             {!isNew && (
               <Menu>
                 <Menu.Trigger>
-                  <Button color="secondary" variant="soft" size="sm" pill={false}>
+                  <Button color="secondary" variant="soft" size="sm" pill={false} className="[--button-ring-color:transparent]">
                     <DotsHorizontal />
                   </Button>
                 </Menu.Trigger>
                 <Menu.Content minWidth="auto">
                   {canPublish && (
-                    <Menu.Item onSelect={() => setStatus("active")}>Publish</Menu.Item>
+                    <Menu.Item onSelect={() => save({ ...form, status: "active", lastPublishedAt: new Date().toISOString() })}>Publish</Menu.Item>
                   )}
-                  {canArchive && (
-                    <Menu.Item onSelect={() => setStatus("archived")}>Archive</Menu.Item>
+                  {canUnpublish && (
+                    <Menu.Item onSelect={() => save({ ...form, status: "draft" })}>Unpublish</Menu.Item>
                   )}
                   <Menu.Separator />
                   <Menu.Item onSelect={handleDelete} className="text-[var(--color-text-danger-ghost)]">Delete</Menu.Item>
                 </Menu.Content>
               </Menu>
             )}
-            <Button color="primary" size="sm" pill={false} onClick={save} loading={saveState === "saving"} disabled={!isDirty || saveState !== "idle"}>{saveState === "saved" ? "Saved!" : "Save"}</Button>
+            <Button color="primary" size="sm" pill={false} onClick={() => save()} loading={saveState === "saving"} disabled={!isDirty || saveState !== "idle"}>{saveState === "saved" ? "Saved!" : "Save"}</Button>
           </div>
         }
       />

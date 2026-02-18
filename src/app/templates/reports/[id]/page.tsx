@@ -126,10 +126,6 @@ function ReportTemplateDetailContent() {
   function patchSettings(p: Partial<ReportForm["settings"]>) {
     setForm((prev) => ({ ...prev, settings: { ...prev.settings, ...p } }));
   }
-  function setStatus(s: TemplateStatus) {
-    patch({ status: s });
-  }
-
   function changeType(type: ReportType) {
     patch({ type, screeningSources: [...SCREENING_SOURCES[type]] });
   }
@@ -143,15 +139,17 @@ function ReportTemplateDetailContent() {
     }));
   }
 
-  function save() {
+  function save(formOverride?: ReportForm) {
+    const f = formOverride ?? form;
+    if (formOverride) setForm(f);
     setSaveState("saving");
     clearTimeout(saveTimerRef.current);
     const payload: Omit<ReportTemplate, "id" | "createdAt" | "updatedAt"> = {
-      ...form,
-      name: form.name.trim() || "Untitled report template",
+      ...f,
+      name: f.name.trim() || "Untitled report template",
       settings: {
-        ...form.settings,
-        monitoringFrequencyDays: form.settings.continuousMonitoring ? form.settings.monitoringFrequencyDays : 30,
+        ...f.settings,
+        monitoringFrequencyDays: f.settings.continuousMonitoring ? f.settings.monitoringFrequencyDays : 30,
       },
     };
     if (isNew) {
@@ -160,7 +158,7 @@ function ReportTemplateDetailContent() {
     } else {
       reportTemplates.update(id, payload);
     }
-    setInitialForm(form);
+    setInitialForm(f);
     saveTimerRef.current = setTimeout(() => {
       setSaveState("saved");
       saveTimerRef.current = setTimeout(() => setSaveState("idle"), 1500);
@@ -177,7 +175,7 @@ function ReportTemplateDetailContent() {
   const sourceOptions = SCREENING_SOURCES[form.type];
   const title = isNew ? "New report template" : (existing?.name ?? "Report template");
   const canPublish = form.status === "draft";
-  const canArchive = form.status === "draft" || form.status === "active";
+  const canUnpublish = form.status === "active";
   const backHref = "/templates/reports";
 
   return (
@@ -191,23 +189,23 @@ function ReportTemplateDetailContent() {
             {!isNew && (
               <Menu>
                 <Menu.Trigger>
-                  <Button color="secondary" variant="soft" size="sm" pill={false}>
+                  <Button color="secondary" variant="soft" size="sm" pill={false} className="[--button-ring-color:transparent]">
                     <DotsHorizontal />
                   </Button>
                 </Menu.Trigger>
                 <Menu.Content minWidth="auto">
                   {canPublish && (
-                    <Menu.Item onSelect={() => setStatus("active")}>Publish</Menu.Item>
+                    <Menu.Item onSelect={() => save({ ...form, status: "active" })}>Publish</Menu.Item>
                   )}
-                  {canArchive && (
-                    <Menu.Item onSelect={() => setStatus("archived")}>Archive</Menu.Item>
+                  {canUnpublish && (
+                    <Menu.Item onSelect={() => save({ ...form, status: "draft" })}>Unpublish</Menu.Item>
                   )}
                   <Menu.Separator />
                   <Menu.Item onSelect={handleDelete} className="text-[var(--color-text-danger-ghost)]">Delete</Menu.Item>
                 </Menu.Content>
               </Menu>
             )}
-            <Button color="primary" size="sm" pill={false} onClick={save} loading={saveState === "saving"} disabled={!isDirty || saveState !== "idle"}>{saveState === "saved" ? "Saved!" : "Save"}</Button>
+            <Button color="primary" size="sm" pill={false} onClick={() => save()} loading={saveState === "saving"} disabled={!isDirty || saveState !== "idle"}>{saveState === "saved" ? "Saved!" : "Save"}</Button>
           </div>
         }
       />

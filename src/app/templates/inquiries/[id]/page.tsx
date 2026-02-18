@@ -156,10 +156,6 @@ function InquiryTemplateDetailContent() {
   function patchSettings(p: Partial<InquiryForm["settings"]>) {
     setForm((prev) => ({ ...prev, settings: { ...prev.settings, ...p } }));
   }
-  function setStatus(s: TemplateStatus) {
-    patch({ status: s, lastPublishedAt: s === "active" ? new Date().toISOString() : form.lastPublishedAt });
-  }
-
   function addStep() {
     setForm((prev) => ({ ...prev, steps: [...prev.steps, defaultStep()] }));
   }
@@ -179,13 +175,15 @@ function InquiryTemplateDetailContent() {
     });
   }
 
-  function save() {
+  function save(formOverride?: InquiryForm) {
+    const f = formOverride ?? form;
+    if (formOverride) setForm(f);
     setSaveState("saving");
     clearTimeout(saveTimerRef.current);
     const payload: Omit<InquiryTemplate, "id" | "createdAt" | "updatedAt"> = {
-      ...form,
-      description: form.description.trim() || undefined,
-      settings: { ...form.settings, redirectUrl: form.settings.redirectUrl.trim() || undefined },
+      ...f,
+      description: f.description.trim() || undefined,
+      settings: { ...f.settings, redirectUrl: f.settings.redirectUrl.trim() || undefined },
     };
     if (isNew) {
       const created = inquiryTemplates.create(payload);
@@ -193,7 +191,7 @@ function InquiryTemplateDetailContent() {
     } else {
       inquiryTemplates.update(id, payload);
     }
-    setInitialForm(form);
+    setInitialForm(f);
     saveTimerRef.current = setTimeout(() => {
       setSaveState("saved");
       saveTimerRef.current = setTimeout(() => setSaveState("idle"), 1500);
@@ -209,7 +207,7 @@ function InquiryTemplateDetailContent() {
 
   const title = isNew ? "New inquiry template" : (existing?.name ?? "Inquiry template");
   const canPublish = form.status === "draft";
-  const canArchive = form.status === "draft" || form.status === "active";
+  const canUnpublish = form.status === "active";
   const backHref = "/templates/inquiries";
 
   return (
@@ -223,23 +221,23 @@ function InquiryTemplateDetailContent() {
             {!isNew && (
               <Menu>
                 <Menu.Trigger>
-                  <Button color="secondary" variant="soft" size="sm" pill={false}>
+                  <Button color="secondary" variant="soft" size="sm" pill={false} className="[--button-ring-color:transparent]">
                     <DotsHorizontal />
                   </Button>
                 </Menu.Trigger>
                 <Menu.Content minWidth="auto">
                   {canPublish && (
-                    <Menu.Item onSelect={() => setStatus("active")}>Publish</Menu.Item>
+                    <Menu.Item onSelect={() => save({ ...form, status: "active", lastPublishedAt: new Date().toISOString() })}>Publish</Menu.Item>
                   )}
-                  {canArchive && (
-                    <Menu.Item onSelect={() => setStatus("archived")}>Archive</Menu.Item>
+                  {canUnpublish && (
+                    <Menu.Item onSelect={() => save({ ...form, status: "draft" })}>Unpublish</Menu.Item>
                   )}
                   <Menu.Separator />
                   <Menu.Item onSelect={handleDelete} className="text-[var(--color-text-danger-ghost)]">Delete</Menu.Item>
                 </Menu.Content>
               </Menu>
             )}
-            <Button color="primary" size="sm" pill={false} onClick={save} loading={saveState === "saving"} disabled={!isDirty || saveState !== "idle"}>{saveState === "saved" ? "Saved!" : "Save"}</Button>
+            <Button color="primary" size="sm" pill={false} onClick={() => save()} loading={saveState === "saving"} disabled={!isDirty || saveState !== "idle"}>{saveState === "saved" ? "Saved!" : "Save"}</Button>
           </div>
         }
       />
