@@ -54,7 +54,7 @@ function buildEdge(
     source,
     target,
     type: "flowEdge" as const,
-    markerEnd: { type: MarkerType.ArrowClosed, color: stroke },
+    markerEnd: { type: MarkerType.ArrowClosed, color: stroke, width: 16, height: 16 },
     data: { edgeStyle: style, edgePriority: priority ?? 1, colorScheme },
     style: { stroke },
     ...(label ? { label } : {}),

@@ -23,17 +23,6 @@ const LAYOUT_OPTIONS: Record<string, string> = {
   "elk.layered.mergeEdges": "true",
 };
 
-interface ElkPoint {
-  x: number;
-  y: number;
-}
-
-interface ElkSection {
-  startPoint: ElkPoint;
-  endPoint: ElkPoint;
-  bendPoints?: ElkPoint[];
-}
-
 function getElkPorts(node: Node) {
   const t = node.type;
   const id = node.id;
@@ -51,69 +40,75 @@ function getElkPorts(node: Node) {
 }
 
 /**
- * Convert ELK edge sections (orthogonal segments) into an SVG path
- * with small rounded corners at each bend.
+ * Trace the happy path by following the highest-priority edge from each node,
+ * starting from __start__. Returns a set of node IDs on the happy path.
  */
-function buildPathFromSections(sections: ElkSection[]): {
-  path: string;
-  labelX: number;
-  labelY: number;
-} {
-  const pts: ElkPoint[] = [];
-  for (const s of sections) {
-    pts.push(s.startPoint);
-    if (s.bendPoints) pts.push(...s.bendPoints);
-    pts.push(s.endPoint);
+function traceHappyPath(edges: Edge[]): Set<string> {
+  const outgoing = new Map<string, { target: string; priority: number }[]>();
+  for (const e of edges) {
+    const list = outgoing.get(e.source) ?? [];
+    list.push({ target: e.target, priority: (e.data?.edgePriority as number) ?? 1 });
+    outgoing.set(e.source, list);
   }
 
-  if (pts.length < 2) return { path: "", labelX: 0, labelY: 0 };
+  const happyIds = new Set<string>();
+  let current: string | undefined = "__start__";
+  const visited = new Set<string>();
 
-  const R = 6;
-  let d = `M ${pts[0].x} ${pts[0].y}`;
+  while (current && !visited.has(current)) {
+    visited.add(current);
+    happyIds.add(current);
+    const outs = outgoing.get(current);
+    if (!outs || outs.length === 0) break;
+    outs.sort((a, b) => b.priority - a.priority);
+    current = outs[0].target;
+  }
+  if (current && !happyIds.has(current)) {
+    happyIds.add(current);
+  }
 
-  for (let i = 1; i < pts.length - 1; i++) {
-    const prev = pts[i - 1];
-    const curr = pts[i];
-    const next = pts[i + 1];
+  return happyIds;
+}
 
-    const dx1 = curr.x - prev.x;
-    const dy1 = curr.y - prev.y;
-    const dx2 = next.x - curr.x;
-    const dy2 = next.y - curr.y;
+/**
+ * Post-process ELK layout:
+ * 1. Align happy-path nodes to the same X coordinate
+ * 2. Push overlapping non-happy-path nodes to the right
+ */
+function alignHappyPath(
+  posMap: Map<string, { x: number; y: number }>,
+  edges: Edge[],
+): void {
+  const happyIds = traceHappyPath(edges);
+  if (happyIds.size < 2) return;
 
-    const len1 = Math.sqrt(dx1 * dx1 + dy1 * dy1);
-    const len2 = Math.sqrt(dx2 * dx2 + dy2 * dy2);
-    const r = Math.min(R, len1 / 2, len2 / 2);
+  const startPos = posMap.get("__start__");
+  if (!startPos) return;
+  const alignX = startPos.x;
 
-    if (r > 0.5 && len1 > 0 && len2 > 0) {
-      const bx = curr.x - (dx1 / len1) * r;
-      const by = curr.y - (dy1 / len1) * r;
-      const ax = curr.x + (dx2 / len2) * r;
-      const ay = curr.y + (dy2 / len2) * r;
-      d += ` L ${bx} ${by} Q ${curr.x} ${curr.y} ${ax} ${ay}`;
-    } else {
-      d += ` L ${curr.x} ${curr.y}`;
+  // Align all happy-path nodes to __start__'s X
+  for (const id of happyIds) {
+    const pos = posMap.get(id);
+    if (pos) pos.x = alignX;
+  }
+
+  // Push non-happy-path nodes that now overlap
+  const happyPositions = [...happyIds]
+    .map((id) => posMap.get(id))
+    .filter(Boolean) as { x: number; y: number }[];
+
+  for (const [id, pos] of posMap.entries()) {
+    if (happyIds.has(id)) continue;
+
+    for (const hp of happyPositions) {
+      const overlapX = pos.x < hp.x + NODE_WIDTH + 40 && pos.x + NODE_WIDTH > hp.x - 40;
+      const overlapY = pos.y < hp.y + NODE_HEIGHT + 20 && pos.y + NODE_HEIGHT > hp.y - 20;
+      if (overlapX && overlapY) {
+        pos.x = hp.x + NODE_WIDTH + 60;
+        break;
+      }
     }
   }
-
-  const last = pts[pts.length - 1];
-  d += ` L ${last.x} ${last.y}`;
-
-  let bestIdx = 1;
-  let bestLen = 0;
-  for (let i = 1; i < pts.length; i++) {
-    const dx = pts[i].x - pts[i - 1].x;
-    const dy = pts[i].y - pts[i - 1].y;
-    const len = dx * dx + dy * dy;
-    if (len > bestLen) {
-      bestLen = len;
-      bestIdx = i;
-    }
-  }
-  const labelX = (pts[bestIdx - 1].x + pts[bestIdx].x) / 2;
-  const labelY = (pts[bestIdx - 1].y + pts[bestIdx].y) / 2;
-
-  return { path: d, labelX, labelY };
 }
 
 export async function getLayoutedElements(
@@ -156,13 +151,7 @@ export async function getLayoutedElements(
     posMap.set(child.id, { x: child.x ?? 0, y: child.y ?? 0 });
   }
 
-  const edgePathMap = new Map<string, { path: string; labelX: number; labelY: number }>();
-  for (const e of result.edges ?? []) {
-    const sections = (e as unknown as { sections?: ElkSection[] }).sections;
-    if (sections && sections.length > 0) {
-      edgePathMap.set(e.id, buildPathFromSections(sections));
-    }
-  }
+  alignHappyPath(posMap, edges);
 
   return {
     nodes: nodes.map((node) => {
@@ -174,17 +163,6 @@ export async function getLayoutedElements(
         targetPosition: Position.Top,
       };
     }),
-    edges: edges.map((edge) => {
-      const route = edgePathMap.get(edge.id);
-      return {
-        ...edge,
-        data: {
-          ...edge.data,
-          ...(route
-            ? { elkPath: route.path, elkLabelX: route.labelX, elkLabelY: route.labelY }
-            : {}),
-        },
-      };
-    }),
+    edges,
   };
 }
