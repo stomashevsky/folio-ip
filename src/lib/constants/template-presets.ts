@@ -54,17 +54,286 @@ export interface ReportPresetDefaults {
 }
 
 // ─── Inquiry Template Presets ───
+// Matches the 24 presets from Persona's "Choose a template" dialog.
 
 export const INQUIRY_TEMPLATE_PRESETS: TemplatePreset<"inquiry">[] = [
   {
-    id: "inq_preset_gov_id_selfie",
-    name: "Government ID + Selfie",
-    description: "Full identity verification with government ID and biometric selfie match",
+    id: "inq_preset_aamva",
+    name: "AAMVA",
+    description: "Use this template as a starting point for AAMVA driver's license data verifications. Standalone AAMVA verifications are recommended for internal Cases use only.",
     icon: "🪪",
     templateType: "inquiry",
     defaults: {
-      name: "KYC: GovID + Selfie",
-      description: "Identity verification with government ID and selfie match",
+      name: "AAMVA",
+      description: "AAMVA driver's license data verification",
+      steps: [
+        { verificationType: "aamva", required: true, onPass: "approve", onFail: "decline", onRetry: "retry", maxRetries: 2 },
+      ],
+      settings: { expiresInDays: 14 },
+    },
+  },
+  {
+    id: "inq_preset_database",
+    name: "Database (name, birthdate, address)",
+    description: "Use this template as a starting point for Database identity verifications using name, birthdate, and address.",
+    icon: "🗄️",
+    templateType: "inquiry",
+    defaults: {
+      name: "Database (name, birthdate, address)",
+      description: "Database identity verification using name, birthdate, and address",
+      steps: [
+        { verificationType: "database", required: true, onPass: "approve", onFail: "needs_review", onRetry: "retry", maxRetries: 1 },
+      ],
+      settings: { expiresInDays: 7 },
+    },
+  },
+  {
+    id: "inq_preset_database_or_gov_id",
+    name: "Database Or Government ID (Front side only)",
+    description: "Use this template as a starting point for Database or Government ID identity verifications based on the country.",
+    icon: "🔀",
+    templateType: "inquiry",
+    defaults: {
+      name: "Database Or Government ID (Front side only)",
+      description: "Database or Government ID verification based on the country",
+      steps: [
+        { verificationType: "database", required: false, onPass: "approve", onFail: "continue", onRetry: "retry", maxRetries: 1 },
+        { verificationType: "government_id", required: true, onPass: "approve", onFail: "decline", onRetry: "retry", maxRetries: 3 },
+      ],
+      settings: { expiresInDays: 14 },
+    },
+  },
+  {
+    id: "inq_preset_database_or_gov_id_selfie",
+    name: "Database Or Government ID (Front side only) and Selfie",
+    description: "Use this template as a starting point for Database or Government ID and live Selfie identity verifications based on the country.",
+    icon: "🔀",
+    templateType: "inquiry",
+    defaults: {
+      name: "Database Or Government ID (Front side only) and Selfie",
+      description: "Database or Government ID and live Selfie verification based on the country",
+      steps: [
+        { verificationType: "database", required: false, onPass: "continue", onFail: "continue", onRetry: "retry", maxRetries: 1 },
+        { verificationType: "government_id", required: true, onPass: "continue", onFail: "decline", onRetry: "retry", maxRetries: 3 },
+        { verificationType: "selfie", required: true, onPass: "approve", onFail: "needs_review", onRetry: "retry", maxRetries: 2 },
+      ],
+      settings: { expiresInDays: 14 },
+    },
+  },
+  {
+    id: "inq_preset_database_phone_carrier",
+    name: "Database Phone Carrier",
+    description: "Use this template as a starting point for Database Phone Carrier verifications in the United States.",
+    icon: "📱",
+    templateType: "inquiry",
+    defaults: {
+      name: "Database Phone Carrier",
+      description: "Database Phone Carrier verification in the United States",
+      steps: [
+        { verificationType: "database_phone_carrier", required: true, onPass: "approve", onFail: "needs_review", onRetry: "retry", maxRetries: 1 },
+      ],
+      settings: { expiresInDays: 7 },
+    },
+  },
+  {
+    id: "inq_preset_database_ssn",
+    name: "Database (name, birthdate, address, social security number)",
+    description: "Use this template as a starting point for Database identity verifications using name, birthdate, address and social security number.",
+    icon: "🗄️",
+    templateType: "inquiry",
+    defaults: {
+      name: "Database (name, birthdate, address, SSN)",
+      description: "Database identity verification using name, birthdate, address and social security number",
+      steps: [
+        { verificationType: "database_ssn", required: true, onPass: "approve", onFail: "needs_review", onRetry: "retry", maxRetries: 1 },
+      ],
+      settings: { expiresInDays: 7 },
+    },
+  },
+  {
+    id: "inq_preset_document",
+    name: "Document",
+    description: "Use this template as a starting point to process non-government-issued documents. Additional configuration required.",
+    icon: "📄",
+    templateType: "inquiry",
+    defaults: {
+      name: "Document",
+      description: "Non-government-issued document verification",
+      steps: [
+        { verificationType: "document", required: true, onPass: "approve", onFail: "needs_review", onRetry: "retry", maxRetries: 2 },
+      ],
+      settings: { expiresInDays: 21 },
+    },
+  },
+  {
+    id: "inq_preset_email_address",
+    name: "Email Address",
+    description: "Use this template as a starting point for Email Address verifications.",
+    icon: "✉️",
+    templateType: "inquiry",
+    defaults: {
+      name: "Email Address",
+      description: "Email address verification",
+      steps: [
+        { verificationType: "email_address", required: true, onPass: "approve", onFail: "decline", onRetry: "retry", maxRetries: 2 },
+      ],
+      settings: { expiresInDays: 3 },
+    },
+  },
+  {
+    id: "inq_preset_gov_id_front_database",
+    name: "Government ID (Front side only) and Database",
+    description: "Use this template as a starting point for Government ID front side and Database identity verifications.",
+    icon: "🪪",
+    templateType: "inquiry",
+    defaults: {
+      name: "Government ID (Front side only) and Database",
+      description: "Government ID front side and Database identity verification",
+      steps: [
+        { verificationType: "government_id", required: true, onPass: "continue", onFail: "decline", onRetry: "retry", maxRetries: 3 },
+        { verificationType: "database", required: true, onPass: "approve", onFail: "needs_review", onRetry: "retry", maxRetries: 1 },
+      ],
+      settings: { expiresInDays: 14 },
+    },
+  },
+  {
+    id: "inq_preset_gov_id_front_database_selfie",
+    name: "Government ID (Front side only) and Database and Selfie",
+    description: "Use this template as a starting point for Government ID front side, Database, and live Selfie identity verifications.",
+    icon: "🪪",
+    templateType: "inquiry",
+    defaults: {
+      name: "Government ID (Front side only) and Database and Selfie",
+      description: "Government ID front side, Database, and live Selfie identity verification",
+      steps: [
+        { verificationType: "government_id", required: true, onPass: "continue", onFail: "decline", onRetry: "retry", maxRetries: 3 },
+        { verificationType: "database", required: true, onPass: "continue", onFail: "needs_review", onRetry: "retry", maxRetries: 1 },
+        { verificationType: "selfie", required: true, onPass: "approve", onFail: "needs_review", onRetry: "retry", maxRetries: 2 },
+      ],
+      settings: { expiresInDays: 14 },
+    },
+  },
+  {
+    id: "inq_preset_gov_id_front_document",
+    name: "Government ID (Front side only) and Document",
+    description: "Use this template as a starting point to verify a government-issued ID (front side only) along with a supporting document. Additional configuration required.",
+    icon: "🪪",
+    templateType: "inquiry",
+    defaults: {
+      name: "Government ID (Front side only) and Document",
+      description: "Government ID front side and supporting document verification",
+      steps: [
+        { verificationType: "government_id", required: true, onPass: "continue", onFail: "decline", onRetry: "retry", maxRetries: 3 },
+        { verificationType: "document", required: true, onPass: "approve", onFail: "needs_review", onRetry: "retry", maxRetries: 2 },
+      ],
+      settings: { expiresInDays: 21 },
+    },
+  },
+  {
+    id: "inq_preset_gov_id_proof_of_address",
+    name: "Government ID and Proof of Address",
+    description: "Use this template to verify a government-issued ID along with proof of address documentation. No additional configuration required.",
+    icon: "🏠",
+    templateType: "inquiry",
+    defaults: {
+      name: "Government ID and Proof of Address",
+      description: "Government ID and proof of address documentation verification",
+      steps: [
+        { verificationType: "government_id", required: true, onPass: "continue", onFail: "decline", onRetry: "retry", maxRetries: 3 },
+        { verificationType: "document", required: true, onPass: "approve", onFail: "needs_review", onRetry: "retry", maxRetries: 2 },
+      ],
+      settings: { expiresInDays: 30 },
+    },
+  },
+  {
+    id: "inq_preset_gov_id_front_form_selfie",
+    name: "Government ID (Front side only) and pre-filled form and Selfie",
+    description: "Use this template as a starting point for Government ID front side and a prefilled form and live Selfie identity verifications.",
+    icon: "📝",
+    templateType: "inquiry",
+    defaults: {
+      name: "Government ID (Front side only) and pre-filled form and Selfie",
+      description: "Government ID front side, pre-filled form, and live Selfie identity verification",
+      steps: [
+        { verificationType: "government_id", required: true, onPass: "continue", onFail: "decline", onRetry: "retry", maxRetries: 3 },
+        { verificationType: "selfie", required: true, onPass: "approve", onFail: "needs_review", onRetry: "retry", maxRetries: 2 },
+      ],
+      settings: { expiresInDays: 14 },
+    },
+  },
+  {
+    id: "inq_preset_gov_id_selfie_document",
+    name: "Government ID, Selfie, and Document",
+    description: "Use this template as a starting point to verify a government-issued ID, capture a live selfie, and validate a supporting document. Additional configuration required.",
+    icon: "🪪",
+    templateType: "inquiry",
+    defaults: {
+      name: "Government ID, Selfie, and Document",
+      description: "Government ID, live selfie, and supporting document verification",
+      steps: [
+        { verificationType: "government_id", required: true, onPass: "continue", onFail: "decline", onRetry: "retry", maxRetries: 3 },
+        { verificationType: "selfie", required: true, onPass: "continue", onFail: "needs_review", onRetry: "retry", maxRetries: 2 },
+        { verificationType: "document", required: true, onPass: "approve", onFail: "needs_review", onRetry: "retry", maxRetries: 2 },
+      ],
+      settings: { expiresInDays: 21 },
+    },
+  },
+  {
+    id: "inq_preset_gov_id_selfie_proof_of_address",
+    name: "Government ID, Selfie and Proof of Address",
+    description: "Use this template to verify a government-issued ID, capture a live selfie, and validate proof of address documentation. No additional configuration required.",
+    icon: "🏠",
+    templateType: "inquiry",
+    defaults: {
+      name: "Government ID, Selfie and Proof of Address",
+      description: "Government ID, live selfie, and proof of address documentation verification",
+      steps: [
+        { verificationType: "government_id", required: true, onPass: "continue", onFail: "decline", onRetry: "retry", maxRetries: 3 },
+        { verificationType: "selfie", required: true, onPass: "continue", onFail: "needs_review", onRetry: "retry", maxRetries: 2 },
+        { verificationType: "document", required: true, onPass: "approve", onFail: "needs_review", onRetry: "retry", maxRetries: 2 },
+      ],
+      settings: { expiresInDays: 30 },
+    },
+  },
+  {
+    id: "inq_preset_gov_id_both_sides",
+    name: "Government ID (Both sides)",
+    description: "Use this template as a starting point for Government ID front and back side identity verifications.",
+    icon: "🆔",
+    templateType: "inquiry",
+    defaults: {
+      name: "Government ID (Both sides)",
+      description: "Government ID front and back side identity verification",
+      steps: [
+        { verificationType: "government_id", required: true, onPass: "approve", onFail: "decline", onRetry: "retry", maxRetries: 3 },
+      ],
+      settings: { expiresInDays: 14 },
+    },
+  },
+  {
+    id: "inq_preset_gov_id_front_only",
+    name: "Government ID (Front side only)",
+    description: "Use this template as a starting point for Government ID front side identity verifications. The submitted ID is auto-classified, users are not required to input their country and ID type before capture or upload.",
+    icon: "🆔",
+    templateType: "inquiry",
+    defaults: {
+      name: "Government ID (Front side only)",
+      description: "Government ID front side identity verification with auto-classification",
+      steps: [
+        { verificationType: "government_id", required: true, onPass: "approve", onFail: "decline", onRetry: "retry", maxRetries: 3 },
+      ],
+      settings: { expiresInDays: 14 },
+    },
+  },
+  {
+    id: "inq_preset_gov_id_selfie",
+    name: "Government ID and Selfie",
+    description: "Use this template as a starting point for combined Government ID and live Selfie identity verifications. The submitted ID is auto-classified, users are not required to input their country and ID type before capture or upload.",
+    icon: "🪪",
+    templateType: "inquiry",
+    defaults: {
+      name: "Government ID and Selfie",
+      description: "Combined Government ID and live Selfie identity verification with auto-classification",
       steps: [
         { verificationType: "government_id", required: true, onPass: "continue", onFail: "decline", onRetry: "retry", maxRetries: 3 },
         { verificationType: "selfie", required: true, onPass: "approve", onFail: "needs_review", onRetry: "retry", maxRetries: 2 },
@@ -73,29 +342,77 @@ export const INQUIRY_TEMPLATE_PRESETS: TemplatePreset<"inquiry">[] = [
     },
   },
   {
-    id: "inq_preset_gov_id_only",
-    name: "Government ID Only",
-    description: "Basic identity check using a government-issued ID document",
-    icon: "🆔",
+    id: "inq_preset_health_insurance_card",
+    name: "Health Insurance Card (US Only)",
+    description: "Use this template to verify health insurance cards, specifically for health insurance providers in the United States. No additional configuration required.",
+    icon: "🏥",
     templateType: "inquiry",
     defaults: {
-      name: "KYC: GovID Only",
-      description: "Basic identity verification with government ID only",
+      name: "Health Insurance Card (US Only)",
+      description: "Health insurance card verification for US providers",
       steps: [
-        { verificationType: "government_id", required: true, onPass: "approve", onFail: "decline", onRetry: "retry", maxRetries: 3 },
+        { verificationType: "health_insurance_card", required: true, onPass: "approve", onFail: "needs_review", onRetry: "retry", maxRetries: 2 },
+      ],
+      settings: { expiresInDays: 30 },
+    },
+  },
+  {
+    id: "inq_preset_phone_number",
+    name: "Phone Number",
+    description: "Use this template as a starting point for Phone Number verifications.",
+    icon: "📱",
+    templateType: "inquiry",
+    defaults: {
+      name: "Phone Number",
+      description: "Phone number verification via OTP",
+      steps: [
+        { verificationType: "phone_number", required: true, onPass: "approve", onFail: "decline", onRetry: "retry", maxRetries: 3 },
+      ],
+      settings: { expiresInDays: 3 },
+    },
+  },
+  {
+    id: "inq_preset_phone_number_database",
+    name: "Phone Number and Database",
+    description: "Use this template as a starting point for Phone Number and Database identity verifications.",
+    icon: "📱",
+    templateType: "inquiry",
+    defaults: {
+      name: "Phone Number and Database",
+      description: "Phone number and database identity verification",
+      steps: [
+        { verificationType: "phone_number", required: true, onPass: "continue", onFail: "decline", onRetry: "retry", maxRetries: 3 },
+        { verificationType: "database", required: true, onPass: "approve", onFail: "needs_review", onRetry: "retry", maxRetries: 1 },
+      ],
+      settings: { expiresInDays: 7 },
+    },
+  },
+  {
+    id: "inq_preset_phone_gov_id_selfie",
+    name: "Phone Number and Government ID and Selfie",
+    description: "Use this template as a starting point for Phone Number, Government ID, and live Selfie identity verifications.",
+    icon: "📱",
+    templateType: "inquiry",
+    defaults: {
+      name: "Phone Number and Government ID and Selfie",
+      description: "Phone Number, Government ID, and live Selfie identity verification",
+      steps: [
+        { verificationType: "phone_number", required: true, onPass: "continue", onFail: "decline", onRetry: "retry", maxRetries: 3 },
+        { verificationType: "government_id", required: true, onPass: "continue", onFail: "decline", onRetry: "retry", maxRetries: 3 },
+        { verificationType: "selfie", required: true, onPass: "approve", onFail: "needs_review", onRetry: "retry", maxRetries: 2 },
       ],
       settings: { expiresInDays: 14 },
     },
   },
   {
-    id: "inq_preset_selfie_only",
-    name: "Selfie Only",
-    description: "Low-friction selfie-based liveness check for returning users",
+    id: "inq_preset_selfie",
+    name: "Selfie",
+    description: "Use this template as a starting point for live Selfie identity verifications.",
     icon: "🤳",
     templateType: "inquiry",
     defaults: {
-      name: "Quick Onboarding: Selfie Only",
-      description: "Selfie-only flow for low-friction returning user verification",
+      name: "Selfie",
+      description: "Live Selfie identity verification",
       steps: [
         { verificationType: "selfie", required: true, onPass: "approve", onFail: "needs_review", onRetry: "retry", maxRetries: 2 },
       ],
@@ -103,50 +420,18 @@ export const INQUIRY_TEMPLATE_PRESETS: TemplatePreset<"inquiry">[] = [
     },
   },
   {
-    id: "inq_preset_document",
-    name: "Document Verification",
-    description: "Verify uploaded documents like utility bills or bank statements",
-    icon: "📄",
+    id: "inq_preset_vehicle_insurance",
+    name: "Vehicle Insurance (US Only)",
+    description: "Use this template to verify vehicle insurance policies, limited to vehicle insurance providers in the United States. No additional configuration required.",
+    icon: "🚗",
     templateType: "inquiry",
     defaults: {
-      name: "Document Verification",
-      description: "Document upload verification for proof of address or other documents",
+      name: "Vehicle Insurance (US Only)",
+      description: "Vehicle insurance policy verification for US providers",
       steps: [
-        { verificationType: "document", required: true, onPass: "approve", onFail: "needs_review", onRetry: "retry", maxRetries: 2 },
+        { verificationType: "vehicle_insurance", required: true, onPass: "approve", onFail: "needs_review", onRetry: "retry", maxRetries: 2 },
       ],
-      settings: { expiresInDays: 21 },
-    },
-  },
-  {
-    id: "inq_preset_enhanced_dd",
-    name: "Enhanced Due Diligence",
-    description: "Multi-step verification for high-risk accounts with all check types",
-    icon: "🔒",
-    templateType: "inquiry",
-    defaults: {
-      name: "Enhanced Due Diligence",
-      description: "Multi-step verification for high-risk accounts with document, selfie, and database checks",
-      steps: [
-        { verificationType: "government_id", required: true, onPass: "continue", onFail: "decline", onRetry: "retry", maxRetries: 2 },
-        { verificationType: "selfie", required: true, onPass: "continue", onFail: "needs_review", onRetry: "retry", maxRetries: 2 },
-        { verificationType: "database", required: true, onPass: "approve", onFail: "needs_review", onRetry: "retry", maxRetries: 1 },
-      ],
-      settings: { expiresInDays: 7 },
-    },
-  },
-  {
-    id: "inq_preset_database_only",
-    name: "Database Check Only",
-    description: "Automated database verification without document or biometric steps",
-    icon: "🗄️",
-    templateType: "inquiry",
-    defaults: {
-      name: "Database Check",
-      description: "Automated database verification without document or biometric steps",
-      steps: [
-        { verificationType: "database", required: true, onPass: "approve", onFail: "needs_review", onRetry: "retry", maxRetries: 1 },
-      ],
-      settings: { expiresInDays: 7 },
+      settings: { expiresInDays: 30 },
     },
   },
 ];

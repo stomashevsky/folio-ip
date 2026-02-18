@@ -213,11 +213,278 @@ export const mockInquiryTemplates: InquiryTemplate[] = [
       { verificationType: "database", required: true, onPass: "continue", onFail: "needs_review", onRetry: "retry", maxRetries: 1 },
       { verificationType: "document", required: false, onPass: "approve", onFail: "skip", onRetry: "retry", maxRetries: 2 },
     ],
-    settings: {
-      expiresInDays: 10,
-      redirectUrl: "https://bank-partner.folio.local/kyc/callback",
-    },
-  },
+     settings: {
+       expiresInDays: 10,
+       redirectUrl: "https://bank-partner.folio.local/kyc/callback",
+     },
+   },
+   {
+     id: "itmpl_aAmVbBnWcCxDdYeEfFgGhHiIjJkKlM",
+     name: "AAMVA",
+     description: "AAMVA driver's license data verification",
+     status: "active",
+     lastPublishedAt: "2026-02-12T10:00:00.000Z",
+     createdAt: "2025-12-10T08:30:00.000Z",
+     updatedAt: "2026-02-12T10:00:00.000Z",
+     steps: [
+       { verificationType: "aamva", required: true, onPass: "approve", onFail: "decline", onRetry: "retry", maxRetries: 2 },
+     ],
+     settings: {
+       expiresInDays: 14,
+     },
+   },
+   {
+     id: "itmpl_nNoOpPqQrRsStTuUvVwWxXyYzZaAbB",
+     name: "Database Or Government ID",
+     description: "Database or Government ID verification based on the country",
+     status: "active",
+     lastPublishedAt: "2026-02-11T14:30:00.000Z",
+     createdAt: "2025-12-05T09:15:00.000Z",
+     updatedAt: "2026-02-11T14:30:00.000Z",
+     steps: [
+       { verificationType: "database", required: false, onPass: "approve", onFail: "continue", onRetry: "retry", maxRetries: 1 },
+       { verificationType: "government_id", required: true, onPass: "approve", onFail: "decline", onRetry: "retry", maxRetries: 3 },
+     ],
+     settings: {
+       expiresInDays: 14,
+     },
+   },
+   {
+     id: "itmpl_cCdDeEfFgGhHiIjJkKlLmMnNoOpPqQ",
+     name: "Database Or Government ID and Selfie",
+     description: "Database or Government ID and live Selfie verification based on the country",
+     status: "active",
+     lastPublishedAt: "2026-02-10T11:45:00.000Z",
+     createdAt: "2025-12-08T10:20:00.000Z",
+     updatedAt: "2026-02-10T11:45:00.000Z",
+     steps: [
+       { verificationType: "database", required: false, onPass: "continue", onFail: "continue", onRetry: "retry", maxRetries: 1 },
+       { verificationType: "government_id", required: true, onPass: "continue", onFail: "decline", onRetry: "retry", maxRetries: 3 },
+       { verificationType: "selfie", required: true, onPass: "approve", onFail: "needs_review", onRetry: "retry", maxRetries: 2 },
+     ],
+     settings: {
+       expiresInDays: 14,
+     },
+   },
+   {
+     id: "itmpl_rRsStTuUvVwWxXyYzZaAbBcCdDeEfF",
+     name: "Database Phone Carrier",
+     description: "Database Phone Carrier verification in the United States",
+     status: "active",
+     lastPublishedAt: "2026-02-09T13:20:00.000Z",
+     createdAt: "2025-11-28T14:00:00.000Z",
+     updatedAt: "2026-02-09T13:20:00.000Z",
+     steps: [
+       { verificationType: "database_phone_carrier", required: true, onPass: "approve", onFail: "needs_review", onRetry: "retry", maxRetries: 1 },
+     ],
+     settings: {
+       expiresInDays: 7,
+     },
+   },
+   {
+     id: "itmpl_gGhHiIjJkKlLmMnNoOpPqQrRsStTuU",
+     name: "Database with SSN",
+     description: "Database identity verification using name, birthdate, address and social security number",
+     status: "active",
+     lastPublishedAt: "2026-02-08T15:50:00.000Z",
+     createdAt: "2025-11-30T11:30:00.000Z",
+     updatedAt: "2026-02-08T15:50:00.000Z",
+     steps: [
+       { verificationType: "database_ssn", required: true, onPass: "approve", onFail: "needs_review", onRetry: "retry", maxRetries: 1 },
+     ],
+     settings: {
+       expiresInDays: 7,
+     },
+   },
+   {
+     id: "itmpl_vVwWxXyYzZaAbBcCdDeEfFgGhHiIjJ",
+     name: "Email Address",
+     description: "Email address verification",
+     status: "active",
+     lastPublishedAt: "2026-02-07T09:10:00.000Z",
+     createdAt: "2025-12-15T16:45:00.000Z",
+     updatedAt: "2026-02-07T09:10:00.000Z",
+     steps: [
+       { verificationType: "email_address", required: true, onPass: "approve", onFail: "decline", onRetry: "retry", maxRetries: 2 },
+     ],
+     settings: {
+       expiresInDays: 3,
+     },
+   },
+   {
+     id: "itmpl_kKlLmMnNoOpPqQrRsStTuUvVwWxXyY",
+     name: "Government ID (Front side only) and Database",
+     description: "Government ID front side and Database identity verification",
+     status: "active",
+     lastPublishedAt: "2026-02-06T12:35:00.000Z",
+     createdAt: "2025-12-12T13:15:00.000Z",
+     updatedAt: "2026-02-06T12:35:00.000Z",
+     steps: [
+       { verificationType: "government_id", required: true, onPass: "continue", onFail: "decline", onRetry: "retry", maxRetries: 3 },
+       { verificationType: "database", required: true, onPass: "approve", onFail: "needs_review", onRetry: "retry", maxRetries: 1 },
+     ],
+     settings: {
+       expiresInDays: 14,
+     },
+   },
+   {
+     id: "itmpl_zZaAbBcCdDeEfFgGhHiIjJkKlLmMnN",
+     name: "Government ID (Front side only) and Database and Selfie",
+     description: "Government ID front side, Database, and live Selfie identity verification",
+     status: "active",
+     lastPublishedAt: "2026-02-05T16:20:00.000Z",
+     createdAt: "2025-12-18T10:50:00.000Z",
+     updatedAt: "2026-02-05T16:20:00.000Z",
+     steps: [
+       { verificationType: "government_id", required: true, onPass: "continue", onFail: "decline", onRetry: "retry", maxRetries: 3 },
+       { verificationType: "database", required: true, onPass: "continue", onFail: "needs_review", onRetry: "retry", maxRetries: 1 },
+       { verificationType: "selfie", required: true, onPass: "approve", onFail: "needs_review", onRetry: "retry", maxRetries: 2 },
+     ],
+     settings: {
+       expiresInDays: 14,
+     },
+   },
+   {
+     id: "itmpl_oOpPqQrRsStTuUvVwWxXyYzZaAbBcC",
+     name: "Government ID (Front side only) and Document",
+     description: "Government ID front side and supporting document verification",
+     status: "active",
+     lastPublishedAt: "2026-02-04T14:05:00.000Z",
+     createdAt: "2025-12-20T15:30:00.000Z",
+     updatedAt: "2026-02-04T14:05:00.000Z",
+     steps: [
+       { verificationType: "government_id", required: true, onPass: "continue", onFail: "decline", onRetry: "retry", maxRetries: 3 },
+       { verificationType: "document", required: true, onPass: "approve", onFail: "needs_review", onRetry: "retry", maxRetries: 2 },
+     ],
+     settings: {
+       expiresInDays: 21,
+     },
+   },
+   {
+     id: "itmpl_dDeEfFgGhHiIjJkKlLmMnNoOpPqQrR",
+     name: "Government ID and Proof of Address",
+     description: "Government ID and proof of address documentation verification",
+     status: "active",
+     lastPublishedAt: "2026-02-03T11:25:00.000Z",
+     createdAt: "2025-12-22T09:40:00.000Z",
+     updatedAt: "2026-02-03T11:25:00.000Z",
+     steps: [
+       { verificationType: "government_id", required: true, onPass: "continue", onFail: "decline", onRetry: "retry", maxRetries: 3 },
+       { verificationType: "document", required: true, onPass: "approve", onFail: "needs_review", onRetry: "retry", maxRetries: 2 },
+     ],
+     settings: {
+       expiresInDays: 30,
+     },
+   },
+   {
+     id: "itmpl_sStTuUvVwWxXyYzZaAbBcCdDeEfFgG",
+     name: "Government ID, pre-filled form and Selfie",
+     description: "Government ID front side, pre-filled form, and live Selfie identity verification",
+     status: "draft",
+     createdAt: "2026-01-25T12:00:00.000Z",
+     updatedAt: "2026-02-13T10:30:00.000Z",
+     steps: [
+       { verificationType: "government_id", required: true, onPass: "continue", onFail: "decline", onRetry: "retry", maxRetries: 3 },
+       { verificationType: "selfie", required: true, onPass: "approve", onFail: "needs_review", onRetry: "retry", maxRetries: 2 },
+     ],
+     settings: {
+       expiresInDays: 14,
+     },
+   },
+   {
+     id: "itmpl_hHiIjJkKlLmMnNoOpPqQrRsStTuUvV",
+     name: "Government ID, Selfie and Proof of Address",
+     description: "Government ID, live selfie, and proof of address documentation verification",
+     status: "active",
+     lastPublishedAt: "2026-02-02T10:15:00.000Z",
+     createdAt: "2025-12-25T14:20:00.000Z",
+     updatedAt: "2026-02-02T10:15:00.000Z",
+     steps: [
+       { verificationType: "government_id", required: true, onPass: "continue", onFail: "decline", onRetry: "retry", maxRetries: 3 },
+       { verificationType: "selfie", required: true, onPass: "continue", onFail: "needs_review", onRetry: "retry", maxRetries: 2 },
+       { verificationType: "document", required: true, onPass: "approve", onFail: "needs_review", onRetry: "retry", maxRetries: 2 },
+     ],
+     settings: {
+       expiresInDays: 30,
+     },
+   },
+   {
+     id: "itmpl_wWxXyYzZaAbBcCdDeEfFgGhHiIjJkK",
+     name: "Health Insurance Card US Only",
+     description: "Health insurance card verification for US providers",
+     status: "active",
+     lastPublishedAt: "2026-02-01T13:40:00.000Z",
+     createdAt: "2025-12-28T11:50:00.000Z",
+     updatedAt: "2026-02-01T13:40:00.000Z",
+     steps: [
+       { verificationType: "health_insurance_card", required: true, onPass: "approve", onFail: "needs_review", onRetry: "retry", maxRetries: 2 },
+     ],
+     settings: {
+       expiresInDays: 30,
+     },
+   },
+   {
+     id: "itmpl_lLmMnNoOpPqQrRsStTuUvVwWxXyYzZ",
+     name: "Phone Number",
+     description: "Phone number verification via OTP",
+     status: "active",
+     lastPublishedAt: "2026-01-31T15:55:00.000Z",
+     createdAt: "2025-12-30T08:25:00.000Z",
+     updatedAt: "2026-01-31T15:55:00.000Z",
+     steps: [
+       { verificationType: "phone_number", required: true, onPass: "approve", onFail: "decline", onRetry: "retry", maxRetries: 3 },
+     ],
+     settings: {
+       expiresInDays: 3,
+     },
+   },
+   {
+     id: "itmpl_aAbBcCdDeEfFgGhHiIjJkKlLmMnNoO",
+     name: "Phone Number and Database",
+     description: "Phone number and database identity verification",
+     status: "active",
+     lastPublishedAt: "2026-01-30T12:10:00.000Z",
+     createdAt: "2026-01-05T10:35:00.000Z",
+     updatedAt: "2026-01-30T12:10:00.000Z",
+     steps: [
+       { verificationType: "phone_number", required: true, onPass: "continue", onFail: "decline", onRetry: "retry", maxRetries: 3 },
+       { verificationType: "database", required: true, onPass: "approve", onFail: "needs_review", onRetry: "retry", maxRetries: 1 },
+     ],
+     settings: {
+       expiresInDays: 7,
+     },
+   },
+   {
+     id: "itmpl_pPqQrRsStTuUvVwWxXyYzZaAbBcCdD",
+     name: "Phone Number and Government ID and Selfie",
+     description: "Phone Number, Government ID, and live Selfie identity verification",
+     status: "draft",
+     createdAt: "2026-01-22T14:45:00.000Z",
+     updatedAt: "2026-02-14T09:20:00.000Z",
+     steps: [
+       { verificationType: "phone_number", required: true, onPass: "continue", onFail: "decline", onRetry: "retry", maxRetries: 3 },
+       { verificationType: "government_id", required: true, onPass: "continue", onFail: "decline", onRetry: "retry", maxRetries: 3 },
+       { verificationType: "selfie", required: true, onPass: "approve", onFail: "needs_review", onRetry: "retry", maxRetries: 2 },
+     ],
+     settings: {
+       expiresInDays: 14,
+     },
+   },
+   {
+     id: "itmpl_eEfFgGhHiIjJkKlLmMnNoOpPqQrRsS",
+     name: "Vehicle Insurance US Only",
+     description: "Vehicle insurance policy verification for US providers",
+     status: "active",
+     lastPublishedAt: "2026-01-29T16:30:00.000Z",
+     createdAt: "2026-01-08T12:15:00.000Z",
+     updatedAt: "2026-01-29T16:30:00.000Z",
+     steps: [
+       { verificationType: "vehicle_insurance", required: true, onPass: "approve", onFail: "needs_review", onRetry: "retry", maxRetries: 2 },
+     ],
+     settings: {
+       expiresInDays: 30,
+     },
+   },
 ];
 
 export const mockVerificationTemplates: VerificationTemplate[] = [

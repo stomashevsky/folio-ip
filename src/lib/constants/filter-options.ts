@@ -37,6 +37,13 @@ export const VERIFICATION_TYPE_OPTIONS = [
   { value: "selfie", label: "Selfie" },
   { value: "database", label: "Database" },
   { value: "document", label: "Document" },
+  { value: "aamva", label: "AAMVA" },
+  { value: "database_phone_carrier", label: "Database Phone Carrier" },
+  { value: "database_ssn", label: "Database (SSN)" },
+  { value: "email_address", label: "Email Address" },
+  { value: "phone_number", label: "Phone Number" },
+  { value: "health_insurance_card", label: "Health Insurance Card" },
+  { value: "vehicle_insurance", label: "Vehicle Insurance" },
 ];
 
 // Report filter options

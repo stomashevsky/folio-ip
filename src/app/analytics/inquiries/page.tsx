@@ -21,7 +21,7 @@ import {
 import { aggregateVolume, aggregateRates, aggregateFunnelRates } from "@/lib/utils/analytics";
 import { DASHBOARD_DATE_SHORTCUTS, type DateRange } from "@/lib/constants/date-shortcuts";
 import type { AnalyticsInterval } from "@/lib/types";
-import { Tabs } from "@plexui/ui/components/Tabs";
+import { SegmentedControl } from "@plexui/ui/components/SegmentedControl";
 import { Select } from "@plexui/ui/components/Select";
 import { DateRangePicker } from "@plexui/ui/components/DateRangePicker";
 import { ANALYTICS_INTERVAL_OPTIONS } from "@/lib/constants/filter-options";
@@ -98,33 +98,28 @@ function InquiryAnalyticsContent() {
 
   return (
     <div className="flex min-h-full flex-col">
-      <TopBar
-        title="Inquiry Analytics"
-        actions={
-          <DateRangePicker
-            value={dateRange}
-            onChange={handleRangeChange}
-            shortcuts={DASHBOARD_DATE_SHORTCUTS}
-            size="md"
-            pill={false}
-            max={DateTime.local().endOf("day")}
-            triggerDateFormat="MM/dd/yy"
-          />
-        }
-        tabs={
-          <Tabs
-            value={activeTab}
-            onChange={(v) => setActiveTab(v as Tab)}
-            variant="underline"
-            flush
-            aria-label="Analytics views"
-            size="lg"
-          >
-            <Tabs.Tab value="Overview">Overview</Tabs.Tab>
-            <Tabs.Tab value="Funnel">Conversion Funnel</Tabs.Tab>
-          </Tabs>
-        }
-      />
+      <TopBar title="Inquiry Analytics" noBorder />
+      <div className="flex shrink-0 items-center justify-between border-b border-[var(--color-border)] px-4 py-2 md:px-6">
+        <SegmentedControl
+          aria-label="Analytics views"
+          value={activeTab}
+          onChange={(v) => setActiveTab(v as Tab)}
+          size="sm"
+          pill={false}
+        >
+          <SegmentedControl.Tab value="Overview">Overview</SegmentedControl.Tab>
+          <SegmentedControl.Tab value="Funnel">Conversion Funnel</SegmentedControl.Tab>
+        </SegmentedControl>
+        <DateRangePicker
+          value={dateRange}
+          onChange={handleRangeChange}
+          shortcuts={DASHBOARD_DATE_SHORTCUTS}
+          size="sm"
+          pill={false}
+          max={DateTime.local().endOf("day")}
+          triggerDateFormat="MM/dd/yy"
+        />
+      </div>
       <div className="px-4 pb-6 pt-6 md:px-6">
         {activeTab === "Overview" && (
           <>

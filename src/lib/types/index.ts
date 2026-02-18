@@ -17,7 +17,18 @@ export type VerificationStatus =
   | "requires_retry"
   | "canceled";
 
-export type VerificationType = "government_id" | "selfie" | "database" | "document";
+export type VerificationType =
+  | "government_id"
+  | "selfie"
+  | "database"
+  | "document"
+  | "aamva"
+  | "database_phone_carrier"
+  | "database_ssn"
+  | "email_address"
+  | "phone_number"
+  | "health_insurance_card"
+  | "vehicle_insurance";
 
 export type ReportStatus = "pending" | "ready" | "no_matches" | "match";
 
@@ -196,6 +207,65 @@ export interface ReportTemplate {
     monitoringFrequencyDays: number;
     enableFuzzyMatch: boolean;
   };
+}
+
+// ─── Flow DSL ───
+
+/** Outcome target — either a step/terminal ID or a branch with conditions */
+export type FlowTarget = string | FlowBranch;
+
+export interface FlowBranch {
+  branch: FlowBranchCondition[];
+}
+
+export interface FlowBranchCondition {
+  when?: string; // condition expression e.g. "risk_score > 80"
+  default?: boolean; // catch-all branch
+  goto: string; // target step or terminal ID
+}
+
+export type FlowStepType = "verification" | "review" | "wait";
+
+export interface FlowStep {
+  type: FlowStepType;
+  verification?: VerificationType; // when type=verification
+  label?: string; // display label override
+  required?: boolean;
+  on_pass: FlowTarget;
+  on_fail: FlowTarget;
+  retry?: { max: number };
+}
+
+export interface FlowReviewStep {
+  type: "review";
+  label: string;
+  outcomes: Record<string, string>; // outcome_name → target step/terminal ID
+}
+
+export interface FlowTerminal {
+  status: "approved" | "declined" | "needs_review";
+  label?: string;
+}
+
+export interface FlowDefinition {
+  start: string; // ID of the first step
+  steps: Record<string, FlowStep | FlowReviewStep>;
+  terminals: Record<string, FlowTerminal>;
+}
+
+/** Node types for React Flow custom nodes */
+export type FlowNodeType = "start" | "verification" | "review" | "terminal" | "branch";
+
+export interface FlowNodeData {
+  nodeType: FlowNodeType;
+  label: string;
+  stepId?: string;
+  verificationType?: VerificationType;
+  required?: boolean;
+  status?: string;
+  maxRetries?: number;
+  outcomes?: Record<string, string>;
+  terminalStatus?: string;
 }
 
 // ─── Signals ───
