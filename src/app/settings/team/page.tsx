@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { TopBar } from "@/components/layout/TopBar";
 import {
+  ConfirmDeleteModal,
   Modal,
   ModalBody,
   ModalFooter,
@@ -385,46 +386,21 @@ export default function TeamPage() {
         </ModalFooter>
       </Modal>
 
-      <Modal
+      <ConfirmDeleteModal
         open={removing !== null}
-        onOpenChange={(open) => {
-          if (!open) setRemoving(null);
-        }}
+        onOpenChange={(open) => { if (!open) setRemoving(null); }}
+        title="Remove member"
+        confirmLabel="Remove"
+        onConfirm={handleRemove}
       >
-        <ModalHeader>
-          <h2 className="heading-sm text-[var(--color-text)]">
-            Remove member
-          </h2>
-        </ModalHeader>
-        <ModalBody>
-          <p className="text-sm text-[var(--color-text-secondary)]">
-            Are you sure you want to remove{" "}
-            <span className="font-medium text-[var(--color-text)]">
-              {removing?.name}
-            </span>{" "}
-            from the team? They will lose access to all organization resources.
-          </p>
-        </ModalBody>
-        <ModalFooter>
-          <Button
-            color="secondary"
-            variant="soft"
-            size="md"
-            pill={false}
-            onClick={() => setRemoving(null)}
-          >
-            Cancel
-          </Button>
-          <Button
-            color="danger"
-            size="md"
-            pill={false}
-            onClick={handleRemove}
-          >
-            Remove
-          </Button>
-        </ModalFooter>
-      </Modal>
+        <p className="text-sm text-[var(--color-text-secondary)]">
+          Are you sure you want to remove{" "}
+          <span className="font-medium text-[var(--color-text)]">
+            {removing?.name}
+          </span>{" "}
+          from the team? They will lose access to all organization resources.
+        </p>
+      </ConfirmDeleteModal>
     </div>
   );
 }

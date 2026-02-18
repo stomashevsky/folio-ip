@@ -5,6 +5,7 @@ import { useParams, useRouter, useSearchParams } from "next/navigation";
 
 import { TopBar } from "@/components/layout/TopBar";
 import { NotFoundPage, SectionHeading, CountrySelectorModal, ConfirmLeaveModal } from "@/components/shared";
+import { useTemplateForm } from "@/lib/hooks/useTemplateForm";
 import { COUNTRY_LABEL_MAP } from "@/lib/constants/countries";
 import { VERIFICATION_TYPE_OPTIONS } from "@/lib/constants/filter-options";
 import { VERIFICATION_TEMPLATE_PRESETS } from "@/lib/constants/template-presets";
@@ -126,14 +127,13 @@ function VerificationTemplateDetailContent() {
   const router = useRouter();
   const { verificationTemplates } = useTemplateStore();
 
-  const isNew = id === "new";
-  const existing = isNew ? undefined : verificationTemplates.getById(id);
-  const presetId = isNew ? searchParams.get("preset") : null;
-
-  const [form, setForm] = useState<VerificationForm>(() => {
-    if (existing) return toForm(existing);
-    if (presetId) return buildFormFromPreset(presetId);
-    return DEFAULT_FORM;
+  const { form, setForm, patch, isNew, existing } = useTemplateForm({
+    id,
+    getExisting: verificationTemplates.getById,
+    presetParam: searchParams.get("preset"),
+    toForm,
+    buildFromPreset: buildFormFromPreset,
+    defaultForm: DEFAULT_FORM,
   });
   const [initialForm, setInitialForm] = useState(form);
   const [saveState, setSaveState] = useState<"idle" | "saving" | "saved">("idle");
@@ -152,10 +152,6 @@ function VerificationTemplateDetailContent() {
 
   if (!isNew && !existing) {
     return <NotFoundPage section="Verification Templates" backHref="/templates/verifications" entity="Verification template" />;
-  }
-
-  function patch(p: Partial<VerificationForm>) {
-    setForm((prev) => ({ ...prev, ...p }));
   }
   function patchSettings(p: Partial<VerificationForm["settings"]>) {
     setForm((prev) => ({ ...prev, settings: { ...prev.settings, ...p } }));

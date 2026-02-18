@@ -212,6 +212,8 @@ export function DocumentViewer({
 
           {/* Nav arrows */}
           <button
+            type="button"
+            aria-label="Previous image"
             className="absolute left-2 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-white/10 text-white backdrop-blur-sm transition-colors enabled:cursor-pointer enabled:hover:bg-white/20 disabled:opacity-30 disabled:cursor-default md:left-4 md:h-10 md:w-10"
             onClick={goPrev}
             disabled={!hasPrev}
@@ -219,6 +221,8 @@ export function DocumentViewer({
             <ChevronLeftMd />
           </button>
           <button
+            type="button"
+            aria-label="Next image"
             className="absolute right-2 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-white/10 text-white backdrop-blur-sm transition-colors enabled:cursor-pointer enabled:hover:bg-white/20 disabled:opacity-30 disabled:cursor-default md:right-4 md:h-10 md:w-10"
             onClick={goNext}
             disabled={!hasNext}

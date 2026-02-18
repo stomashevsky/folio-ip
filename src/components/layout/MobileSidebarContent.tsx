@@ -94,22 +94,23 @@ export function MobileMenuOverlay({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex h-full flex-col p-3">
       {/* Section toggle: Dashboard / Analytics / Templates / Settings */}
-      <div className="mb-3 flex gap-1">
-        {navSections.map((section) => (
-          <button
-            key={section.href}
-            type="button"
-            onClick={() => switchSection(section.href)}
-            className={`flex h-8 cursor-pointer items-center rounded-lg px-3 text-sm transition-colors ${
-              isSectionActive(pathname, section.href)
-                ? "bg-[var(--color-nav-active-bg)] font-medium text-[var(--color-text)]"
-                : "text-[var(--color-text-secondary)] hover:text-[var(--color-text)]"
-            }`}
-          >
-            {section.label}
-          </button>
-        ))}
-      </div>
+       <div className="mb-3 flex gap-1">
+         {navSections.map((section) => (
+           <button
+             key={section.href}
+             type="button"
+             aria-label={`Switch to ${section.label}`}
+             onClick={() => switchSection(section.href)}
+             className={`flex h-8 cursor-pointer items-center rounded-lg px-3 text-sm transition-colors ${
+               isSectionActive(pathname, section.href)
+                 ? "bg-[var(--color-nav-active-bg)] font-medium text-[var(--color-text)]"
+                 : "text-[var(--color-text-secondary)] hover:text-[var(--color-text)]"
+             }`}
+           >
+             {section.label}
+           </button>
+         ))}
+       </div>
 
       {/* Navigation items — scrollable */}
       <div className="flex-1 overflow-auto">
@@ -164,11 +165,12 @@ export function MobileMenuOverlay({ children }: { children: React.ReactNode }) {
       {/* Profile menu — pinned bottom */}
       <div className="shrink-0 border-t border-[var(--color-border)] pt-3">
         <Menu>
-          <Menu.Trigger asChild>
-            <button
-              type="button"
-              className="flex w-full cursor-pointer items-center gap-3 rounded-lg px-2 py-2 transition-colors hover:bg-[var(--color-nav-hover-bg)]"
-            >
+           <Menu.Trigger asChild>
+             <button
+               type="button"
+               aria-label="User menu"
+               className="flex w-full cursor-pointer items-center gap-3 rounded-lg px-2 py-2 transition-colors hover:bg-[var(--color-nav-hover-bg)]"
+             >
               <Avatar name={MOCK_USER.name} size={32} color={MOCK_USER.avatarColor} variant="solid" />
               <div className="text-left">
                 <p className="text-sm font-medium text-[var(--color-text)]">{MOCK_USER.name}</p>

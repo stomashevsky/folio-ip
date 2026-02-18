@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { TopBar } from "@/components/layout/TopBar";
 import {
+  ConfirmDeleteModal,
   Modal,
   ModalBody,
   ModalFooter,
@@ -368,46 +369,21 @@ export default function WebhooksPage() {
         </ModalFooter>
       </Modal>
 
-      <Modal
+      <ConfirmDeleteModal
         open={deleting !== null}
-        onOpenChange={(open) => {
-          if (!open) setDeleting(null);
-        }}
+        onOpenChange={(open) => { if (!open) setDeleting(null); }}
+        title="Delete webhook"
+        confirmLabel="Delete"
+        onConfirm={handleDelete}
       >
-        <ModalHeader>
-          <h2 className="heading-sm text-[var(--color-text)]">
-            Delete webhook
-          </h2>
-        </ModalHeader>
-        <ModalBody>
-          <p className="text-sm text-[var(--color-text-secondary)]">
-            Are you sure you want to delete the endpoint{" "}
-            <span className="font-mono font-medium text-[var(--color-text)]">
-              {deleting?.url}
-            </span>
-            ? It will no longer receive event notifications.
-          </p>
-        </ModalBody>
-        <ModalFooter>
-          <Button
-            color="secondary"
-            variant="soft"
-            size="md"
-            pill={false}
-            onClick={() => setDeleting(null)}
-          >
-            Cancel
-          </Button>
-          <Button
-            color="danger"
-            size="md"
-            pill={false}
-            onClick={handleDelete}
-          >
-            Delete
-          </Button>
-        </ModalFooter>
-      </Modal>
+        <p className="text-sm text-[var(--color-text-secondary)]">
+          Are you sure you want to delete the endpoint{" "}
+          <span className="font-mono font-medium text-[var(--color-text)]">
+            {deleting?.url}
+          </span>
+          ? It will no longer receive event notifications.
+        </p>
+      </ConfirmDeleteModal>
     </div>
   );
 }
