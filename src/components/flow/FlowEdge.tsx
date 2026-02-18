@@ -3,7 +3,6 @@
 import {
   BaseEdge,
   EdgeLabelRenderer,
-  Position,
   getSmoothStepPath,
   type EdgeProps,
 } from "@xyflow/react";
@@ -41,22 +40,30 @@ export function FlowEdge({
   markerStart,
   data,
 }: EdgeProps) {
-  const gap = 6;
-  const gapSourceY = sourcePosition === Position.Bottom ? sourceY - gap : sourcePosition === Position.Top ? sourceY + gap : sourceY;
-  const gapSourceX = sourcePosition === Position.Right ? sourceX - gap : sourcePosition === Position.Left ? sourceX + gap : sourceX;
-  const gapTargetY = targetPosition === Position.Top ? targetY + gap : targetPosition === Position.Bottom ? targetY - gap : targetY;
-  const gapTargetX = targetPosition === Position.Left ? targetX + gap : targetPosition === Position.Right ? targetX - gap : targetX;
+  const elkPath = data?.elkPath as string | undefined;
+  const elkLabelX = data?.elkLabelX as number | undefined;
+  const elkLabelY = data?.elkLabelY as number | undefined;
 
-  const [path, labelX, labelY] = getSmoothStepPath({
-    sourceX: gapSourceX,
-    sourceY: gapSourceY,
-    targetX: gapTargetX,
-    targetY: gapTargetY,
-    sourcePosition,
-    targetPosition,
-    borderRadius: 8,
-    offset: 20,
-  });
+  let path: string;
+  let labelX: number;
+  let labelY: number;
+
+  if (elkPath) {
+    path = elkPath;
+    labelX = elkLabelX ?? (sourceX + targetX) / 2;
+    labelY = elkLabelY ?? (sourceY + targetY) / 2;
+  } else {
+    [path, labelX, labelY] = getSmoothStepPath({
+      sourceX,
+      sourceY,
+      targetX,
+      targetY,
+      sourcePosition,
+      targetPosition,
+      borderRadius: 8,
+      offset: 20,
+    });
+  }
 
   return (
     <>
