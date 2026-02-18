@@ -54,7 +54,7 @@ function buildEdge(
     source,
     target,
     type: "flowEdge" as const,
-    markerEnd: { type: MarkerType.ArrowClosed, color: stroke },
+    markerEnd: { type: MarkerType.ArrowClosed, color: stroke, width: 20, height: 20 },
     data: { edgeStyle: style, edgePriority: priority ?? 1, colorScheme },
     style: { stroke },
     ...(label ? { label } : {}),
@@ -110,13 +110,15 @@ function addTargetEdges(
 ): void {
   if (typeof target === "string") {
     const priority = outcome === "pass" ? 100 : 1;
-    edges.push(buildEdge(`edge__${stepId}__${outcome}__${target}`, stepId, target, outcome, titleCase(outcome), undefined, priority));
+    const handle = outcome === "fail" ? "left" : "default";
+    edges.push(buildEdge(`edge__${stepId}__${outcome}__${target}`, stepId, target, outcome, titleCase(outcome), handle, priority));
     return;
   }
 
   for (const [index, condition] of target.branch.entries()) {
     const label = condition.when ?? titleCase(outcome);
     const priority = outcome === "pass" ? (index === 0 ? 50 : 10) : 1;
+    const handle = outcome === "fail" ? "left" : (index === 0 ? "default" : "right");
     edges.push(
       buildEdge(
         `edge__${stepId}__${outcome}__${index}__${condition.goto}`,
@@ -124,7 +126,7 @@ function addTargetEdges(
         condition.goto,
         outcome,
         label,
-        undefined,
+        handle,
         priority,
       ),
     );
@@ -165,7 +167,8 @@ export function flowToElements(flow: FlowDefinition): { nodes: Node[]; edges: Ed
   for (const [stepId, step] of Object.entries(flow.steps)) {
     if (isReviewStep(step)) {
       const outcomeEntries = Object.entries(step.outcomes);
-      for (const [, [outcomeName, target]] of outcomeEntries.entries()) {
+      const handles = ["default", "right", "left"];
+      for (const [idx, [outcomeName, target]] of outcomeEntries.entries()) {
         edges.push(
           buildEdge(
             `edge__${stepId}__outcome__${outcomeName}__${target}`,
@@ -173,7 +176,7 @@ export function flowToElements(flow: FlowDefinition): { nodes: Node[]; edges: Ed
             target,
             "outcome",
             titleCase(outcomeName),
-            undefined,
+            handles[idx] ?? "right",
             5,
           ),
         );

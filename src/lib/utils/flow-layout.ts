@@ -135,12 +135,11 @@ export async function getLayoutedElements(
       },
     })),
     edges: edges.map((edge) => {
-      const srcHandle = edge.sourceHandle || "default";
       const priority = String(edge.data?.edgePriority ?? 1);
 
       return {
         id: edge.id,
-        sources: [`${edge.source}__${srcHandle}`],
+        sources: [`${edge.source}__default`],
         targets: [`${edge.target}__target`],
         layoutOptions: {
           "org.eclipse.elk.priority": priority,
