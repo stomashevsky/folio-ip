@@ -97,85 +97,94 @@ export function DocumentViewer({
   return createPortal(
     <div className="fixed inset-0 z-50 flex flex-col bg-black">
       {/* ─── Top Bar ─── */}
-      <div className="flex h-14 shrink-0 items-center justify-between border-b border-white/10 px-4">
-        {/* Left: back + label */}
-        <div className="flex items-center gap-3">
-          <Button
-            color="secondary"
-            variant="ghost"
-            size="sm"
-            uniform
-            onClick={onClose}
-            className="text-white hover:bg-white/10"
-          >
-            <ArrowLeftLg />
-          </Button>
-          <span className="text-sm text-white/80">{filename}</span>
+      <div className="shrink-0 border-b border-white/10">
+        <div className="flex h-14 items-center justify-between px-2 md:px-4">
+          {/* Left: back + label (label hidden on mobile) */}
+          <div className="flex min-w-0 items-center gap-2 md:gap-3">
+            <Button
+              color="secondary"
+              variant="ghost"
+              size="sm"
+              uniform
+              onClick={onClose}
+              className="shrink-0 text-white hover:bg-white/10"
+            >
+              <ArrowLeftLg />
+            </Button>
+            <span className="text-xs text-white/50 md:hidden">
+              {index + 1}/{items.length}
+            </span>
+            <span className="hidden truncate text-sm text-white/80 md:inline">{filename}</span>
+          </div>
+
+          {/* Center: zoom */}
+          <div className="flex shrink-0 items-center gap-1">
+            <Button
+              color="secondary"
+              variant="ghost"
+              size="sm"
+              uniform
+              onClick={zoomOut}
+              disabled={zoom <= ZOOM_STEPS[0]}
+              className="text-white hover:bg-white/10 disabled:opacity-30"
+            >
+              <Minus />
+            </Button>
+            <span className="w-12 text-center text-xs tabular-nums text-white/60 md:w-14">
+              {zoom}%
+            </span>
+            <Button
+              color="secondary"
+              variant="ghost"
+              size="sm"
+              uniform
+              onClick={zoomIn}
+              disabled={zoom >= ZOOM_STEPS[ZOOM_STEPS.length - 1]}
+              className="text-white hover:bg-white/10 disabled:opacity-30"
+            >
+              <Plus />
+            </Button>
+          </div>
+
+          {/* Right: rotate + counter + download */}
+          <div className="flex shrink-0 items-center gap-1 md:gap-3">
+            <Button
+              color="secondary"
+              variant="ghost"
+              size="sm"
+              uniform
+              onClick={rotateClockwise}
+              className="text-white hover:bg-white/10"
+            >
+              <ArrowRotateCw />
+            </Button>
+            <span className="hidden text-xs text-white/50 md:inline">
+              {index + 1}/{items.length}
+            </span>
+            <Button
+              color="secondary"
+              variant="ghost"
+              size="sm"
+              uniform
+              onClick={handleDownload}
+              className="text-white hover:bg-white/10"
+            >
+              <Download />
+            </Button>
+          </div>
         </div>
 
-        {/* Center: zoom + rotate */}
-        <div className="flex items-center gap-1">
-          <Button
-            color="secondary"
-            variant="ghost"
-            size="sm"
-            uniform
-            onClick={zoomOut}
-            disabled={zoom <= ZOOM_STEPS[0]}
-            className="text-white hover:bg-white/10 disabled:opacity-30"
-          >
-            <Minus />
-          </Button>
-          <span className="w-14 text-center text-xs tabular-nums text-white/60">
-            {zoom}%
-          </span>
-          <Button
-            color="secondary"
-            variant="ghost"
-            size="sm"
-            uniform
-            onClick={zoomIn}
-            disabled={zoom >= ZOOM_STEPS[ZOOM_STEPS.length - 1]}
-            className="text-white hover:bg-white/10 disabled:opacity-30"
-          >
-            <Plus />
-          </Button>
-          <div className="mx-1 h-5 w-px bg-white/10" />
-          <Button
-            color="secondary"
-            variant="ghost"
-            size="sm"
-            uniform
-            onClick={rotateClockwise}
-            className="text-white hover:bg-white/10"
-          >
-            <ArrowRotateCw />
-          </Button>
-        </div>
-
-        {/* Right: counter + download */}
-        <div className="flex items-center gap-3">
-          <span className="text-xs text-white/50">
-            {index + 1} / {items.length}
-          </span>
-          <Button
-            color="secondary"
-            variant="ghost"
-            size="sm"
-            uniform
-            onClick={handleDownload}
-            className="text-white hover:bg-white/10"
-          >
-            <Download />
-          </Button>
+        {/* Filename strip — mobile only */}
+        <div className="truncate border-t border-white/10 px-4 py-2 text-xs text-white/60 md:hidden">
+          {filename}
         </div>
       </div>
 
       {/* ─── Main Area ─── */}
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex flex-1 flex-col overflow-auto md:flex-row md:overflow-hidden">
         {/* Image viewport */}
         <div
-          className="relative flex flex-1 items-center justify-center overflow-auto"
+          className="relative flex min-h-[50vh] shrink-0 items-center justify-center overflow-auto md:min-h-0 md:flex-1"
         >
           <Image
             key={index}
@@ -203,14 +212,14 @@ export function DocumentViewer({
 
           {/* Nav arrows */}
           <button
-            className="absolute left-4 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/10 text-white backdrop-blur-sm transition-colors enabled:cursor-pointer enabled:hover:bg-white/20 disabled:opacity-30 disabled:cursor-default"
+            className="absolute left-2 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-white/10 text-white backdrop-blur-sm transition-colors enabled:cursor-pointer enabled:hover:bg-white/20 disabled:opacity-30 disabled:cursor-default md:left-4 md:h-10 md:w-10"
             onClick={goPrev}
             disabled={!hasPrev}
           >
             <ChevronLeftMd />
           </button>
           <button
-            className="absolute right-4 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/10 text-white backdrop-blur-sm transition-colors enabled:cursor-pointer enabled:hover:bg-white/20 disabled:opacity-30 disabled:cursor-default"
+            className="absolute right-2 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-white/10 text-white backdrop-blur-sm transition-colors enabled:cursor-pointer enabled:hover:bg-white/20 disabled:opacity-30 disabled:cursor-default md:right-4 md:h-10 md:w-10"
             onClick={goNext}
             disabled={!hasNext}
           >
@@ -219,7 +228,7 @@ export function DocumentViewer({
         </div>
 
         {/* Sidebar — always visible */}
-        <div className="w-80 shrink-0 overflow-auto border-l border-white/10 bg-zinc-950">
+        <div className="w-full shrink-0 border-t border-white/10 bg-zinc-950 md:w-80 md:overflow-auto md:border-l md:border-t-0">
           {hasExtractions ? (
             <>
               <div className="border-b border-white/10 px-4 py-3">

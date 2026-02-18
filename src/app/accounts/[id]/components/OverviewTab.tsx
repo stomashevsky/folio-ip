@@ -1,8 +1,9 @@
+import { useState } from "react";
 import Image from "next/image";
 import { Avatar } from "@plexui/ui/components/Avatar";
-import { SectionHeading } from "@/components/shared";
+import { SectionHeading, KeyValueTable, DocumentViewer } from "@/components/shared";
 import { formatDate, toTitleCase } from "@/lib/utils/format";
-import type { Account, Inquiry, Verification } from "@/lib/types";
+import type { Account, Inquiry, Verification, DocumentViewerItem } from "@/lib/types";
 import { InquiriesTab } from "./InquiriesTab";
 
 export function OverviewTab({
@@ -14,78 +15,64 @@ export function OverviewTab({
   inquiries: Inquiry[];
   verifications: Verification[];
 }) {
-  // Find a selfie photo for the profile card, fallback to first gov ID photo
   const selfieVer = verifications.find((v) => v.type === "selfie");
   const govIdVer = verifications.find((v) => v.type === "government_id");
   const profilePhoto =
     selfieVer?.photos?.[0] ?? govIdVer?.photos?.[0] ?? null;
 
+  const viewerItems: DocumentViewerItem[] = profilePhoto
+    ? [{ photo: profilePhoto, extractedData: govIdVer?.extractedData, verificationType: selfieVer ? "Selfie" : "Government ID" }]
+    : [];
+
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+
   return (
     <div className="space-y-6">
-      {/* Profile */}
       <div>
         <SectionHeading>Profile</SectionHeading>
-        <div className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5">
-          <div className="flex flex-col gap-5 sm:flex-row sm:gap-6">
-            <div className="shrink-0">
-              {profilePhoto ? (
+        <div className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]">
+          <div className="px-5 py-4">
+            {profilePhoto ? (
+              <button
+                className="group cursor-pointer outline-none"
+                onClick={() => setLightboxOpen(true)}
+              >
                 <Image
                   src={profilePhoto.url}
                   alt={profilePhoto.label}
-                  width={150}
-                  height={150}
-                  className="h-[150px] w-[150px] rounded-xl border border-[var(--color-border)] object-cover"
+                  width={160}
+                  height={160}
+                  className="h-[160px] w-auto rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] object-contain transition-opacity group-hover:opacity-90"
                 />
-              ) : (
-                <Avatar name={account.name} size={150} color="primary" />
-              )}
-            </div>
-
-            <div className="min-w-0 flex-1 self-center">
-              <div className="grid grid-cols-2 gap-x-8 gap-y-4">
-                <div>
-                  <p className="text-xs text-[var(--color-text-tertiary)]">
-                    Name
-                  </p>
-                  <p className="text-sm font-medium text-[var(--color-text)]">
-                    {toTitleCase(account.name)}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-xs text-[var(--color-text-tertiary)]">
-                    Address
-                  </p>
-                  <p className="text-sm text-[var(--color-text)]">
-                    {account.address ?? "—"}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-xs text-[var(--color-text-tertiary)]">
-                    Birthdate
-                  </p>
-                  <p className="text-sm text-[var(--color-text)]">
-                    {account.birthdate ? formatDate(account.birthdate) : "—"}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-xs text-[var(--color-text-tertiary)]">
-                    Age
-                  </p>
-                  <p className="text-sm text-[var(--color-text)]">
-                    {account.age ? `${account.age}` : "—"}
-                  </p>
-                </div>
-              </div>
-            </div>
+              </button>
+            ) : (
+              <Avatar name={account.name} size={160} color="primary" />
+            )}
           </div>
+          <KeyValueTable
+            bare
+            rows={[
+              { label: "Name", value: toTitleCase(account.name) },
+              { label: "Address", value: account.address ?? "—" },
+              { label: "Birthdate", value: account.birthdate ? formatDate(account.birthdate) : "—" },
+              { label: "Age", value: account.age ? `${account.age}` : "—" },
+            ]}
+          />
         </div>
       </div>
 
-      {/* Inquiries */}
       <div>
         <SectionHeading badge={inquiries.length}>Inquiries</SectionHeading>
         <InquiriesTab inquiries={inquiries} />
       </div>
+
+      {lightboxOpen && viewerItems.length > 0 && (
+        <DocumentViewer
+          items={viewerItems}
+          initialIndex={0}
+          onClose={() => setLightboxOpen(false)}
+        />
+      )}
     </div>
   );
 }

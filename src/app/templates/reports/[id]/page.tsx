@@ -1,12 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useRef, useState } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 
 import { TopBar } from "@/components/layout/TopBar";
-import { NotFoundPage, SectionHeading } from "@/components/shared";
+import { NotFoundPage, SectionHeading, ConfirmLeaveModal } from "@/components/shared";
 import { REPORT_TYPE_LABELS } from "@/lib/constants/report-type-labels";
 import { REPORT_TEMPLATE_PRESETS } from "@/lib/constants/template-presets";
+import { useUnsavedChanges } from "@/lib/hooks/useUnsavedChanges";
 import { useTemplateStore } from "@/lib/stores/template-store";
 import { getStatusColor } from "@/lib/utils/format";
 import type { ReportTemplate, ReportType, TemplateStatus } from "@/lib/types";
@@ -79,6 +80,14 @@ function toForm(t: ReportTemplate): ReportForm {
 }
 
 export default function ReportTemplateDetailPage() {
+  return (
+    <Suspense fallback={null}>
+      <ReportTemplateDetailContent />
+    </Suspense>
+  );
+}
+
+function ReportTemplateDetailContent() {
   const { id } = useParams<{ id: string }>();
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -93,11 +102,19 @@ export default function ReportTemplateDetailPage() {
     if (presetId) return buildFormFromPreset(presetId);
     return DEFAULT_FORM;
   });
+  const [initialForm, setInitialForm] = useState(form);
+  const [saveState, setSaveState] = useState<"idle" | "saving" | "saved">("idle");
+  const saveTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
   const [prevId, setPrevId] = useState(id);
   if (prevId !== id) {
     setPrevId(id);
-    setForm(existing ? toForm(existing) : DEFAULT_FORM);
+    const next = existing ? toForm(existing) : DEFAULT_FORM;
+    setForm(next);
+    setInitialForm(next);
   }
+
+  const isDirty = isNew || JSON.stringify(form) !== JSON.stringify(initialForm);
+  const { confirmNavigation, showLeaveConfirm, confirmLeave, cancelLeave } = useUnsavedChanges(isDirty);
 
   if (!isNew && !existing) {
     return <NotFoundPage section="Report Templates" backHref="/templates/reports" entity="Report template" />;
@@ -127,6 +144,8 @@ export default function ReportTemplateDetailPage() {
   }
 
   function save() {
+    setSaveState("saving");
+    clearTimeout(saveTimerRef.current);
     const payload: Omit<ReportTemplate, "id" | "createdAt" | "updatedAt"> = {
       ...form,
       name: form.name.trim() || "Untitled report template",
@@ -135,13 +154,22 @@ export default function ReportTemplateDetailPage() {
         monitoringFrequencyDays: form.settings.continuousMonitoring ? form.settings.monitoringFrequencyDays : 30,
       },
     };
-    if (isNew) reportTemplates.create(payload);
-    else reportTemplates.update(id, payload);
-    router.push("/templates/reports");
+    if (isNew) {
+      const created = reportTemplates.create(payload);
+      router.replace(`/templates/reports/${created.id}`);
+    } else {
+      reportTemplates.update(id, payload);
+    }
+    setInitialForm(form);
+    saveTimerRef.current = setTimeout(() => {
+      setSaveState("saved");
+      saveTimerRef.current = setTimeout(() => setSaveState("idle"), 1500);
+    }, 600);
   }
 
   function handleDelete() {
     if (!existing) return;
+    setInitialForm(form);
     reportTemplates.delete(id);
     router.push("/templates/reports");
   }
@@ -150,12 +178,14 @@ export default function ReportTemplateDetailPage() {
   const title = isNew ? "New report template" : (existing?.name ?? "Report template");
   const canPublish = form.status === "draft";
   const canArchive = form.status === "draft" || form.status === "active";
+  const backHref = "/templates/reports";
 
   return (
     <div className="flex h-full flex-col overflow-auto">
       <TopBar
         title={<span className="flex items-center gap-2">{title}{!isNew && <Badge color={getStatusColor(form.status) as "warning" | "success" | "secondary"} size="sm">{form.status}</Badge>}</span>}
-        backHref="/templates/reports"
+        backHref={backHref}
+        onBackClick={() => confirmNavigation(backHref)}
         actions={
           <div className="flex items-center gap-2">
             {!isNew && (
@@ -177,7 +207,7 @@ export default function ReportTemplateDetailPage() {
                 </Menu.Content>
               </Menu>
             )}
-            <Button color="primary" size="sm" pill={false} onClick={save}>Save</Button>
+            <Button color="primary" size="sm" pill={false} onClick={save} loading={saveState === "saving"} disabled={!isDirty || saveState !== "idle"}>{saveState === "saved" ? "Saved!" : "Save"}</Button>
           </div>
         }
       />
@@ -264,6 +294,8 @@ export default function ReportTemplateDetailPage() {
           </div>
         </div>
       </div>
+
+      <ConfirmLeaveModal open={showLeaveConfirm} onConfirm={confirmLeave} onCancel={cancelLeave} />
     </div>
   );
 }

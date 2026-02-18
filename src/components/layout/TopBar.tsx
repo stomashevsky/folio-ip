@@ -1,4 +1,4 @@
-import { ButtonLink } from "@plexui/ui/components/Button";
+import { Button, ButtonLink } from "@plexui/ui/components/Button";
 import { ChevronLeftLg } from "@plexui/ui/components/Icon";
 
 interface TopBarProps {
@@ -6,13 +6,12 @@ interface TopBarProps {
   description?: string;
   actions?: React.ReactNode;
   toolbar?: React.ReactNode;
-  /** Tab bar rendered tight below the title — its underline replaces the header border */
   tabs?: React.ReactNode;
-  /** Renders a "< Title" back link (OpenAI-style) that links to this href */
   backHref?: string;
+  onBackClick?: () => void;
 }
 
-export function TopBar({ title, description, actions, toolbar, tabs, backHref }: TopBarProps) {
+export function TopBar({ title, description, actions, toolbar, tabs, backHref, onBackClick }: TopBarProps) {
   const hasToolbar = !!toolbar;
   const hasTabs = !!tabs;
 
@@ -26,16 +25,29 @@ export function TopBar({ title, description, actions, toolbar, tabs, backHref }:
       <div className="flex min-h-9 items-center justify-between">
         <div className="flex items-center gap-1">
           {backHref && (
-            <ButtonLink
-              href={backHref}
-              color="secondary"
-              variant="ghost"
-              size="md"
-              pill={false}
-              data-uniform=""
-            >
-              <ChevronLeftLg />
-            </ButtonLink>
+            onBackClick ? (
+              <Button
+                color="secondary"
+                variant="ghost"
+                size="md"
+                pill={false}
+                data-uniform=""
+                onClick={onBackClick}
+              >
+                <ChevronLeftLg />
+              </Button>
+            ) : (
+              <ButtonLink
+                href={backHref}
+                color="secondary"
+                variant="ghost"
+                size="md"
+                pill={false}
+                data-uniform=""
+              >
+                <ChevronLeftLg />
+              </ButtonLink>
+            )
           )}
           <div>
             <h1 className="heading-md text-[var(--color-text)]">
