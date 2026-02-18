@@ -9,22 +9,23 @@ import { getLayoutedElements } from "@/lib/utils/flow-layout";
 import { FlowVisualizer } from "./FlowVisualizer";
 import { YamlEditor } from "./YamlEditor";
 import { FlowChat } from "./FlowChat";
-import { SegmentedControl } from "@plexui/ui/components/SegmentedControl";
 import { ExclamationMarkCircle } from "@plexui/ui/components/Icon";
+
+export type FlowEditorPanel = "chat" | "code" | "settings";
 
 interface FlowEditorProps {
   initialYaml: string;
   onChange?: (yaml: string) => void;
   readOnly?: boolean;
-  actions?: React.ReactNode;
   settingsPanel?: React.ReactNode;
+  panel: FlowEditorPanel;
+  onPanelChange: (panel: FlowEditorPanel) => void;
 }
 
-type LeftPanel = "chat" | "code" | "settings";
-
-export function FlowEditor({ initialYaml, onChange, readOnly = false, actions, settingsPanel }: FlowEditorProps) {
+export function FlowEditor({ initialYaml, onChange, readOnly = false, settingsPanel, panel, onPanelChange }: FlowEditorProps) {
   const [yamlValue, setYamlValue] = useState(initialYaml);
-  const [leftPanel, setLeftPanel] = useState<LeftPanel>("chat");
+  const leftPanel = panel;
+  const setLeftPanel = onPanelChange;
   const onChangeRef = useRef(onChange);
   useEffect(() => { onChangeRef.current = onChange; });
 
@@ -73,7 +74,7 @@ export function FlowEditor({ initialYaml, onChange, readOnly = false, actions, s
       onChangeRef.current?.(newYaml);
       setLeftPanel("code");
     },
-    [],
+    [setLeftPanel],
   );
 
   const scrollCountRef = useRef(0);
@@ -83,26 +84,10 @@ export function FlowEditor({ initialYaml, onChange, readOnly = false, actions, s
     setLeftPanel("code");
     scrollCountRef.current += 1;
     setScrollTarget(`${nodeId}|${scrollCountRef.current}`);
-  }, []);
+  }, [setLeftPanel]);
 
   return (
     <div className="flex h-full flex-col overflow-hidden">
-      <div className="flex shrink-0 items-center justify-between border-b border-[var(--color-border)] px-4 py-2 md:px-6">
-        <SegmentedControl
-          aria-label="Editor panel"
-          value={leftPanel}
-          onChange={(v) => setLeftPanel(v as LeftPanel)}
-          size="sm"
-          pill={false}
-          className="-ml-1.5"
-        >
-          <SegmentedControl.Tab value="chat">AI Chat</SegmentedControl.Tab>
-          <SegmentedControl.Tab value="code">Code</SegmentedControl.Tab>
-          {settingsPanel && <SegmentedControl.Tab value="settings">Settings</SegmentedControl.Tab>}
-        </SegmentedControl>
-        {actions && <div className="flex shrink-0 items-center gap-2">{actions}</div>}
-      </div>
-
       <div className="flex min-h-0 flex-1">
         <div className="flex w-[420px] shrink-0 flex-col border-r border-[var(--color-border)]">
           {leftPanel === "code" && (

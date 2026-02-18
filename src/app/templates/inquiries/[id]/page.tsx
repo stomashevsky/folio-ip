@@ -5,7 +5,8 @@ import { useParams, useRouter, useSearchParams } from "next/navigation";
 
 import { TopBar } from "@/components/layout/TopBar";
 import { NotFoundPage, ConfirmLeaveModal } from "@/components/shared";
-import { FlowEditor } from "@/components/flow/FlowEditor";
+import { FlowEditor, type FlowEditorPanel } from "@/components/flow/FlowEditor";
+import { SegmentedControl } from "@plexui/ui/components/SegmentedControl";
 import { INQUIRY_TEMPLATE_PRESETS } from "@/lib/constants/template-presets";
 import { FLOW_TEMPLATES, DEFAULT_FLOW_YAML } from "@/lib/constants/flow-templates";
 import { useUnsavedChanges } from "@/lib/hooks/useUnsavedChanges";
@@ -93,6 +94,7 @@ function InquiryTemplateDetailContent() {
   });
   const [initialForm, setInitialForm] = useState(form);
   const [saveState, setSaveState] = useState<"idle" | "saving" | "saved">("idle");
+  const [editorPanel, setEditorPanel] = useState<FlowEditorPanel>("chat");
   const saveTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
   const [prevId, setPrevId] = useState(id);
   if (prevId !== id) {
@@ -154,6 +156,8 @@ function InquiryTemplateDetailContent() {
   const canUnpublish = form.status === "active";
   const backHref = "/templates/inquiries";
 
+  const hasSettings = true;
+
   return (
     <div className="flex h-full flex-col overflow-hidden">
       <TopBar
@@ -168,15 +172,22 @@ function InquiryTemplateDetailContent() {
           </span>
         }
         backHref={backHref}
+        backLabel="Inquiry Templates"
         onBackClick={() => confirmNavigation(backHref)}
-      />
-
-      <div className="min-h-0 flex-1">
-        <FlowEditor
-          initialYaml={form.flowYaml}
-          onChange={(yaml) => patch({ flowYaml: yaml })}
-          actions={
-            <>
+        toolbar={
+          <div className="flex w-full items-center justify-between">
+            <SegmentedControl
+              aria-label="Editor panel"
+              value={editorPanel}
+              onChange={(v) => setEditorPanel(v as FlowEditorPanel)}
+              size="sm"
+              pill={false}
+            >
+              <SegmentedControl.Tab value="chat">AI Chat</SegmentedControl.Tab>
+              <SegmentedControl.Tab value="code">Code</SegmentedControl.Tab>
+              {hasSettings && <SegmentedControl.Tab value="settings">Settings</SegmentedControl.Tab>}
+            </SegmentedControl>
+            <div className="flex shrink-0 items-center gap-2">
               {!isNew && (
                 <Menu>
                   <Menu.Trigger>
@@ -210,8 +221,17 @@ function InquiryTemplateDetailContent() {
               >
                 {saveState === "saved" ? "Saved!" : "Save"}
               </Button>
-            </>
-          }
+            </div>
+          </div>
+        }
+      />
+
+      <div className="min-h-0 flex-1">
+        <FlowEditor
+          initialYaml={form.flowYaml}
+          onChange={(yaml) => patch({ flowYaml: yaml })}
+          panel={editorPanel}
+          onPanelChange={setEditorPanel}
           settingsPanel={
             <div className="flex flex-col gap-4 p-4">
               <div>

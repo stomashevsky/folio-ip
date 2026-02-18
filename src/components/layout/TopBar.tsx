@@ -1,5 +1,4 @@
-import { Button, ButtonLink } from "@plexui/ui/components/Button";
-import { ChevronLeftLg, ChevronRightSm } from "@plexui/ui/components/Icon";
+import { ChevronRightLg, ChevronRightSm } from "@plexui/ui/components/Icon";
 import Link from "next/link";
 
 export interface BreadcrumbItem {
@@ -15,14 +14,21 @@ interface TopBarProps {
   tabs?: React.ReactNode;
   breadcrumb?: BreadcrumbItem[];
   backHref?: string;
+  backLabel?: string;
   onBackClick?: () => void;
   noBorder?: boolean;
 }
 
-export function TopBar({ title, description, actions, toolbar, tabs, breadcrumb, backHref, onBackClick, noBorder }: TopBarProps) {
+function deriveLabel(href: string): string {
+  const last = href.split("/").filter(Boolean).pop() ?? "";
+  return last.charAt(0).toUpperCase() + last.slice(1);
+}
+
+export function TopBar({ title, description, actions, toolbar, tabs, breadcrumb, backHref, backLabel, onBackClick, noBorder }: TopBarProps) {
   const hasToolbar = !!toolbar;
   const hasTabs = !!tabs;
   const hasBreadcrumb = !!breadcrumb && breadcrumb.length > 0;
+  const hasBack = !!backHref && !hasBreadcrumb;
 
   return (
     <div
@@ -54,44 +60,31 @@ export function TopBar({ title, description, actions, toolbar, tabs, breadcrumb,
 
       {/* Row 1: title + actions — min-h-9 keeps height stable with or without action buttons */}
       <div className="flex min-h-9 items-center justify-between">
-        <div className="flex items-center gap-1">
-          {backHref && !hasBreadcrumb && (
-            onBackClick ? (
-              <Button
-                color="secondary"
-                variant="ghost"
-                size="md"
-                pill={false}
-                data-uniform=""
-                className="-ml-1.5"
-                onClick={onBackClick}
-              >
-                <ChevronLeftLg />
-              </Button>
-            ) : (
-              <ButtonLink
-                href={backHref}
-                color="secondary"
-                variant="ghost"
-                size="md"
-                pill={false}
-                data-uniform=""
-                className="-ml-1.5"
-              >
-                <ChevronLeftLg />
-              </ButtonLink>
-            )
-          )}
-          <div>
-            <h1 className="heading-md text-[var(--color-text)]">
+        <div>
+          {hasBack ? (
+            <h1 className="m-0">
+              <div className="flex items-center gap-2 text-[18px] font-medium leading-[29px] tracking-[-0.01em] text-[var(--color-text)]">
+                {onBackClick ? (
+                  <button type="button" onClick={onBackClick} className="cursor-pointer">
+                    {backLabel || deriveLabel(backHref)}
+                  </button>
+                ) : (
+                  <Link href={backHref}>{backLabel || deriveLabel(backHref)}</Link>
+                )}
+                <ChevronRightLg className="shrink-0" />
+                <span>{title}</span>
+              </div>
+            </h1>
+          ) : (
+            <h1 className="text-[18px] font-medium leading-[29px] tracking-[-0.01em] text-[var(--color-text)]">
               {title}
             </h1>
-            {description && (
-              <p className="mt-0.5 text-xs text-[var(--color-text-tertiary)]">
-                {description}
-              </p>
-            )}
-          </div>
+          )}
+          {description && (
+            <p className="mt-0.5 text-xs text-[var(--color-text-tertiary)]">
+              {description}
+            </p>
+          )}
         </div>
         {actions && (
           <div className="flex shrink-0 items-center gap-2">{actions}</div>
@@ -103,7 +96,7 @@ export function TopBar({ title, description, actions, toolbar, tabs, breadcrumb,
 
       {/* Row 2: toolbar (filters / segmented controls) */}
       {hasToolbar && (
-        <div className="mt-3 flex min-w-0 flex-wrap items-center gap-2">
+        <div className="mt-2 flex min-w-0 flex-wrap items-center gap-2">
           {toolbar}
         </div>
       )}

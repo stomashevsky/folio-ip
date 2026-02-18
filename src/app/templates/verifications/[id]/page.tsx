@@ -208,6 +208,7 @@ function VerificationTemplateDetailContent() {
       <TopBar
         title={<span className="flex items-center gap-2">{title}{!isNew && <Badge color={getStatusColor(form.status) as "warning" | "success" | "secondary"} size="sm">{form.status}</Badge>}</span>}
         backHref={backHref}
+        backLabel="Verification Templates"
         onBackClick={() => confirmNavigation(backHref)}
         actions={
           <div className="flex items-center gap-2">

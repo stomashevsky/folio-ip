@@ -20,7 +20,7 @@ export function NotFoundPage({ section, backHref, entity }: NotFoundPageProps) {
 
   return (
     <div className="flex min-h-full flex-col">
-      <TopBar title={section} backHref={backHref} />
+      <TopBar title={entity} backHref={backHref} backLabel={section} />
       <div className="flex flex-1 items-center justify-center py-12">
         <EmptyMessage>
           <EmptyMessage.Icon><Search /></EmptyMessage.Icon>

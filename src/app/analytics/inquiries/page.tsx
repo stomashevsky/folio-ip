@@ -98,28 +98,32 @@ function InquiryAnalyticsContent() {
 
   return (
     <div className="flex min-h-full flex-col">
-      <TopBar title="Inquiry Analytics" noBorder />
-      <div className="flex shrink-0 items-center justify-between border-b border-[var(--color-border)] px-4 py-2 md:px-6">
-        <SegmentedControl
-          aria-label="Analytics views"
-          value={activeTab}
-          onChange={(v) => setActiveTab(v as Tab)}
-          size="sm"
-          pill={false}
-        >
-          <SegmentedControl.Tab value="Overview">Overview</SegmentedControl.Tab>
-          <SegmentedControl.Tab value="Funnel">Conversion Funnel</SegmentedControl.Tab>
-        </SegmentedControl>
-        <DateRangePicker
-          value={dateRange}
-          onChange={handleRangeChange}
-          shortcuts={DASHBOARD_DATE_SHORTCUTS}
-          size="sm"
-          pill={false}
-          max={DateTime.local().endOf("day")}
-          triggerDateFormat="MM/dd/yy"
-        />
-      </div>
+      <TopBar
+        title="Inquiry Analytics"
+        toolbar={
+          <div className="flex w-full items-center justify-between">
+            <SegmentedControl
+              aria-label="Analytics views"
+              value={activeTab}
+              onChange={(v) => setActiveTab(v as Tab)}
+              size="sm"
+              pill={false}
+            >
+              <SegmentedControl.Tab value="Overview">Overview</SegmentedControl.Tab>
+              <SegmentedControl.Tab value="Funnel">Conversion Funnel</SegmentedControl.Tab>
+            </SegmentedControl>
+            <DateRangePicker
+              value={dateRange}
+              onChange={handleRangeChange}
+              shortcuts={DASHBOARD_DATE_SHORTCUTS}
+              size="sm"
+              pill={false}
+              max={DateTime.local().endOf("day")}
+              triggerDateFormat="MM/dd/yy"
+            />
+          </div>
+        }
+      />
       <div className="px-4 pb-6 pt-6 md:px-6">
         {activeTab === "Overview" && (
           <>
