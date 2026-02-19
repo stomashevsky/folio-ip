@@ -1,14 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import {
   FLOW_CHAT_DEFAULT_PROVIDER,
-  FLOW_CHAT_EXAMPLE_PROMPTS,
   FLOW_CHAT_GEMINI_DEFAULT_MODEL,
   FLOW_CHAT_GROQ_BASE_URL,
   FLOW_CHAT_GROQ_DEFAULT_MODEL,
   FLOW_CHAT_MAX_OUTPUT_TOKENS,
   FLOW_CHAT_TEMPERATURE,
+  VERIFICATION_TYPE_LABELS,
 } from "@/lib/constants";
 import type { FlowChatProvider } from "@/lib/constants";
+import type { FlowDefinition, FlowReviewStep, FlowStep, FlowTarget } from "@/lib/types";
+import { parseFlowYaml, serializeFlowYaml, validateFlow } from "@/lib/utils/flow-parser";
+import { getFlowChatExamplePromptsFromYaml } from "@/lib/utils/flow-chat-prompts";
 
 const SYSTEM_PROMPT = `You are a KYC flow editor assistant. You help modify inquiry template flows defined in YAML DSL.
 
@@ -20,7 +23,9 @@ RULES:
 5. Use only these verification types: government_id, selfie, database, document.
 6. Terminal statuses must be: approved, declined, or needs_review.
 7. Step IDs should be snake_case.
-8. Keep the YAML clean and readable.`;
+8. Keep the YAML clean and readable.
+9. Step IDs and YAML keys in steps/terminals must be unique (never duplicate keys).
+10. If user asks to add an existing step, update that existing step instead of creating another key with the same ID.`;
 
 interface RequestBody {
   message: string;
@@ -34,6 +39,28 @@ interface RequestBody {
 interface FlowChatResponse {
   message: string;
   yaml: string | null;
+}
+
+function ensureValidSuggestedYaml(result: FlowChatResponse): FlowChatResponse {
+  if (!result.yaml) return result;
+
+  try {
+    const parsed = parseFlowYaml(result.yaml);
+    const errors = validateFlow(parsed);
+    if (errors.length > 0) {
+      return {
+        message: `${result.message} I generated invalid YAML (${errors[0]}). Please retry or rephrase.`,
+        yaml: null,
+      };
+    }
+    return result;
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Invalid YAML";
+    return {
+      message: `${result.message} I generated invalid YAML (${message}). Please retry or rephrase.`,
+      yaml: null,
+    };
+  }
 }
 
 class AiProviderApiError extends Error {
@@ -56,7 +83,9 @@ function normalizePrompt(prompt: string): string {
     .trim();
 }
 
-const FLOW_CHAT_EXAMPLE_PROMPT_SET = new Set(FLOW_CHAT_EXAMPLE_PROMPTS.map((prompt) => normalizePrompt(prompt)));
+function getDeterministicPromptSet(currentYaml: string): Set<string> {
+  return new Set(getFlowChatExamplePromptsFromYaml(currentYaml).map((prompt) => normalizePrompt(prompt)));
+}
 
 function extractYamlFromResponse(text: string): string | null {
   const yamlMatch = text.match(/```yaml\n([\s\S]*?)```/);
@@ -216,108 +245,305 @@ function toMockFallbackResponse(userMessage: string, currentYaml: string, reason
   };
 }
 
-function getFirstStepId(currentYaml: string): string | null {
-  const lines = currentYaml.split("\n");
-  const stepsIndex = lines.findIndex((line) => line.trim() === "steps:");
-  if (stepsIndex === -1) return null;
+function normalizeTargetId(value: string): string {
+  return value.trim().replace(/\s+/g, "_").toLowerCase();
+}
 
-  for (let i = stepsIndex + 1; i < lines.length; i++) {
-    const match = lines[i].match(/^\s{2}([a-zA-Z0-9_]+):\s*$/);
-    if (match) return match[1];
-    if (lines[i].trim() === "terminals:") break;
+function getFlowTargetIds(target: FlowTarget): string[] {
+  if (typeof target === "string") {
+    return [target];
+  }
+
+  return target.branch.map((condition) => condition.goto);
+}
+
+function isReviewStep(step: FlowStep | FlowReviewStep): step is FlowReviewStep {
+  return "outcomes" in step;
+}
+
+function collectTargetReferenceCounts(flow: FlowDefinition): Map<string, number> {
+  const counts = new Map<string, number>();
+  const addTarget = (targetId: string) => {
+    const normalizedTarget = normalizeTargetId(targetId);
+    counts.set(normalizedTarget, (counts.get(normalizedTarget) ?? 0) + 1);
+  };
+
+  for (const step of Object.values(flow.steps)) {
+    if (isReviewStep(step)) {
+      for (const target of Object.values(step.outcomes)) {
+        addTarget(target);
+      }
+      continue;
+    }
+
+    for (const target of getFlowTargetIds(step.on_pass)) addTarget(target);
+    for (const target of getFlowTargetIds(step.on_fail)) addTarget(target);
+  }
+
+  return counts;
+}
+
+function getFirstStepId(flow: FlowDefinition): string | null {
+  for (const stepId of Object.keys(flow.steps)) return stepId;
+  return null;
+}
+
+function getMutableStepEntries(flow: FlowDefinition): Array<[string, FlowStep]> {
+  return Object.entries(flow.steps).filter((entry): entry is [string, FlowStep] => !isReviewStep(entry[1]));
+}
+
+function resolveTargetId(flow: FlowDefinition, targetHint: string): string | null {
+  const normalizedTargetId = normalizeTargetId(targetHint);
+  const stepId = Object.keys(flow.steps).find((id) => normalizeTargetId(id) === normalizedTargetId);
+  if (stepId) return stepId;
+  const terminalId = Object.keys(flow.terminals).find((id) => normalizeTargetId(id) === normalizedTargetId);
+  if (terminalId) return terminalId;
+  return null;
+}
+
+function isTerminalTarget(flow: FlowDefinition, targetId: string): boolean {
+  return Object.keys(flow.terminals).some((id) => normalizeTargetId(id) === normalizeTargetId(targetId));
+}
+
+function toValidatedFlowYamlResponse(flow: FlowDefinition, message: string): FlowChatResponse {
+  const errors = validateFlow(flow);
+  if (errors.length > 0) {
+    return {
+      message: `I couldn't apply this change because it would make the flow invalid: ${errors[0]}.`,
+      yaml: null,
+    };
+  }
+  return {
+    message,
+    yaml: serializeFlowYaml(flow),
+  };
+}
+
+function insertStepAfter(
+  steps: Record<string, FlowStep | FlowReviewStep>,
+  anchorStepId: string,
+  newStepId: string,
+  newStep: FlowStep,
+): Record<string, FlowStep | FlowReviewStep> {
+  const updatedSteps: Record<string, FlowStep | FlowReviewStep> = {};
+  for (const [stepId, step] of Object.entries(steps)) {
+    updatedSteps[stepId] = step;
+    if (stepId === anchorStepId) {
+      updatedSteps[newStepId] = newStep;
+    }
+  }
+
+  if (!(newStepId in updatedSteps)) {
+    updatedSteps[newStepId] = newStep;
+  }
+
+  return updatedSteps;
+}
+
+function hasTokenSubset(sourceText: string, candidateText: string): boolean {
+  const sourceTokens = new Set(normalizePrompt(sourceText).split(" ").filter(Boolean));
+  const candidateTokens = normalizePrompt(candidateText).split(" ").filter(Boolean);
+  if (candidateTokens.length === 0) return false;
+  return candidateTokens.every((token) => sourceTokens.has(token));
+}
+
+function findStepEntryByHint(flow: FlowDefinition, sourceStepHint: string): [string, FlowStep] | null {
+  const normalizedHint = normalizePrompt(sourceStepHint);
+
+  for (const [stepId, step] of getMutableStepEntries(flow)) {
+    if (includesStepReference(normalizedHint, stepId)) {
+      return [stepId, step];
+    }
+
+    if (hasTokenSubset(sourceStepHint, stepId.replaceAll("_", " "))) {
+      return [stepId, step];
+    }
+
+    if (step.label && normalizedHint.includes(normalizePrompt(step.label))) {
+      return [stepId, step];
+    }
+
+    if (step.verification) {
+      if (normalizedHint.includes(step.verification.replaceAll("_", " "))) {
+        return [stepId, step];
+      }
+      const verificationLabel = VERIFICATION_TYPE_LABELS[step.verification] ?? step.verification;
+      if (hasTokenSubset(sourceStepHint, verificationLabel) || hasTokenSubset(sourceStepHint, `${verificationLabel} check`)) {
+        return [stepId, step];
+      }
+    }
   }
 
   return null;
 }
 
-function findStepRange(lines: string[], stepId: string): { start: number; end: number } | null {
-  const start = lines.findIndex((line) => new RegExp(`^\\s{2}${stepId}:\\s*$`).test(line));
-  if (start === -1) return null;
-
-  let end = lines.length;
-  for (let i = start + 1; i < lines.length; i++) {
-    if (/^\s{2}[a-zA-Z0-9_]+:\s*$/.test(lines[i]) || lines[i].trim() === "terminals:") {
-      end = i;
-      break;
-    }
+function routeStepTarget(
+  flow: FlowDefinition,
+  sourceStepHint: string,
+  targetHint: string,
+  targetField: "on_pass" | "on_fail",
+): FlowChatResponse {
+  const stepEntry = findStepEntryByHint(flow, sourceStepHint);
+  if (!stepEntry) {
+    return { message: `I couldn't find a step matching "${sourceStepHint}".`, yaml: null };
   }
 
-  return { start, end };
+  const [stepId, step] = stepEntry;
+  if (typeof step[targetField] !== "string") {
+    return {
+      message: `I couldn't route ${targetField.replace("on_", "")} for ${stepId} because ${targetField} uses a branch.`,
+      yaml: null,
+    };
+  }
+
+  const nextTargetId = resolveTargetId(flow, targetHint);
+  if (!nextTargetId) {
+    return { message: `I couldn't find target ${normalizeTargetId(targetHint)}.`, yaml: null };
+  }
+
+  const currentTargetId = step[targetField];
+  if (normalizeTargetId(currentTargetId) === normalizeTargetId(nextTargetId)) {
+    return { message: `${targetField} for ${stepId} already routes to ${nextTargetId}.`, yaml: null };
+  }
+
+  const targetReferenceCounts = collectTargetReferenceCounts(flow);
+  if ((targetReferenceCounts.get(normalizeTargetId(currentTargetId)) ?? 0) <= 1) {
+    const targetKind = isTerminalTarget(flow, currentTargetId) ? "terminal" : "step";
+    return {
+      message: `I couldn't apply this change because ${targetKind} ${normalizeTargetId(currentTargetId)} would become unreachable from start.`,
+      yaml: null,
+    };
+  }
+
+  step[targetField] = nextTargetId;
+
+  return toValidatedFlowYamlResponse(
+    flow,
+    `Changed the ${targetField} target of the ${stepId} step to ${nextTargetId}.`,
+  );
 }
 
-function updateRetryMax(currentYaml: string, stepId: string, max: number): string | null {
-  const lines = currentYaml.split("\n");
-  const range = findStepRange(lines, stepId);
-  if (!range) return null;
-
-  let retryIndex = -1;
-  for (let i = range.start + 1; i < range.end; i++) {
-    if (/^\s{4}retry:\s*$/.test(lines[i])) {
-      retryIndex = i;
-      break;
-    }
-  }
-
-  if (retryIndex === -1) {
-    lines.splice(range.end, 0, "    retry:", `      max: ${max}`);
-    return lines.join("\n");
-  }
-
-  for (let i = retryIndex + 1; i < range.end; i++) {
-    if (/^\s{6}max:\s*\d+\s*$/.test(lines[i])) {
-      lines[i] = `      max: ${max}`;
-      return lines.join("\n");
-    }
-    if (/^\s{4}[a-zA-Z0-9_]+:\s*$/.test(lines[i])) {
-      break;
-    }
-  }
-
-  lines.splice(retryIndex + 1, 0, `      max: ${max}`);
-  return lines.join("\n");
+function findSelfieStepId(flow: FlowDefinition): string | null {
+  const selfieEntry = getMutableStepEntries(flow).find(([, step]) => step.verification === "selfie");
+  return selfieEntry?.[0] ?? null;
 }
 
-function updateCountryBranchWithEs(currentYaml: string): string | null {
-  const lines = currentYaml.split("\n");
-  const countryLineIndex = lines.findIndex((line) => /country in \[[^\]]+\]/.test(line));
-  if (countryLineIndex === -1) return null;
+function pickPreferredTerminal(flow: FlowDefinition, preferredNormalizedIds: string[]): string | null {
+  for (const preferred of preferredNormalizedIds) {
+    const terminalId = Object.keys(flow.terminals).find((id) => normalizeTargetId(id) === preferred);
+    if (terminalId) return terminalId;
+  }
+  return Object.keys(flow.terminals)[0] ?? null;
+}
 
-  const match = lines[countryLineIndex].match(/country in \[([^\]]+)\]/);
-  if (!match) return null;
+function addSelfieStep(flow: FlowDefinition, sourceStepHint: string): FlowChatResponse {
+  const anchorEntry = findStepEntryByHint(flow, sourceStepHint);
+  if (!anchorEntry) {
+    return { message: `I couldn't find a step matching "${sourceStepHint}".`, yaml: null };
+  }
+
+  const [anchorStepId, anchorStep] = anchorEntry;
+  if (typeof anchorStep.on_pass !== "string") {
+    return { message: `I couldn't add selfie after ${anchorStepId} because on_pass uses a branch.`, yaml: null };
+  }
+
+  const existingSelfieStepId = findSelfieStepId(flow);
+  if (existingSelfieStepId) {
+    if (normalizeTargetId(anchorStep.on_pass) === normalizeTargetId(existingSelfieStepId)) {
+      return { message: `${anchorStepId} already routes pass to ${existingSelfieStepId}.`, yaml: null };
+    }
+
+    const targetReferenceCounts = collectTargetReferenceCounts(flow);
+    if ((targetReferenceCounts.get(normalizeTargetId(anchorStep.on_pass)) ?? 0) <= 1) {
+      const targetKind = isTerminalTarget(flow, anchorStep.on_pass) ? "terminal" : "step";
+      return {
+        message: `I couldn't apply this change because ${targetKind} ${normalizeTargetId(anchorStep.on_pass)} would become unreachable from start.`,
+        yaml: null,
+      };
+    }
+
+    anchorStep.on_pass = existingSelfieStepId;
+    return toValidatedFlowYamlResponse(
+      flow,
+      `Updated ${anchorStepId} so pass now routes to ${existingSelfieStepId}.`,
+    );
+  }
+
+  const previousPassTarget = anchorStep.on_pass;
+  const fallbackFailTarget = pickPreferredTerminal(flow, ["needs_review", "decline", "declined"]) ?? previousPassTarget;
+  let selfieStepId = "selfie";
+  let suffix = 2;
+  while (flow.steps[selfieStepId]) {
+    selfieStepId = `selfie_${suffix}`;
+    suffix += 1;
+  }
+
+  anchorStep.on_pass = selfieStepId;
+  const selfieStep: FlowStep = {
+    type: "verification",
+    verification: "selfie",
+    required: true,
+    on_pass: previousPassTarget,
+    on_fail: fallbackFailTarget,
+    retry: { max: 2 },
+  };
+  flow.steps = insertStepAfter(flow.steps, anchorStepId, selfieStepId, selfieStep);
+
+  return toValidatedFlowYamlResponse(flow, `Added a ${selfieStepId} verification step.`);
+}
+
+function addEsToCountryCondition(when: string): { updatedWhen: string; changed: boolean } {
+  const countryPattern = /country\s+in\s+\[([^\]]+)\]/i;
+  const match = when.match(countryPattern);
+  if (!match) return { updatedWhen: when, changed: false };
 
   const countries = match[1]
     .split(",")
     .map((code) => code.trim())
     .filter(Boolean);
-  if (!countries.includes("ES")) {
-    countries.push("ES");
-  }
+  const hasEs = countries.some((code) => code.toUpperCase() === "ES");
+  if (hasEs) return { updatedWhen: when, changed: false };
 
-  lines[countryLineIndex] = lines[countryLineIndex].replace(
-    /country in \[[^\]]+\]/,
-    `country in [${countries.join(", ")}]`,
-  );
+  const nextCountries = [...countries, "ES"];
+  return {
+    updatedWhen: when.replace(countryPattern, `country in [${nextCountries.join(", ")}]`),
+    changed: true,
+  };
+}
 
-  let defaultIndex = -1;
-  for (let i = countryLineIndex + 1; i < Math.min(lines.length, countryLineIndex + 12); i++) {
-    if (/^\s*-\s*default:\s*[a-zA-Z0-9_]+\s*$/.test(lines[i])) {
-      defaultIndex = i;
-      break;
+function updateCountryBranchTarget(target: FlowTarget): boolean {
+  if (typeof target === "string") return false;
+
+  let changed = false;
+  for (const condition of target.branch) {
+    if (!condition.when) continue;
+    const result = addEsToCountryCondition(condition.when);
+    if (result.changed) {
+      condition.when = result.updatedWhen;
+      changed = true;
     }
-    if (/^\s{2}[a-zA-Z0-9_]+:\s*$/.test(lines[i]) || lines[i].trim() === "terminals:") {
-      break;
+  }
+  return changed;
+}
+
+function updateCountryBranchWithEs(flow: FlowDefinition, sourceStepHint?: string): FlowChatResponse {
+  const mutableSteps = getMutableStepEntries(flow);
+  const sortedSteps = sourceStepHint
+    ? [
+      ...mutableSteps.filter(([stepId]) => includesStepReference(sourceStepHint, stepId)),
+      ...mutableSteps.filter(([stepId]) => !includesStepReference(sourceStepHint, stepId)),
+    ]
+    : mutableSteps;
+
+  for (const [stepId, step] of sortedSteps) {
+    const passUpdated = updateCountryBranchTarget(step.on_pass);
+    const failUpdated = updateCountryBranchTarget(step.on_fail);
+    if (passUpdated || failUpdated) {
+      return toValidatedFlowYamlResponse(flow, `Updated country branch in ${stepId} to include ES.`);
     }
   }
 
-  if (defaultIndex !== -1) {
-    const indent = lines[defaultIndex].match(/^(\s*)/)?.[1] ?? "";
-    lines[defaultIndex] = `${indent}- default: manual_review`;
-  } else {
-    const itemIndent = lines[countryLineIndex].match(/^(\s*)-/)?.[1] ?? "        ";
-    lines.splice(countryLineIndex + 1, 0, `${itemIndent}- default: manual_review`);
-  }
-
-  return lines.join("\n");
+  return { message: "I couldn't find a country branch condition to update.", yaml: null };
 }
 
 function includesStepReference(message: string, stepId: string): boolean {
@@ -325,85 +551,63 @@ function includesStepReference(message: string, stepId: string): boolean {
 }
 
 function mockResponse(userMessage: string, currentYaml: string): { message: string; yaml: string | null } {
-  const msg = userMessage.toLowerCase();
-
-  if (msg.includes("selfie") && (msg.includes("add") || msg.includes("добавь"))) {
-    const lines = currentYaml.split("\n");
-    const stepsIndex = lines.findIndex((l) => l.trim() === "steps:");
-    if (stepsIndex === -1) return { message: "Could not find steps section.", yaml: null };
-
-    let firstStepEnd = -1;
-    let firstStepOnPass = "";
-    for (let i = stepsIndex + 1; i < lines.length; i++) {
-      const line = lines[i];
-      if (/^\s{2}\w/.test(line) && i > stepsIndex + 1) {
-        firstStepEnd = i;
-        break;
-      }
-      const passMatch = line.match(/on_pass:\s*(\w+)/);
-      if (passMatch) firstStepOnPass = passMatch[1];
+  const msg = normalizePrompt(userMessage);
+  const parseCurrentFlow = (): FlowDefinition | null => {
+    try {
+      return parseFlowYaml(currentYaml);
+    } catch {
+      return null;
     }
+  };
 
-    if (firstStepEnd === -1 || !firstStepOnPass) {
-      return { message: "I'll add a selfie step. Please check the result.", yaml: null };
-    }
-
-    const selfieStep = [
-      "  selfie:",
-      "    type: verification",
-      "    verification: selfie",
-      "    required: true",
-      `    on_pass: ${firstStepOnPass}`,
-      "    on_fail: needs_review",
-      "    retry:",
-      "      max: 2",
-    ];
-
-    for (let i = stepsIndex + 1; i < firstStepEnd; i++) {
-      if (lines[i].includes("on_pass:")) {
-        lines[i] = lines[i].replace(/on_pass:\s*\w+/, "on_pass: selfie");
-        break;
-      }
-    }
-
-    lines.splice(firstStepEnd, 0, ...selfieStep);
-    return { message: "Added a selfie verification step.", yaml: lines.join("\n") };
+  const routeFailuresMatch = msg.match(/route failures? from (.+?) to ([a-z0-9_]+)/);
+  if (routeFailuresMatch) {
+    const flow = parseCurrentFlow();
+    if (!flow) return { message: "I couldn't parse the current YAML flow.", yaml: null };
+    return routeStepTarget(flow, routeFailuresMatch[1].trim(), routeFailuresMatch[2], "on_fail");
   }
 
-  if (
-    (msg.includes("country") || msg.includes("spain") || /\bes\b/.test(msg)) &&
-    (msg.includes("branch") || includesStepReference(msg, "document_check"))
-  ) {
-    const updatedYaml = updateCountryBranchWithEs(currentYaml);
-    if (!updatedYaml) {
-      return { message: "I couldn't find a country branch condition to update.", yaml: null };
+  const routePassMatch = msg.match(/route pass(?:es)? from (.+?) to ([a-z0-9_]+)/);
+  if (routePassMatch) {
+    const flow = parseCurrentFlow();
+    if (!flow) return { message: "I couldn't parse the current YAML flow.", yaml: null };
+    return routeStepTarget(flow, routePassMatch[1].trim(), routePassMatch[2], "on_pass");
+  }
+
+  if (msg.includes("selfie") && (msg.includes("add") || msg.includes("добавь"))) {
+    const flow = parseCurrentFlow();
+    if (!flow) return { message: "I couldn't parse the current YAML flow.", yaml: null };
+    const afterMatch = msg.match(/after (.+)$/);
+    const sourceStepHint = afterMatch?.[1]?.trim() || getFirstStepId(flow);
+    if (!sourceStepHint) {
+      return { message: "I couldn't find a step to attach selfie to.", yaml: null };
     }
-    return {
-      message: "Updated country branch to include ES and kept default fallback to manual_review.",
-      yaml: updatedYaml,
-    };
+    return addSelfieStep(flow, sourceStepHint);
   }
 
   if (msg.includes("retry")) {
+    const flow = parseCurrentFlow();
+    if (!flow) return { message: "I couldn't parse the current YAML flow.", yaml: null };
+
     const maxMatch = msg.match(/\b(\d+)\b/);
     const max = maxMatch ? Number(maxMatch[1]) : 3;
-    const targetStepId = ["document_check", "database_check", "government_id", "selfie"].find((stepId) =>
-      includesStepReference(msg, stepId)
-    ) ?? getFirstStepId(currentYaml);
+    const targetStepEntry = getMutableStepEntries(flow).find(([stepId]) => includesStepReference(msg, stepId))
+      ?? getMutableStepEntries(flow)[0];
 
-    if (!targetStepId) {
+    if (!targetStepEntry) {
       return { message: "I couldn't find a step to update retry settings.", yaml: null };
     }
 
-    const updatedYaml = updateRetryMax(currentYaml, targetStepId, max);
-    if (!updatedYaml) {
-      return { message: `I couldn't find step ${targetStepId}.`, yaml: null };
-    }
+    const [targetStepId, targetStep] = targetStepEntry;
+    targetStep.retry = { max };
+    return toValidatedFlowYamlResponse(flow, `Set retry.max to ${max} for ${targetStepId}.`);
+  }
 
-    return {
-      message: `Set retry.max to ${max} for ${targetStepId}.`,
-      yaml: updatedYaml,
-    };
+  if (msg.includes("country") || msg.includes("spain") || /\bes\b/.test(msg)) {
+    const flow = parseCurrentFlow();
+    if (!flow) return { message: "I couldn't parse the current YAML flow.", yaml: null };
+    const sourceStepHint = Object.keys(flow.steps).find((stepId) => includesStepReference(msg, stepId));
+    return updateCountryBranchWithEs(flow, sourceStepHint);
   }
 
   if (msg.includes("branch") || msg.includes("condition") || msg.includes("ветвление") || msg.includes("условие")) {
@@ -431,8 +635,9 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Message is required" }, { status: 400 });
     }
 
-    // Keep example prompts deterministic to avoid model variance for quick testing.
-    if (FLOW_CHAT_EXAMPLE_PROMPT_SET.has(normalizePrompt(message))) {
+    const deterministicPromptSet = getDeterministicPromptSet(currentYaml);
+    // Keep generated example prompts deterministic to avoid model variance for quick testing.
+    if (deterministicPromptSet.has(normalizePrompt(message))) {
       return NextResponse.json(mockResponse(message, currentYaml));
     }
 
@@ -486,7 +691,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    return NextResponse.json(result ?? mockResponse(message, currentYaml));
+    return NextResponse.json(ensureValidSuggestedYaml(result ?? mockResponse(message, currentYaml)));
   } catch (err) {
     const msg = err instanceof Error ? err.message : "Internal error";
     return NextResponse.json({ error: msg }, { status: 500 });

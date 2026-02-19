@@ -28,6 +28,9 @@ export const FLOW_CHAT_EXAMPLE_ROW_PADDING_Y_PX = 8;
 export const FLOW_CHAT_MESSAGE_ACTION_GAP_PX = 6;
 export const FLOW_CHAT_MESSAGE_LINE_HEIGHT_PX = 20;
 export const FLOW_CHAT_MESSAGE_VERTICAL_PADDING_PX = 10;
+export const FLOW_CHAT_EXAMPLE_PROMPTS_LIMIT = 3;
+export const FLOW_CHAT_EXAMPLE_COUNTRY_CODE = "ES";
+export const FLOW_CHAT_EXAMPLE_RETRY_MAX = 3;
 export const FLOW_CHAT_COMPOSER_TEXTAREA_SIZE = "lg" as const;
 export const FLOW_CHAT_COMPOSER_TEXTAREA_VARIANT = "outline" as const;
 export const FLOW_CHAT_COMPOSER_ACTION_SIZE = "lg" as const;
@@ -52,7 +55,7 @@ export const FLOW_CHAT_COMPOSER_TEXT_BOTTOM_PADDING_PX =
 export const FLOW_CHAT_COMPOSER_TEXT_LINE_HEIGHT_PX = 20;
 export const FLOW_CHAT_COMPOSER_MIN_HEIGHT_PX = 98;
 
-export const FLOW_CHAT_EXAMPLE_PROMPTS = [
+export const FLOW_CHAT_UNIVERSAL_EXAMPLE_PROMPTS = [
   "Add ES to the document check",
   "Add a selfie verification after government id",
   "Set retry max to 3 for document check",

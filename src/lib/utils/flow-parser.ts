@@ -257,9 +257,16 @@ function validateTarget(
   }
 }
 
-function collectReachableSteps(flow: FlowDefinition): Set<string> {
+interface FlowReachability {
+  steps: Set<string>;
+  terminals: Set<string>;
+}
+
+function collectReachability(flow: FlowDefinition): FlowReachability {
   const stepIds = new Set(Object.keys(flow.steps));
-  const visited = new Set<string>();
+  const terminalIds = new Set(Object.keys(flow.terminals));
+  const visitedSteps = new Set<string>();
+  const visitedTerminals = new Set<string>();
   const queue: string[] = [];
 
   if (stepIds.has(flow.start)) {
@@ -268,11 +275,11 @@ function collectReachableSteps(flow: FlowDefinition): Set<string> {
 
   while (queue.length > 0) {
     const currentStepId = queue.shift();
-    if (!currentStepId || visited.has(currentStepId)) {
+    if (!currentStepId || visitedSteps.has(currentStepId)) {
       continue;
     }
 
-    visited.add(currentStepId);
+    visitedSteps.add(currentStepId);
 
     const step = flow.steps[currentStepId];
     if (!step) {
@@ -281,27 +288,36 @@ function collectReachableSteps(flow: FlowDefinition): Set<string> {
 
     if (isReviewStep(step)) {
       for (const target of Object.values(step.outcomes)) {
-        if (stepIds.has(target) && !visited.has(target)) {
+        if (stepIds.has(target) && !visitedSteps.has(target)) {
           queue.push(target);
+        } else if (terminalIds.has(target)) {
+          visitedTerminals.add(target);
         }
       }
       continue;
     }
 
     for (const target of getTargetIds(step.on_pass)) {
-      if (stepIds.has(target) && !visited.has(target)) {
+      if (stepIds.has(target) && !visitedSteps.has(target)) {
         queue.push(target);
+      } else if (terminalIds.has(target)) {
+        visitedTerminals.add(target);
       }
     }
 
     for (const target of getTargetIds(step.on_fail)) {
-      if (stepIds.has(target) && !visited.has(target)) {
+      if (stepIds.has(target) && !visitedSteps.has(target)) {
         queue.push(target);
+      } else if (terminalIds.has(target)) {
+        visitedTerminals.add(target);
       }
     }
   }
 
-  return visited;
+  return {
+    steps: visitedSteps,
+    terminals: visitedTerminals,
+  };
 }
 
 export function parseFlowYaml(yamlStr: string): FlowDefinition {
@@ -387,10 +403,16 @@ export function validateFlow(flow: FlowDefinition): string[] {
     validateTarget(step.on_fail, `steps.${stepId}.on_fail`, stepIds, terminalIds, errors);
   }
 
-  const reachableStepIds = collectReachableSteps(flow);
+  const reachable = collectReachability(flow);
   for (const stepId of stepIds) {
-    if (!reachableStepIds.has(stepId)) {
+    if (!reachable.steps.has(stepId)) {
       errors.push(`orphan step is unreachable from start: ${stepId}`);
+    }
+  }
+
+  for (const terminalId of terminalIds) {
+    if (!reachable.terminals.has(terminalId)) {
+      errors.push(`orphan terminal is unreachable from start: ${terminalId}`);
     }
   }
 

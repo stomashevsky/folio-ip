@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { Button } from "@plexui/ui/components/Button";
 import { Textarea } from "@plexui/ui/components/Textarea";
 import { ExclamationMarkCircle, ArrowUpSm, Reply } from "@plexui/ui/components/Icon";
@@ -34,7 +34,6 @@ import {
   FLOW_CHAT_MESSAGE_LINE_HEIGHT_PX,
   FLOW_CHAT_MESSAGE_VERTICAL_PADDING_PX,
   FLOW_CHAT_EXAMPLE_TEXT_LINE_HEIGHT_PX,
-  FLOW_CHAT_EXAMPLE_PROMPTS,
   FLOW_CHAT_FRAME_PADDING_PX,
   FLOW_CHAT_FRAME_SECTION_GAP_PX,
   FLOW_CHAT_INPUT_PLACEHOLDER,
@@ -44,6 +43,7 @@ import {
 } from "@/lib/constants";
 import type { FlowChatProvider } from "@/lib/constants";
 import type { StoredFlowChatKey } from "@/lib/types";
+import { getFlowChatExamplePromptsFromYaml } from "@/lib/utils/flow-chat-prompts";
 
 interface ChatMessage {
   role: "user" | "assistant";
@@ -80,7 +80,7 @@ const FLOW_DSL_SCHEMA = `
 
 interface FlowChatProps {
   currentYaml: string;
-  onApplyYaml: (yaml: string) => void;
+  onApplyYaml: (yaml: string) => { ok: true } | { ok: false; error: string };
 }
 
 interface FlowChatRequestConfig {
@@ -218,10 +218,23 @@ export function FlowChat({ currentYaml, onApplyYaml }: FlowChatProps) {
     setError(null);
   }, [loading]);
 
+  const handleApplyClick = useCallback((nextYaml: string) => {
+    const result = onApplyYaml(nextYaml);
+    if (!result.ok) {
+      setError(result.error);
+    } else {
+      setError(null);
+    }
+  }, [onApplyYaml]);
+
   const hasMessages = messages.length > 0;
   const canSubmit = input.trim().length > 0;
   const sendButtonActive = canSubmit || loading;
   const showExamples = !hasMessages && !canSubmit;
+  const examplePrompts = useMemo(
+    () => getFlowChatExamplePromptsFromYaml(currentYaml),
+    [currentYaml],
+  );
 
   const renderError = (className?: string) => {
     if (!error) return null;
@@ -237,7 +250,7 @@ export function FlowChat({ currentYaml, onApplyYaml }: FlowChatProps) {
   };
 
   const renderExamples = () => {
-    if (!showExamples) return null;
+    if (!showExamples || examplePrompts.length === 0) return null;
 
     return (
       <div
@@ -246,7 +259,7 @@ export function FlowChat({ currentYaml, onApplyYaml }: FlowChatProps) {
           gap: FLOW_CHAT_EXAMPLE_ROW_GAP_PX,
         }}
       >
-        {FLOW_CHAT_EXAMPLE_PROMPTS.map((example) => (
+        {examplePrompts.map((example) => (
           <button
             key={example}
             type="button"
@@ -393,7 +406,7 @@ export function FlowChat({ currentYaml, onApplyYaml }: FlowChatProps) {
                         variant="solid"
                         size="sm"
                         pill={false}
-                        onClick={() => onApplyYaml(yamlResult)}
+                        onClick={() => handleApplyClick(yamlResult)}
                       >
                         Apply to code
                       </Button>

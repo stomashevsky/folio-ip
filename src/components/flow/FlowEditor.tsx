@@ -261,12 +261,25 @@ export function FlowEditor({
 
   const handleAiApply = useCallback(
     (newYaml: string) => {
-      if (newYaml === yamlValueRef.current) return;
+      if (newYaml === yamlValueRef.current) {
+        return { ok: true } as const;
+      }
+      try {
+        const parsed = parseFlowYaml(newYaml);
+        const errors = validateFlow(parsed);
+        if (errors.length > 0) {
+          return { ok: false, error: `Cannot apply AI YAML: ${errors[0]}` } as const;
+        }
+      } catch (err) {
+        const message = err instanceof Error ? err.message : "Invalid YAML";
+        return { ok: false, error: `Cannot apply AI YAML: ${message}` } as const;
+      }
       externalHistoryRef.current.past.push(yamlValueRef.current);
       externalHistoryRef.current.future = [];
       syncExternalHistoryState();
       fitAfterAiApplyPendingRef.current = true;
       applyYamlValue(newYaml);
+      return { ok: true } as const;
     },
     [applyYamlValue, syncExternalHistoryState],
   );
