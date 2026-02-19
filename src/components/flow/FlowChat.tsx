@@ -383,7 +383,9 @@ export function FlowChat({ currentYaml, onApplyYaml }: FlowChatProps) {
                 onMouseEnter={() => setHoveredMessageIndex(i)}
                 onMouseLeave={() => setHoveredMessageIndex((prev) => (prev === i ? null : prev))}
               >
-                {isUser && showCopyButton && <CopyButton value={msg.content} />}
+                {isUser && (
+                  <CopyButton value={msg.content} className={showCopyButton ? "opacity-100" : "opacity-0 pointer-events-none"} />
+                )}
                 <div
                   className={`max-w-[90%] rounded-lg text-sm ${
                     isUser
@@ -413,7 +415,9 @@ export function FlowChat({ currentYaml, onApplyYaml }: FlowChatProps) {
                     </div>
                   )}
                 </div>
-                {!isUser && showCopyButton && <CopyButton value={msg.content} />}
+                {!isUser && (
+                  <CopyButton value={msg.content} className={showCopyButton ? "opacity-100" : "opacity-0 pointer-events-none"} />
+                )}
               </div>
             );
           })}
