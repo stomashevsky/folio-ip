@@ -2,7 +2,7 @@
 
 import { TopBar } from "@/components/layout/TopBar";
 import { StatusBadge } from "@/components/shared/StatusBadge";
-import { NotFoundPage, InlineEmpty, EventTimeline, TagEditModal, SectionHeading, InfoRow } from "@/components/shared";
+import { NotFoundPage, TagEditModal, InfoRow, DetailPageSidebar } from "@/components/shared";
 import {
   mockInquiries,
   mockVerifications,
@@ -13,11 +13,11 @@ import {
   getBehavioralRiskForInquiry,
 } from "@/lib/data";
 import { formatDateTime } from "@/lib/utils/format";
+import { getAllKnownTags } from "@/lib/utils/tags";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { Suspense, useMemo, useState } from "react";
+import { Suspense, useState } from "react";
 import { useTabParam } from "@/lib/hooks/useTabParam";
-import { Badge } from "@plexui/ui/components/Badge";
 import { Button } from "@plexui/ui/components/Button";
 import { Tabs } from "@plexui/ui/components/Tabs";
 import { DotsHorizontal } from "@plexui/ui/components/Icon";
@@ -54,13 +54,7 @@ function InquiryDetailContent() {
   const inquiry = mockInquiries.find((i) => i.id === params.id);
   const [tags, setTags] = useState<string[]>(() => inquiry?.tags ?? []);
   const [tagModalOpen, setTagModalOpen] = useState(false);
-  const allKnownTags = useMemo(
-    () =>
-      Array.from(new Set(mockInquiries.flatMap((i) => i.tags)))
-        .filter(Boolean)
-        .sort(),
-    [],
-  );
+  const allKnownTags = getAllKnownTags();
 
   const verifications = mockVerifications.filter(
     (v) => v.inquiryId === inquiry?.id
@@ -155,11 +149,9 @@ function InquiryDetailContent() {
         </div>
 
         {/* Right sidebar */}
-        <div className="w-full border-t border-[var(--color-border)] bg-[var(--color-surface)] md:w-[440px] md:min-w-[280px] md:shrink md:overflow-auto md:border-l md:border-t-0">
-          <div className="px-5 py-5">
-            {/* Info section */}
-            <h3 className="heading-sm text-[var(--color-text)]">Info</h3>
-            <div className="mt-3 space-y-1">
+        <DetailPageSidebar
+          infoRows={
+            <>
               <InfoRow label="Inquiry ID" copyValue={inquiry.id} mono>
                 {inquiry.id}
               </InfoRow>
@@ -199,51 +191,12 @@ function InquiryDetailContent() {
               <InfoRow label="Notes">
                 <span className="text-[var(--color-text-tertiary)]">—</span>
               </InfoRow>
-            </div>
-          </div>
-
-          {/* Tags */}
-          <div className="border-t border-[var(--color-border)] px-5 py-4">
-            <SectionHeading
-              action={
-                <Button
-                  color="secondary"
-                  variant="ghost"
-                  size="sm"
-                  pill={false}
-                  onClick={() => setTagModalOpen(true)}
-                >
-                  {tags.length > 0 ? "Edit" : "Add"}
-                </Button>
-              }
-            >
-              Tags
-            </SectionHeading>
-            {tags.length > 0 && (
-              <div className="flex flex-wrap gap-2">
-                {tags.map((tag) => (
-                  <Badge key={tag} color="secondary" size="sm">
-                    {tag}
-                  </Badge>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Event Timeline */}
-          <div className="border-t border-[var(--color-border)] px-5 py-4">
-            {events.length > 0 ? (
-              <EventTimeline events={events} />
-            ) : (
-              <div>
-                <h3 className="heading-sm text-[var(--color-text)]">
-                  Event timeline (UTC)
-                </h3>
-                <InlineEmpty>No events recorded.</InlineEmpty>
-              </div>
-            )}
-          </div>
-        </div>
+            </>
+          }
+          tags={tags}
+          onEditTags={() => setTagModalOpen(true)}
+          events={events}
+        />
       </div>
 
       {/* Tag Edit Modal */}

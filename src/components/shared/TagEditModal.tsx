@@ -66,19 +66,22 @@ export function TagEditModal({
 
         {suggestions.length > 0 && (
           <Field label="Select existing tags" size="xl">
-            <div className="flex flex-wrap gap-1.5">
-              {suggestions.map((tag) => (
-                <button
-                  key={tag}
-                  onClick={() => addSuggestion(tag)}
-                  className="cursor-pointer"
-                >
-                  <Badge color="secondary" size="sm">
-                    {tag}
-                  </Badge>
-                </button>
-              ))}
-            </div>
+             <div className="flex flex-wrap gap-1.5">
+               {suggestions.map((tag) => (
+                 <Button
+                   key={tag}
+                   color="secondary"
+                   variant="ghost"
+                   size="sm"
+                   pill={false}
+                   onClick={() => addSuggestion(tag)}
+                 >
+                   <Badge color="secondary" size="sm">
+                     {tag}
+                   </Badge>
+                 </Button>
+               ))}
+             </div>
           </Field>
         )}
       </ModalBody>

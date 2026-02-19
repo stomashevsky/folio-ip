@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { TopBar } from "@/components/layout/TopBar";
 import {
+  ConfirmDeleteModal,
   CopyButton,
   Modal,
   ModalBody,
@@ -371,47 +372,22 @@ export default function ApiKeysPage() {
         </ModalFooter>
       </Modal>
 
-      <Modal
+      <ConfirmDeleteModal
         open={revoking !== null}
-        onOpenChange={(open) => {
-          if (!open) setRevoking(null);
-        }}
+        onOpenChange={(open) => { if (!open) setRevoking(null); }}
+        title="Revoke API key"
+        confirmLabel="Revoke"
+        onConfirm={handleRevoke}
       >
-        <ModalHeader>
-          <h2 className="heading-sm text-[var(--color-text)]">
-            Revoke API key
-          </h2>
-        </ModalHeader>
-        <ModalBody>
-          <p className="text-sm text-[var(--color-text-secondary)]">
-            Are you sure you want to revoke the API key{" "}
-            <span className="font-medium text-[var(--color-text)]">
-              &ldquo;{revoking?.name}&rdquo;
-            </span>
-            ? This action cannot be undone. Any applications using this key will
-            stop working.
-          </p>
-        </ModalBody>
-        <ModalFooter>
-          <Button
-            color="secondary"
-            variant="soft"
-            size="md"
-            pill={false}
-            onClick={() => setRevoking(null)}
-          >
-            Cancel
-          </Button>
-          <Button
-            color="danger"
-            size="md"
-            pill={false}
-            onClick={handleRevoke}
-          >
-            Revoke
-          </Button>
-        </ModalFooter>
-      </Modal>
+        <p className="text-sm text-[var(--color-text-secondary)]">
+          Are you sure you want to revoke the API key{" "}
+          <span className="font-medium text-[var(--color-text)]">
+            &ldquo;{revoking?.name}&rdquo;
+          </span>
+          ? This action cannot be undone. Any applications using this key will
+          stop working.
+        </p>
+      </ConfirmDeleteModal>
     </div>
   );
 }

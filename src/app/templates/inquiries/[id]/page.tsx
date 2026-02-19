@@ -7,6 +7,7 @@ import { TopBar } from "@/components/layout/TopBar";
 import { NotFoundPage, ConfirmLeaveModal } from "@/components/shared";
 import { FlowEditor, type FlowEditorPanel } from "@/components/flow/FlowEditor";
 import { SegmentedControl } from "@plexui/ui/components/SegmentedControl";
+import { useTemplateForm } from "@/lib/hooks/useTemplateForm";
 import { INQUIRY_TEMPLATE_PRESETS } from "@/lib/constants/template-presets";
 import { FLOW_TEMPLATES, DEFAULT_FLOW_YAML } from "@/lib/constants/flow-templates";
 import { useUnsavedChanges } from "@/lib/hooks/useUnsavedChanges";
@@ -83,14 +84,13 @@ function InquiryTemplateDetailContent() {
   const router = useRouter();
   const { inquiryTemplates } = useTemplateStore();
 
-  const isNew = id === "new";
-  const existing = isNew ? undefined : inquiryTemplates.getById(id);
-  const presetId = isNew ? searchParams.get("preset") : null;
-
-  const [form, setForm] = useState<InquiryFlowForm>(() => {
-    if (existing) return toForm(existing);
-    if (presetId) return buildFormFromPreset(presetId);
-    return DEFAULT_FORM;
+  const { form, setForm, patch, isNew, existing } = useTemplateForm({
+    id,
+    getExisting: inquiryTemplates.getById,
+    presetParam: searchParams.get("preset"),
+    toForm,
+    buildFromPreset: buildFormFromPreset,
+    defaultForm: DEFAULT_FORM,
   });
   const [initialForm, setInitialForm] = useState(form);
   const [saveState, setSaveState] = useState<"idle" | "saving" | "saved">("idle");
@@ -99,9 +99,7 @@ function InquiryTemplateDetailContent() {
   const [prevId, setPrevId] = useState(id);
   if (prevId !== id) {
     setPrevId(id);
-    const next = existing ? toForm(existing) : DEFAULT_FORM;
-    setForm(next);
-    setInitialForm(next);
+    setInitialForm(existing ? toForm(existing) : DEFAULT_FORM);
   }
 
   const isDirty = isNew || JSON.stringify(form) !== JSON.stringify(initialForm);
@@ -109,10 +107,6 @@ function InquiryTemplateDetailContent() {
 
   if (!isNew && !existing) {
     return <NotFoundPage section="Inquiry Templates" backHref="/templates/inquiries" entity="Inquiry template" />;
-  }
-
-  function patch(p: Partial<InquiryFlowForm>) {
-    setForm((prev) => ({ ...prev, ...p }));
   }
   function patchSettings(p: Partial<InquiryFlowForm["settings"]>) {
     setForm((prev) => ({ ...prev, settings: { ...prev.settings, ...p } }));

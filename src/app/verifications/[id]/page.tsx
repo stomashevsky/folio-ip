@@ -1,11 +1,10 @@
 "use client";
 
-import { Suspense, useMemo, useState } from "react";
+import { Suspense, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { Button } from "@plexui/ui/components/Button";
-import { Badge } from "@plexui/ui/components/Badge";
 import { DotsHorizontal, Plus, Search } from "@plexui/ui/components/Icon";
 import { Menu } from "@plexui/ui/components/Menu";
 import { Input } from "@plexui/ui/components/Input";
@@ -17,19 +16,20 @@ import {
   InfoRow,
   DocumentViewer,
   KeyValueTable,
-  SectionHeading,
   TagEditModal,
   CardHeader,
+  DetailPageSidebar,
 } from "@/components/shared";
 import { mockVerifications, mockInquiries } from "@/lib/data";
 import { formatDateTime, formatDuration, toTitleCase } from "@/lib/utils/format";
+import { getAllKnownTags } from "@/lib/utils/tags";
 import { VERIFICATION_TYPE_LABELS } from "@/lib/constants/verification-type-labels";
 import {
   CHECK_TYPE_OPTIONS,
   CHECK_REQUIREMENT_OPTIONS,
 } from "@/lib/constants/filter-options";
 import type { DocumentViewerItem } from "@/lib/types";
-import { CheckRow } from "./components";
+import { CheckRow, CHECK_TABLE_HEADERS } from "@/components/shared/CheckRow";
 
 const TYPE_OPTIONS = CHECK_TYPE_OPTIONS;
 const REQUIREMENT_OPTIONS = CHECK_REQUIREMENT_OPTIONS;
@@ -53,13 +53,7 @@ function VerificationDetailContent() {
 
   const [tags, setTags] = useState<string[]>([]);
   const [tagModalOpen, setTagModalOpen] = useState(false);
-  const allKnownTags = useMemo(
-    () =>
-      Array.from(new Set(mockInquiries.flatMap((i) => i.tags)))
-        .filter(Boolean)
-        .sort(),
-    [],
-  );
+  const allKnownTags = getAllKnownTags();
 
   if (!verification) {
     return (
@@ -147,12 +141,14 @@ function VerificationDetailContent() {
               {verification.photos && verification.photos.length > 0 && (
                 <div className="border-b border-[var(--color-border)] px-4 py-4">
                   <div className="flex flex-wrap gap-6">
-                    {verification.photos.map((photo, i) => (
-                      <div key={photo.label + i} className="flex flex-col">
-                        <button
-                          className="group flex cursor-pointer flex-col gap-1.5 outline-none"
-                          onClick={() => setLightboxIndex(i)}
-                        >
+                     {verification.photos.map((photo, i) => (
+                       <div key={photo.label + i} className="flex flex-col">
+                         <button
+                           type="button"
+                           aria-label={`View ${photo.label}`}
+                           className="group flex cursor-pointer flex-col gap-1.5 outline-none"
+                           onClick={() => setLightboxIndex(i)}
+                         >
                           <Image
                              src={photo.url}
                              alt={photo.label}
@@ -256,23 +252,21 @@ function VerificationDetailContent() {
                 <table className="w-full">
                   <thead>
                     <tr className="border-y border-[var(--color-border)]">
-                      <th className="w-[100px] px-4 py-2 text-left text-xs font-semibold uppercase tracking-[0.5px] text-[var(--color-text-tertiary)]">
-                        Status
-                      </th>
-                      <th className="px-4 py-2 text-left text-xs font-semibold uppercase tracking-[0.5px] text-[var(--color-text-tertiary)]">
-                        Check name
-                      </th>
-                      <th className="w-[190px] px-4 py-2 text-left text-xs font-semibold uppercase tracking-[0.5px] text-[var(--color-text-tertiary)]">
-                        Type
-                      </th>
-                      <th className="w-[80px] px-4 py-2 text-center text-xs font-semibold uppercase tracking-[0.5px] text-[var(--color-text-tertiary)]">
-                        Required
-                      </th>
+                      {CHECK_TABLE_HEADERS["status-first"].map((h) => (
+                        <th
+                          key={h.label}
+                          className={`${h.width ?? ""} px-4 py-2 text-xs font-semibold uppercase tracking-[0.5px] text-[var(--color-text-tertiary)] ${
+                            h.align === "center" ? "text-center" : "text-left"
+                          }`}
+                        >
+                          {h.label}
+                        </th>
+                      ))}
                     </tr>
                   </thead>
                   <tbody>
                     {filteredChecks.map((check, i) => (
-                      <CheckRow key={i} check={check} />
+                      <CheckRow key={i} check={check} variant="status-first" />
                     ))}
                   </tbody>
                 </table>
@@ -289,10 +283,9 @@ function VerificationDetailContent() {
         </div>
 
         {/* Right sidebar */}
-        <div className="w-full border-t border-[var(--color-border)] bg-[var(--color-surface)] md:w-[440px] md:min-w-[280px] md:shrink md:overflow-auto md:border-l md:border-t-0">
-          <div className="px-5 py-5">
-            <h3 className="heading-sm text-[var(--color-text)]">Info</h3>
-            <div className="mt-3 space-y-1">
+        <DetailPageSidebar
+          infoRows={
+            <>
               <InfoRow label="Verification ID" copyValue={verification.id} mono>
                 {verification.id}
               </InfoRow>
@@ -341,37 +334,12 @@ function VerificationDetailContent() {
               {duration !== null && (
                 <InfoRow label="Duration">{formatDuration(duration)}</InfoRow>
               )}
-            </div>
-          </div>
-
-          {/* Tags */}
-          <div className="border-t border-[var(--color-border)] px-5 py-4">
-            <SectionHeading
-              action={
-                <Button
-                  color="secondary"
-                  variant="ghost"
-                  size="sm"
-                  pill={false}
-                  onClick={() => setTagModalOpen(true)}
-                >
-                  {tags.length > 0 ? "Edit" : <><Plus /><span>Add tag</span></>}
-                </Button>
-              }
-            >
-              Tags
-            </SectionHeading>
-            {tags.length > 0 && (
-              <div className="flex flex-wrap gap-2">
-                {tags.map((tag) => (
-                  <Badge key={tag} color="secondary" size="sm">
-                    {tag}
-                  </Badge>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
+            </>
+          }
+          tags={tags}
+          onEditTags={() => setTagModalOpen(true)}
+          tagAddLabel={<><Plus /><span>Add tag</span></>}
+        />
       </div>
 
       {lightboxIndex !== null && lightboxItems.length > 0 && (

@@ -83,13 +83,15 @@ export function OverviewTab({
               {verTypeLabels.join(" + ")}
             </p>
           )}
-          <div className="flex flex-wrap gap-4">
-            {viewerItems.map((item, i) => (
-              <button
-                key={item.photo.label + i}
-                className="group flex min-w-[100px] cursor-pointer flex-col gap-1.5 outline-none"
-                onClick={() => setLightboxIndex(i)}
-              >
+           <div className="flex flex-wrap gap-4">
+             {viewerItems.map((item, i) => (
+               <button
+                 type="button"
+                 key={item.photo.label + i}
+                 aria-label={`View ${item.photo.label}`}
+                 className="group flex min-w-[100px] cursor-pointer flex-col gap-1.5 outline-none"
+                 onClick={() => setLightboxIndex(i)}
+               >
                 <Image
                    src={item.photo.url}
                    alt={item.photo.label}

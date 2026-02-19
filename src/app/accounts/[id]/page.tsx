@@ -4,11 +4,9 @@ import { TopBar } from "@/components/layout/TopBar";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import {
   NotFoundPage,
-  InlineEmpty,
-  EventTimeline,
   TagEditModal,
-  SectionHeading,
   InfoRow,
+  DetailPageSidebar,
 } from "@/components/shared";
 import {
   mockAccounts,
@@ -19,13 +17,13 @@ import {
 } from "@/lib/data";
 import { useTabParam } from "@/lib/hooks/useTabParam";
 import { formatDateTime } from "@/lib/utils/format";
-import { Badge } from "@plexui/ui/components/Badge";
+import { getAllKnownTags } from "@/lib/utils/tags";
 import { Button } from "@plexui/ui/components/Button";
 import { DotsHorizontal, Plus } from "@plexui/ui/components/Icon";
 import { Menu } from "@plexui/ui/components/Menu";
 import { Tabs } from "@plexui/ui/components/Tabs";
 import { useParams } from "next/navigation";
-import { Suspense, useMemo, useState, type CSSProperties } from "react";
+import { Suspense, useState, type CSSProperties } from "react";
 import {
   OverviewTab,
   VerificationsTab,
@@ -64,13 +62,7 @@ function AccountDetailContent() {
     ).filter(Boolean)
   );
   const [tagModalOpen, setTagModalOpen] = useState(false);
-  const allKnownTags = useMemo(
-    () =>
-      Array.from(new Set(mockInquiries.flatMap((inquiry) => inquiry.tags)))
-        .filter(Boolean)
-        .sort(),
-    []
-  );
+  const allKnownTags = getAllKnownTags();
 
   if (!account) {
     return (
@@ -168,10 +160,9 @@ function AccountDetailContent() {
           </div>
         </div>
 
-        <div className="w-full border-t border-[var(--color-border)] bg-[var(--color-surface)] md:w-[440px] md:min-w-[280px] md:shrink md:overflow-auto md:border-l md:border-t-0">
-          <div className="px-5 py-5">
-            <h3 className="heading-sm text-[var(--color-text)]">Info</h3>
-            <div className="mt-3 space-y-1">
+        <DetailPageSidebar
+          infoRows={
+            <>
               <InfoRow label="Account Type">{account.type}</InfoRow>
               <InfoRow label="Account ID" copyValue={account.id} mono>
                 {account.id}
@@ -196,51 +187,13 @@ function AccountDetailContent() {
               <InfoRow label="Last updated at">
                 {formatDateTime(account.updatedAt)} UTC
               </InfoRow>
-            </div>
-          </div>
-
-          <div className="border-t border-[var(--color-border)] px-5 py-4">
-            <SectionHeading
-              action={
-                <Button
-                  color="secondary"
-                  variant="ghost"
-                  size="sm"
-                  pill={false}
-                  onClick={() => setTagModalOpen(true)}
-                >
-                  {tags.length > 0 ? "Edit" : "Add"}
-                </Button>
-              }
-            >
-              Tags
-            </SectionHeading>
-            {tags.length > 0 ? (
-              <div className="flex flex-wrap gap-2">
-                {tags.map((tag) => (
-                  <Badge key={tag} color="secondary" size="sm">
-                    {tag}
-                  </Badge>
-                ))}
-              </div>
-            ) : (
-              <InlineEmpty>No tags assigned.</InlineEmpty>
-            )}
-          </div>
-
-          <div className="border-t border-[var(--color-border)] px-5 py-4">
-            {events.length > 0 ? (
-              <EventTimeline events={events} />
-            ) : (
-              <div>
-                <h3 className="heading-sm text-[var(--color-text)]">
-                  Event timeline (UTC)
-                </h3>
-                <InlineEmpty>No events recorded.</InlineEmpty>
-              </div>
-            )}
-          </div>
-        </div>
+            </>
+          }
+          tags={tags}
+          onEditTags={() => setTagModalOpen(true)}
+          events={events}
+          tagEmptyMessage="No tags assigned."
+        />
       </div>
 
       <TagEditModal

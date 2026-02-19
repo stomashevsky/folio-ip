@@ -79,6 +79,8 @@ interface DataTableProps<T> {
   onColumnVisibilityChange?: (visibility: VisibilityState) => void;
   /** Columns to hide on mobile (<768px). Merged with columnVisibility. */
   mobileColumnVisibility?: VisibilityState;
+  /** Text shown when the table is empty (default: "No results found.") */
+  emptyMessage?: string;
 }
 
 export function DataTable<T>({
@@ -91,6 +93,7 @@ export function DataTable<T>({
   columnVisibility,
   onColumnVisibilityChange,
   mobileColumnVisibility,
+  emptyMessage = "No results found.",
 }: DataTableProps<T>) {
   const [sorting, setSorting] = useState<SortingState>(initialSorting);
   const isMobile = useIsMobile();
@@ -101,6 +104,7 @@ export function DataTable<T>({
     return { ...columnVisibility, ...mobileColumnVisibility };
   }, [isMobile, mobileColumnVisibility, columnVisibility]);
 
+  // eslint-disable-next-line react-hooks/incompatible-library -- TanStack Table API is intentionally non-memoizable
   const table = useReactTable({
     data,
     columns,
@@ -182,7 +186,7 @@ export function DataTable<T>({
                   colSpan={table.getVisibleLeafColumns().length}
                   className="py-12 text-center text-sm text-[var(--color-text-tertiary)]"
                 >
-                  No results found.
+                  {emptyMessage}
                 </td>
               </tr>
             ) : (
@@ -213,7 +217,8 @@ export function DataTable<T>({
         </table>
       </div>
 
-      {/* Pagination – pinned bottom */}
+      {/* Pagination – pinned bottom, hidden when all rows fit on one page */}
+      {totalRows > table.getState().pagination.pageSize && (
       <div className="shrink-0 flex items-center justify-between border-t border-[var(--color-border)] bg-[var(--color-surface)] py-3">
         {/* Rows per page */}
         <div className="flex items-center gap-2">
@@ -269,6 +274,7 @@ export function DataTable<T>({
           </div>
         </div>
       </div>
+      )}
     </div>
   );
 }

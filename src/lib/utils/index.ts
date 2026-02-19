@@ -31,3 +31,4 @@ export {
   aggregateFunnelRates,
 } from "./analytics";
 export { idCell, dateTimeCell, statusCell } from "./columnHelpers";
+export { getAllKnownTags } from "./tags";

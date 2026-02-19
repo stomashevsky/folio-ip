@@ -1,6 +1,7 @@
 "use client";
 
 import { Avatar } from "@plexui/ui/components/Avatar";
+import { Button } from "@plexui/ui/components/Button";
 import { Menu } from "@plexui/ui/components/Menu";
 import { Sun, Moon, SystemMode } from "@plexui/ui/components/Icon";
 import { SegmentedControl } from "@plexui/ui/components/SegmentedControl";
@@ -69,13 +70,13 @@ export function Navbar() {
 
       {/* Right: Avatar (desktop) | Menu button (mobile) */}
       <div className="flex items-center justify-end">
-        <div className="hidden md:block">
-          <Menu>
-            <Menu.Trigger asChild>
-              <button type="button" className="cursor-pointer">
-                <Avatar name={MOCK_USER.name} size={28} color={MOCK_USER.avatarColor} variant="solid" />
-              </button>
-            </Menu.Trigger>
+         <div className="hidden md:block">
+           <Menu>
+             <Menu.Trigger asChild>
+               <Button color="secondary" variant="ghost" size="sm" uniform pill={false} aria-label="User menu">
+                 <Avatar name={MOCK_USER.name} size={28} color={MOCK_USER.avatarColor} variant="solid" />
+               </Button>
+             </Menu.Trigger>
             <Menu.Content align="end" sideOffset={8} minWidth={220}>
               <div className="px-3 py-2">
                 <p className="text-sm font-medium text-[var(--color-text)]">{MOCK_USER.name}</p>

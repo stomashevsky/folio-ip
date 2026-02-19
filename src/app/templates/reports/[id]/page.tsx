@@ -5,6 +5,7 @@ import { useParams, useRouter, useSearchParams } from "next/navigation";
 
 import { TopBar } from "@/components/layout/TopBar";
 import { NotFoundPage, SectionHeading, ConfirmLeaveModal } from "@/components/shared";
+import { useTemplateForm } from "@/lib/hooks/useTemplateForm";
 import { REPORT_TYPE_LABELS } from "@/lib/constants/report-type-labels";
 import { REPORT_TEMPLATE_PRESETS } from "@/lib/constants/template-presets";
 import { useUnsavedChanges } from "@/lib/hooks/useUnsavedChanges";
@@ -93,14 +94,13 @@ function ReportTemplateDetailContent() {
   const router = useRouter();
   const { reportTemplates } = useTemplateStore();
 
-  const isNew = id === "new";
-  const existing = isNew ? undefined : reportTemplates.getById(id);
-  const presetId = isNew ? searchParams.get("preset") : null;
-
-  const [form, setForm] = useState<ReportForm>(() => {
-    if (existing) return toForm(existing);
-    if (presetId) return buildFormFromPreset(presetId);
-    return DEFAULT_FORM;
+  const { form, setForm, patch, isNew, existing } = useTemplateForm({
+    id,
+    getExisting: reportTemplates.getById,
+    presetParam: searchParams.get("preset"),
+    toForm,
+    buildFromPreset: buildFormFromPreset,
+    defaultForm: DEFAULT_FORM,
   });
   const [initialForm, setInitialForm] = useState(form);
   const [saveState, setSaveState] = useState<"idle" | "saving" | "saved">("idle");
@@ -118,10 +118,6 @@ function ReportTemplateDetailContent() {
 
   if (!isNew && !existing) {
     return <NotFoundPage section="Report Templates" backHref="/templates/reports" entity="Report template" />;
-  }
-
-  function patch(p: Partial<ReportForm>) {
-    setForm((prev) => ({ ...prev, ...p }));
   }
   function patchSettings(p: Partial<ReportForm["settings"]>) {
     setForm((prev) => ({ ...prev, settings: { ...prev.settings, ...p } }));

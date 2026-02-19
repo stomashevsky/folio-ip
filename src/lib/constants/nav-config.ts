@@ -103,7 +103,7 @@ export function isSectionActive(
   sectionHref: string,
 ): boolean {
   // Dashboard: "/" and all entity prefixes
-  if (sectionHref === "/" || sectionHref === "/") {
+  if (sectionHref === "/") {
     return (
       pathname === "/" ||
       dashboardPrefixes.some((p) => pathname.startsWith(p))

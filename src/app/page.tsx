@@ -1,11 +1,10 @@
 "use client";
 
-import { useState, useMemo, useCallback } from "react";
+import { useState } from "react";
 import { DateTime } from "luxon";
 import { ButtonLink } from "@plexui/ui/components/Button";
 import { TopBar } from "@/components/layout/TopBar";
-import { MetricCard, ChartCard } from "@/components/shared";
-import { RecentInquiriesTable } from "@/components/shared/RecentInquiriesTable";
+import { MetricCard, ChartCard, DataTable } from "@/components/shared";
 import { InquiriesTrendChart } from "@/components/charts/InquiriesTrendChart";
 import { StatusDonutChart } from "@/components/charts/StatusDonutChart";
 import { DateRangePicker } from "@plexui/ui/components/DateRangePicker";
@@ -13,11 +12,14 @@ import {
   mockInquiries,
   generateTimeSeries,
 } from "@/lib/data";
+import { idCell, dateTimeCell, statusCell } from "@/lib/utils/columnHelpers";
 import { formatNumber, formatPercent, formatDuration } from "@/lib/utils/format";
 import { DASHBOARD_DATE_SHORTCUTS, type DateRangeShortcut } from "@/lib/constants/date-shortcuts";
 import { STATUS_COLORS } from "@/lib/constants/status-colors";
-import type { StatusDistribution } from "@/lib/types";
+import type { ColumnDef } from "@tanstack/react-table";
+import type { Inquiry, StatusDistribution } from "@/lib/types";
 import type { DateRange } from "@/lib/constants/date-shortcuts";
+import { useRouter } from "next/navigation";
 
 /* ── Seeded pseudo-random (Mulberry32) for stable derived data ── */
 function seededRandom(seed: number) {
@@ -96,33 +98,67 @@ function trendLabel(days: number, shortcutLabel?: string): string {
   return `vs prev ${days} days`;
 }
 
-// Default range: last 30 days
 const defaultRange: DateRange = DASHBOARD_DATE_SHORTCUTS[1].getDateRange();
 
+const recentInquiriesColumns: ColumnDef<Inquiry, unknown>[] = [
+  {
+    accessorKey: "accountName",
+    header: "Name",
+    enableSorting: false,
+    cell: ({ row }) => (
+      <span className="font-medium">{row.original.accountName}</span>
+    ),
+  },
+  {
+    accessorKey: "id",
+    header: "Inquiry ID",
+    enableSorting: false,
+    cell: idCell<Inquiry>((r) => r.id),
+  },
+  {
+    accessorKey: "templateName",
+    header: "Template",
+    enableSorting: false,
+    cell: ({ row }) => (
+      <span className="text-[var(--color-text-secondary)]">
+        {row.original.templateName}
+      </span>
+    ),
+  },
+  {
+    accessorKey: "createdAt",
+    header: "Created at",
+    enableSorting: false,
+    cell: dateTimeCell<Inquiry>((r) => r.createdAt),
+  },
+  {
+    accessorKey: "status",
+    header: "Status",
+    enableSorting: false,
+    cell: statusCell<Inquiry>((r) => r.status),
+  },
+];
+
 export default function DashboardHome() {
+  const router = useRouter();
   const recentInquiries = mockInquiries.slice(0, 10);
   const [dateRange, setDateRange] = useState<DateRange | null>(defaultRange);
   const [activeShortcutLabel, setActiveShortcutLabel] = useState<string | undefined>("Last 30 days");
 
-  const handleRangeChange = useCallback(
-    (next: DateRange | null, shortcut?: DateRangeShortcut) => {
-      setDateRange(next);
-      setActiveShortcutLabel(shortcut?.label);
-    },
-    [],
-  );
+  const handleRangeChange = (next: DateRange | null, shortcut?: DateRangeShortcut) => {
+    setDateRange(next);
+    setActiveShortcutLabel(shortcut?.label);
+  };
 
-  const days = useMemo(() => {
-    if (!dateRange) return 30;
-    // +1 to count both start and end days inclusively
-    return Math.max(1, Math.round(dateRange[1].diff(dateRange[0], "days").days) + 1);
-  }, [dateRange]);
+  const days = dateRange
+    ? Math.max(1, Math.round(dateRange[1].diff(dateRange[0], "days").days) + 1)
+    : 30;
 
-  const metrics = useMemo(() => deriveMetrics(days), [days]);
+  const metrics = deriveMetrics(days);
   const currentTrendLabel = trendLabel(days, activeShortcutLabel);
   const periodDesc = describePeriod(days, activeShortcutLabel);
-  const trendData = useMemo(() => generateTimeSeries(days), [days]);
-  const statusData = useMemo(() => deriveStatusDistribution(days), [days]);
+  const trendData = generateTimeSeries(days);
+  const statusData = deriveStatusDistribution(days);
 
   return (
     <div className="flex-1">
@@ -188,7 +224,12 @@ export default function DashboardHome() {
             </ButtonLink>
           </div>
           <div className="mt-4">
-            <RecentInquiriesTable data={recentInquiries} />
+            <DataTable
+              data={recentInquiries}
+              columns={recentInquiriesColumns}
+              onRowClick={(row) => router.push(`/inquiries/${row.id}`)}
+              emptyMessage="No inquiries found."
+            />
           </div>
         </div>
       </div>

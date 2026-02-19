@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useMemo, useState } from "react";
+import { Suspense, useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { Button } from "@plexui/ui/components/Button";
@@ -10,16 +10,15 @@ import { Menu } from "@plexui/ui/components/Menu";
 import { TopBar } from "@/components/layout/TopBar";
 import {
   NotFoundPage,
-  InlineEmpty,
-  EventTimeline,
   InfoRow,
-  SectionHeading,
   TagEditModal,
+  DetailPageSidebar,
 } from "@/components/shared";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import { REPORT_TYPE_LABELS } from "@/lib/constants/report-type-labels";
-import { mockReports, mockInquiries, getEventsForReport } from "@/lib/data";
+import { mockReports, getEventsForReport } from "@/lib/data";
 import { formatDateTime, toTitleCase } from "@/lib/utils/format";
+import { getAllKnownTags } from "@/lib/utils/tags";
 import { ScreeningResults } from "./components";
 
 export default function ReportDetailPage() {
@@ -35,13 +34,7 @@ function ReportDetailContent() {
   const report = mockReports.find((r) => r.id === params.id);
   const [tags, setTags] = useState<string[]>([]);
   const [tagModalOpen, setTagModalOpen] = useState(false);
-  const allKnownTags = useMemo(
-    () =>
-      Array.from(new Set(mockInquiries.flatMap((i) => i.tags)))
-        .filter(Boolean)
-        .sort(),
-    [],
-  );
+  const allKnownTags = getAllKnownTags();
 
   if (!report) {
     return (
@@ -86,10 +79,9 @@ function ReportDetailContent() {
           </div>
         </div>
 
-        <div className="w-full border-t border-[var(--color-border)] bg-[var(--color-surface)] md:w-[440px] md:min-w-[280px] md:shrink md:overflow-auto md:border-l md:border-t-0">
-          <div className="px-5 py-5">
-            <h3 className="heading-sm text-[var(--color-text)]">Info</h3>
-            <div className="mt-3 space-y-1">
+        <DetailPageSidebar
+          infoRows={
+            <>
               <InfoRow label="Report ID" copyValue={report.id} mono>
                 {report.id}
               </InfoRow>
@@ -171,51 +163,13 @@ function ReportDetailContent() {
                   "Disabled"
                 )}
               </InfoRow>
-            </div>
-          </div>
-
-          <div className="border-t border-[var(--color-border)] px-5 py-4">
-            <SectionHeading
-              action={
-                <Button
-                  color="secondary"
-                  variant="ghost"
-                  size="sm"
-                  pill={false}
-                  onClick={() => setTagModalOpen(true)}
-                >
-                  {tags.length > 0 ? "Edit" : "Add"}
-                </Button>
-              }
-            >
-              Tags
-            </SectionHeading>
-            {tags.length > 0 ? (
-              <div className="flex flex-wrap gap-2">
-                {tags.map((tag) => (
-                  <Badge key={tag} color="secondary" size="sm">
-                    {tag}
-                  </Badge>
-                ))}
-              </div>
-            ) : (
-              <InlineEmpty>No tags assigned.</InlineEmpty>
-            )}
-          </div>
-
-          <div className="border-t border-[var(--color-border)] px-5 py-4">
-            {events.length > 0 ? (
-              <EventTimeline events={events} />
-            ) : (
-              <div>
-                <h3 className="heading-sm text-[var(--color-text)]">
-                  Event timeline (UTC)
-                </h3>
-                <InlineEmpty>No events recorded.</InlineEmpty>
-              </div>
-            )}
-          </div>
-        </div>
+            </>
+          }
+          tags={tags}
+          onEditTags={() => setTagModalOpen(true)}
+          events={events}
+          tagEmptyMessage="No tags assigned."
+        />
       </div>
 
       <TagEditModal
