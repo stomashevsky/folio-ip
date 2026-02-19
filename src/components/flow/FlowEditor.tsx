@@ -32,12 +32,6 @@ interface FlowEditorProps {
   onPanelChange: (panel: FlowEditorPanel) => void;
 }
 
-function getInitialFlowEditorSidebarWidth() {
-  if (typeof window === "undefined") return FLOW_EDITOR_SIDEBAR_DEFAULT_WIDTH;
-  const storedWidth = Number(window.localStorage.getItem(FLOW_EDITOR_SIDEBAR_WIDTH_STORAGE_KEY));
-  return Number.isFinite(storedWidth) ? storedWidth : FLOW_EDITOR_SIDEBAR_DEFAULT_WIDTH;
-}
-
 export function FlowEditor({ initialYaml, onChange, readOnly = false, settingsPanel, panel, onPanelChange }: FlowEditorProps) {
   const [yamlValue, setYamlValue] = useState(initialYaml);
   const leftPanel = panel;
@@ -50,7 +44,8 @@ export function FlowEditor({ initialYaml, onChange, readOnly = false, settingsPa
   const [isResizingSidebar, setIsResizingSidebar] = useState(false);
   const [hasManualViewportInteraction, setHasManualViewportInteraction] = useState(false);
   const [fitViewRequestId, setFitViewRequestId] = useState(0);
-  const [sidebarWidth, setSidebarWidth] = useState(getInitialFlowEditorSidebarWidth);
+  const [sidebarWidth, setSidebarWidth] = useState(FLOW_EDITOR_SIDEBAR_DEFAULT_WIDTH);
+  const [isSidebarWidthHydrated, setIsSidebarWidthHydrated] = useState(false);
   useEffect(() => { onChangeRef.current = onChange; });
 
   const clampSidebarWidth = useCallback((width: number) => {
@@ -64,8 +59,27 @@ export function FlowEditor({ initialYaml, onChange, readOnly = false, settingsPa
 
   useEffect(() => {
     if (typeof window === "undefined") return;
+    const storedWidth = Number(window.localStorage.getItem(FLOW_EDITOR_SIDEBAR_WIDTH_STORAGE_KEY));
+    let cancelled = false;
+    queueMicrotask(() => {
+      if (cancelled) return;
+      if (Number.isFinite(storedWidth)) {
+        setSidebarWidth((current) => {
+          const next = clampSidebarWidth(storedWidth);
+          return next === current ? current : next;
+        });
+      }
+      setIsSidebarWidthHydrated(true);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [clampSidebarWidth]);
+
+  useEffect(() => {
+    if (typeof window === "undefined" || !isSidebarWidthHydrated) return;
     window.localStorage.setItem(FLOW_EDITOR_SIDEBAR_WIDTH_STORAGE_KEY, String(sidebarWidth));
-  }, [sidebarWidth]);
+  }, [isSidebarWidthHydrated, sidebarWidth]);
 
   useEffect(() => {
     const onResize = () => setSidebarWidth((current) => clampSidebarWidth(current));
@@ -145,9 +159,8 @@ export function FlowEditor({ initialYaml, onChange, readOnly = false, settingsPa
     (newYaml: string) => {
       setYamlValue(newYaml);
       onChangeRef.current?.(newYaml);
-      setLeftPanel("code");
     },
-    [setLeftPanel],
+    [],
   );
 
   const scrollCountRef = useRef(0);

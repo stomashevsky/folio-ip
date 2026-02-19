@@ -5,6 +5,16 @@ import { Button } from "@plexui/ui/components/Button";
 import { Input } from "@plexui/ui/components/Input";
 import { Sparkles, ExclamationMarkCircle, ArrowRightSm } from "@plexui/ui/components/Icon";
 import { EmptyMessage } from "@plexui/ui/components/EmptyMessage";
+import {
+  FLOW_CHAT_ACTIVE_KEY_ID_STORAGE_KEY,
+  FLOW_CHAT_API_KEY_STORAGE_KEY,
+  FLOW_CHAT_DEFAULT_PROVIDER,
+  FLOW_CHAT_KEYS_STORAGE_KEY,
+  FLOW_CHAT_MODEL_STORAGE_KEY,
+  FLOW_CHAT_PROVIDER_STORAGE_KEY,
+} from "@/lib/constants";
+import type { FlowChatProvider } from "@/lib/constants";
+import type { StoredFlowChatKey } from "@/lib/types";
 
 interface ChatMessage {
   role: "user" | "assistant";
@@ -44,6 +54,69 @@ interface FlowChatProps {
   onApplyYaml: (yaml: string) => void;
 }
 
+interface FlowChatRequestConfig {
+  provider: FlowChatProvider;
+  apiKey?: string;
+  model?: string;
+}
+
+function getFlowChatRequestConfig(): FlowChatRequestConfig {
+  if (typeof window === "undefined") {
+    return { provider: FLOW_CHAT_DEFAULT_PROVIDER };
+  }
+
+  const storedKeysRaw = window.localStorage.getItem(FLOW_CHAT_KEYS_STORAGE_KEY);
+  if (storedKeysRaw) {
+    try {
+      const parsed = JSON.parse(storedKeysRaw) as StoredFlowChatKey[];
+      const storedActiveKeyId = window.localStorage.getItem(FLOW_CHAT_ACTIVE_KEY_ID_STORAGE_KEY);
+      const activeKey = parsed.find((key) => key.id === storedActiveKeyId && key.active)
+        ?? parsed.find((key) => key.active);
+      if (activeKey?.apiKey.trim()) {
+        return {
+          provider: activeKey.provider,
+          apiKey: activeKey.apiKey.trim(),
+          model: activeKey.model?.trim() || undefined,
+        };
+      }
+    } catch {
+      // Fallback to legacy single-key storage.
+    }
+  }
+
+  const providerRaw = window.localStorage.getItem(FLOW_CHAT_PROVIDER_STORAGE_KEY);
+  const provider: FlowChatProvider = providerRaw === "gemini" || providerRaw === "groq"
+    ? providerRaw
+    : FLOW_CHAT_DEFAULT_PROVIDER;
+
+  const apiKey = window.localStorage.getItem(FLOW_CHAT_API_KEY_STORAGE_KEY)?.trim() ?? "";
+  const model = window.localStorage.getItem(FLOW_CHAT_MODEL_STORAGE_KEY)?.trim() ?? "";
+
+  return {
+    provider,
+    apiKey: apiKey || undefined,
+    model: model || undefined,
+  };
+}
+
+function toReadableErrorMessage(error: unknown): string {
+  const message = (error instanceof Error ? error.message : "Failed to get response").replace(/\s+/g, " ").trim();
+
+  if (/quota exceeded|resource_exhausted|status 429/i.test(message)) {
+    return "AI provider quota for this key is unavailable right now.";
+  }
+
+  if (/failed to fetch|network/i.test(message)) {
+    return "Network error while contacting AI API.";
+  }
+
+  if (message.length > 200) {
+    return `${message.slice(0, 197)}...`;
+  }
+
+  return message;
+}
+
 export function FlowChat({ currentYaml, onApplyYaml }: FlowChatProps) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
@@ -69,6 +142,7 @@ export function FlowChat({ currentYaml, onApplyYaml }: FlowChatProps) {
       setLoading(true);
 
       try {
+        const requestConfig = getFlowChatRequestConfig();
         const response = await fetch("/api/flow-chat", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -76,6 +150,9 @@ export function FlowChat({ currentYaml, onApplyYaml }: FlowChatProps) {
             message: userMessage,
             currentYaml,
             schema: FLOW_DSL_SCHEMA,
+            provider: requestConfig.provider,
+            apiKey: requestConfig.apiKey,
+            model: requestConfig.model,
           }),
         });
 
@@ -92,19 +169,14 @@ export function FlowChat({ currentYaml, onApplyYaml }: FlowChatProps) {
         };
 
         setMessages((prev) => [...prev, assistantMsg]);
-
-        if (data.yaml) {
-          onApplyYaml(data.yaml);
-        }
       } catch (err) {
-        const msg = err instanceof Error ? err.message : "Failed to get response";
+        const msg = toReadableErrorMessage(err);
         setError(msg);
-        setMessages((prev) => [...prev, { role: "assistant", content: `Error: ${msg}` }]);
       } finally {
         setLoading(false);
       }
     },
-    [input, loading, currentYaml, onApplyYaml],
+    [input, loading, currentYaml],
   );
 
   return (
@@ -122,8 +194,11 @@ export function FlowChat({ currentYaml, onApplyYaml }: FlowChatProps) {
           </div>
         )}
 
-        {messages.map((msg, i) => (
-          <div key={i} className={`mb-2 flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
+        {messages.map((msg, i) => {
+          const yamlResult = msg.yamlResult;
+
+          return (
+            <div key={i} className={`mb-2 flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
             <div
               className={`max-w-[90%] rounded-lg px-3 py-2 text-sm leading-relaxed ${
                 msg.role === "user"
@@ -134,12 +209,24 @@ export function FlowChat({ currentYaml, onApplyYaml }: FlowChatProps) {
               }`}
             >
               {msg.content}
-              {msg.yamlResult && (
-                <span className="mt-1 block text-xs text-[var(--color-text-tertiary)]">Flow updated</span>
+              {yamlResult && (
+                <div className="mt-2 flex items-center gap-2">
+                  <span className="text-xs text-[var(--color-text-tertiary)]">Suggested YAML is ready.</span>
+                  <Button
+                    color="secondary"
+                    variant="soft"
+                    size="sm"
+                    pill
+                    onClick={() => onApplyYaml(yamlResult)}
+                  >
+                    Apply to code
+                  </Button>
+                </div>
               )}
             </div>
           </div>
-        ))}
+          );
+        })}
 
         {loading && (
           <div className="mb-2 flex justify-start">

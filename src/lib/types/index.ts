@@ -464,3 +464,5 @@ export interface InquirySignal {
   flagged: boolean;
   category: SignalCategory;
 }
+
+export type { StoredFlowChatKey } from "./flow-chat";

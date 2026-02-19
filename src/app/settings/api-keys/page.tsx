@@ -1,124 +1,177 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { TopBar } from "@/components/layout/TopBar";
 import {
   ConfirmDeleteModal,
-  CopyButton,
   Modal,
   ModalBody,
   ModalFooter,
   ModalHeader,
   SettingsTable,
 } from "@/components/shared";
-import { getActiveBadgeColor } from "@/lib/utils/format";
 import { Button } from "@plexui/ui/components/Button";
 import { Badge } from "@plexui/ui/components/Badge";
 import { Input } from "@plexui/ui/components/Input";
 import { Field } from "@plexui/ui/components/Field";
 import { Menu } from "@plexui/ui/components/Menu";
+import { Select } from "@plexui/ui/components/Select";
 import { DotsHorizontal, Plus } from "@plexui/ui/components/Icon";
+import {
+  FLOW_CHAT_ACTIVE_KEY_ID_STORAGE_KEY,
+  FLOW_CHAT_API_KEY_STORAGE_KEY,
+  FLOW_CHAT_DEFAULT_PROVIDER,
+  FLOW_CHAT_KEYS_STORAGE_KEY,
+  FLOW_CHAT_PROVIDER_OPTIONS,
+  FLOW_CHAT_PROVIDER_STORAGE_KEY,
+} from "@/lib/constants";
+import type { FlowChatProvider } from "@/lib/constants";
+import type { StoredFlowChatKey } from "@/lib/types";
 
-interface ApiKeyItem {
-  id: string;
-  name: string;
-  fullKey: string;
-  maskedKey: string;
-  created: string;
-  lastUsed: string;
-  active: boolean;
+const AI_PROVIDER_OPTIONS = FLOW_CHAT_PROVIDER_OPTIONS.map((option) => ({
+  value: option.value,
+  label: option.label,
+}));
+
+function normalizeProvider(value?: string | null): FlowChatProvider {
+  if (value === "groq" || value === "gemini") return value;
+  return FLOW_CHAT_DEFAULT_PROVIDER;
 }
 
-function generateKey() {
-  const chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-  let key = "folio_test_";
-  for (let i = 0; i < 32; i++) {
-    key += chars[Math.floor(Math.random() * chars.length)];
+function maskKey(key: string): string {
+  const trimmed = key.trim();
+  if (trimmed.length === 0) return "";
+  if (trimmed.length <= 8) {
+    return `${trimmed.slice(0, 2)}${"•".repeat(Math.max(trimmed.length - 2, 1))}`;
   }
-  return key;
+  return `${trimmed.slice(0, 4)}${"•".repeat(8)}${trimmed.slice(-4)}`;
 }
 
-function maskKey(key: string) {
-  const last4 = key.slice(-4);
-  return `folio_test_${"•".repeat(13)}${last4}`;
+function formatDate(iso: string): string {
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return "-";
+  return date.toLocaleDateString("en-US", {
+    month: "short",
+    day: "2-digit",
+    year: "numeric",
+  });
 }
 
-const initialKeys: ApiKeyItem[] = [
-  {
-    id: `key_${Math.random().toString(36).slice(2, 14)}`,
-    name: "Default test key",
-    fullKey: "folio_test_aBvf7kQ2mN9xLpR3wT5yH8jD",
-    maskedKey: "folio_test_•••••••••••••aBvf",
-    created: "Jan 15, 2026",
-    lastUsed: "Feb 10, 2026",
-    active: true,
-  },
-  {
-    id: `key_${Math.random().toString(36).slice(2, 14)}`,
-    name: "CI/CD pipeline",
-    fullKey: "folio_test_qR3xkV7nW2pJ5sL8mT4yG9bF",
-    maskedKey: "folio_test_•••••••••••••qR3x",
-    created: "Feb 01, 2026",
-    lastUsed: "Feb 09, 2026",
-    active: true,
-  },
-  {
-    id: `key_${Math.random().toString(36).slice(2, 14)}`,
-    name: "Staging environment",
-    fullKey: "folio_test_mN7pxK3dR9wQ2jL5vT8yH4sF",
-    maskedKey: "folio_test_•••••••••••••mN7p",
-    created: "Feb 05, 2026",
-    lastUsed: "Never",
-    active: false,
-  },
-];
+function parseStoredKeys(raw: string | null): StoredFlowChatKey[] {
+  if (!raw) return [];
+  try {
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    return parsed.filter((item): item is StoredFlowChatKey => {
+      return Boolean(
+        item
+          && typeof item.id === "string"
+          && typeof item.name === "string"
+          && typeof item.provider === "string"
+          && typeof item.apiKey === "string"
+          && typeof item.createdAt === "string"
+          && typeof item.active === "boolean",
+      );
+    }).map((item) => ({
+      ...item,
+      provider: normalizeProvider(item.provider),
+    }));
+  } catch {
+    return [];
+  }
+}
+
+function createKeyId(): string {
+  if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+    return `ai_${crypto.randomUUID()}`;
+  }
+  return `ai_${Date.now()}`;
+}
+
+function ensureSingleActive(keys: StoredFlowChatKey[]): StoredFlowChatKey[] {
+  const activeIndex = keys.findIndex((key) => key.active);
+  if (activeIndex === -1) {
+    return keys.map((key, index) => ({ ...key, active: index === 0 }));
+  }
+  return keys.map((key, index) => ({ ...key, active: index === activeIndex }));
+}
+
+function persistKeys(keys: StoredFlowChatKey[]) {
+  const normalizedKeys = ensureSingleActive(keys);
+  window.localStorage.setItem(FLOW_CHAT_KEYS_STORAGE_KEY, JSON.stringify(normalizedKeys));
+
+  const activeKey = normalizedKeys.find((key) => key.active) ?? null;
+  if (!activeKey) {
+    window.localStorage.removeItem(FLOW_CHAT_ACTIVE_KEY_ID_STORAGE_KEY);
+    window.localStorage.removeItem(FLOW_CHAT_PROVIDER_STORAGE_KEY);
+    window.localStorage.removeItem(FLOW_CHAT_API_KEY_STORAGE_KEY);
+    return;
+  }
+
+  window.localStorage.setItem(FLOW_CHAT_ACTIVE_KEY_ID_STORAGE_KEY, activeKey.id);
+  window.localStorage.setItem(FLOW_CHAT_PROVIDER_STORAGE_KEY, activeKey.provider);
+  window.localStorage.setItem(FLOW_CHAT_API_KEY_STORAGE_KEY, activeKey.apiKey);
+}
 
 export default function ApiKeysPage() {
-  const [keys, setKeys] = useState<ApiKeyItem[]>(initialKeys);
+  const [keys, setKeys] = useState<StoredFlowChatKey[]>([]);
   const [createOpen, setCreateOpen] = useState(false);
   const [createName, setCreateName] = useState("");
-  const [createdKey, setCreatedKey] = useState<{
-    name: string;
-    fullKey: string;
-  } | null>(null);
-  const [revoking, setRevoking] = useState<ApiKeyItem | null>(null);
+  const [createProvider, setCreateProvider] = useState<FlowChatProvider>(FLOW_CHAT_DEFAULT_PROVIDER);
+  const [createApiKey, setCreateApiKey] = useState("");
+  const [revoking, setRevoking] = useState<StoredFlowChatKey | null>(null);
 
-  const handleCreate = () => {
-    if (!createName.trim()) return;
-    const fullKey = generateKey();
-    const newKey: ApiKeyItem = {
-      id: `key_${Math.random().toString(36).slice(2, 14)}`,
-      name: createName.trim(),
-      fullKey,
-      maskedKey: maskKey(fullKey),
-      created: new Date().toLocaleDateString("en-US", {
-        month: "short",
-        day: "2-digit",
-        year: "numeric",
-      }),
-      lastUsed: "Never",
-      active: true,
+  useEffect(() => {
+    let cancelled = false;
+    queueMicrotask(() => {
+      if (cancelled) return;
+      const storedKeys = ensureSingleActive(parseStoredKeys(window.localStorage.getItem(FLOW_CHAT_KEYS_STORAGE_KEY)));
+      setKeys(storedKeys);
+      persistKeys(storedKeys);
+    });
+    return () => {
+      cancelled = true;
     };
-    setKeys((prev) => [newKey, ...prev]);
-    setCreatedKey({ name: newKey.name, fullKey });
-    setCreateName("");
-  };
+  }, []);
 
   const handleCloseCreate = () => {
     setCreateOpen(false);
     setCreateName("");
-    setCreatedKey(null);
+    setCreateProvider(FLOW_CHAT_DEFAULT_PROVIDER);
+    setCreateApiKey("");
   };
 
-  const handleToggleActive = (id: string) => {
-    setKeys((prev) =>
-      prev.map((k) => (k.id === id ? { ...k, active: !k.active } : k)),
-    );
+  const handleCreate = () => {
+    if (!createName.trim() || !createApiKey.trim()) return;
+
+    const newKey: StoredFlowChatKey = {
+      id: createKeyId(),
+      name: createName.trim(),
+      provider: createProvider,
+      apiKey: createApiKey.trim(),
+      createdAt: new Date().toISOString(),
+      active: true,
+    };
+
+    const nextKeys = [
+      newKey,
+      ...keys.map((key) => ({
+        ...key,
+        active: false,
+      })),
+    ];
+
+    setKeys(nextKeys);
+    persistKeys(nextKeys);
+    handleCloseCreate();
   };
 
   const handleRevoke = () => {
     if (!revoking) return;
-    setKeys((prev) => prev.filter((k) => k.id !== revoking.id));
+
+    const nextKeys = ensureSingleActive(keys.filter((key) => key.id !== revoking.id));
+    setKeys(nextKeys);
+    persistKeys(nextKeys);
     setRevoking(null);
   };
 
@@ -127,174 +180,93 @@ export default function ApiKeysPage() {
       <TopBar
         title="API keys"
         actions={
-          <Button
-            color="primary"
-            pill={false}
-            size="md"
-            onClick={() => setCreateOpen(true)}
-          >
+          <Button color="primary" pill={false} size="md" onClick={() => setCreateOpen(true)}>
             <Plus />
             Create new key
           </Button>
         }
       />
+
       <div className="px-4 py-8 md:px-6">
         <p className="mb-6 text-sm text-[var(--color-text-secondary)]">
-          API keys are used to authenticate requests to the Folio API. Keep your
-          keys secret — do not share them in client-side code.
+          Manage external AI provider keys used by Template AI Chat. Keys are stored in this browser profile only.
         </p>
 
-        <SettingsTable<ApiKeyItem>
+        <SettingsTable<StoredFlowChatKey>
           data={keys}
-          keyExtractor={(k) => k.id}
+          keyExtractor={(key) => key.id}
           columns={[
             {
               header: "Name",
-              render: (apiKey) => (
-                <span className="text-sm font-medium text-[var(--color-text)]">
-                  {apiKey.name}
-                </span>
-              ),
-            },
-            {
-              header: "Key",
-              render: (apiKey) => (
-                <div className="flex items-center gap-1">
-                  <span className="font-mono text-sm text-[var(--color-text-secondary)]">
-                    {apiKey.maskedKey}
-                  </span>
-                  <CopyButton value={apiKey.fullKey} />
+              render: (key) => (
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-medium text-[var(--color-text)]">{key.name}</span>
+                  <Badge color="secondary" variant="soft" size="sm">{key.provider}</Badge>
                 </div>
               ),
             },
             {
-              header: "Created",
-              render: (apiKey) => (
-                <span className="text-sm text-[var(--color-text-secondary)]">
-                  {apiKey.created}
-                </span>
+              header: "Key",
+              render: (key) => (
+                <span className="font-mono text-sm text-[var(--color-text-secondary)]">{maskKey(key.apiKey)}</span>
               ),
             },
             {
-              header: "Last used",
-              render: (apiKey) => (
-                <span className="text-sm text-[var(--color-text-secondary)]">
-                  {apiKey.lastUsed}
-                </span>
+              header: "Created",
+              render: (key) => (
+                <span className="text-sm text-[var(--color-text-secondary)]">{formatDate(key.createdAt)}</span>
               ),
             },
             {
               header: "Status",
-              render: (apiKey) => (
-                <Badge
-                  color={
-                    getActiveBadgeColor(apiKey.active) as
-                      | "success"
-                      | "secondary"
-                  }
-                >
-                  {apiKey.active ? "Active" : "Inactive"}
-                </Badge>
+              render: (key) => (
+                <Badge color={key.active ? "success" : "secondary"}>{key.active ? "Active" : "Inactive"}</Badge>
               ),
             },
             {
               header: "",
               align: "right" as const,
-              render: (apiKey) => (
+              render: (key) => (
                 <Menu>
                   <Menu.Trigger>
-                    <Button
-                      color="secondary"
-                      variant="ghost"
-                      size="sm"
-                      pill={false}
-                    >
+                    <Button color="secondary" variant="ghost" size="sm" pill={false}>
                       <DotsHorizontal />
                     </Button>
                   </Menu.Trigger>
                   <Menu.Content align="end" minWidth="auto">
                     <Menu.Item
-                      onSelect={() =>
-                        navigator.clipboard.writeText(apiKey.fullKey)
-                      }
-                    >
-                      Copy key
-                    </Menu.Item>
-                    <Menu.Item onSelect={() => handleToggleActive(apiKey.id)}>
-                      {apiKey.active ? "Disable" : "Enable"}
-                    </Menu.Item>
-                    <Menu.Separator />
-                    <Menu.Item
-                      onSelect={() => setRevoking(apiKey)}
+                      onSelect={() => setRevoking(key)}
                       className="text-[var(--color-text-danger-ghost)]"
                     >
-                      Revoke key
+                      Delete key
                     </Menu.Item>
                   </Menu.Content>
                 </Menu>
               ),
             },
           ]}
-          renderMobileCard={(apiKey) => (
+          renderMobileCard={(key) => (
             <>
               <div className="flex items-center justify-between">
-                <span className="text-sm font-medium text-[var(--color-text)]">
-                  {apiKey.name}
-                </span>
                 <div className="flex items-center gap-2">
-                  <Badge
-                    color={
-                      getActiveBadgeColor(apiKey.active) as
-                        | "success"
-                        | "secondary"
-                    }
-                  >
-                    {apiKey.active ? "Active" : "Inactive"}
-                  </Badge>
-                  <Menu>
-                    <Menu.Trigger>
-                      <Button
-                        color="secondary"
-                        variant="ghost"
-                        size="sm"
-                      >
-                        <DotsHorizontal />
-                      </Button>
-                    </Menu.Trigger>
-                    <Menu.Content align="end" minWidth="auto">
-                      <Menu.Item
-                        onSelect={() =>
-                          navigator.clipboard.writeText(apiKey.fullKey)
-                        }
-                      >
-                        Copy key
-                      </Menu.Item>
-                      <Menu.Item onSelect={() => handleToggleActive(apiKey.id)}>
-                        {apiKey.active ? "Disable" : "Enable"}
-                      </Menu.Item>
-                      <Menu.Separator />
-                      <Menu.Item
-                        onSelect={() => setRevoking(apiKey)}
-                        className="text-[var(--color-text-danger-ghost)]"
-                      >
-                        Revoke key
-                      </Menu.Item>
-                    </Menu.Content>
-                  </Menu>
+                  <span className="text-sm font-medium text-[var(--color-text)]">{key.name}</span>
+                  <Badge color="secondary" variant="soft" size="sm">{key.provider}</Badge>
                 </div>
+                <Badge color={key.active ? "success" : "secondary"}>{key.active ? "Active" : "Inactive"}</Badge>
               </div>
-              <div className="mt-1.5 flex items-center gap-1">
-                <span className="truncate font-mono text-xs text-[var(--color-text-secondary)]">
-                  {apiKey.maskedKey}
-                </span>
-                <CopyButton value={apiKey.fullKey} />
+              <div className="mt-1.5 flex items-center gap-1.5">
+                <span className="truncate font-mono text-xs text-[var(--color-text-secondary)]">{maskKey(key.apiKey)}</span>
               </div>
-              <p className="mt-1 text-xs text-[var(--color-text-tertiary)]">
-                Created {apiKey.created} · Last used {apiKey.lastUsed}
-              </p>
+              <p className="mt-1 text-xs text-[var(--color-text-tertiary)]">Created {formatDate(key.createdAt)}</p>
             </>
           )}
         />
+
+        {keys.length === 0 && (
+          <div className="mt-4 rounded-lg border border-dashed border-[var(--color-border)] px-4 py-6 text-sm text-[var(--color-text-secondary)]">
+            No API keys yet. Click &quot;Create new key&quot;.
+          </div>
+        )}
       </div>
 
       <Modal
@@ -304,88 +276,70 @@ export default function ApiKeysPage() {
         }}
       >
         <ModalHeader>
-          <h2 className="heading-sm text-[var(--color-text)]">
-            {createdKey ? "API key created" : "Create new API key"}
-          </h2>
+          <h2 className="heading-sm text-[var(--color-text)]">Create new API key</h2>
         </ModalHeader>
         <ModalBody>
-          {createdKey ? (
-            <>
-              <p className="text-sm text-[var(--color-text-secondary)]">
-                Make sure to copy your API key now. You won&apos;t be able to
-                see it again.
-              </p>
-              <div className="flex items-center gap-2 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-secondary)] px-3 py-2.5">
-                <code className="min-w-0 flex-1 truncate font-mono text-sm text-[var(--color-text)]">
-                  {createdKey.fullKey}
-                </code>
-                <CopyButton value={createdKey.fullKey} />
-              </div>
-            </>
-          ) : (
-            <Field label="Key name" size="xl">
+          <div className="grid gap-3">
+            <Field label="Name" size="xl">
               <Input
                 value={createName}
-                onChange={(e) => setCreateName(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") handleCreate();
-                }}
+                onChange={(event) => setCreateName(event.target.value)}
                 size="xl"
                 autoFocus
-                placeholder="e.g. Production API key"
+                placeholder="e.g. Groq primary key"
               />
             </Field>
-          )}
+            <Field label="Provider" size="xl">
+              <Select
+                options={AI_PROVIDER_OPTIONS}
+                value={createProvider}
+                onChange={(option) => {
+                  if (option) setCreateProvider(normalizeProvider(option.value));
+                }}
+                pill={false}
+                block
+              />
+            </Field>
+            <Field label="API key" size="xl">
+              <Input
+                type="text"
+                value={createApiKey}
+                onChange={(event) => setCreateApiKey(event.target.value)}
+                size="xl"
+                placeholder={createProvider === "groq" ? "gsk_..." : "AIza..."}
+                autoComplete="off"
+                spellCheck={false}
+              />
+            </Field>
+          </div>
         </ModalBody>
         <ModalFooter>
-          {createdKey ? (
-            <Button
-              color="primary"
-              size="md"
-              pill={false}
-              onClick={handleCloseCreate}
-            >
-              Done
-            </Button>
-          ) : (
-            <>
-              <Button
-                color="secondary"
-                variant="soft"
-                size="md"
-                pill={false}
-                onClick={handleCloseCreate}
-              >
-                Cancel
-              </Button>
-              <Button
-                color="primary"
-                size="md"
-                pill={false}
-                onClick={handleCreate}
-                disabled={!createName.trim()}
-              >
-                Create key
-              </Button>
-            </>
-          )}
+          <Button color="secondary" variant="soft" size="md" pill={false} onClick={handleCloseCreate}>
+            Cancel
+          </Button>
+          <Button
+            color="primary"
+            size="md"
+            pill={false}
+            onClick={handleCreate}
+            disabled={!createName.trim() || !createApiKey.trim()}
+          >
+            Create key
+          </Button>
         </ModalFooter>
       </Modal>
 
       <ConfirmDeleteModal
         open={revoking !== null}
-        onOpenChange={(open) => { if (!open) setRevoking(null); }}
-        title="Revoke API key"
-        confirmLabel="Revoke"
+        onOpenChange={(open) => {
+          if (!open) setRevoking(null);
+        }}
+        title="Delete API key"
+        confirmLabel="Delete"
         onConfirm={handleRevoke}
       >
         <p className="text-sm text-[var(--color-text-secondary)]">
-          Are you sure you want to revoke the API key{" "}
-          <span className="font-medium text-[var(--color-text)]">
-            &ldquo;{revoking?.name}&rdquo;
-          </span>
-          ? This action cannot be undone. Any applications using this key will
-          stop working.
+          Delete key <span className="font-medium text-[var(--color-text)]">&ldquo;{revoking?.name}&rdquo;</span>? AI Chat will stop using it.
         </p>
       </ConfirmDeleteModal>
     </div>

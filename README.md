@@ -22,6 +22,18 @@ npm run dev
 
 App runs at [http://localhost:3100](http://localhost:3100).
 
+## AI Chat (Inquiry Template Editor)
+
+Set your Groq key in `.env.local`:
+
+```bash
+GROQ_API_KEY=your_key_here
+# optional: override model
+# GROQ_MODEL=llama-3.1-8b-instant
+```
+
+Or configure it in UI at `/settings/api-keys` via **Create new key** modal.
+
 ## Scripts
 
 | Command | Description |
