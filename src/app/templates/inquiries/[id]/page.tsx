@@ -19,7 +19,7 @@ import { Badge } from "@plexui/ui/components/Badge";
 import { Button } from "@plexui/ui/components/Button";
 import { Input } from "@plexui/ui/components/Input";
 import { Menu } from "@plexui/ui/components/Menu";
-import { DotsHorizontal } from "@plexui/ui/components/Icon";
+import { DotsHorizontal, Undo, Redo } from "@plexui/ui/components/Icon";
 
 interface InquiryFlowForm {
   name: string;
@@ -95,6 +95,8 @@ function InquiryTemplateDetailContent() {
   const [initialForm, setInitialForm] = useState(form);
   const [saveState, setSaveState] = useState<"idle" | "saving" | "saved">("idle");
   const [editorPanel, setEditorPanel] = useState<FlowEditorPanel>("chat");
+  const [codeHistoryState, setCodeHistoryState] = useState({ canUndo: false, canRedo: false });
+  const [codeHistoryActions, setCodeHistoryActions] = useState<{ undo: () => void; redo: () => void } | null>(null);
   const saveTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
   const [prevId, setPrevId] = useState(id);
   if (prevId !== id) {
@@ -182,6 +184,28 @@ function InquiryTemplateDetailContent() {
               {hasSettings && <SegmentedControl.Tab value="settings">Settings</SegmentedControl.Tab>}
             </SegmentedControl>
             <div className="flex shrink-0 items-center gap-2">
+              <Button
+                color="secondary"
+                variant="soft"
+                size="sm"
+                pill={false}
+                disabled={!codeHistoryState.canUndo}
+                onClick={() => codeHistoryActions?.undo()}
+                className="[--button-ring-color:transparent]"
+              >
+                <Undo />
+              </Button>
+              <Button
+                color="secondary"
+                variant="soft"
+                size="sm"
+                pill={false}
+                disabled={!codeHistoryState.canRedo}
+                onClick={() => codeHistoryActions?.redo()}
+                className="[--button-ring-color:transparent]"
+              >
+                <Redo />
+              </Button>
               {!isNew && (
                 <Menu>
                   <Menu.Trigger>
@@ -226,6 +250,8 @@ function InquiryTemplateDetailContent() {
           onChange={(yaml) => patch({ flowYaml: yaml })}
           panel={editorPanel}
           onPanelChange={setEditorPanel}
+          onCodeHistoryChange={setCodeHistoryState}
+          onCodeHistoryActionsReady={setCodeHistoryActions}
           settingsPanel={
             <div className="flex flex-col gap-4 p-4">
               <div>

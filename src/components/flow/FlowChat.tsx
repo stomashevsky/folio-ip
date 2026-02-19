@@ -2,13 +2,16 @@
 
 import { useState, useRef, useEffect, useCallback } from "react";
 import { Button } from "@plexui/ui/components/Button";
-import { Input } from "@plexui/ui/components/Input";
-import { Sparkles, ExclamationMarkCircle, ArrowRightSm } from "@plexui/ui/components/Icon";
+import { Textarea } from "@plexui/ui/components/Textarea";
+import { Sparkles, ExclamationMarkCircle, ArrowUpSm } from "@plexui/ui/components/Icon";
 import { EmptyMessage } from "@plexui/ui/components/EmptyMessage";
 import {
   FLOW_CHAT_ACTIVE_KEY_ID_STORAGE_KEY,
   FLOW_CHAT_API_KEY_STORAGE_KEY,
+  FLOW_CHAT_COMPOSER_CONTROL_SIZE,
   FLOW_CHAT_DEFAULT_PROVIDER,
+  FLOW_CHAT_EXAMPLES_TITLE,
+  FLOW_CHAT_EXAMPLE_PROMPTS,
   FLOW_CHAT_KEYS_STORAGE_KEY,
   FLOW_CHAT_MODEL_STORAGE_KEY,
   FLOW_CHAT_PROVIDER_STORAGE_KEY,
@@ -123,6 +126,7 @@ export function FlowChat({ currentYaml, onApplyYaml }: FlowChatProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const formRef = useRef<HTMLFormElement>(null);
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -130,54 +134,62 @@ export function FlowChat({ currentYaml, onApplyYaml }: FlowChatProps) {
     }
   }, [messages]);
 
-  const handleSubmit = useCallback(
-    async (e: React.FormEvent) => {
-      e.preventDefault();
-      if (!input.trim() || loading) return;
+  const submitMessage = useCallback(async (messageOverride?: string) => {
+    if (loading) return;
 
-      const userMessage = input.trim();
-      setInput("");
-      setError(null);
-      setMessages((prev) => [...prev, { role: "user", content: userMessage }]);
-      setLoading(true);
+    const userMessage = (messageOverride ?? input).trim();
+    if (!userMessage) return;
+    setInput("");
+    setError(null);
+    setMessages((prev) => [...prev, { role: "user", content: userMessage }]);
+    setLoading(true);
 
-      try {
-        const requestConfig = getFlowChatRequestConfig();
-        const response = await fetch("/api/flow-chat", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            message: userMessage,
-            currentYaml,
-            schema: FLOW_DSL_SCHEMA,
-            provider: requestConfig.provider,
-            apiKey: requestConfig.apiKey,
-            model: requestConfig.model,
-          }),
-        });
+    try {
+      const requestConfig = getFlowChatRequestConfig();
+      const response = await fetch("/api/flow-chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          message: userMessage,
+          currentYaml,
+          schema: FLOW_DSL_SCHEMA,
+          provider: requestConfig.provider,
+          apiKey: requestConfig.apiKey,
+          model: requestConfig.model,
+        }),
+      });
 
-        if (!response.ok) {
-          const errData = await response.json().catch(() => ({}));
-          throw new Error(errData.error || `Request failed (${response.status})`);
-        }
-
-        const data = await response.json();
-        const assistantMsg: ChatMessage = {
-          role: "assistant",
-          content: data.message,
-          yamlResult: data.yaml,
-        };
-
-        setMessages((prev) => [...prev, assistantMsg]);
-      } catch (err) {
-        const msg = toReadableErrorMessage(err);
-        setError(msg);
-      } finally {
-        setLoading(false);
+      if (!response.ok) {
+        const errData = await response.json().catch(() => ({}));
+        throw new Error(errData.error || `Request failed (${response.status})`);
       }
-    },
-    [input, loading, currentYaml],
-  );
+
+      const data = await response.json();
+      const assistantMsg: ChatMessage = {
+        role: "assistant",
+        content: data.message,
+        yamlResult: data.yaml,
+      };
+
+      setMessages((prev) => [...prev, assistantMsg]);
+    } catch (err) {
+      const msg = toReadableErrorMessage(err);
+      setError(msg);
+    } finally {
+      setLoading(false);
+    }
+  }, [input, loading, currentYaml]);
+
+  const handleSubmit = useCallback((e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    void submitMessage();
+  }, [submitMessage]);
+
+  const handleExampleClick = useCallback((prompt: string) => {
+    if (loading) return;
+    setInput(prompt);
+    setError(null);
+  }, [loading]);
 
   return (
     <div className="flex h-full flex-col">
@@ -188,7 +200,7 @@ export function FlowChat({ currentYaml, onApplyYaml }: FlowChatProps) {
               <EmptyMessage.Icon><Sparkles /></EmptyMessage.Icon>
               <EmptyMessage.Title>AI Assistant</EmptyMessage.Title>
               <EmptyMessage.Description>
-                Describe changes to the flow in natural language, e.g. &quot;Add a selfie step after government_id&quot;
+                Describe changes to the flow in natural language.
               </EmptyMessage.Description>
             </EmptyMessage>
           </div>
@@ -210,8 +222,7 @@ export function FlowChat({ currentYaml, onApplyYaml }: FlowChatProps) {
             >
               {msg.content}
               {yamlResult && (
-                <div className="mt-2 flex items-center gap-2">
-                  <span className="text-xs text-[var(--color-text-tertiary)]">Suggested YAML is ready.</span>
+                <div className="mt-2">
                   <Button
                     color="secondary"
                     variant="soft"
@@ -245,18 +256,55 @@ export function FlowChat({ currentYaml, onApplyYaml }: FlowChatProps) {
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="flex items-center gap-2 border-t border-[var(--color-border)] px-4 py-3">
-        <Input
+      <div className="h-px w-full bg-[var(--color-border)]" />
+
+      <div>
+        <div className="heading-xs px-4 pt-2 text-[var(--color-text-secondary)]">{FLOW_CHAT_EXAMPLES_TITLE}</div>
+        <div className="space-y-1 px-2 py-2">
+          {FLOW_CHAT_EXAMPLE_PROMPTS.map((example) => (
+            <button
+              key={example}
+              type="button"
+              className="block w-full cursor-pointer rounded-md px-2 py-2 text-left text-sm text-[var(--color-text-secondary)] hover:bg-[var(--color-nav-hover-bg)] hover:text-[var(--color-text)] disabled:cursor-not-allowed"
+              disabled={loading}
+              onClick={() => handleExampleClick(example)}
+            >
+              {example}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <form ref={formRef} onSubmit={handleSubmit} className="flex items-end gap-2 px-4 py-3">
+        <Textarea
           value={input}
           onChange={(e) => setInput(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && !e.shiftKey) {
+              e.preventDefault();
+              formRef.current?.requestSubmit();
+            }
+          }}
           placeholder="Describe a change..."
-          size="lg"
-          pill
+          size={FLOW_CHAT_COMPOSER_CONTROL_SIZE}
+          rows={1}
+          autoResize
+          maxRows={8}
           disabled={loading}
-          className="flex-1"
+          className="min-w-0 flex-1"
         />
-        <Button color="primary" size="lg" uniform pill type="submit" disabled={!input.trim() || loading} loading={loading}>
-          <ArrowRightSm />
+        <Button
+          color="primary"
+          variant="solid"
+          size={FLOW_CHAT_COMPOSER_CONTROL_SIZE}
+          uniform
+          pill
+          type="submit"
+          disabled={!input.trim() || loading}
+          loading={loading}
+          className="shrink-0"
+        >
+          <ArrowUpSm />
         </Button>
       </form>
     </div>

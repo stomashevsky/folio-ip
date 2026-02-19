@@ -13,6 +13,15 @@ export const FLOW_CHAT_PROVIDER_OPTIONS = [
 
 export type FlowChatProvider = (typeof FLOW_CHAT_PROVIDER_OPTIONS)[number]["value"];
 
+export const FLOW_CHAT_EXAMPLES_TITLE = "Examples";
+export const FLOW_CHAT_COMPOSER_CONTROL_SIZE = "lg" as const;
+
+export const FLOW_CHAT_EXAMPLE_PROMPTS = [
+  "Add ES to the document check",
+  "Add a selfie verification after government id",
+  "Set retry max to 3 for document check",
+] as const;
+
 export const FLOW_CHAT_DEFAULT_PROVIDER: FlowChatProvider = "groq";
 export const FLOW_CHAT_PROVIDER_STORAGE_KEY = "folio:flow-chat-provider";
 export const FLOW_CHAT_MODEL_STORAGE_KEY = "folio:flow-chat-model";

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import {
   FLOW_CHAT_DEFAULT_PROVIDER,
+  FLOW_CHAT_EXAMPLE_PROMPTS,
   FLOW_CHAT_GEMINI_DEFAULT_MODEL,
   FLOW_CHAT_GROQ_BASE_URL,
   FLOW_CHAT_GROQ_DEFAULT_MODEL,
@@ -46,6 +47,16 @@ class AiProviderApiError extends Error {
     this.status = status;
   }
 }
+
+function normalizePrompt(prompt: string): string {
+  return prompt
+    .toLowerCase()
+    .replace(/[^a-z0-9_\s]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+const FLOW_CHAT_EXAMPLE_PROMPT_SET = new Set(FLOW_CHAT_EXAMPLE_PROMPTS.map((prompt) => normalizePrompt(prompt)));
 
 function extractYamlFromResponse(text: string): string | null {
   const yamlMatch = text.match(/```yaml\n([\s\S]*?)```/);
@@ -205,6 +216,114 @@ function toMockFallbackResponse(userMessage: string, currentYaml: string, reason
   };
 }
 
+function getFirstStepId(currentYaml: string): string | null {
+  const lines = currentYaml.split("\n");
+  const stepsIndex = lines.findIndex((line) => line.trim() === "steps:");
+  if (stepsIndex === -1) return null;
+
+  for (let i = stepsIndex + 1; i < lines.length; i++) {
+    const match = lines[i].match(/^\s{2}([a-zA-Z0-9_]+):\s*$/);
+    if (match) return match[1];
+    if (lines[i].trim() === "terminals:") break;
+  }
+
+  return null;
+}
+
+function findStepRange(lines: string[], stepId: string): { start: number; end: number } | null {
+  const start = lines.findIndex((line) => new RegExp(`^\\s{2}${stepId}:\\s*$`).test(line));
+  if (start === -1) return null;
+
+  let end = lines.length;
+  for (let i = start + 1; i < lines.length; i++) {
+    if (/^\s{2}[a-zA-Z0-9_]+:\s*$/.test(lines[i]) || lines[i].trim() === "terminals:") {
+      end = i;
+      break;
+    }
+  }
+
+  return { start, end };
+}
+
+function updateRetryMax(currentYaml: string, stepId: string, max: number): string | null {
+  const lines = currentYaml.split("\n");
+  const range = findStepRange(lines, stepId);
+  if (!range) return null;
+
+  let retryIndex = -1;
+  for (let i = range.start + 1; i < range.end; i++) {
+    if (/^\s{4}retry:\s*$/.test(lines[i])) {
+      retryIndex = i;
+      break;
+    }
+  }
+
+  if (retryIndex === -1) {
+    lines.splice(range.end, 0, "    retry:", `      max: ${max}`);
+    return lines.join("\n");
+  }
+
+  for (let i = retryIndex + 1; i < range.end; i++) {
+    if (/^\s{6}max:\s*\d+\s*$/.test(lines[i])) {
+      lines[i] = `      max: ${max}`;
+      return lines.join("\n");
+    }
+    if (/^\s{4}[a-zA-Z0-9_]+:\s*$/.test(lines[i])) {
+      break;
+    }
+  }
+
+  lines.splice(retryIndex + 1, 0, `      max: ${max}`);
+  return lines.join("\n");
+}
+
+function updateCountryBranchWithEs(currentYaml: string): string | null {
+  const lines = currentYaml.split("\n");
+  const countryLineIndex = lines.findIndex((line) => /country in \[[^\]]+\]/.test(line));
+  if (countryLineIndex === -1) return null;
+
+  const match = lines[countryLineIndex].match(/country in \[([^\]]+)\]/);
+  if (!match) return null;
+
+  const countries = match[1]
+    .split(",")
+    .map((code) => code.trim())
+    .filter(Boolean);
+  if (!countries.includes("ES")) {
+    countries.push("ES");
+  }
+
+  lines[countryLineIndex] = lines[countryLineIndex].replace(
+    /country in \[[^\]]+\]/,
+    `country in [${countries.join(", ")}]`,
+  );
+
+  let defaultIndex = -1;
+  for (let i = countryLineIndex + 1; i < Math.min(lines.length, countryLineIndex + 12); i++) {
+    if (/^\s*-\s*default:\s*[a-zA-Z0-9_]+\s*$/.test(lines[i])) {
+      defaultIndex = i;
+      break;
+    }
+    if (/^\s{2}[a-zA-Z0-9_]+:\s*$/.test(lines[i]) || lines[i].trim() === "terminals:") {
+      break;
+    }
+  }
+
+  if (defaultIndex !== -1) {
+    const indent = lines[defaultIndex].match(/^(\s*)/)?.[1] ?? "";
+    lines[defaultIndex] = `${indent}- default: manual_review`;
+  } else {
+    const itemIndent = lines[countryLineIndex].match(/^(\s*)-/)?.[1] ?? "        ";
+    lines.splice(countryLineIndex + 1, 0, `${itemIndent}- default: manual_review`);
+  }
+
+  return lines.join("\n");
+}
+
+function includesStepReference(message: string, stepId: string): boolean {
+  return message.includes(stepId) || message.includes(stepId.replaceAll("_", " "));
+}
+
 function mockResponse(userMessage: string, currentYaml: string): { message: string; yaml: string | null } {
   const msg = userMessage.toLowerCase();
 
@@ -251,6 +370,42 @@ function mockResponse(userMessage: string, currentYaml: string): { message: stri
     return { message: "Added a selfie verification step.", yaml: lines.join("\n") };
   }
 
+  if (
+    (msg.includes("country") || msg.includes("spain") || /\bes\b/.test(msg)) &&
+    (msg.includes("branch") || includesStepReference(msg, "document_check"))
+  ) {
+    const updatedYaml = updateCountryBranchWithEs(currentYaml);
+    if (!updatedYaml) {
+      return { message: "I couldn't find a country branch condition to update.", yaml: null };
+    }
+    return {
+      message: "Updated country branch to include ES and kept default fallback to manual_review.",
+      yaml: updatedYaml,
+    };
+  }
+
+  if (msg.includes("retry")) {
+    const maxMatch = msg.match(/\b(\d+)\b/);
+    const max = maxMatch ? Number(maxMatch[1]) : 3;
+    const targetStepId = ["document_check", "database_check", "government_id", "selfie"].find((stepId) =>
+      includesStepReference(msg, stepId)
+    ) ?? getFirstStepId(currentYaml);
+
+    if (!targetStepId) {
+      return { message: "I couldn't find a step to update retry settings.", yaml: null };
+    }
+
+    const updatedYaml = updateRetryMax(currentYaml, targetStepId, max);
+    if (!updatedYaml) {
+      return { message: `I couldn't find step ${targetStepId}.`, yaml: null };
+    }
+
+    return {
+      message: `Set retry.max to ${max} for ${targetStepId}.`,
+      yaml: updatedYaml,
+    };
+  }
+
   if (msg.includes("branch") || msg.includes("condition") || msg.includes("ветвление") || msg.includes("условие")) {
     return {
       message: "To add branching, modify the on_pass or on_fail to use a branch structure with conditions. (AI model required for complex modifications — set GROQ_API_KEY in Settings or .env.local)",
@@ -274,6 +429,11 @@ export async function POST(request: NextRequest) {
 
     if (!message?.trim()) {
       return NextResponse.json({ error: "Message is required" }, { status: 400 });
+    }
+
+    // Keep example prompts deterministic to avoid model variance for quick testing.
+    if (FLOW_CHAT_EXAMPLE_PROMPT_SET.has(normalizePrompt(message))) {
+      return NextResponse.json(mockResponse(message, currentYaml));
     }
 
     let result: FlowChatResponse | null = null;

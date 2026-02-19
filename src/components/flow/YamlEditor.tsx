@@ -1,10 +1,10 @@
 "use client";
 
-import { useRef, useEffect, useCallback } from "react";
+import { forwardRef, useRef, useEffect, useCallback, useImperativeHandle } from "react";
 import { EditorView, keymap, placeholder as placeholderExt, lineNumbers, Decoration, GutterMarker, gutterLineClass } from "@codemirror/view";
-import { EditorState, RangeSetBuilder } from "@codemirror/state";
+import { EditorState, RangeSetBuilder, Transaction } from "@codemirror/state";
 import { yaml } from "@codemirror/lang-yaml";
-import { defaultKeymap, history, historyKeymap, indentWithTab } from "@codemirror/commands";
+import { defaultKeymap, history, historyKeymap, indentWithTab, undo, redo, undoDepth, redoDepth } from "@codemirror/commands";
 import { syntaxHighlighting, defaultHighlightStyle, bracketMatching, foldGutter, foldKeymap, codeFolding, foldState } from "@codemirror/language";
 import { searchKeymap, highlightSelectionMatches } from "@codemirror/search";
 import { autocompletion, completionKeymap } from "@codemirror/autocomplete";
@@ -164,15 +164,41 @@ interface YamlEditorProps {
   readOnly?: boolean;
   className?: string;
   scrollToStepId?: string | null;
+  onHistoryStateChange?: (state: { canUndo: boolean; canRedo: boolean }) => void;
 }
 
-export function YamlEditor({ value, onChange, placeholder = "# Define your inquiry flow here...", readOnly = false, className, scrollToStepId }: YamlEditorProps) {
+export interface YamlEditorHandle {
+  undo: () => void;
+  redo: () => void;
+}
+
+export const YamlEditor = forwardRef<YamlEditorHandle, YamlEditorProps>(function YamlEditor(
+  {
+    value,
+    onChange,
+    placeholder = "# Define your inquiry flow here...",
+    readOnly = false,
+    className,
+    scrollToStepId,
+    onHistoryStateChange,
+  }: YamlEditorProps,
+  ref,
+) {
   const containerRef = useRef<HTMLDivElement>(null);
   const editorRef = useRef<EditorView | null>(null);
   const onChangeRef = useRef(onChange);
+  const onHistoryStateChangeRef = useRef(onHistoryStateChange);
   onChangeRef.current = onChange;
+  onHistoryStateChangeRef.current = onHistoryStateChange;
 
   const isDark = typeof document !== "undefined" && document.documentElement.classList.contains("dark");
+
+  const emitHistoryState = useCallback((state: EditorState) => {
+    onHistoryStateChangeRef.current?.({
+      canUndo: undoDepth(state) > 0,
+      canRedo: redoDepth(state) > 0,
+    });
+  }, []);
 
   const createState = useCallback(
     (doc: string) => {
@@ -218,11 +244,14 @@ export function YamlEditor({ value, onChange, placeholder = "# Define your inqui
             if (update.docChanged) {
               onChangeRef.current(update.state.doc.toString());
             }
+            if (update.docChanged || update.transactions.some((transaction) => transaction.isUserEvent("undo") || transaction.isUserEvent("redo"))) {
+              emitHistoryState(update.state);
+            }
           }),
         ],
       });
     },
-    [isDark, placeholder, readOnly],
+    [emitHistoryState, isDark, placeholder, readOnly],
   );
 
   useEffect(() => {
@@ -234,10 +263,12 @@ export function YamlEditor({ value, onChange, placeholder = "# Define your inqui
       parent: containerRef.current,
     });
     editorRef.current = view;
+    emitHistoryState(view.state);
 
     return () => {
       view.destroy();
       editorRef.current = null;
+      onHistoryStateChangeRef.current?.({ canUndo: false, canRedo: false });
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -249,6 +280,7 @@ export function YamlEditor({ value, onChange, placeholder = "# Define your inqui
     if (currentValue !== value) {
       view.dispatch({
         changes: { from: 0, to: currentValue.length, insert: value },
+        annotations: Transaction.addToHistory.of(false),
       });
     }
   }, [value]);
@@ -272,10 +304,29 @@ export function YamlEditor({ value, onChange, placeholder = "# Define your inqui
     view.focus();
   }, [scrollToStepId]);
 
+  useImperativeHandle(
+    ref,
+    () => ({
+      undo: () => {
+        const view = editorRef.current;
+        if (!view || readOnly) return;
+        if (!undo(view)) return;
+        emitHistoryState(view.state);
+      },
+      redo: () => {
+        const view = editorRef.current;
+        if (!view || readOnly) return;
+        if (!redo(view)) return;
+        emitHistoryState(view.state);
+      },
+    }),
+    [emitHistoryState, readOnly],
+  );
+
   return (
     <div
       ref={containerRef}
       className={`h-full overflow-auto [&_.cm-editor]:h-full [&_.cm-editor]:outline-none [&_.cm-scroller]:overflow-auto [&_.cm-scroller]:overscroll-x-contain [&_.cm-scroller]:overscroll-y-contain [&_.cm-content]:whitespace-pre ${className ?? ""}`}
     />
   );
-}
+});

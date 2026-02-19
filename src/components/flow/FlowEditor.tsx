@@ -7,7 +7,7 @@ import { parseFlowYaml, validateFlow } from "@/lib/utils/flow-parser";
 import { flowToElements } from "@/lib/utils/flow-to-nodes";
 import { getLayoutedElements } from "@/lib/utils/flow-layout";
 import { FlowVisualizer } from "./FlowVisualizer";
-import { YamlEditor } from "./YamlEditor";
+import { YamlEditor, type YamlEditorHandle } from "./YamlEditor";
 import { FlowChat } from "./FlowChat";
 import { ExclamationMarkCircle } from "@plexui/ui/components/Icon";
 import {
@@ -30,23 +30,116 @@ interface FlowEditorProps {
   settingsPanel?: React.ReactNode;
   panel: FlowEditorPanel;
   onPanelChange: (panel: FlowEditorPanel) => void;
+  onCodeHistoryChange?: (state: { canUndo: boolean; canRedo: boolean }) => void;
+  onCodeHistoryActionsReady?: (actions: { undo: () => void; redo: () => void } | null) => void;
 }
 
-export function FlowEditor({ initialYaml, onChange, readOnly = false, settingsPanel, panel, onPanelChange }: FlowEditorProps) {
+export function FlowEditor({
+  initialYaml,
+  onChange,
+  readOnly = false,
+  settingsPanel,
+  panel,
+  onPanelChange,
+  onCodeHistoryChange,
+  onCodeHistoryActionsReady,
+}: FlowEditorProps) {
   const [yamlValue, setYamlValue] = useState(initialYaml);
   const leftPanel = panel;
   const setLeftPanel = onPanelChange;
   const onChangeRef = useRef(onChange);
+  const yamlValueRef = useRef(yamlValue);
   const containerRef = useRef<HTMLDivElement>(null);
   const dragStartXRef = useRef(0);
   const dragStartWidthRef = useRef(FLOW_EDITOR_SIDEBAR_DEFAULT_WIDTH);
   const didResizeDuringDragRef = useRef(false);
+  const yamlEditorRef = useRef<YamlEditorHandle | null>(null);
   const [isResizingSidebar, setIsResizingSidebar] = useState(false);
   const [hasManualViewportInteraction, setHasManualViewportInteraction] = useState(false);
   const [fitViewRequestId, setFitViewRequestId] = useState(0);
   const [sidebarWidth, setSidebarWidth] = useState(FLOW_EDITOR_SIDEBAR_DEFAULT_WIDTH);
   const [isSidebarWidthHydrated, setIsSidebarWidthHydrated] = useState(false);
+  const [editorHistoryState, setEditorHistoryState] = useState({ canUndo: false, canRedo: false });
+  const [externalHistoryState, setExternalHistoryState] = useState({ canUndo: false, canRedo: false });
+  const externalHistoryRef = useRef<{ past: string[]; future: string[] }>({ past: [], future: [] });
+  const fitAfterAiApplyPendingRef = useRef(false);
   useEffect(() => { onChangeRef.current = onChange; });
+  useEffect(() => { yamlValueRef.current = yamlValue; }, [yamlValue]);
+
+  const emitCombinedHistoryState = useCallback(() => {
+    const hasExternalUndo = externalHistoryRef.current.past.length > 0;
+    const hasExternalRedo = externalHistoryRef.current.future.length > 0;
+    onCodeHistoryChange?.({
+      canUndo: editorHistoryState.canUndo || hasExternalUndo,
+      canRedo: editorHistoryState.canRedo || hasExternalRedo,
+    });
+  }, [editorHistoryState.canRedo, editorHistoryState.canUndo, onCodeHistoryChange]);
+
+  const syncExternalHistoryState = useCallback(() => {
+    const next = {
+      canUndo: externalHistoryRef.current.past.length > 0,
+      canRedo: externalHistoryRef.current.future.length > 0,
+    };
+    setExternalHistoryState(next);
+    onCodeHistoryChange?.({
+      canUndo: editorHistoryState.canUndo || next.canUndo,
+      canRedo: editorHistoryState.canRedo || next.canRedo,
+    });
+  }, [editorHistoryState.canRedo, editorHistoryState.canUndo, onCodeHistoryChange]);
+
+  const applyYamlValue = useCallback((nextYaml: string) => {
+    setYamlValue(nextYaml);
+    onChangeRef.current?.(nextYaml);
+  }, []);
+
+  const handleExternalUndo = useCallback(() => {
+    const previousYaml = externalHistoryRef.current.past.pop();
+    if (!previousYaml) return false;
+    externalHistoryRef.current.future.push(yamlValueRef.current);
+    fitAfterAiApplyPendingRef.current = true;
+    applyYamlValue(previousYaml);
+    syncExternalHistoryState();
+    return true;
+  }, [applyYamlValue, syncExternalHistoryState]);
+
+  const handleExternalRedo = useCallback(() => {
+    const nextYaml = externalHistoryRef.current.future.pop();
+    if (!nextYaml) return false;
+    externalHistoryRef.current.past.push(yamlValueRef.current);
+    fitAfterAiApplyPendingRef.current = true;
+    applyYamlValue(nextYaml);
+    syncExternalHistoryState();
+    return true;
+  }, [applyYamlValue, syncExternalHistoryState]);
+
+  const handleUndo = useCallback(() => {
+    if (yamlEditorRef.current && editorHistoryState.canUndo) {
+      yamlEditorRef.current.undo();
+      return;
+    }
+    handleExternalUndo();
+  }, [editorHistoryState.canUndo, handleExternalUndo]);
+
+  const handleRedo = useCallback(() => {
+    if (yamlEditorRef.current && editorHistoryState.canRedo) {
+      yamlEditorRef.current.redo();
+      return;
+    }
+    handleExternalRedo();
+  }, [editorHistoryState.canRedo, handleExternalRedo]);
+
+  useEffect(() => {
+    if (!onCodeHistoryActionsReady) return;
+    onCodeHistoryActionsReady({
+      undo: handleUndo,
+      redo: handleRedo,
+    });
+    return () => onCodeHistoryActionsReady(null);
+  }, [handleRedo, handleUndo, onCodeHistoryActionsReady]);
+
+  useEffect(() => {
+    emitCombinedHistoryState();
+  }, [editorHistoryState, externalHistoryState, emitCombinedHistoryState]);
 
   const clampSidebarWidth = useCallback((width: number) => {
     const containerWidth = containerRef.current?.clientWidth;
@@ -54,7 +147,8 @@ export function FlowEditor({ initialYaml, onChange, readOnly = false, settingsPa
       ? Math.max(FLOW_EDITOR_SIDEBAR_MIN_WIDTH, containerWidth - FLOW_EDITOR_MAIN_MIN_WIDTH)
       : FLOW_EDITOR_SIDEBAR_MAX_WIDTH;
     const max = Math.min(FLOW_EDITOR_SIDEBAR_MAX_WIDTH, maxByContainer);
-    return Math.min(Math.max(width, FLOW_EDITOR_SIDEBAR_MIN_WIDTH), max);
+    const clamped = Math.min(Math.max(width, FLOW_EDITOR_SIDEBAR_MIN_WIDTH), max);
+    return Math.round(clamped);
   }, []);
 
   useEffect(() => {
@@ -138,12 +232,21 @@ export function FlowEditor({ initialYaml, onChange, readOnly = false, settingsPa
 
   useEffect(() => {
     if (rawParsed.nodes.length === 0) {
-      queueMicrotask(() => setLayouted({ nodes: [], edges: [] }));
+      queueMicrotask(() => {
+        setLayouted({ nodes: [], edges: [] });
+        fitAfterAiApplyPendingRef.current = false;
+      });
       return;
     }
     let cancelled = false;
     getLayoutedElements(rawParsed.nodes, rawParsed.edges).then((result) => {
-      if (!cancelled) setLayouted(result);
+      if (!cancelled) {
+        setLayouted(result);
+        if (fitAfterAiApplyPendingRef.current) {
+          fitAfterAiApplyPendingRef.current = false;
+          setFitViewRequestId((current) => current + 1);
+        }
+      }
     });
     return () => {
       cancelled = true;
@@ -151,16 +254,19 @@ export function FlowEditor({ initialYaml, onChange, readOnly = false, settingsPa
   }, [rawParsed]);
 
   const handleYamlChange = useCallback((newYaml: string) => {
-    setYamlValue(newYaml);
-    onChangeRef.current?.(newYaml);
-  }, []);
+    applyYamlValue(newYaml);
+  }, [applyYamlValue]);
 
   const handleAiApply = useCallback(
     (newYaml: string) => {
-      setYamlValue(newYaml);
-      onChangeRef.current?.(newYaml);
+      if (newYaml === yamlValueRef.current) return;
+      externalHistoryRef.current.past.push(yamlValueRef.current);
+      externalHistoryRef.current.future = [];
+      syncExternalHistoryState();
+      fitAfterAiApplyPendingRef.current = true;
+      applyYamlValue(newYaml);
     },
-    [],
+    [applyYamlValue, syncExternalHistoryState],
   );
 
   const scrollCountRef = useRef(0);
@@ -206,6 +312,10 @@ export function FlowEditor({ initialYaml, onChange, readOnly = false, settingsPa
     setHasManualViewportInteraction(true);
   }, []);
 
+  const handleCodeHistoryChange = useCallback((state: { canUndo: boolean; canRedo: boolean }) => {
+    setEditorHistoryState(state);
+  }, []);
+
   return (
     <div className="flex h-full flex-col overflow-hidden">
       <div ref={containerRef} className="flex min-h-0 flex-1">
@@ -213,7 +323,14 @@ export function FlowEditor({ initialYaml, onChange, readOnly = false, settingsPa
           {leftPanel === "code" && (
             <>
               <div className="min-h-0 flex-1">
-                <YamlEditor value={yamlValue} onChange={handleYamlChange} readOnly={readOnly} scrollToStepId={scrollTarget} />
+                <YamlEditor
+                  ref={yamlEditorRef}
+                  value={yamlValue}
+                  onChange={handleYamlChange}
+                  readOnly={readOnly}
+                  scrollToStepId={scrollTarget}
+                  onHistoryStateChange={handleCodeHistoryChange}
+                />
               </div>
               {rawParsed.errors.length > 0 && (
                 <div className="shrink-0 border-t border-[var(--color-border)] bg-[var(--color-danger-soft-bg)]">
@@ -230,7 +347,9 @@ export function FlowEditor({ initialYaml, onChange, readOnly = false, settingsPa
             </>
           )}
 
-          {leftPanel === "chat" && <FlowChat currentYaml={yamlValue} onApplyYaml={handleAiApply} />}
+          <div className={leftPanel === "chat" ? "flex h-full flex-col" : "hidden"}>
+            <FlowChat currentYaml={yamlValue} onApplyYaml={handleAiApply} />
+          </div>
 
           {leftPanel === "settings" && settingsPanel && (
             <div className="flex-1 overflow-auto">{settingsPanel}</div>
@@ -245,10 +364,13 @@ export function FlowEditor({ initialYaml, onChange, readOnly = false, settingsPa
           onPointerDown={handleResizeStart}
           onDoubleClick={handleResizeDoubleClick}
           onKeyDown={handleResizeKeyDown}
-          className="group relative w-2 shrink-0 cursor-col-resize touch-none bg-transparent outline-none hover:bg-[var(--color-nav-hover-bg)] focus-visible:bg-[var(--color-nav-hover-bg)]"
+          className="group relative -mx-1 w-2 shrink-0 cursor-col-resize touch-none bg-transparent outline-none"
         >
           <span
-            className={`absolute inset-y-0 left-1/2 w-px -translate-x-1/2 bg-[var(--color-border)] ${isResizingSidebar ? "bg-[var(--color-text-tertiary)]" : "group-hover:bg-[var(--color-text-tertiary)]"}`}
+            className={`pointer-events-none absolute inset-y-0 left-1/2 w-2 -translate-x-1/2 ${isResizingSidebar ? "bg-[var(--color-nav-hover-bg)]" : "bg-transparent group-hover:bg-[var(--color-nav-hover-bg)] group-focus-visible:bg-[var(--color-nav-hover-bg)]"}`}
+          />
+          <span
+            className={`absolute inset-y-0 left-1/2 w-px bg-[var(--color-border)] ${isResizingSidebar ? "bg-[var(--color-text-tertiary)]" : "group-hover:bg-[var(--color-text-tertiary)]"}`}
           />
         </div>
 
