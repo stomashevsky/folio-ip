@@ -30,7 +30,6 @@ const githubBaseTheme = EditorView.theme({
   },
   ".cm-content": {
     padding: "8px 0",
-    minWidth: "100%",
     whiteSpace: "pre !important",
     overflowWrap: "normal",
     wordBreak: "normal",
@@ -44,6 +43,10 @@ const githubBaseTheme = EditorView.theme({
     backgroundColor: "transparent",
     color: "var(--color-text-tertiary)",
     border: "none",
+  },
+  ".cm-scroller": {
+    overscrollBehaviorX: "contain",
+    overscrollBehaviorY: "contain",
   },
   ".cm-lineNumbers .cm-gutterElement": {
     paddingLeft: `${GITHUB_LINE_NUMBER_GUTTER_PADDING_LEFT}px !important`,
@@ -123,7 +126,7 @@ const getFoldedLineStarts = (state: EditorState) => {
     const line = state.doc.lineAt(from > 0 ? from - 1 : from);
     starts.add(line.from);
   });
-  return Array.from(starts);
+  return Array.from(starts).sort((a, b) => a - b);
 };
 
 /** Light theme for PlexUI light mode */
@@ -272,7 +275,7 @@ export function YamlEditor({ value, onChange, placeholder = "# Define your inqui
   return (
     <div
       ref={containerRef}
-      className={`h-full overflow-auto [&_.cm-editor]:h-full [&_.cm-editor]:outline-none [&_.cm-scroller]:overflow-auto [&_.cm-content]:min-w-full [&_.cm-content]:whitespace-pre ${className ?? ""}`}
+      className={`h-full overflow-auto [&_.cm-editor]:h-full [&_.cm-editor]:outline-none [&_.cm-scroller]:overflow-auto [&_.cm-scroller]:overscroll-x-contain [&_.cm-scroller]:overscroll-y-contain [&_.cm-content]:whitespace-pre ${className ?? ""}`}
     />
   );
 }

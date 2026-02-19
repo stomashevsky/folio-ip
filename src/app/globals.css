@@ -25,6 +25,12 @@ html.dark {
   color-scheme: dark;
 }
 
+html,
+body {
+  overscroll-behavior-x: none;
+  overflow-x: hidden;
+}
+
 /* ─── App tokens ─── */
 :root {
   --navbar-height: 54px;
