@@ -369,8 +369,8 @@ export function FlowChat({ currentYaml, onApplyYaml }: FlowChatProps) {
                   {yamlResult && (
                     <div className="mt-2">
                       <Button
-                        color="secondary"
-                        variant="outline"
+                        color="primary"
+                        variant="solid"
                         size="sm"
                         pill={false}
                         onClick={() => onApplyYaml(yamlResult)}

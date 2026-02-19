@@ -1,0 +1,1 @@
+export const FLOW_VERIFICATION_RETRY_BADGE_PREFIX = "Retry";
