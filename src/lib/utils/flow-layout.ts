@@ -20,7 +20,7 @@ const LAYOUT_OPTIONS: Record<string, string> = {
   "elk.layered.crossingMinimization.strategy": "LAYER_SWEEP",
   "elk.layered.crossingMinimization.greedySwitch.type": "TWO_SIDED",
   "elk.layered.thoroughness": "100",
-  "elk.layered.mergeEdges": "true",
+  "elk.layered.mergeEdges": "false",
 };
 
 interface ElkPoint {
@@ -44,10 +44,17 @@ function getElkPorts(node: Node) {
   }
 
   if (t !== "terminal") {
-    ports.push({ id: `${id}__default`, layoutOptions: { "port.side": "SOUTH", "port.index": "0" } });
+    ports.push({ id: `${id}__source_default`, layoutOptions: { "port.side": "SOUTH", "port.index": "0" } });
+    ports.push({ id: `${id}__source_left`, layoutOptions: { "port.side": "WEST", "port.index": "1" } });
+    ports.push({ id: `${id}__source_right`, layoutOptions: { "port.side": "EAST", "port.index": "2" } });
   }
 
   return ports;
+}
+
+function getEdgeSourcePortId(edge: Edge): string {
+  const handle = edge.sourceHandle === "left" || edge.sourceHandle === "right" ? edge.sourceHandle : "default";
+  return `${edge.source}__source_${handle}`;
 }
 
 /**
@@ -101,17 +108,28 @@ function buildPathFromSections(sections: ElkSection[]): {
 
   let bestIdx = 1;
   let bestLen = 0;
+  const minSegmentLengthSquared = 36 * 36;
+  let firstHorizontalIdx: number | null = null;
+  let firstLongIdx: number | null = null;
   for (let i = 1; i < pts.length; i++) {
     const dx = pts[i].x - pts[i - 1].x;
     const dy = pts[i].y - pts[i - 1].y;
     const len = dx * dx + dy * dy;
+    const isHorizontal = Math.abs(dy) < 0.5;
+    if (isHorizontal && firstHorizontalIdx === null && len >= minSegmentLengthSquared) {
+      firstHorizontalIdx = i;
+    }
+    if (firstLongIdx === null && len >= minSegmentLengthSquared) {
+      firstLongIdx = i;
+    }
     if (len > bestLen) {
       bestLen = len;
       bestIdx = i;
     }
   }
-  const labelX = (pts[bestIdx - 1].x + pts[bestIdx].x) / 2;
-  const labelY = (pts[bestIdx - 1].y + pts[bestIdx].y) / 2;
+  const labelSegmentIdx = firstHorizontalIdx ?? firstLongIdx ?? bestIdx;
+  const labelX = (pts[labelSegmentIdx - 1].x + pts[labelSegmentIdx].x) / 2;
+  const labelY = (pts[labelSegmentIdx - 1].y + pts[labelSegmentIdx].y) / 2;
 
   return { path: d, labelX, labelY };
 }
@@ -139,7 +157,7 @@ export async function getLayoutedElements(
 
       return {
         id: edge.id,
-        sources: [`${edge.source}__default`],
+        sources: [getEdgeSourcePortId(edge)],
         targets: [`${edge.target}__target`],
         layoutOptions: {
           "org.eclipse.elk.priority": priority,
