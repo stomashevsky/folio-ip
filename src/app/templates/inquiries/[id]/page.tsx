@@ -10,6 +10,7 @@ import { SegmentedControl } from "@plexui/ui/components/SegmentedControl";
 import { useTemplateForm } from "@/lib/hooks/useTemplateForm";
 import { INQUIRY_TEMPLATE_PRESETS } from "@/lib/constants/template-presets";
 import { FLOW_TEMPLATES, DEFAULT_FLOW_YAML } from "@/lib/constants/flow-templates";
+import { FLOW_CHAT_EMPTY_STATE_TITLE } from "@/lib/constants";
 import { useUnsavedChanges } from "@/lib/hooks/useUnsavedChanges";
 import { useTemplateStore } from "@/lib/stores/template-store";
 import { getStatusColor } from "@/lib/utils/format";
@@ -179,7 +180,7 @@ function InquiryTemplateDetailContent() {
               size="sm"
               pill={false}
             >
-              <SegmentedControl.Tab value="chat">AI Chat</SegmentedControl.Tab>
+              <SegmentedControl.Tab value="chat">{FLOW_CHAT_EMPTY_STATE_TITLE}</SegmentedControl.Tab>
               <SegmentedControl.Tab value="code">Code</SegmentedControl.Tab>
               {hasSettings && <SegmentedControl.Tab value="settings">Settings</SegmentedControl.Tab>}
             </SegmentedControl>

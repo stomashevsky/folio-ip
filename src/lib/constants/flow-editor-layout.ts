@@ -6,3 +6,5 @@ export const FLOW_EDITOR_SIDEBAR_RESIZE_STEP = 16;
 export const FLOW_EDITOR_SIDEBAR_WIDTH_STORAGE_KEY = "folio:flow-editor-sidebar-width";
 export const FLOW_EDITOR_FIT_VIEW_PADDING = 0.2;
 export const FLOW_EDITOR_FIT_VIEW_DURATION_MS = 180;
+export const FLOW_EDITOR_RESIZER_HIT_AREA_WIDTH_PX = 12;
+export const FLOW_EDITOR_RESIZER_HOVER_LINE_WIDTH_PX = 5;

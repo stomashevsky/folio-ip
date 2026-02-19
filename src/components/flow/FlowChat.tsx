@@ -3,15 +3,37 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { Button } from "@plexui/ui/components/Button";
 import { Textarea } from "@plexui/ui/components/Textarea";
-import { Sparkles, ExclamationMarkCircle, ArrowUpSm } from "@plexui/ui/components/Icon";
-import { EmptyMessage } from "@plexui/ui/components/EmptyMessage";
+import { ExclamationMarkCircle, ArrowUpSm, Reply } from "@plexui/ui/components/Icon";
 import {
   FLOW_CHAT_ACTIVE_KEY_ID_STORAGE_KEY,
   FLOW_CHAT_API_KEY_STORAGE_KEY,
-  FLOW_CHAT_COMPOSER_CONTROL_SIZE,
+  FLOW_CHAT_COMPOSER_ACTION_SIZE,
+  FLOW_CHAT_COMPOSER_ACTION_INSET_PX,
+  FLOW_CHAT_COMPOSER_BOTTOM_ROW_HEIGHT_PX,
+  FLOW_CHAT_COMPOSER_MAX_ROWS,
+  FLOW_CHAT_COMPOSER_MIN_HEIGHT_PX,
+  FLOW_CHAT_COMPOSER_RADIUS_PX,
+  FLOW_CHAT_COMPOSER_SEND_ICON_SIZE_PX,
+  FLOW_CHAT_COMPOSER_SEND_RADIUS_PX,
+  FLOW_CHAT_COMPOSER_ROWS,
+  FLOW_CHAT_COMPOSER_TEXT_BOTTOM_PADDING_PX,
+  FLOW_CHAT_COMPOSER_TEXT_RIGHT_PADDING_PX,
+  FLOW_CHAT_COMPOSER_TEXT_SIDE_PADDING_PX,
+  FLOW_CHAT_COMPOSER_TEXT_TOP_PADDING_PX,
+  FLOW_CHAT_COMPOSER_TEXTAREA_SIZE,
+  FLOW_CHAT_COMPOSER_TEXTAREA_VARIANT,
   FLOW_CHAT_DEFAULT_PROVIDER,
-  FLOW_CHAT_EXAMPLES_TITLE,
+  FLOW_CHAT_EXAMPLE_ICON_SIZE_PX,
+  FLOW_CHAT_EXAMPLE_ICON_VERTICAL_PADDING_PX,
+  FLOW_CHAT_EXAMPLE_ROW_GAP_PX,
+  FLOW_CHAT_EXAMPLE_ROW_PADDING_X_PX,
+  FLOW_CHAT_EXAMPLE_ROW_PADDING_Y_PX,
+  FLOW_CHAT_EXAMPLE_ROW_RADIUS_PX,
+  FLOW_CHAT_EXAMPLE_TEXT_LINE_HEIGHT_PX,
   FLOW_CHAT_EXAMPLE_PROMPTS,
+  FLOW_CHAT_FRAME_PADDING_PX,
+  FLOW_CHAT_FRAME_SECTION_GAP_PX,
+  FLOW_CHAT_INPUT_PLACEHOLDER,
   FLOW_CHAT_KEYS_STORAGE_KEY,
   FLOW_CHAT_MODEL_STORAGE_KEY,
   FLOW_CHAT_PROVIDER_STORAGE_KEY,
@@ -191,91 +213,83 @@ export function FlowChat({ currentYaml, onApplyYaml }: FlowChatProps) {
     setError(null);
   }, [loading]);
 
-  return (
-    <div className="flex h-full flex-col">
-      <div ref={scrollRef} className="flex-1 overflow-auto px-3 py-3">
-        {messages.length === 0 && (
-          <div className="flex h-full items-center justify-center">
-            <EmptyMessage fill="none">
-              <EmptyMessage.Icon><Sparkles /></EmptyMessage.Icon>
-              <EmptyMessage.Title>AI Assistant</EmptyMessage.Title>
-              <EmptyMessage.Description>
-                Describe changes to the flow in natural language.
-              </EmptyMessage.Description>
-            </EmptyMessage>
-          </div>
-        )}
+  const hasMessages = messages.length > 0;
+  const canSubmit = input.trim().length > 0;
+  const sendButtonActive = canSubmit || loading;
+  const showExamples = !hasMessages && !canSubmit;
 
-        {messages.map((msg, i) => {
-          const yamlResult = msg.yamlResult;
+  const renderError = (className?: string) => {
+    if (!error) return null;
 
-          return (
-            <div key={i} className={`mb-2 flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
-            <div
-              className={`max-w-[90%] rounded-lg px-3 py-2 text-sm leading-relaxed ${
-                msg.role === "user"
-                  ? "bg-[var(--color-primary-soft-bg)] text-[var(--color-primary-soft-text)]"
-                  : msg.content.startsWith("Error:")
-                    ? "bg-[var(--color-danger-soft-bg)] text-[var(--color-danger-soft-text)]"
-                    : "bg-[var(--color-surface-secondary)] text-[var(--color-text)]"
-              }`}
-            >
-              {msg.content}
-              {yamlResult && (
-                <div className="mt-2">
-                  <Button
-                    color="secondary"
-                    variant="soft"
-                    size="sm"
-                    pill
-                    onClick={() => onApplyYaml(yamlResult)}
-                  >
-                    Apply to code
-                  </Button>
-                </div>
-              )}
-            </div>
-          </div>
-          );
-        })}
-
-        {loading && (
-          <div className="mb-2 flex justify-start">
-            <div className="flex items-center gap-1.5 rounded-lg bg-[var(--color-surface-secondary)] px-3 py-2 text-sm text-[var(--color-text-tertiary)]">
-              <span className="inline-block h-3 w-3 animate-spin rounded-full border-2 border-current border-t-transparent" />
-              Thinking...
-            </div>
-          </div>
-        )}
-      </div>
-
-      {error && (
-        <div className="flex items-center gap-1.5 border-t border-[var(--color-border)] px-3 py-1.5">
+    return (
+      <div className={className}>
+        <div className="flex items-center gap-1.5 rounded-md bg-[var(--color-danger-soft-bg)] px-2 py-1.5">
           <ExclamationMarkCircle className="h-3 w-3 shrink-0 text-[var(--color-text-danger-ghost)]" />
           <span className="text-xs text-[var(--color-text-danger-ghost)]">{error}</span>
         </div>
-      )}
+      </div>
+    );
+  };
 
-      <div className="h-px w-full bg-[var(--color-border)]" />
+  const renderExamples = () => {
+    if (!showExamples) return null;
 
-      <div>
-        <div className="heading-xs px-4 pt-2 text-[var(--color-text-secondary)]">{FLOW_CHAT_EXAMPLES_TITLE}</div>
-        <div className="space-y-1 px-2 py-2">
-          {FLOW_CHAT_EXAMPLE_PROMPTS.map((example) => (
-            <button
-              key={example}
-              type="button"
-              className="block w-full cursor-pointer rounded-md px-2 py-2 text-left text-sm text-[var(--color-text-secondary)] hover:bg-[var(--color-nav-hover-bg)] hover:text-[var(--color-text)] disabled:cursor-not-allowed"
-              disabled={loading}
-              onClick={() => handleExampleClick(example)}
+    return (
+      <div
+        className="flex flex-col"
+        style={{
+          gap: FLOW_CHAT_EXAMPLE_ROW_GAP_PX,
+        }}
+      >
+        {FLOW_CHAT_EXAMPLE_PROMPTS.map((example) => (
+          <button
+            key={example}
+            type="button"
+            className="flex w-full cursor-pointer items-start text-left text-[var(--color-text)] transition-colors hover:bg-[var(--color-nav-hover-bg)] disabled:cursor-not-allowed"
+            disabled={loading}
+            onClick={() => handleExampleClick(example)}
+            style={{
+              borderRadius: FLOW_CHAT_EXAMPLE_ROW_RADIUS_PX,
+              gap: FLOW_CHAT_EXAMPLE_ROW_GAP_PX,
+              paddingTop: FLOW_CHAT_EXAMPLE_ROW_PADDING_Y_PX,
+              paddingBottom: FLOW_CHAT_EXAMPLE_ROW_PADDING_Y_PX,
+              paddingLeft: FLOW_CHAT_EXAMPLE_ROW_PADDING_X_PX,
+              paddingRight: FLOW_CHAT_EXAMPLE_ROW_PADDING_X_PX,
+            }}
+          >
+            <span
+              className="shrink-0"
+              style={{
+                paddingTop: FLOW_CHAT_EXAMPLE_ICON_VERTICAL_PADDING_PX,
+                paddingBottom: FLOW_CHAT_EXAMPLE_ICON_VERTICAL_PADDING_PX,
+              }}
+            >
+              <Reply
+                className="text-[var(--color-text)]"
+                style={{ width: FLOW_CHAT_EXAMPLE_ICON_SIZE_PX, height: FLOW_CHAT_EXAMPLE_ICON_SIZE_PX }}
+              />
+            </span>
+            <span
+              className="text-sm font-medium"
+              style={{ lineHeight: `${FLOW_CHAT_EXAMPLE_TEXT_LINE_HEIGHT_PX}px` }}
             >
               {example}
-            </button>
-          ))}
-        </div>
+            </span>
+          </button>
+        ))}
       </div>
+    );
+  };
 
-      <form ref={formRef} onSubmit={handleSubmit} className="flex items-end gap-2 px-4 py-3">
+  const renderComposer = () => (
+    <form ref={formRef} onSubmit={handleSubmit}>
+      <div
+        className="relative"
+        style={{
+          ["--flow-chat-composer-radius" as string]: `${FLOW_CHAT_COMPOSER_RADIUS_PX}px`,
+          minHeight: FLOW_CHAT_COMPOSER_MIN_HEIGHT_PX,
+        }}
+      >
         <Textarea
           value={input}
           onChange={(e) => setInput(e.target.value)}
@@ -285,28 +299,115 @@ export function FlowChat({ currentYaml, onApplyYaml }: FlowChatProps) {
               formRef.current?.requestSubmit();
             }
           }}
-          placeholder="Describe a change..."
-          size={FLOW_CHAT_COMPOSER_CONTROL_SIZE}
-          rows={1}
+          placeholder={FLOW_CHAT_INPUT_PLACEHOLDER}
+          variant={FLOW_CHAT_COMPOSER_TEXTAREA_VARIANT}
+          size={FLOW_CHAT_COMPOSER_TEXTAREA_SIZE}
+          rows={FLOW_CHAT_COMPOSER_ROWS}
           autoResize
-          maxRows={8}
+          maxRows={FLOW_CHAT_COMPOSER_MAX_ROWS}
           disabled={loading}
-          className="min-w-0 flex-1"
+          className="min-w-0 w-full [--textarea-radius:var(--flow-chat-composer-radius)] [--input-outline-border-color:var(--color-border)] [--input-outline-border-color-hover:var(--color-border)] [--input-outline-border-color-focus:var(--color-border)]"
+          style={{
+            minHeight: FLOW_CHAT_COMPOSER_MIN_HEIGHT_PX,
+            paddingTop: FLOW_CHAT_COMPOSER_TEXT_TOP_PADDING_PX,
+            paddingBottom: FLOW_CHAT_COMPOSER_TEXT_BOTTOM_PADDING_PX,
+            paddingLeft: FLOW_CHAT_COMPOSER_TEXT_SIDE_PADDING_PX,
+            paddingRight: FLOW_CHAT_COMPOSER_TEXT_RIGHT_PADDING_PX,
+          }}
         />
-        <Button
-          color="primary"
-          variant="solid"
-          size={FLOW_CHAT_COMPOSER_CONTROL_SIZE}
-          uniform
-          pill
-          type="submit"
-          disabled={!input.trim() || loading}
-          loading={loading}
-          className="shrink-0"
+        <div
+          className="pointer-events-none absolute inset-x-0 bottom-0 flex items-end justify-end"
+          style={{
+            height: FLOW_CHAT_COMPOSER_BOTTOM_ROW_HEIGHT_PX,
+            padding: FLOW_CHAT_COMPOSER_ACTION_INSET_PX,
+            paddingTop: 0,
+          }}
         >
-          <ArrowUpSm />
-        </Button>
-      </form>
+          <Button
+            color={sendButtonActive ? "primary" : "secondary"}
+            variant={sendButtonActive ? "solid" : "soft"}
+            size={FLOW_CHAT_COMPOSER_ACTION_SIZE}
+            uniform
+            pill={false}
+            type="submit"
+            disabled={!canSubmit || loading}
+            loading={loading}
+            className="pointer-events-auto [--button-ring-color:transparent]"
+            style={{ borderRadius: FLOW_CHAT_COMPOSER_SEND_RADIUS_PX }}
+          >
+            <ArrowUpSm
+              style={{
+                width: FLOW_CHAT_COMPOSER_SEND_ICON_SIZE_PX,
+                height: FLOW_CHAT_COMPOSER_SEND_ICON_SIZE_PX,
+              }}
+            />
+          </Button>
+        </div>
+      </div>
+    </form>
+  );
+
+  return (
+    <div className="flex h-full min-h-0 flex-col">
+      {hasMessages && (
+        <div ref={scrollRef} className="min-h-0 flex-1 overflow-auto px-3 py-3">
+          {messages.map((msg, i) => {
+            const yamlResult = msg.yamlResult;
+
+            return (
+              <div key={i} className={`mb-2 flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
+                <div
+                  className={`max-w-[90%] rounded-lg py-2 text-sm leading-relaxed ${
+                    msg.role === "user"
+                      ? "bg-[var(--color-surface-secondary)] pl-3 pr-2 text-[var(--color-text)]"
+                      : msg.content.startsWith("Error:")
+                        ? "bg-[var(--color-danger-soft-bg)] px-3 text-[var(--color-danger-soft-text)]"
+                        : "bg-transparent px-0 text-[var(--color-text)]"
+                  }`}
+                >
+                  {msg.content}
+                  {yamlResult && (
+                    <div className="mt-2">
+                      <Button
+                        color="secondary"
+                        variant="outline"
+                        size="sm"
+                        pill={false}
+                        onClick={() => onApplyYaml(yamlResult)}
+                      >
+                        Apply to code
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+
+          {loading && (
+            <div className="mb-2 flex justify-start">
+              <div className="flex items-center gap-1.5 rounded-lg bg-[var(--color-surface-secondary)] px-3 py-2 text-sm text-[var(--color-text-tertiary)]">
+                <span className="inline-block h-3 w-3 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                Thinking...
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      <div className={hasMessages ? "" : "mt-auto"}>
+        <div
+          className="flex flex-col"
+          style={{
+            padding: FLOW_CHAT_FRAME_PADDING_PX,
+            gap: FLOW_CHAT_FRAME_SECTION_GAP_PX,
+          }}
+        >
+          {renderError()}
+          {renderExamples()}
+          {renderComposer()}
+        </div>
+      </div>
     </div>
   );
 }

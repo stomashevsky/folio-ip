@@ -14,6 +14,8 @@ import {
   FLOW_EDITOR_FIT_VIEW_DURATION_MS,
   FLOW_EDITOR_FIT_VIEW_PADDING,
   FLOW_EDITOR_MAIN_MIN_WIDTH,
+  FLOW_EDITOR_RESIZER_HIT_AREA_WIDTH_PX,
+  FLOW_EDITOR_RESIZER_HOVER_LINE_WIDTH_PX,
   FLOW_EDITOR_SIDEBAR_DEFAULT_WIDTH,
   FLOW_EDITOR_SIDEBAR_MAX_WIDTH,
   FLOW_EDITOR_SIDEBAR_MIN_WIDTH,
@@ -364,13 +366,19 @@ export function FlowEditor({
           onPointerDown={handleResizeStart}
           onDoubleClick={handleResizeDoubleClick}
           onKeyDown={handleResizeKeyDown}
-          className="group relative -mx-1 w-2 shrink-0 cursor-col-resize touch-none bg-transparent outline-none"
+          className="group relative z-10 shrink-0 cursor-col-resize touch-none bg-transparent outline-none"
+          style={{
+            width: FLOW_EDITOR_RESIZER_HIT_AREA_WIDTH_PX,
+            marginLeft: -(FLOW_EDITOR_RESIZER_HIT_AREA_WIDTH_PX / 2),
+            marginRight: -(FLOW_EDITOR_RESIZER_HIT_AREA_WIDTH_PX / 2),
+          }}
         >
           <span
-            className={`pointer-events-none absolute inset-y-0 left-1/2 w-2 -translate-x-1/2 ${isResizingSidebar ? "bg-[var(--color-nav-hover-bg)]" : "bg-transparent group-hover:bg-[var(--color-nav-hover-bg)] group-focus-visible:bg-[var(--color-nav-hover-bg)]"}`}
+            className={`pointer-events-none absolute inset-y-0 left-1/2 -translate-x-1/2 ${isResizingSidebar ? "bg-[var(--color-nav-hover-bg)]" : "bg-transparent group-hover:bg-[var(--color-nav-hover-bg)] group-focus-visible:bg-[var(--color-nav-hover-bg)]"}`}
+            style={{ width: FLOW_EDITOR_RESIZER_HOVER_LINE_WIDTH_PX }}
           />
           <span
-            className={`absolute inset-y-0 left-1/2 w-px bg-[var(--color-border)] ${isResizingSidebar ? "bg-[var(--color-text-tertiary)]" : "group-hover:bg-[var(--color-text-tertiary)]"}`}
+            className="absolute inset-y-0 left-1/2 w-px -translate-x-1/2 bg-[var(--color-border)]"
           />
         </div>
 
