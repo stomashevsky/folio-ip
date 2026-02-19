@@ -30,6 +30,10 @@ html.dark {
   --navbar-height: 54px;
   --color-nav-active-bg: rgb(0 0 0 / 0.08);
   --color-nav-hover-bg: rgb(0 0 0 / 0.04);
+  --color-editor-folded-line-bg: rgb(246 248 250);
+  --color-editor-folded-line-border: rgb(208 215 222);
+  --color-editor-folded-icon: rgb(89 99 110);
+  --color-editor-folded-placeholder-hover-bg: rgb(175 184 193 / 0.2);
   --color-chart-primary: #0073e6;
   --color-chart-secondary: #30a46c;
   --color-chart-muted: #ededed;
@@ -44,6 +48,10 @@ html.dark {
 html.dark {
   --color-nav-active-bg: rgb(255 255 255 / 0.08);
   --color-nav-hover-bg: rgb(255 255 255 / 0.04);
+  --color-editor-folded-line-bg: rgb(22 27 34);
+  --color-editor-folded-line-border: rgb(48 54 61);
+  --color-editor-folded-icon: rgb(125 133 144);
+  --color-editor-folded-placeholder-hover-bg: rgb(110 118 129 / 0.25);
   --color-chart-primary: #4da3ff;
   --color-chart-secondary: #4ade80;
   --color-chart-muted: #2a2a2a;

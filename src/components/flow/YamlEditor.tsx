@@ -1,122 +1,158 @@
 "use client";
 
 import { useRef, useEffect, useCallback } from "react";
-import { EditorView, keymap, placeholder as placeholderExt, lineNumbers, highlightActiveLine, highlightActiveLineGutter } from "@codemirror/view";
-import { EditorState } from "@codemirror/state";
+import { EditorView, keymap, placeholder as placeholderExt, lineNumbers, Decoration, GutterMarker, gutterLineClass } from "@codemirror/view";
+import { EditorState, RangeSetBuilder } from "@codemirror/state";
 import { yaml } from "@codemirror/lang-yaml";
 import { defaultKeymap, history, historyKeymap, indentWithTab } from "@codemirror/commands";
-import { syntaxHighlighting, defaultHighlightStyle, bracketMatching, foldGutter, foldKeymap } from "@codemirror/language";
+import { syntaxHighlighting, defaultHighlightStyle, bracketMatching, foldGutter, foldKeymap, codeFolding, foldState } from "@codemirror/language";
 import { searchKeymap, highlightSelectionMatches } from "@codemirror/search";
 import { autocompletion, completionKeymap } from "@codemirror/autocomplete";
 import { lintGutter } from "@codemirror/lint";
+import { githubLight, githubDark } from "@uiw/codemirror-theme-github";
+import {
+  GITHUB_FOLD_MARKER_SIZE,
+  GITHUB_FOLD_MARKER_SVG,
+  GITHUB_FOLD_PLACEHOLDER_BUTTON_HEIGHT,
+  GITHUB_FOLD_PLACEHOLDER_BUTTON_WIDTH,
+  GITHUB_FOLD_PLACEHOLDER_ICON_SIZE,
+  GITHUB_FOLD_PLACEHOLDER_SVG,
+  GITHUB_LINE_NUMBER_GUTTER_MIN_WIDTH,
+  GITHUB_LINE_NUMBER_GUTTER_PADDING_LEFT,
+  GITHUB_LINE_NUMBER_GUTTER_PADDING_RIGHT,
+} from "@/lib/constants";
 
 /** Minimal dark theme matching PlexUI dark mode */
-const darkTheme = EditorView.theme(
-  {
-    "&": {
-      backgroundColor: "var(--color-surface)",
-      color: "var(--color-text)",
-      fontSize: "13px",
-      fontFamily: "ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace",
-    },
-    ".cm-content": {
-      caretColor: "var(--color-text)",
-      padding: "8px 0",
-    },
-    ".cm-cursor": {
-      borderLeftColor: "var(--color-text)",
-    },
-    ".cm-activeLine": {
-      backgroundColor: "rgba(128, 128, 128, 0.08)",
-    },
-    ".cm-activeLineGutter": {
-      backgroundColor: "rgba(128, 128, 128, 0.08)",
-    },
-    ".cm-gutters": {
-      backgroundColor: "var(--color-surface)",
-      color: "var(--color-text-tertiary)",
-      border: "none",
-      paddingRight: "4px",
-    },
-    ".cm-lineNumbers .cm-gutterElement": {
-      padding: "0 8px",
-      minWidth: "32px",
-    },
-    ".cm-foldGutter .cm-gutterElement": {
-      padding: "0 4px",
-    },
-    "&.cm-focused .cm-selectionBackground, .cm-selectionBackground": {
-      backgroundColor: "rgba(128, 128, 255, 0.15)",
-    },
-    ".cm-selectionMatch": {
-      backgroundColor: "rgba(128, 128, 255, 0.1)",
-    },
-    ".cm-matchingBracket": {
-      backgroundColor: "rgba(128, 128, 255, 0.2)",
-      outline: "none",
-    },
-    ".cm-searchMatch": {
-      backgroundColor: "rgba(255, 200, 0, 0.2)",
-    },
-    ".cm-searchMatch.cm-searchMatch-selected": {
-      backgroundColor: "rgba(255, 200, 0, 0.4)",
-    },
-    ".cm-tooltip": {
-      backgroundColor: "var(--color-surface)",
-      border: "1px solid var(--color-border)",
-      borderRadius: "6px",
-    },
-    ".cm-tooltip-autocomplete": {
-      "& > ul > li": {
-        padding: "2px 8px",
-      },
-      "& > ul > li[aria-selected]": {
-        backgroundColor: "rgba(128, 128, 255, 0.15)",
-      },
-    },
-    ".cm-panels": {
-      backgroundColor: "var(--color-surface)",
-      color: "var(--color-text)",
-    },
-    ".cm-panel.cm-search": {
-      padding: "4px 8px",
-    },
+const githubBaseTheme = EditorView.theme({
+  "&": {
+    fontSize: "13px",
+    fontFamily: "ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace",
   },
-  { dark: true },
-);
+  ".cm-content": {
+    padding: "8px 0",
+    minWidth: "100%",
+    whiteSpace: "pre !important",
+    overflowWrap: "normal",
+    wordBreak: "normal",
+  },
+  ".cm-line": {
+    whiteSpace: "pre !important",
+    overflowWrap: "normal",
+    wordBreak: "normal",
+  },
+  ".cm-gutters": {
+    backgroundColor: "transparent",
+    color: "var(--color-text-tertiary)",
+    border: "none",
+  },
+  ".cm-lineNumbers .cm-gutterElement": {
+    paddingLeft: `${GITHUB_LINE_NUMBER_GUTTER_PADDING_LEFT}px !important`,
+    paddingRight: `${GITHUB_LINE_NUMBER_GUTTER_PADDING_RIGHT}px !important`,
+    minWidth: `${GITHUB_LINE_NUMBER_GUTTER_MIN_WIDTH}px !important`,
+  },
+  ".cm-foldGutter .cm-gutterElement": {
+    padding: "0",
+    width: `${GITHUB_FOLD_MARKER_SIZE}px`,
+    minWidth: `${GITHUB_FOLD_MARKER_SIZE}px`,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    cursor: "pointer",
+    color: "var(--color-editor-folded-icon)",
+  },
+  ".cm-foldGutter .cm-gutterElement:hover": {
+    color: "var(--color-text)",
+  },
+  ".cm-foldGutterMarker": {
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    width: `${GITHUB_FOLD_MARKER_SIZE}px`,
+    height: "100%",
+    color: "var(--color-editor-folded-icon)",
+  },
+  ".cm-foldGutterMarker svg": {
+    width: `${GITHUB_FOLD_MARKER_SIZE}px`,
+    height: `${GITHUB_FOLD_MARKER_SIZE}px`,
+    fill: "currentColor",
+  },
+  ".cm-line.cm-foldedLine": {
+    display: "block",
+    width: "100%",
+    backgroundColor: "var(--color-editor-folded-line-bg) !important",
+  },
+  ".cm-gutter .cm-gutterElement.cm-foldedGutterElement": {
+    backgroundColor: "var(--color-editor-folded-line-bg) !important",
+  },
+  ".cm-lineNumbers .cm-gutterElement.cm-foldedGutterElement": {
+    boxShadow: "inset 2px 0 0 var(--color-editor-folded-line-border)",
+  },
+  ".cm-foldPlaceholder": {
+    backgroundColor: "transparent",
+    border: "none",
+    color: "var(--color-editor-folded-icon)",
+    margin: "0 4px",
+    padding: "0",
+    width: `${GITHUB_FOLD_PLACEHOLDER_BUTTON_WIDTH}px`,
+    height: `${GITHUB_FOLD_PLACEHOLDER_BUTTON_HEIGHT}px`,
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    verticalAlign: "middle",
+    borderRadius: "6px",
+    cursor: "pointer",
+  },
+  ".cm-foldPlaceholder svg": {
+    width: `${GITHUB_FOLD_PLACEHOLDER_ICON_SIZE}px`,
+    height: `${GITHUB_FOLD_PLACEHOLDER_ICON_SIZE}px`,
+    fill: "currentColor",
+  },
+  ".cm-foldPlaceholder:hover": {
+    backgroundColor: "var(--color-editor-folded-placeholder-hover-bg)",
+  },
+  ".cm-activeLine, .cm-activeLineGutter": {
+    backgroundColor: "transparent !important",
+  },
+});
+
+const getFoldedLineStarts = (state: EditorState) => {
+  const foldSet = state.field(foldState, false);
+  if (!foldSet) return [];
+  const starts = new Set<number>();
+  foldSet.between(0, state.doc.length, (from) => {
+    const line = state.doc.lineAt(from > 0 ? from - 1 : from);
+    starts.add(line.from);
+  });
+  return Array.from(starts);
+};
 
 /** Light theme for PlexUI light mode */
-const lightTheme = EditorView.theme(
-  {
-    "&": {
-      backgroundColor: "var(--color-surface)",
-      color: "var(--color-text)",
-      fontSize: "13px",
-      fontFamily: "ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace",
-    },
-    ".cm-content": {
-      caretColor: "var(--color-text)",
-      padding: "8px 0",
-    },
-    ".cm-activeLine": {
-      backgroundColor: "rgba(0, 0, 0, 0.04)",
-    },
-    ".cm-activeLineGutter": {
-      backgroundColor: "rgba(0, 0, 0, 0.04)",
-    },
-    ".cm-gutters": {
-      backgroundColor: "var(--color-surface)",
-      color: "var(--color-text-tertiary)",
-      border: "none",
-      paddingRight: "4px",
-    },
-    ".cm-lineNumbers .cm-gutterElement": {
-      padding: "0 8px",
-      minWidth: "32px",
-    },
-  },
-  { dark: false },
-);
+/** Extension to add a class to folded lines for styling the whole line */
+const foldedLineHighlighter = EditorView.decorations.compute(["doc", foldState], (state) => {
+  const builder = new RangeSetBuilder<Decoration>();
+  const foldedLineStarts = getFoldedLineStarts(state);
+  for (const lineStart of foldedLineStarts) {
+    builder.add(lineStart, lineStart, Decoration.line({ class: "cm-foldedLine" }));
+  }
+  return builder.finish();
+});
+
+class FoldedLineGutterMarker extends GutterMarker {
+  elementClass = "cm-foldedGutterElement";
+}
+
+const foldedLineGutterMarker = new FoldedLineGutterMarker();
+
+const foldedLineGutterHighlighter = gutterLineClass.compute(["doc", foldState], (state) => {
+  const builder = new RangeSetBuilder<GutterMarker>();
+  const foldedLineStarts = getFoldedLineStarts(state);
+  for (const lineStart of foldedLineStarts) {
+    builder.add(lineStart, lineStart, foldedLineGutterMarker);
+  }
+  return builder.finish();
+});
+
+// YamlEditorProps defines the properties for the component
 
 interface YamlEditorProps {
   value: string;
@@ -141,9 +177,25 @@ export function YamlEditor({ value, onChange, placeholder = "# Define your inqui
         doc,
         extensions: [
           lineNumbers(),
-          highlightActiveLine(),
-          highlightActiveLineGutter(),
-          foldGutter(),
+          codeFolding({
+            placeholderDOM: (_view, onclick) => {
+              const dom = document.createElement("button");
+              dom.type = "button";
+              dom.className = "cm-foldPlaceholder";
+              dom.setAttribute("aria-label", "Expand folded section");
+              dom.onclick = onclick;
+              dom.innerHTML = GITHUB_FOLD_PLACEHOLDER_SVG;
+              return dom;
+            }
+          }),
+          foldGutter({
+            markerDOM: (open) => {
+              const dom = document.createElement("span");
+              dom.className = "cm-foldGutterMarker";
+              dom.innerHTML = open ? GITHUB_FOLD_MARKER_SVG.open : GITHUB_FOLD_MARKER_SVG.closed;
+              return dom;
+            }
+          }),
           history(),
           bracketMatching(),
           highlightSelectionMatches(),
@@ -151,7 +203,10 @@ export function YamlEditor({ value, onChange, placeholder = "# Define your inqui
           lintGutter(),
           syntaxHighlighting(defaultHighlightStyle, { fallback: true }),
           yaml(),
-          isDark ? darkTheme : lightTheme,
+          isDark ? githubDark : githubLight,
+          githubBaseTheme,
+          foldedLineHighlighter,
+          foldedLineGutterHighlighter,
           placeholderExt(placeholder),
           EditorView.editable.of(!readOnly),
           EditorState.readOnly.of(readOnly),
@@ -161,7 +216,6 @@ export function YamlEditor({ value, onChange, placeholder = "# Define your inqui
               onChangeRef.current(update.state.doc.toString());
             }
           }),
-          EditorView.lineWrapping,
         ],
       });
     },
@@ -216,6 +270,9 @@ export function YamlEditor({ value, onChange, placeholder = "# Define your inqui
   }, [scrollToStepId]);
 
   return (
-    <div ref={containerRef} className={`h-full overflow-auto [&_.cm-editor]:h-full [&_.cm-editor]:outline-none [&_.cm-scroller]:overflow-auto ${className ?? ""}`} />
+    <div
+      ref={containerRef}
+      className={`h-full overflow-auto [&_.cm-editor]:h-full [&_.cm-editor]:outline-none [&_.cm-scroller]:overflow-auto [&_.cm-content]:min-w-full [&_.cm-content]:whitespace-pre ${className ?? ""}`}
+    />
   );
 }
