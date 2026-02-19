@@ -5,11 +5,12 @@ import type { Node as FlowNode, Edge as FlowEdge } from "@xyflow/react";
 
 import { parseFlowYaml, validateFlow } from "@/lib/utils/flow-parser";
 import { flowToElements } from "@/lib/utils/flow-to-nodes";
-import { getLayoutedElements, type ElkLayoutOverrides } from "@/lib/utils/flow-layout";
+import { getLayoutedElements } from "@/lib/utils/flow-layout";
 import { FlowVisualizer } from "./FlowVisualizer";
 import { YamlEditor, type YamlEditorHandle } from "./YamlEditor";
 import { FlowChat } from "./FlowChat";
-import { ElkSettingsPanel } from "./ElkSettingsPanel";
+// import { ElkSettingsPanel } from "./ElkSettingsPanel";
+// import type { ElkLayoutOverrides } from "@/lib/utils/flow-layout";
 import { ExclamationMarkCircle } from "@plexui/ui/components/Icon";
 import {
   FLOW_EDITOR_FIT_VIEW_DURATION_MS,
@@ -66,11 +67,12 @@ export function FlowEditor({
   const [externalHistoryState, setExternalHistoryState] = useState({ canUndo: false, canRedo: false });
   const externalHistoryRef = useRef<{ past: string[]; future: string[] }>({ past: [], future: [] });
   const fitAfterAiApplyPendingRef = useRef(false);
-  const [elkOverrides, setElkOverrides] = useState<ElkLayoutOverrides>({});
-  const [elkPortConstraint, setElkPortConstraint] = useState("FIXED_SIDE");
-  const [elkSourceLeftSide, setElkSourceLeftSide] = useState("EAST");
-  const [elkSourceRightSide, setElkSourceRightSide] = useState("EAST");
-  const [elkUseElkLabelPos, setElkUseElkLabelPos] = useState(true);
+  // ELK settings panel state — hidden but kept for future tuning
+  // const [elkOverrides, setElkOverrides] = useState<ElkLayoutOverrides>({});
+  // const [elkPortConstraint, setElkPortConstraint] = useState("FIXED_SIDE");
+  // const [elkSourceLeftSide, setElkSourceLeftSide] = useState("EAST");
+  // const [elkSourceRightSide, setElkSourceRightSide] = useState("EAST");
+  // const [elkUseElkLabelPos, setElkUseElkLabelPos] = useState(true);
   useEffect(() => { onChangeRef.current = onChange; });
   useEffect(() => { yamlValueRef.current = yamlValue; }, [yamlValue]);
 
@@ -247,14 +249,7 @@ export function FlowEditor({
       return;
     }
     let cancelled = false;
-    const settings = {
-      overrides: Object.keys(elkOverrides).length > 0 ? elkOverrides : undefined,
-      portConstraint: elkPortConstraint as "FIXED_SIDE" | "FIXED_ORDER" | "FIXED_POS" | "FREE",
-      sourceLeftSide: elkSourceLeftSide as "SOUTH" | "WEST" | "EAST",
-      sourceRightSide: elkSourceRightSide as "SOUTH" | "EAST" | "WEST",
-      useElkLabelPositions: elkUseElkLabelPos,
-    };
-    getLayoutedElements(rawParsed.nodes, rawParsed.edges, settings).then((result) => {
+    getLayoutedElements(rawParsed.nodes, rawParsed.edges).then((result) => {
       if (!cancelled) {
         setLayouted(result);
         if (fitAfterAiApplyPendingRef.current) {
@@ -266,7 +261,7 @@ export function FlowEditor({
     return () => {
       cancelled = true;
     };
-  }, [rawParsed, elkOverrides, elkPortConstraint, elkSourceLeftSide, elkSourceRightSide, elkUseElkLabelPos]);
+  }, [rawParsed]);
 
   const handleYamlChange = useCallback((newYaml: string) => {
     applyYamlValue(newYaml);
@@ -409,6 +404,7 @@ export function FlowEditor({
         </div>
 
         <div className="relative min-w-0 flex-1">
+          {/* ELK settings panel — hidden but kept for future tuning
           <ElkSettingsPanel
             overrides={elkOverrides}
             portConstraint={elkPortConstraint}
@@ -421,6 +417,7 @@ export function FlowEditor({
             onSourceRightSideChange={setElkSourceRightSide}
             onUseElkLabelPositionsChange={setElkUseElkLabelPos}
           />
+          */}
           {layouted.nodes.length > 0 ? (
             <FlowVisualizer
               nodes={layouted.nodes}
