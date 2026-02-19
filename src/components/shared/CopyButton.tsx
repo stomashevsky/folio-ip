@@ -2,13 +2,19 @@
 
 import { useRef, useState } from "react";
 import { Button } from "@plexui/ui/components/Button";
-import { CheckCircle, Copy } from "@plexui/ui/components/Icon";
+import { Check, Copy } from "@plexui/ui/components/Icon";
+import {
+  COPY_BUTTON_FEEDBACK_TIMEOUT_MS,
+  COPY_BUTTON_ICON_SIZE_PX,
+  COPY_BUTTON_VERTICAL_PADDING_PX,
+} from "@/lib/constants";
 
 interface CopyButtonProps {
   value: string;
+  className?: string;
 }
 
-export function CopyButton({ value }: CopyButtonProps) {
+export function CopyButton({ value, className }: CopyButtonProps) {
   const [copied, setCopied] = useState(false);
   const timerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
@@ -16,23 +22,31 @@ export function CopyButton({ value }: CopyButtonProps) {
     navigator.clipboard.writeText(value);
     setCopied(true);
     clearTimeout(timerRef.current);
-    timerRef.current = setTimeout(() => setCopied(false), 1500);
+    timerRef.current = setTimeout(() => setCopied(false), COPY_BUTTON_FEEDBACK_TIMEOUT_MS);
   };
 
   return (
-    <Button
-      color="secondary"
-      variant="ghost"
-      size="sm"
-      uniform
-      pill={false}
-      onClick={handleCopy}
+    <span
+      className={`inline-flex ${className ?? ""}`}
+      style={{
+        paddingTop: COPY_BUTTON_VERTICAL_PADDING_PX,
+        paddingBottom: COPY_BUTTON_VERTICAL_PADDING_PX,
+      }}
     >
-      {copied ? (
-        <CheckCircle className="h-4 w-4 text-[var(--color-background-success-solid)]" />
-      ) : (
-        <Copy className="h-4 w-4" />
-      )}
-    </Button>
+      <Button
+        color="secondary"
+        variant="ghost"
+        size="sm"
+        uniform
+        pill={false}
+        onClick={handleCopy}
+      >
+        {copied ? (
+          <Check style={{ width: COPY_BUTTON_ICON_SIZE_PX, height: COPY_BUTTON_ICON_SIZE_PX }} />
+        ) : (
+          <Copy style={{ width: COPY_BUTTON_ICON_SIZE_PX, height: COPY_BUTTON_ICON_SIZE_PX }} />
+        )}
+      </Button>
+    </span>
   );
 }

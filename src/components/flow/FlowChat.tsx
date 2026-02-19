@@ -4,6 +4,7 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { Button } from "@plexui/ui/components/Button";
 import { Textarea } from "@plexui/ui/components/Textarea";
 import { ExclamationMarkCircle, ArrowUpSm, Reply } from "@plexui/ui/components/Icon";
+import { CopyButton } from "@/components/shared";
 import {
   FLOW_CHAT_ACTIVE_KEY_ID_STORAGE_KEY,
   FLOW_CHAT_API_KEY_STORAGE_KEY,
@@ -29,6 +30,9 @@ import {
   FLOW_CHAT_EXAMPLE_ROW_PADDING_X_PX,
   FLOW_CHAT_EXAMPLE_ROW_PADDING_Y_PX,
   FLOW_CHAT_EXAMPLE_ROW_RADIUS_PX,
+  FLOW_CHAT_MESSAGE_ACTION_GAP_PX,
+  FLOW_CHAT_MESSAGE_LINE_HEIGHT_PX,
+  FLOW_CHAT_MESSAGE_VERTICAL_PADDING_PX,
   FLOW_CHAT_EXAMPLE_TEXT_LINE_HEIGHT_PX,
   FLOW_CHAT_EXAMPLE_PROMPTS,
   FLOW_CHAT_FRAME_PADDING_PX,
@@ -144,6 +148,7 @@ function toReadableErrorMessage(error: unknown): string {
 
 export function FlowChat({ currentYaml, onApplyYaml }: FlowChatProps) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [hoveredMessageIndex, setHoveredMessageIndex] = useState<number | null>(null);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -353,17 +358,32 @@ export function FlowChat({ currentYaml, onApplyYaml }: FlowChatProps) {
         <div ref={scrollRef} className="min-h-0 flex-1 overflow-auto px-3 py-3">
           {messages.map((msg, i) => {
             const yamlResult = msg.yamlResult;
+            const isUser = msg.role === "user";
+            const isErrorMessage = msg.content.startsWith("Error:");
+            const showCopyButton = hoveredMessageIndex === i;
 
             return (
-              <div key={i} className={`mb-2 flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
+              <div
+                key={i}
+                className={`group mb-2 flex items-start ${isUser ? "justify-end" : "justify-start"}`}
+                style={{ gap: FLOW_CHAT_MESSAGE_ACTION_GAP_PX }}
+                onMouseEnter={() => setHoveredMessageIndex(i)}
+                onMouseLeave={() => setHoveredMessageIndex((prev) => (prev === i ? null : prev))}
+              >
+                {isUser && showCopyButton && <CopyButton value={msg.content} />}
                 <div
-                  className={`max-w-[90%] rounded-lg py-2 text-sm leading-relaxed ${
-                    msg.role === "user"
+                  className={`max-w-[90%] rounded-lg text-sm ${
+                    isUser
                       ? "bg-[var(--color-surface-secondary)] pl-3 pr-2 text-[var(--color-text)]"
-                      : msg.content.startsWith("Error:")
+                      : isErrorMessage
                         ? "bg-[var(--color-danger-soft-bg)] px-3 text-[var(--color-danger-soft-text)]"
                         : "bg-transparent px-0 text-[var(--color-text)]"
                   }`}
+                  style={{
+                    lineHeight: `${FLOW_CHAT_MESSAGE_LINE_HEIGHT_PX}px`,
+                    paddingTop: FLOW_CHAT_MESSAGE_VERTICAL_PADDING_PX,
+                    paddingBottom: FLOW_CHAT_MESSAGE_VERTICAL_PADDING_PX,
+                  }}
                 >
                   {msg.content}
                   {yamlResult && (
@@ -380,6 +400,7 @@ export function FlowChat({ currentYaml, onApplyYaml }: FlowChatProps) {
                     </div>
                   )}
                 </div>
+                {!isUser && showCopyButton && <CopyButton value={msg.content} />}
               </div>
             );
           })}
