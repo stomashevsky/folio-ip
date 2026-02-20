@@ -99,7 +99,7 @@ export function DocumentViewer({
       {/* ─── Top Bar ─── */}
       <div className="shrink-0 border-b border-white/10">
         <div className="flex h-14 items-center justify-between px-2 md:px-4">
-          {/* Left: back + label (label hidden on mobile) */}
+          {/* Left: back + counter */}
           <div className="flex min-w-0 items-center gap-2 md:gap-3">
             <Button
               color="secondary"
@@ -111,10 +111,9 @@ export function DocumentViewer({
             >
               <ArrowLeftLg />
             </Button>
-            <span className="text-xs text-white/50 md:hidden">
+            <span className="text-xs text-white/50">
               {index + 1}/{items.length}
             </span>
-            <span className="hidden truncate text-sm text-white/80 md:inline">{filename}</span>
           </div>
 
           {/* Center: zoom */}
@@ -146,7 +145,7 @@ export function DocumentViewer({
             </Button>
           </div>
 
-          {/* Right: rotate + counter + download */}
+          {/* Right: rotate + download */}
           <div className="flex shrink-0 items-center gap-1 md:gap-3">
             <Button
               color="secondary"
@@ -158,9 +157,6 @@ export function DocumentViewer({
             >
               <ArrowRotateCw />
             </Button>
-            <span className="hidden text-xs text-white/50 md:inline">
-              {index + 1}/{items.length}
-            </span>
             <Button
               color="secondary"
               variant="ghost"
@@ -172,11 +168,6 @@ export function DocumentViewer({
               <Download />
             </Button>
           </div>
-        </div>
-
-        {/* Filename strip — mobile only */}
-        <div className="truncate border-t border-white/10 px-4 py-2 text-xs text-white/60 md:hidden">
-          {filename}
         </div>
       </div>
 
@@ -237,6 +228,7 @@ export function DocumentViewer({
             <>
               <div className="border-b border-white/10 px-4 py-3">
                 <h3 className="text-sm font-medium text-white/80">Extractions</h3>
+                <div className="mt-1 truncate text-xs text-white/40">{filename}</div>
               </div>
               <div className="divide-y divide-white/5">
                 {Object.entries(item.extractedData!).map(([key, value]) => (
@@ -255,6 +247,7 @@ export function DocumentViewer({
             <>
               <div className="border-b border-white/10 px-4 py-3">
                 <h3 className="text-sm font-medium text-white/80">Photo</h3>
+                <div className="mt-1 truncate text-xs text-white/40">{filename}</div>
               </div>
               <div className="space-y-3 px-4 py-3">
                 <div>
