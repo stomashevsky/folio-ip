@@ -108,54 +108,98 @@ const RISK_COLORS: Record<string, "success" | "warning" | "danger"> = {
 };
 
 const MOCK_CONNECTIONS: GraphConnection[] = [
-  { id: "conn_001", sourceType: "account", sourceId: "act_001", targetType: "inquiry", targetId: "inq_101", relationship: "owns", strength: 0.95, riskLevel: "low", clusterId: "cluster_1", createdAt: "2025-02-20T14:30:00Z" },
-  { id: "conn_002", sourceType: "inquiry", sourceId: "inq_101", targetType: "verification", targetId: "ver_201", relationship: "submitted", strength: 0.92, riskLevel: "low", clusterId: "cluster_1", createdAt: "2025-02-20T14:29:15Z" },
-  { id: "conn_003", sourceType: "inquiry", sourceId: "inq_101", targetType: "verification", targetId: "ver_202", relationship: "submitted", strength: 0.88, riskLevel: "low", clusterId: "cluster_1", createdAt: "2025-02-20T14:28:45Z" },
-  { id: "conn_004", sourceType: "device", sourceId: "dev_301", targetType: "account", targetId: "act_001", relationship: "same_device", strength: 0.90, riskLevel: "low", clusterId: "cluster_1", createdAt: "2025-02-20T14:27:30Z" },
-  { id: "conn_005", sourceType: "email", sourceId: "eml_401", targetType: "account", targetId: "act_001", relationship: "same_email", strength: 0.99, riskLevel: "low", clusterId: "cluster_1", createdAt: "2025-02-20T14:26:00Z" },
+  // ── Cluster: "clean_onboarding" — Normal user, clean KYC ──
+  { id: "c001", sourceType: "account", sourceId: "act_8f3a2b", targetType: "inquiry", targetId: "inq_d41f0c", relationship: "owns", strength: 0.97, riskLevel: "low", clusterId: "clean_onboarding", createdAt: "2025-02-18T09:12:00Z" },
+  { id: "c002", sourceType: "inquiry", sourceId: "inq_d41f0c", targetType: "verification", targetId: "ver_selfie_01", relationship: "submitted", strength: 0.95, riskLevel: "low", clusterId: "clean_onboarding", createdAt: "2025-02-18T09:13:30Z" },
+  { id: "c003", sourceType: "inquiry", sourceId: "inq_d41f0c", targetType: "verification", targetId: "ver_govid_01", relationship: "submitted", strength: 0.93, riskLevel: "low", clusterId: "clean_onboarding", createdAt: "2025-02-18T09:14:00Z" },
+  { id: "c004", sourceType: "device", sourceId: "dev_iphone15", targetType: "account", targetId: "act_8f3a2b", relationship: "same_device", strength: 0.99, riskLevel: "low", clusterId: "clean_onboarding", createdAt: "2025-02-18T09:10:00Z" },
+  { id: "c005", sourceType: "email", sourceId: "eml_proton_01", targetType: "account", targetId: "act_8f3a2b", relationship: "same_email", strength: 0.99, riskLevel: "low", clusterId: "clean_onboarding", createdAt: "2025-02-18T09:09:00Z" },
 
-  { id: "conn_006", sourceType: "account", sourceId: "act_002", targetType: "inquiry", targetId: "inq_102", relationship: "owns", strength: 0.93, riskLevel: "medium", clusterId: "cluster_2", createdAt: "2025-02-20T13:10:00Z" },
-  { id: "conn_007", sourceType: "inquiry", sourceId: "inq_102", targetType: "verification", targetId: "ver_203", relationship: "submitted", strength: 0.85, riskLevel: "medium", clusterId: "cluster_2", createdAt: "2025-02-20T13:09:00Z" },
-  { id: "conn_008", sourceType: "ip_address", sourceId: "ip_501", targetType: "account", targetId: "act_002", relationship: "same_ip", strength: 0.72, riskLevel: "medium", clusterId: "cluster_2", createdAt: "2025-02-20T13:08:00Z" },
-  { id: "conn_009", sourceType: "ip_address", sourceId: "ip_501", targetType: "account", targetId: "act_003", relationship: "same_ip", strength: 0.68, riskLevel: "medium", clusterId: "cluster_2", createdAt: "2025-02-20T13:07:30Z" },
-  { id: "conn_010", sourceType: "account", sourceId: "act_003", targetType: "inquiry", targetId: "inq_103", relationship: "owns", strength: 0.91, riskLevel: "medium", clusterId: "cluster_2", createdAt: "2025-02-20T13:06:00Z" },
-  { id: "conn_011", sourceType: "device", sourceId: "dev_302", targetType: "account", targetId: "act_002", relationship: "same_device", strength: 0.82, riskLevel: "medium", clusterId: "cluster_2", createdAt: "2025-02-20T13:05:00Z" },
-  { id: "conn_012", sourceType: "device", sourceId: "dev_302", targetType: "account", targetId: "act_003", relationship: "same_device", strength: 0.79, riskLevel: "high", clusterId: "cluster_2", createdAt: "2025-02-20T13:04:00Z" },
+  // ── Cluster: "fraud_ring_synthetic" — Synthetic identity ring: 5 fake accounts, shared infra ──
+  { id: "c010", sourceType: "account", sourceId: "act_syn_01", targetType: "account", targetId: "act_syn_02", relationship: "same_ip", strength: 0.94, riskLevel: "high", clusterId: "fraud_ring_synthetic", createdAt: "2025-02-17T03:22:00Z" },
+  { id: "c011", sourceType: "account", sourceId: "act_syn_02", targetType: "account", targetId: "act_syn_03", relationship: "same_device", strength: 0.91, riskLevel: "high", clusterId: "fraud_ring_synthetic", createdAt: "2025-02-17T03:23:00Z" },
+  { id: "c012", sourceType: "account", sourceId: "act_syn_03", targetType: "account", targetId: "act_syn_04", relationship: "same_ip", strength: 0.89, riskLevel: "high", clusterId: "fraud_ring_synthetic", createdAt: "2025-02-17T03:24:00Z" },
+  { id: "c013", sourceType: "account", sourceId: "act_syn_04", targetType: "account", targetId: "act_syn_05", relationship: "same_device", strength: 0.92, riskLevel: "high", clusterId: "fraud_ring_synthetic", createdAt: "2025-02-17T03:25:00Z" },
+  { id: "c014", sourceType: "account", sourceId: "act_syn_05", targetType: "account", targetId: "act_syn_01", relationship: "same_ip", strength: 0.88, riskLevel: "high", clusterId: "fraud_ring_synthetic", createdAt: "2025-02-17T03:26:00Z" },
+  { id: "c015", sourceType: "device", sourceId: "dev_emulator_01", targetType: "account", targetId: "act_syn_01", relationship: "same_device", strength: 0.97, riskLevel: "high", clusterId: "fraud_ring_synthetic", createdAt: "2025-02-17T03:20:00Z" },
+  { id: "c016", sourceType: "device", sourceId: "dev_emulator_01", targetType: "account", targetId: "act_syn_03", relationship: "same_device", strength: 0.96, riskLevel: "high", clusterId: "fraud_ring_synthetic", createdAt: "2025-02-17T03:20:30Z" },
+  { id: "c017", sourceType: "device", sourceId: "dev_emulator_01", targetType: "account", targetId: "act_syn_05", relationship: "same_device", strength: 0.95, riskLevel: "high", clusterId: "fraud_ring_synthetic", createdAt: "2025-02-17T03:21:00Z" },
+  { id: "c018", sourceType: "device", sourceId: "dev_emulator_02", targetType: "account", targetId: "act_syn_02", relationship: "same_device", strength: 0.96, riskLevel: "high", clusterId: "fraud_ring_synthetic", createdAt: "2025-02-17T03:21:30Z" },
+  { id: "c019", sourceType: "device", sourceId: "dev_emulator_02", targetType: "account", targetId: "act_syn_04", relationship: "same_device", strength: 0.94, riskLevel: "high", clusterId: "fraud_ring_synthetic", createdAt: "2025-02-17T03:22:00Z" },
+  { id: "c020", sourceType: "ip_address", sourceId: "ip_vpn_exit_01", targetType: "account", targetId: "act_syn_01", relationship: "same_ip", strength: 0.93, riskLevel: "high", clusterId: "fraud_ring_synthetic", createdAt: "2025-02-17T03:19:00Z" },
+  { id: "c021", sourceType: "ip_address", sourceId: "ip_vpn_exit_01", targetType: "account", targetId: "act_syn_02", relationship: "same_ip", strength: 0.92, riskLevel: "high", clusterId: "fraud_ring_synthetic", createdAt: "2025-02-17T03:19:30Z" },
+  { id: "c022", sourceType: "ip_address", sourceId: "ip_vpn_exit_01", targetType: "account", targetId: "act_syn_04", relationship: "same_ip", strength: 0.90, riskLevel: "high", clusterId: "fraud_ring_synthetic", createdAt: "2025-02-17T03:20:00Z" },
+  { id: "c023", sourceType: "ip_address", sourceId: "ip_vpn_exit_02", targetType: "account", targetId: "act_syn_03", relationship: "same_ip", strength: 0.91, riskLevel: "high", clusterId: "fraud_ring_synthetic", createdAt: "2025-02-17T03:20:30Z" },
+  { id: "c024", sourceType: "ip_address", sourceId: "ip_vpn_exit_02", targetType: "account", targetId: "act_syn_05", relationship: "same_ip", strength: 0.89, riskLevel: "high", clusterId: "fraud_ring_synthetic", createdAt: "2025-02-17T03:21:00Z" },
+  { id: "c025", sourceType: "email", sourceId: "eml_tempmail_01", targetType: "account", targetId: "act_syn_01", relationship: "same_email", strength: 0.98, riskLevel: "high", clusterId: "fraud_ring_synthetic", createdAt: "2025-02-17T03:18:00Z" },
+  { id: "c026", sourceType: "email", sourceId: "eml_tempmail_01", targetType: "account", targetId: "act_syn_03", relationship: "same_email", strength: 0.97, riskLevel: "high", clusterId: "fraud_ring_synthetic", createdAt: "2025-02-17T03:18:30Z" },
+  { id: "c027", sourceType: "account", sourceId: "act_syn_01", targetType: "inquiry", targetId: "inq_syn_01", relationship: "owns", strength: 0.95, riskLevel: "high", clusterId: "fraud_ring_synthetic", createdAt: "2025-02-17T03:30:00Z" },
+  { id: "c028", sourceType: "account", sourceId: "act_syn_02", targetType: "inquiry", targetId: "inq_syn_02", relationship: "owns", strength: 0.94, riskLevel: "high", clusterId: "fraud_ring_synthetic", createdAt: "2025-02-17T03:31:00Z" },
+  { id: "c029", sourceType: "account", sourceId: "act_syn_04", targetType: "inquiry", targetId: "inq_syn_04", relationship: "owns", strength: 0.93, riskLevel: "high", clusterId: "fraud_ring_synthetic", createdAt: "2025-02-17T03:32:00Z" },
+  { id: "c030", sourceType: "inquiry", sourceId: "inq_syn_01", targetType: "verification", targetId: "ver_fake_dl_01", relationship: "submitted", strength: 0.92, riskLevel: "high", clusterId: "fraud_ring_synthetic", createdAt: "2025-02-17T03:33:00Z" },
+  { id: "c031", sourceType: "inquiry", sourceId: "inq_syn_02", targetType: "verification", targetId: "ver_fake_dl_02", relationship: "submitted", strength: 0.90, riskLevel: "high", clusterId: "fraud_ring_synthetic", createdAt: "2025-02-17T03:34:00Z" },
+  { id: "c032", sourceType: "verification", sourceId: "ver_fake_dl_01", targetType: "verification", targetId: "ver_fake_dl_02", relationship: "similar_document", strength: 0.94, riskLevel: "high", clusterId: "fraud_ring_synthetic", createdAt: "2025-02-17T03:35:00Z" },
 
-  { id: "conn_013", sourceType: "account", sourceId: "act_004", targetType: "account", targetId: "act_005", relationship: "same_ip", strength: 0.91, riskLevel: "high", clusterId: "fraud_ring_1", createdAt: "2025-02-19T22:15:00Z" },
-  { id: "conn_014", sourceType: "account", sourceId: "act_005", targetType: "account", targetId: "act_006", relationship: "same_device", strength: 0.87, riskLevel: "high", clusterId: "fraud_ring_1", createdAt: "2025-02-19T22:14:00Z" },
-  { id: "conn_015", sourceType: "account", sourceId: "act_006", targetType: "account", targetId: "act_007", relationship: "same_ip", strength: 0.93, riskLevel: "high", clusterId: "fraud_ring_1", createdAt: "2025-02-19T22:13:00Z" },
-  { id: "conn_016", sourceType: "account", sourceId: "act_007", targetType: "account", targetId: "act_004", relationship: "same_device", strength: 0.85, riskLevel: "high", clusterId: "fraud_ring_1", createdAt: "2025-02-19T22:12:00Z" },
-  { id: "conn_017", sourceType: "device", sourceId: "dev_303", targetType: "account", targetId: "act_004", relationship: "same_device", strength: 0.96, riskLevel: "high", clusterId: "fraud_ring_1", createdAt: "2025-02-19T22:11:00Z" },
-  { id: "conn_018", sourceType: "device", sourceId: "dev_303", targetType: "account", targetId: "act_006", relationship: "same_device", strength: 0.94, riskLevel: "high", clusterId: "fraud_ring_1", createdAt: "2025-02-19T22:10:00Z" },
-  { id: "conn_019", sourceType: "ip_address", sourceId: "ip_502", targetType: "account", targetId: "act_004", relationship: "same_ip", strength: 0.89, riskLevel: "high", clusterId: "fraud_ring_1", createdAt: "2025-02-19T22:09:00Z" },
-  { id: "conn_020", sourceType: "ip_address", sourceId: "ip_502", targetType: "account", targetId: "act_005", relationship: "same_ip", strength: 0.88, riskLevel: "high", clusterId: "fraud_ring_1", createdAt: "2025-02-19T22:08:00Z" },
-  { id: "conn_021", sourceType: "ip_address", sourceId: "ip_502", targetType: "account", targetId: "act_007", relationship: "same_ip", strength: 0.87, riskLevel: "high", clusterId: "fraud_ring_1", createdAt: "2025-02-19T22:07:00Z" },
-  { id: "conn_022", sourceType: "account", sourceId: "act_004", targetType: "inquiry", targetId: "inq_104", relationship: "owns", strength: 0.95, riskLevel: "high", clusterId: "fraud_ring_1", createdAt: "2025-02-19T22:06:00Z" },
-  { id: "conn_023", sourceType: "account", sourceId: "act_005", targetType: "inquiry", targetId: "inq_105", relationship: "owns", strength: 0.94, riskLevel: "high", clusterId: "fraud_ring_1", createdAt: "2025-02-19T22:05:00Z" },
-  { id: "conn_024", sourceType: "inquiry", sourceId: "inq_104", targetType: "inquiry", targetId: "inq_105", relationship: "similar_document", strength: 0.91, riskLevel: "high", clusterId: "fraud_ring_1", createdAt: "2025-02-19T22:04:00Z" },
-  { id: "conn_025", sourceType: "email", sourceId: "eml_402", targetType: "account", targetId: "act_004", relationship: "same_email", strength: 0.98, riskLevel: "high", clusterId: "fraud_ring_1", createdAt: "2025-02-19T22:03:00Z" },
-  { id: "conn_026", sourceType: "email", sourceId: "eml_402", targetType: "account", targetId: "act_006", relationship: "same_email", strength: 0.97, riskLevel: "high", clusterId: "fraud_ring_1", createdAt: "2025-02-19T22:02:00Z" },
-  { id: "conn_031", sourceType: "inquiry", sourceId: "inq_104", targetType: "verification", targetId: "ver_205", relationship: "submitted", strength: 0.93, riskLevel: "high", clusterId: "fraud_ring_1", createdAt: "2025-02-19T22:01:00Z" },
-  { id: "conn_032", sourceType: "inquiry", sourceId: "inq_105", targetType: "verification", targetId: "ver_206", relationship: "submitted", strength: 0.90, riskLevel: "high", clusterId: "fraud_ring_1", createdAt: "2025-02-19T22:00:00Z" },
-  { id: "conn_033", sourceType: "verification", sourceId: "ver_205", targetType: "verification", targetId: "ver_206", relationship: "similar_document", strength: 0.88, riskLevel: "high", clusterId: "fraud_ring_1", createdAt: "2025-02-19T21:59:00Z" },
-  { id: "conn_034", sourceType: "account", sourceId: "act_006", targetType: "inquiry", targetId: "inq_107", relationship: "owns", strength: 0.92, riskLevel: "high", clusterId: "fraud_ring_1", createdAt: "2025-02-19T21:58:00Z" },
-  { id: "conn_035", sourceType: "inquiry", sourceId: "inq_105", targetType: "inquiry", targetId: "inq_107", relationship: "similar_document", strength: 0.86, riskLevel: "high", clusterId: "fraud_ring_1", createdAt: "2025-02-19T21:57:00Z" },
-  { id: "conn_036", sourceType: "account", sourceId: "act_007", targetType: "inquiry", targetId: "inq_108", relationship: "owns", strength: 0.91, riskLevel: "high", clusterId: "fraud_ring_1", createdAt: "2025-02-19T21:56:00Z" },
-  { id: "conn_037", sourceType: "device", sourceId: "dev_303", targetType: "account", targetId: "act_005", relationship: "same_device", strength: 0.88, riskLevel: "high", clusterId: "fraud_ring_1", createdAt: "2025-02-19T21:55:00Z" },
+  // ── Cluster: "velocity_abuse" — Same person, rapid-fire inquiries from datacenter ──
+  { id: "c040", sourceType: "account", sourceId: "act_velocity", targetType: "inquiry", targetId: "inq_rapid_01", relationship: "owns", strength: 0.96, riskLevel: "medium", clusterId: "velocity_abuse", createdAt: "2025-02-19T14:00:00Z" },
+  { id: "c041", sourceType: "account", sourceId: "act_velocity", targetType: "inquiry", targetId: "inq_rapid_02", relationship: "owns", strength: 0.96, riskLevel: "medium", clusterId: "velocity_abuse", createdAt: "2025-02-19T14:00:12Z" },
+  { id: "c042", sourceType: "account", sourceId: "act_velocity", targetType: "inquiry", targetId: "inq_rapid_03", relationship: "owns", strength: 0.96, riskLevel: "medium", clusterId: "velocity_abuse", createdAt: "2025-02-19T14:00:24Z" },
+  { id: "c043", sourceType: "account", sourceId: "act_velocity", targetType: "inquiry", targetId: "inq_rapid_04", relationship: "owns", strength: 0.96, riskLevel: "medium", clusterId: "velocity_abuse", createdAt: "2025-02-19T14:00:36Z" },
+  { id: "c044", sourceType: "ip_address", sourceId: "ip_datacenter", targetType: "account", targetId: "act_velocity", relationship: "same_ip", strength: 0.85, riskLevel: "medium", clusterId: "velocity_abuse", createdAt: "2025-02-19T13:59:00Z" },
+  { id: "c045", sourceType: "device", sourceId: "dev_headless", targetType: "account", targetId: "act_velocity", relationship: "same_device", strength: 0.88, riskLevel: "medium", clusterId: "velocity_abuse", createdAt: "2025-02-19T13:58:00Z" },
+  { id: "c046", sourceType: "inquiry", sourceId: "inq_rapid_01", targetType: "verification", targetId: "ver_rapid_01", relationship: "submitted", strength: 0.91, riskLevel: "medium", clusterId: "velocity_abuse", createdAt: "2025-02-19T14:01:00Z" },
+  { id: "c047", sourceType: "inquiry", sourceId: "inq_rapid_02", targetType: "verification", targetId: "ver_rapid_02", relationship: "submitted", strength: 0.89, riskLevel: "medium", clusterId: "velocity_abuse", createdAt: "2025-02-19T14:01:30Z" },
 
-  { id: "conn_027", sourceType: "account", sourceId: "act_003", targetType: "account", targetId: "act_007", relationship: "linked_to", strength: 0.55, riskLevel: "medium", createdAt: "2025-02-20T10:00:00Z" },
+  // ── Cluster: "fraud_ring_docmill" — Document forgery mill: shared templates ──
+  { id: "c050", sourceType: "account", sourceId: "act_mill_01", targetType: "inquiry", targetId: "inq_mill_01", relationship: "owns", strength: 0.95, riskLevel: "high", clusterId: "fraud_ring_docmill", createdAt: "2025-02-16T11:00:00Z" },
+  { id: "c051", sourceType: "account", sourceId: "act_mill_02", targetType: "inquiry", targetId: "inq_mill_02", relationship: "owns", strength: 0.94, riskLevel: "high", clusterId: "fraud_ring_docmill", createdAt: "2025-02-16T11:05:00Z" },
+  { id: "c052", sourceType: "account", sourceId: "act_mill_03", targetType: "inquiry", targetId: "inq_mill_03", relationship: "owns", strength: 0.93, riskLevel: "high", clusterId: "fraud_ring_docmill", createdAt: "2025-02-16T11:10:00Z" },
+  { id: "c053", sourceType: "inquiry", sourceId: "inq_mill_01", targetType: "verification", targetId: "ver_forged_01", relationship: "submitted", strength: 0.92, riskLevel: "high", clusterId: "fraud_ring_docmill", createdAt: "2025-02-16T11:15:00Z" },
+  { id: "c054", sourceType: "inquiry", sourceId: "inq_mill_02", targetType: "verification", targetId: "ver_forged_02", relationship: "submitted", strength: 0.91, riskLevel: "high", clusterId: "fraud_ring_docmill", createdAt: "2025-02-16T11:16:00Z" },
+  { id: "c055", sourceType: "inquiry", sourceId: "inq_mill_03", targetType: "verification", targetId: "ver_forged_03", relationship: "submitted", strength: 0.90, riskLevel: "high", clusterId: "fraud_ring_docmill", createdAt: "2025-02-16T11:17:00Z" },
+  { id: "c056", sourceType: "verification", sourceId: "ver_forged_01", targetType: "verification", targetId: "ver_forged_02", relationship: "similar_document", strength: 0.96, riskLevel: "high", clusterId: "fraud_ring_docmill", createdAt: "2025-02-16T11:20:00Z" },
+  { id: "c057", sourceType: "verification", sourceId: "ver_forged_02", targetType: "verification", targetId: "ver_forged_03", relationship: "similar_document", strength: 0.95, riskLevel: "high", clusterId: "fraud_ring_docmill", createdAt: "2025-02-16T11:21:00Z" },
+  { id: "c058", sourceType: "verification", sourceId: "ver_forged_01", targetType: "verification", targetId: "ver_forged_03", relationship: "similar_document", strength: 0.93, riskLevel: "high", clusterId: "fraud_ring_docmill", createdAt: "2025-02-16T11:22:00Z" },
+  { id: "c059", sourceType: "device", sourceId: "dev_mill_tablet", targetType: "account", targetId: "act_mill_01", relationship: "same_device", strength: 0.95, riskLevel: "high", clusterId: "fraud_ring_docmill", createdAt: "2025-02-16T10:55:00Z" },
+  { id: "c060", sourceType: "device", sourceId: "dev_mill_tablet", targetType: "account", targetId: "act_mill_02", relationship: "same_device", strength: 0.94, riskLevel: "high", clusterId: "fraud_ring_docmill", createdAt: "2025-02-16T10:56:00Z" },
+  { id: "c061", sourceType: "device", sourceId: "dev_mill_tablet", targetType: "account", targetId: "act_mill_03", relationship: "same_device", strength: 0.93, riskLevel: "high", clusterId: "fraud_ring_docmill", createdAt: "2025-02-16T10:57:00Z" },
+  { id: "c062", sourceType: "ip_address", sourceId: "ip_cafe_wifi", targetType: "account", targetId: "act_mill_01", relationship: "same_ip", strength: 0.88, riskLevel: "high", clusterId: "fraud_ring_docmill", createdAt: "2025-02-16T10:54:00Z" },
+  { id: "c063", sourceType: "ip_address", sourceId: "ip_cafe_wifi", targetType: "account", targetId: "act_mill_02", relationship: "same_ip", strength: 0.87, riskLevel: "high", clusterId: "fraud_ring_docmill", createdAt: "2025-02-16T10:54:30Z" },
+  { id: "c064", sourceType: "ip_address", sourceId: "ip_cafe_wifi", targetType: "account", targetId: "act_mill_03", relationship: "same_ip", strength: 0.86, riskLevel: "high", clusterId: "fraud_ring_docmill", createdAt: "2025-02-16T10:55:00Z" },
 
-  { id: "conn_028", sourceType: "account", sourceId: "act_008", targetType: "inquiry", targetId: "inq_106", relationship: "owns", strength: 0.94, riskLevel: "low", createdAt: "2025-02-20T09:00:00Z" },
-  { id: "conn_029", sourceType: "inquiry", sourceId: "inq_106", targetType: "verification", targetId: "ver_204", relationship: "submitted", strength: 0.90, riskLevel: "low", createdAt: "2025-02-20T08:55:00Z" },
-  { id: "conn_030", sourceType: "verification", sourceId: "ver_204", targetType: "verification", targetId: "ver_203", relationship: "flagged_by", strength: 0.60, riskLevel: "medium", createdAt: "2025-02-20T08:50:00Z" },
+  // ── Cluster: "shared_household" — Legitimate shared IP (family), medium risk ──
+  { id: "c070", sourceType: "account", sourceId: "act_parent", targetType: "inquiry", targetId: "inq_parent", relationship: "owns", strength: 0.97, riskLevel: "low", clusterId: "shared_household", createdAt: "2025-02-15T18:00:00Z" },
+  { id: "c071", sourceType: "account", sourceId: "act_teen", targetType: "inquiry", targetId: "inq_teen", relationship: "owns", strength: 0.96, riskLevel: "low", clusterId: "shared_household", createdAt: "2025-02-15T19:30:00Z" },
+  { id: "c072", sourceType: "ip_address", sourceId: "ip_home_router", targetType: "account", targetId: "act_parent", relationship: "same_ip", strength: 0.80, riskLevel: "low", clusterId: "shared_household", createdAt: "2025-02-15T17:55:00Z" },
+  { id: "c073", sourceType: "ip_address", sourceId: "ip_home_router", targetType: "account", targetId: "act_teen", relationship: "same_ip", strength: 0.78, riskLevel: "low", clusterId: "shared_household", createdAt: "2025-02-15T19:25:00Z" },
+  { id: "c074", sourceType: "inquiry", sourceId: "inq_parent", targetType: "verification", targetId: "ver_parent_id", relationship: "submitted", strength: 0.94, riskLevel: "low", clusterId: "shared_household", createdAt: "2025-02-15T18:05:00Z" },
+  { id: "c075", sourceType: "inquiry", sourceId: "inq_teen", targetType: "verification", targetId: "ver_teen_id", relationship: "submitted", strength: 0.92, riskLevel: "low", clusterId: "shared_household", createdAt: "2025-02-15T19:35:00Z" },
+  { id: "c076", sourceType: "device", sourceId: "dev_family_ipad", targetType: "account", targetId: "act_parent", relationship: "same_device", strength: 0.75, riskLevel: "medium", clusterId: "shared_household", createdAt: "2025-02-15T18:01:00Z" },
+  { id: "c077", sourceType: "device", sourceId: "dev_family_ipad", targetType: "account", targetId: "act_teen", relationship: "same_device", strength: 0.73, riskLevel: "medium", clusterId: "shared_household", createdAt: "2025-02-15T19:31:00Z" },
+  { id: "c078", sourceType: "email", sourceId: "eml_parent", targetType: "account", targetId: "act_parent", relationship: "same_email", strength: 0.99, riskLevel: "low", clusterId: "shared_household", createdAt: "2025-02-15T17:50:00Z" },
+  { id: "c079", sourceType: "email", sourceId: "eml_teen", targetType: "account", targetId: "act_teen", relationship: "same_email", strength: 0.99, riskLevel: "low", clusterId: "shared_household", createdAt: "2025-02-15T19:20:00Z" },
+
+  // ── Cluster: "business_bulk" — Business doing bulk verifications, clean ──
+  { id: "c080", sourceType: "account", sourceId: "act_corp_hr", targetType: "inquiry", targetId: "inq_hire_01", relationship: "owns", strength: 0.98, riskLevel: "low", clusterId: "business_bulk", createdAt: "2025-02-20T10:00:00Z" },
+  { id: "c081", sourceType: "account", sourceId: "act_corp_hr", targetType: "inquiry", targetId: "inq_hire_02", relationship: "owns", strength: 0.98, riskLevel: "low", clusterId: "business_bulk", createdAt: "2025-02-20T10:05:00Z" },
+  { id: "c082", sourceType: "account", sourceId: "act_corp_hr", targetType: "inquiry", targetId: "inq_hire_03", relationship: "owns", strength: 0.98, riskLevel: "low", clusterId: "business_bulk", createdAt: "2025-02-20T10:10:00Z" },
+  { id: "c083", sourceType: "inquiry", sourceId: "inq_hire_01", targetType: "verification", targetId: "ver_bgcheck_01", relationship: "submitted", strength: 0.95, riskLevel: "low", clusterId: "business_bulk", createdAt: "2025-02-20T10:15:00Z" },
+  { id: "c084", sourceType: "inquiry", sourceId: "inq_hire_02", targetType: "verification", targetId: "ver_bgcheck_02", relationship: "submitted", strength: 0.94, riskLevel: "low", clusterId: "business_bulk", createdAt: "2025-02-20T10:20:00Z" },
+  { id: "c085", sourceType: "inquiry", sourceId: "inq_hire_03", targetType: "verification", targetId: "ver_bgcheck_03", relationship: "submitted", strength: 0.93, riskLevel: "low", clusterId: "business_bulk", createdAt: "2025-02-20T10:25:00Z" },
+  { id: "c086", sourceType: "ip_address", sourceId: "ip_corp_office", targetType: "account", targetId: "act_corp_hr", relationship: "same_ip", strength: 0.99, riskLevel: "low", clusterId: "business_bulk", createdAt: "2025-02-20T09:55:00Z" },
+  { id: "c087", sourceType: "email", sourceId: "eml_corp_hr", targetType: "account", targetId: "act_corp_hr", relationship: "same_email", strength: 0.99, riskLevel: "low", clusterId: "business_bulk", createdAt: "2025-02-20T09:50:00Z" },
+
+  // ── Cross-cluster bridges — These reveal hidden connections ──
+  { id: "c090", sourceType: "ip_address", sourceId: "ip_vpn_exit_01", targetType: "account", targetId: "act_mill_02", relationship: "same_ip", strength: 0.62, riskLevel: "high", createdAt: "2025-02-18T02:30:00Z" },
+  { id: "c091", sourceType: "device", sourceId: "dev_emulator_02", targetType: "account", targetId: "act_velocity", relationship: "same_device", strength: 0.58, riskLevel: "high", createdAt: "2025-02-19T01:15:00Z" },
+  { id: "c092", sourceType: "account", sourceId: "act_syn_03", targetType: "account", targetId: "act_mill_01", relationship: "linked_to", strength: 0.52, riskLevel: "high", createdAt: "2025-02-17T16:00:00Z" },
 ];
 
 const SAMPLE_QUERIES = [
-  { label: "Find fraud rings", query: "MATCH (a1:Account)-[:SAME_IP|SAME_DEVICE]-(a2:Account) WHERE a1 <> a2 RETURN CLUSTER" },
-  { label: "Shared devices", query: "MATCH (d:Device)-[:SAME_DEVICE]-(a:Account) WHERE COUNT(a) > 1 RETURN d, a" },
-  { label: "High risk nodes", query: "MATCH (n) WHERE n.risk_level = 'high' RETURN n WITH CONNECTIONS" },
-  { label: "Cross-cluster links", query: "MATCH (a1)-[r]-(a2) WHERE a1.cluster <> a2.cluster RETURN a1, r, a2" },
+  { label: "Synthetic identity rings", query: "MATCH (a1:Account)-[:SAME_IP|SAME_DEVICE]-(a2:Account) WHERE a1 <> a2 RETURN CLUSTER" },
+  { label: "Document forgery clusters", query: "MATCH (v1:Verification)-[:SIMILAR_DOCUMENT]-(v2:Verification) RETURN v1, v2 WITH ACCOUNTS" },
+  { label: "Shared emulators", query: "MATCH (d:Device)-[:SAME_DEVICE]-(a:Account) WHERE d.type = 'emulator' AND COUNT(a) > 2 RETURN d, a" },
+  { label: "Cross-cluster bridges", query: "MATCH (a1)-[r]-(a2) WHERE a1.cluster <> a2.cluster RETURN a1, r, a2" },
 ];
 
 interface GraphLayoutConfig {
@@ -232,7 +276,9 @@ function buildGraph(
 
     const style = NODE_STYLES[entity.type] ?? NODE_STYLES.account;
     const isFraudRing = cluster.startsWith("fraud_ring");
-    const isHighlighted = highlightCluster ? cluster === highlightCluster : false;
+    const isHighlighted = highlightCluster
+      ? highlightCluster === "__fraud_rings__" ? isFraudRing : cluster === highlightCluster
+      : false;
     const isDimmed = highlightCluster ? !isHighlighted : false;
 
     return {
@@ -271,7 +317,7 @@ function buildGraph(
   const edges: Edge[] = connections.map((conn) => {
     const isFraud = conn.clusterId?.startsWith("fraud_ring");
     const isDimmed = highlightCluster
-      ? conn.clusterId !== highlightCluster
+      ? highlightCluster === "__fraud_rings__" ? !isFraud : conn.clusterId !== highlightCluster
       : false;
 
     return {
@@ -306,7 +352,8 @@ function detectClusters(connections: GraphConnection[]): {
   const clusterRisks = new Map<string, string[]>();
 
   for (const conn of connections) {
-    const cluster = conn.clusterId ?? "unclustered";
+    if (!conn.clusterId) continue;
+    const cluster = conn.clusterId;
     if (!clusterNodes.has(cluster)) clusterNodes.set(cluster, new Set());
     clusterNodes.get(cluster)!.add(`${conn.sourceType}:${conn.sourceId}`);
     clusterNodes.get(cluster)!.add(`${conn.targetType}:${conn.targetId}`);
@@ -534,18 +581,24 @@ export default function GraphPage() {
 
   function handleRunQuery() {
     const lowerQuery = queryText.toLowerCase();
-    if (lowerQuery.includes("fraud") || lowerQuery.includes("ring") || lowerQuery.includes("cluster")) {
-      setHighlightCluster("fraud_ring_1");
+    if (lowerQuery.includes("fraud") || lowerQuery.includes("ring") || lowerQuery.includes("synthetic")) {
+      setHighlightCluster("__fraud_rings__");
       setActiveTab("explorer");
-      setQueryResult("Found 1 fraud ring with 8 nodes and 14 connections. Cluster highlighted in the graph.");
+      const totalFraudNodes = fraudRings.reduce((sum, r) => sum + r.nodeCount, 0);
+      const totalFraudEdges = fraudRings.reduce((sum, r) => sum + r.edgeCount, 0);
+      setQueryResult(`Found ${fraudRings.length} fraud ring(s) with ${totalFraudNodes} nodes and ${totalFraudEdges} connections.`);
     } else if (lowerQuery.includes("same_ip") || lowerQuery.includes("shared")) {
       setRelationshipFilter(["same_ip"]);
       setActiveTab("explorer");
       setQueryResult(`Filtered to ${MOCK_CONNECTIONS.filter((c) => c.relationship === "same_ip").length} same_ip connections.`);
     } else if (lowerQuery.includes("high") || lowerQuery.includes("risk")) {
-      setHighlightCluster("fraud_ring_1");
+      setHighlightCluster("__fraud_rings__");
       setActiveTab("explorer");
       setQueryResult(`Found ${MOCK_CONNECTIONS.filter((c) => c.riskLevel === "high").length} high-risk connections across ${fraudRings.length} fraud ring(s).`);
+    } else if (lowerQuery.includes("document") || lowerQuery.includes("forgery") || lowerQuery.includes("mill")) {
+      setHighlightCluster("fraud_ring_docmill");
+      setActiveTab("explorer");
+      setQueryResult("Highlighted document forgery mill cluster. 3 accounts sharing forged documents from single device.");
     } else {
       setQueryResult(`Query executed. ${filteredConnections.length} connections matched across ${clusters.length} clusters.`);
     }
@@ -560,12 +613,12 @@ export default function GraphPage() {
             {fraudRings.length > 0 && (
               <Button
                 color="danger"
-                variant={highlightCluster === "fraud_ring_1" ? "solid" : "outline"}
+                variant={highlightCluster === "__fraud_rings__" ? "solid" : "outline"}
                 size={TOPBAR_CONTROL_SIZE}
                 pill={TOPBAR_ACTION_PILL}
                 onClick={() =>
                   setHighlightCluster((prev) =>
-                    prev === "fraud_ring_1" ? null : "fraud_ring_1",
+                    prev === "__fraud_rings__" ? null : "__fraud_rings__",
                   )
                 }
               >

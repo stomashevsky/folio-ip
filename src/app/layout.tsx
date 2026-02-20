@@ -21,8 +21,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Folio — Identity Verification Dashboard",
-  description: "KYC/Identity Verification Analytics Dashboard",
+  title: "Folio — Identity Platform",
+  description: "KYC/Identity Platform",
 };
 
 export default function RootLayout({
