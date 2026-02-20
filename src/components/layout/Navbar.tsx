@@ -11,6 +11,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
 import { globalSections, getActiveGlobalSection } from "@/lib/constants/nav-config";
 import { MOCK_USER } from "@/lib/constants/mock-user";
+import { SandboxBadge } from "@/components/shared/SandboxBadge";
 
 function ThemeSwitcher() {
   const { theme, setTheme } = useTheme();
@@ -49,6 +50,7 @@ export function Navbar() {
           <Avatar name={MOCK_USER.organization} size={25} color="primary" variant="solid" />
           <span>{MOCK_USER.organization}</span>
         </Link>
+        <SandboxBadge />
       </div>
 
       {/* Center: Global section tabs (desktop) */}

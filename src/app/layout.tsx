@@ -8,6 +8,7 @@ import { SidebarSwitch } from "@/components/layout/SidebarSwitch";
 import { Navbar } from "@/components/layout/Navbar";
 import { MobileLayoutWrapper } from "@/components/layout/MobileLayoutWrapper";
 import { MobileMenuOverlay } from "@/components/layout/MobileSidebarContent";
+import { CommandPalette } from "@/components/shared/CommandPalette";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -35,6 +36,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <Providers>
+          <CommandPalette />
           <SidebarProvider collapsible="offcanvas" className="flex h-dvh flex-col">
             <MobileLayoutWrapper>
               <Navbar />

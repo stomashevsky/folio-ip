@@ -31,3 +31,5 @@ export { DetailPageSidebar } from "./DetailPageSidebar";
 export { ConfirmDeleteModal } from "./ConfirmDeleteModal";
 export { TemplateDetailTopBar } from "./TemplateDetailTopBar";
 export { ComingSoonPage } from "./ComingSoonPage";
+export { CommandPalette } from "./CommandPalette";
+export { SandboxBadge } from "./SandboxBadge";
