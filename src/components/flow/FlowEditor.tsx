@@ -5,6 +5,8 @@ import type { Node as FlowNode, Edge as FlowEdge } from "@xyflow/react";
 
 import { parseFlowYaml, validateFlow } from "@/lib/utils/flow-parser";
 import { flowToElements } from "@/lib/utils/flow-to-nodes";
+import { parseWorkflowYaml, validateWorkflowFlow } from "@/lib/utils/workflow-parser";
+import { workflowFlowToElements } from "@/lib/utils/workflow-to-nodes";
 import { getLayoutedElements } from "@/lib/utils/flow-layout";
 import { FlowVisualizer } from "./FlowVisualizer";
 import { YamlEditor, type YamlEditorHandle } from "./YamlEditor";
@@ -26,6 +28,7 @@ import {
 } from "@/lib/constants";
 
 export type FlowEditorPanel = "chat" | "code" | "settings";
+export type FlowEditorMode = "inquiry" | "workflow";
 
 interface FlowEditorProps {
   initialYaml: string;
@@ -36,6 +39,7 @@ interface FlowEditorProps {
   onPanelChange: (panel: FlowEditorPanel) => void;
   onCodeHistoryChange?: (state: { canUndo: boolean; canRedo: boolean }) => void;
   onCodeHistoryActionsReady?: (actions: { undo: () => void; redo: () => void } | null) => void;
+  mode?: FlowEditorMode;
 }
 
 export function FlowEditor({
@@ -47,6 +51,7 @@ export function FlowEditor({
   onPanelChange,
   onCodeHistoryChange,
   onCodeHistoryActionsReady,
+  mode = "inquiry",
 }: FlowEditorProps) {
   const [yamlValue, setYamlValue] = useState(initialYaml);
   const leftPanel = panel;
@@ -222,6 +227,12 @@ export function FlowEditor({
 
   const rawParsed = useMemo(() => {
     try {
+      if (mode === "workflow") {
+        const flow = parseWorkflowYaml(yamlValue);
+        const errors = validateWorkflowFlow(flow);
+        const { nodes, edges } = workflowFlowToElements(flow);
+        return { nodes, edges, errors };
+      }
       const flow = parseFlowYaml(yamlValue);
       const errors = validateFlow(flow);
       const { nodes, edges } = flowToElements(flow);
@@ -233,7 +244,7 @@ export function FlowEditor({
         errors: [err instanceof Error ? err.message : "Failed to parse YAML"],
       };
     }
-  }, [yamlValue]);
+  }, [mode, yamlValue]);
 
   const [layouted, setLayouted] = useState<{ nodes: FlowNode[]; edges: FlowEdge[] }>({
     nodes: [],

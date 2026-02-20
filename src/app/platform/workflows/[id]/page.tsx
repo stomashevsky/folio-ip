@@ -9,7 +9,7 @@ import { FlowEditor, type FlowEditorPanel } from "@/components/flow/FlowEditor";
 import { SegmentedControl } from "@plexui/ui/components/SegmentedControl";
 import { useTemplateForm } from "@/lib/hooks/useTemplateForm";
 import { WORKFLOW_PRESETS } from "@/lib/constants/template-presets";
-import { FLOW_TEMPLATES, DEFAULT_FLOW_YAML } from "@/lib/constants/flow-templates";
+import { WORKFLOW_FLOW_TEMPLATES, DEFAULT_WORKFLOW_YAML } from "@/lib/constants/flow-templates";
 import { FLOW_CHAT_EMPTY_STATE_TITLE } from "@/lib/constants";
 import { useUnsavedChanges } from "@/lib/hooks/useUnsavedChanges";
 import { useTemplateStore } from "@/lib/stores/template-store";
@@ -39,7 +39,7 @@ const DEFAULT_FORM: WorkflowForm = {
   name: "",
   description: "",
   status: "draft",
-  flowYaml: DEFAULT_FLOW_YAML,
+  flowYaml: DEFAULT_WORKFLOW_YAML,
   triggerEvent: "inquiry.completed",
   triggerConditions: "",
 };
@@ -51,7 +51,7 @@ function buildFormFromPreset(presetParam: string): WorkflowForm {
     name: preset.defaults.name,
     description: preset.defaults.description ?? "",
     status: "draft",
-    flowYaml: DEFAULT_FLOW_YAML,
+    flowYaml: DEFAULT_WORKFLOW_YAML,
     triggerEvent: preset.defaults.triggerEvent,
     triggerConditions: preset.defaults.triggerConditions ?? "",
   };
@@ -63,7 +63,7 @@ function toForm(w: Workflow): WorkflowForm {
     description: w.description ?? "",
     status: w.status,
     lastPublishedAt: w.lastPublishedAt,
-    flowYaml: FLOW_TEMPLATES[w.id] ?? DEFAULT_FLOW_YAML,
+    flowYaml: WORKFLOW_FLOW_TEMPLATES[w.id] ?? DEFAULT_WORKFLOW_YAML,
     triggerEvent: w.trigger.event,
     triggerConditions: w.trigger.conditions
       ? Object.entries(w.trigger.conditions)
@@ -258,6 +258,7 @@ function WorkflowDetailContent() {
 
       <div className="min-h-0 flex-1">
         <FlowEditor
+          mode="workflow"
           initialYaml={form.flowYaml}
           onChange={(yaml) => patch({ flowYaml: yaml })}
           panel={editorPanel}

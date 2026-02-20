@@ -472,10 +472,13 @@ export type WorkflowStatus = "active" | "draft" | "archived" | "disabled";
 export type WorkflowTriggerType =
   | "inquiry.completed"
   | "inquiry.created"
+  | "inquiry.failed"
+  | "inquiry.expired"
   | "verification.passed"
   | "verification.failed"
   | "report.ready"
   | "account.created"
+  | "case.resolved"
   | "manual";
 
 export interface WorkflowTrigger {
@@ -503,6 +506,90 @@ export interface Workflow {
   runsCount: number;
   lastRunAt?: string;
 }
+
+// ─── Workflow Flow Definition (YAML schema) ───
+
+export type WorkflowActionType =
+  | "approve_inquiry"
+  | "decline_inquiry"
+  | "review_inquiry"
+  | "create_case"
+  | "run_report"
+  | "tag_object"
+  | "send_email"
+  | "send_sms"
+  | "send_slack"
+  | "make_http_request"
+  | "run_workflow"
+  | "schedule_workflow"
+  | "evaluate_code";
+
+export type WorkflowFlowStepType = "action" | "conditional" | "parallel" | "wait";
+
+export interface WorkflowFlowRoute {
+  label: string;
+  when: string; // condition expression
+  goto: string; // step ID
+}
+
+export interface WorkflowFlowActionStep {
+  type: "action";
+  action: WorkflowActionType;
+  label: string;
+  config?: Record<string, unknown>;
+  next?: string; // next step ID
+}
+
+export interface WorkflowFlowConditionalStep {
+  type: "conditional";
+  label: string;
+  routes: WorkflowFlowRoute[];
+  else?: string; // fallback step ID
+  next?: string; // after all routes merge
+}
+
+export interface WorkflowFlowParallelStep {
+  type: "parallel";
+  label: string;
+  branches: string[]; // first step ID of each branch
+  next?: string; // after all branches complete
+}
+
+export interface WorkflowFlowWaitStep {
+  type: "wait";
+  label: string;
+  wait_for: "object" | "time";
+  target_object?: string; // step ID that created the object
+  events?: string[];
+  timeout_seconds?: number;
+  next?: string;
+}
+
+export type WorkflowFlowStep =
+  | WorkflowFlowActionStep
+  | WorkflowFlowConditionalStep
+  | WorkflowFlowParallelStep
+  | WorkflowFlowWaitStep;
+
+export interface WorkflowFlowDefinition {
+  trigger: {
+    event: WorkflowTriggerType;
+    where?: Record<string, string>;
+  };
+  start: string; // first step ID
+  steps: Record<string, WorkflowFlowStep>;
+  output?: Record<string, unknown>;
+}
+
+/** Node types for workflow React Flow custom nodes */
+export type WorkflowFlowNodeType =
+  | "wf_trigger"
+  | "wf_action"
+  | "wf_conditional"
+  | "wf_parallel"
+  | "wf_wait"
+  | "wf_output"
+  | "wf_route_label";
 
 export interface WorkflowRun {
   id: string; // wfr_...
