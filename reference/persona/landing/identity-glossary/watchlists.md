@@ -1,0 +1,3 @@
+# What is a Watchlist? | Definition & FAQs | Persona Glossary
+
+Watchlists are lists of people and entities (such as organizations, states, and countries) companies may want to monitor and screen against, such as Office of Foreign Assets Control (OFAC) [sanctions](./sanctions.md) lists, Specially Designated Nationals and Blocked Persons (SDN) lists, [Politically Exposed Person (PEP)](../blog/what-is-a-politically-exposed-person-pep.md) lists, and more. Monitoring these watchlists can help businesses enrich their understanding of users, deter, detect, and deny fraud, and perform ongoing KYC/AML monitoring without going through additional integration or procurement.

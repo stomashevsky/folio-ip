@@ -1,0 +1,3 @@
+# What is Regtech? | Definition and FAQs
+
+[**Regtech**](../blog/regtech-both-necessity-and-differentiator.md) is a term used to refer to technologies designed to help companies comply with regulatory requirements. It is a portmanteau of the words “regulatory” and “technology.” In the financial space, it’s often used to refer to technologies that aid in [anti-money laundering](../blog/what-is-anti-money-laundering-aml-and-why-is-it-important.md) (AML), [Know Your Customer](../blog/kyc-aml-differences.md) (KYC), and [customer due diligence](./customer-due-diligence-cdd.md) (CDD) compliance, but it may take on a different meaning in other industries that are subject to their own regulations.

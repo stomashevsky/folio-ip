@@ -1,0 +1,3 @@
+# What is Federated Identity Management (FIM)?
+
+Federated identity management (FIM) is an identity federation that links a user's identity across multiple security domains — each supporting or using its own identity management system. When two domains are federated, the user can authenticate to one domain and then access resources in the other domain without having to perform a separate login process. [Single sign-on (SSO)](./single-sign-on-sso.md) is a subset of federated identity, as it relates only to authentication and would not be possible without some sort of federation. FIM is a subset of [Identity and Access Management (IAM)](./identity-and-access-management-iam.md).

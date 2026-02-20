@@ -1,0 +1,3 @@
+# Know Your Business (KYB) | Definition & FAQs
+
+Know Your Business (KYB), sometimes called corporate KYC, is the process of verifying that another business is legitimate and safe to do business with. This usually involves verifying key details about the business and identifying the [Ultimate Beneficial Owners (UBOs)](./ultimate-beneficial-owner-ubo.md), or the key people behind the business, to understand who benefits from the business’s financial transactions — along with continuous [AML](../blog/what-is-anti-money-laundering-aml-and-why-is-it-important.md) monitoring throughout the business relationship.

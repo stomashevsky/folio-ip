@@ -1,0 +1,5 @@
+# Enhanced Due Diligence: Definition and FAQs
+
+[**Enhanced due diligence (EDD)**](../blog/cdd-vs-edd-whats-the-difference.md) refers to the due diligence process that a business applies to an individual (or other entity) deemed to carry a potentially high risk of money laundering. The goal is to achieve a deeper understanding of the risks posed by the individual, as well as a greater level of [assurance](./identity-assurance-levels-ial.md) in their identity. 
+
+Having a process in place for EDD is key to implementing a [risk-based approach to money laundering](../blog/risk-based-approach-aml.md). This typically includes some combination of more stringent [identity verification](./identity-verification-idv.md), additional [anti-money laundering (AML) screenings](../blog/aml-screening.md), [source of funds (SoF) verification](../blog/understanding-customer-source-of-funds-sof-and-source-of-wealth-sow.md), and heightened [transaction monitoring](../blog/what-is-aml-transaction-monitoring-and-how-is-it-set-up.md) compared to the standard [Customer Due Diligence (CDD)](./customer-due-diligence-cdd.md) process.

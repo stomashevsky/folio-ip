@@ -1,0 +1,29 @@
+# Email (2FA) Verification
+
+## Overview[](#overview)
+
+The Email (2FA) Verification verifies the ownership of an inputted email address with two-factor authentication via email. It is often used at onboarding or login as an additional layer of friction. An Email Verification answers the question “Does the user possess their claimed email address?”
+
+## Verification Features[](#verification-features)
+
+### Verification Inputs[](#verification-inputs)
+
+-   Email
+
+### Verification Outputs[](#verification-outputs)
+
+**Verification status** A Verification’s status is an indicator of where the Verification is in its lifecycle. After a Verification has run the simplest output and indicator is the status as `failed` or `passed`. This is an easy way to ascertain, at a high level, if the attempt to verify the identity met the requirements set forth in the configurations of the Verification Template.
+
+**Verification Check statuses** Each Verification check will be shown as `passed`, `failed`, or `not applicable`. This will give a more detailed look at which of the Verification Checks the attempt failed. In the Dashboard, the results view of the Verification also show which checks were required on the Verification Template when the Verification ran. Those that were required determine what checks are necessary to receive a `passed` at the Verification Status level.
+
+## Configuration options[](#configuration-options)
+
+The Email (2FA) Verification offers a few configurations, including required or un-required verification checks, and maximum retries (the number of confirmation code attempts allowed).
+
+## Email Verification access by plan[](#email-verification-access-by-plan)
+
+|  | **Startup Program** | **Essential Plan** | **Growth and Enterprise Plans** |
+| --- | --- | --- | --- |
+| Email (2FA) Verification | Not Available | Available | Available |
+
+[Learn about pricing and plans](../../landing/pricing.md)

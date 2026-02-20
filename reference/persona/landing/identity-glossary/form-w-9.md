@@ -1,0 +1,3 @@
+# Form W-9 | Definition & Common Questions
+
+**Form W-9** is a tax form that employers use to confirm the name, address, and taxpayer identification number (TIN) of an individual that they will pay, but who is not classified as an “employee” at the company. It is also known as the **Request for Taxpayer Identification Number and Certification** form. An individual must typically complete the form prior to receiving their first payment from the company. The employing company then submits the form to the IRS. Later, the information contained within a Form W-9 will be used to generate the individual’s 1099 tax form, which will be used in filing individual income taxes.

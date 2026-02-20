@@ -1,0 +1,23 @@
+# Retrieve a Device
+
+[API Reference](../accounts/list-all-accounts.md)[Devices](./list-all-devices.md)
+
+# Retrieve a Device
+
+GET
+
+https://api.withpersona.com/api/v1/devices/:device-id
+
+```
+{
+  "data": {
+    "id": "dev_ABC123",
+    "attributes": {
+      "device-vendor-id": "1a2b3c4d-5e6f-7g8h-9ijk-1A2B3C4D5E6F",
+      "device-fingerprint": "1a2b3c4d5e6f7g8h9ijk",
+      "browser-fingerprint": "1a2b3c4d5e6f7g8h9ijklmnopqrstuvw"
+    },
+    "type": "device"
+  }
+}
+```

@@ -1,0 +1,5 @@
+# What is the California Consumer Privacy Act (CCPA)?
+
+The California Consumer Privacy Act (CCPA) is the California equivalent of [GDPR](../blog/top-gdpr-statistics-businesses-must-know.md) and went into effect on January 1, 2020. It specifies that consumers have a right to request what information is being collected, for what purpose, and with whom it's being shared. Consumers can also request to opt out of their data being shared or for their data to be deleted (which businesses must comply with unless that data impairs their ability to provide core services). Individuals also have the right to equal service and price, even if they exercise their privacy rights. Under CCPA, businesses are not allowed to sell the PII of anyone under 16 years of age, unless these individuals have specifically opted in.
+
+A more comprehensive version of CCPA, the [Consumer Privacy Rights Act (CPRA)](../blog/consumer-privacy-rights-act-cpra.md), went into effect on January 1, 2023 and gives consumers control over whether companies can share their personal information as well as whether they can sell it.

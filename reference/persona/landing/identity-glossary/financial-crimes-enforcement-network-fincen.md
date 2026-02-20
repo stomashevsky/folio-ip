@@ -1,0 +1,3 @@
+# What is the Financial Crimes Enforcement Network (FinCEN)?
+
+The Financial Crimes Enforcement Network is a bureau of the US Department of the Treasury that aims to safeguard the financial system from illicit use, prevent and punish domestic and international [money laundering](../blog/what-is-anti-money-laundering-aml-and-why-is-it-important.md), and promote national security by collecting and analyzing information about financial transactions required under the [Bank Secrecy Act (BSA)](./bank-secrecy-act-bsa.md). It consists of law-enforcement agencies, the regulatory community, and the financial services community.

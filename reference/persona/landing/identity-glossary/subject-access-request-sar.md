@@ -1,0 +1,3 @@
+# What is a Subject Access Request (SAR)? | Persona Glossary
+
+Also known as a data subject request (DSR) or data subject access request (DSAR), a subject access request (SAR) is a formal request by an individual (data subject) to a controller (company) to disclose what personal data the organization has collected about the individual and how they use or intend to use it. Consumers are granted the right to request this information under data privacy laws such as [GDPR](../blog/top-gdpr-statistics-businesses-must-know.md) and [CCPA](./california-consumer-privacy-act-ccpa.md)/[CPRA](../blog/consumer-privacy-rights-act-cpra.md).

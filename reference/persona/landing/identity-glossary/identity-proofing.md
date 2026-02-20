@@ -1,0 +1,3 @@
+# Identity Proofing | Definition & Common Questions
+
+Identity proofing refers to the processes a business undertakes to establish that a customer is who they say they are. It involves the collection of information and evidence from an individual, which is then used to consider whether or not the person is who they claim to be. While any business can engage in identity proofing, it is common in regulated industries subject to [Know Your Customer (KYC)](./know-your-customer-kyc.md) requirements, such as the [financial industry](./bank-secrecy-act-bsa.md), [online marketplaces](./inform-consumers-act.md), and, increasingly, [social media](../blog/online-safety-act.md).
