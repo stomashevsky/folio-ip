@@ -3,7 +3,7 @@
 import { useState, useMemo } from "react";
 import { TopBar, TOPBAR_CONTROL_SIZE, TOPBAR_TOOLBAR_PILL } from "@/components/layout/TopBar";
 import { TABLE_PAGE_WRAPPER, TABLE_PAGE_CONTENT } from "@/lib/constants/page-layout";
-import { DataTable, TableSearch } from "@/components/shared";
+import { DataTable, TableSearch, Modal, ModalHeader, ModalBody, KeyValueTable } from "@/components/shared";
 import { ColumnSettings, type ColumnConfig } from "@/components/shared/ColumnSettings";
 import { idCell, dateTimeCell } from "@/lib/utils/columnHelpers";
 import type { ColumnDef, VisibilityState } from "@tanstack/react-table";
@@ -233,6 +233,7 @@ export default function EventsPage() {
   const [actorTypeFilter, setActorTypeFilter] = useState<string[]>([]);
   const [columnVisibility, setColumnVisibility] =
     useState<VisibilityState>(DEFAULT_VISIBILITY);
+  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
 
   const hasActiveFilters = resourceTypeFilter.length > 0 || actorTypeFilter.length > 0;
 
@@ -339,12 +340,36 @@ export default function EventsPage() {
           initialSorting={[{ id: "createdAt", desc: true }]}
           columnVisibility={columnVisibility}
           onColumnVisibilityChange={setColumnVisibility}
+          onRowClick={setSelectedEvent}
           mobileColumnVisibility={{
             actorId: false,
             resourceId: false,
           }}
         />
       </div>
+
+      <Modal open={!!selectedEvent} onOpenChange={(open) => { if (!open) setSelectedEvent(null); }} maxWidth="max-w-lg">
+        {selectedEvent && (
+          <>
+            <ModalHeader>
+              <h2 className="heading-sm">{selectedEvent.type}</h2>
+            </ModalHeader>
+            <ModalBody>
+              <KeyValueTable
+                rows={[
+                  { label: "Event ID", value: selectedEvent.id },
+                  { label: "Type", value: selectedEvent.type },
+                  { label: "Resource Type", value: selectedEvent.resourceType },
+                  { label: "Resource ID", value: selectedEvent.resourceId },
+                  { label: "Actor Type", value: selectedEvent.actorType },
+                  { label: "Actor ID", value: selectedEvent.actorId },
+                  { label: "Timestamp", value: new Date(selectedEvent.createdAt).toLocaleString() },
+                ]}
+              />
+            </ModalBody>
+          </>
+        )}
+      </Modal>
     </div>
   );
 }

@@ -3,7 +3,7 @@
 import { useState, useMemo } from "react";
 import { TopBar, TOPBAR_CONTROL_SIZE, TOPBAR_TOOLBAR_PILL } from "@/components/layout/TopBar";
 import { TABLE_PAGE_WRAPPER, TABLE_PAGE_CONTENT } from "@/lib/constants/page-layout";
-import { DataTable, TableSearch } from "@/components/shared";
+import { DataTable, TableSearch, Modal, ModalHeader, ModalBody, KeyValueTable } from "@/components/shared";
 import { ColumnSettings, type ColumnConfig } from "@/components/shared/ColumnSettings";
 import { dateTimeCell } from "@/lib/utils/columnHelpers";
 import type { ColumnDef, VisibilityState } from "@tanstack/react-table";
@@ -278,6 +278,7 @@ export default function WebhookEventsPage() {
   const [eventTypeFilter, setEventTypeFilter] = useState<string[]>([]);
   const [columnVisibility, setColumnVisibility] =
     useState<VisibilityState>(DEFAULT_VISIBILITY);
+  const [selectedEvent, setSelectedEvent] = useState<WebhookEvent | null>(null);
 
   const hasActiveFilters = statusFilter.length > 0 || eventTypeFilter.length > 0;
 
@@ -384,6 +385,7 @@ export default function WebhookEventsPage() {
           initialSorting={[{ id: "createdAt", desc: true }]}
           columnVisibility={columnVisibility}
           onColumnVisibilityChange={setColumnVisibility}
+          onRowClick={setSelectedEvent}
           mobileColumnVisibility={{
             url: false,
             lastAttemptAt: false,
@@ -391,6 +393,31 @@ export default function WebhookEventsPage() {
           }}
         />
       </div>
+
+      <Modal open={!!selectedEvent} onOpenChange={(open) => { if (!open) setSelectedEvent(null); }} maxWidth="max-w-lg">
+        {selectedEvent && (
+          <>
+            <ModalHeader>
+              <h2 className="heading-sm">{selectedEvent.eventType}</h2>
+            </ModalHeader>
+            <ModalBody>
+              <KeyValueTable
+                rows={[
+                  { label: "Event ID", value: selectedEvent.id },
+                  { label: "Webhook ID", value: selectedEvent.webhookId },
+                  { label: "Event Type", value: selectedEvent.eventType },
+                  { label: "URL", value: selectedEvent.url },
+                  { label: "Status", value: selectedEvent.status },
+                  { label: "Status Code", value: String(selectedEvent.statusCode) },
+                  { label: "Attempts", value: String(selectedEvent.attempts) },
+                  { label: "Last Attempt", value: new Date(selectedEvent.lastAttemptAt).toLocaleString() },
+                  { label: "Created", value: new Date(selectedEvent.createdAt).toLocaleString() },
+                ]}
+              />
+            </ModalBody>
+          </>
+        )}
+      </Modal>
     </div>
   );
 }

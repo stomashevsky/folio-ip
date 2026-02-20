@@ -3,7 +3,7 @@
 import { useState, useMemo } from "react";
 import { TopBar, TOPBAR_CONTROL_SIZE, TOPBAR_TOOLBAR_PILL } from "@/components/layout/TopBar";
 import { TABLE_PAGE_WRAPPER, TABLE_PAGE_CONTENT } from "@/lib/constants/page-layout";
-import { DataTable, TableSearch } from "@/components/shared";
+import { DataTable, TableSearch, Modal, ModalHeader, ModalBody, KeyValueTable } from "@/components/shared";
 import { ColumnSettings, type ColumnConfig } from "@/components/shared/ColumnSettings";
 import { idCell, dateTimeCell } from "@/lib/utils/columnHelpers";
 import type { ColumnDef, VisibilityState } from "@tanstack/react-table";
@@ -268,6 +268,7 @@ export default function ApiLogsPage() {
   const [statusCodeFilter, setStatusCodeFilter] = useState<string[]>([]);
   const [columnVisibility, setColumnVisibility] =
     useState<VisibilityState>(DEFAULT_VISIBILITY);
+  const [selectedLog, setSelectedLog] = useState<ApiLog | null>(null);
 
   const hasActiveFilters = methodFilter.length > 0 || statusCodeFilter.length > 0;
 
@@ -377,6 +378,7 @@ export default function ApiLogsPage() {
           initialSorting={[{ id: "createdAt", desc: true }]}
           columnVisibility={columnVisibility}
           onColumnVisibilityChange={setColumnVisibility}
+          onRowClick={setSelectedLog}
           mobileColumnVisibility={{
             ipAddress: false,
             apiKeyId: false,
@@ -384,6 +386,30 @@ export default function ApiLogsPage() {
           }}
         />
       </div>
+
+      <Modal open={!!selectedLog} onOpenChange={(open) => { if (!open) setSelectedLog(null); }} maxWidth="max-w-lg">
+        {selectedLog && (
+          <>
+            <ModalHeader>
+              <h2 className="heading-sm">{selectedLog.method} {selectedLog.path}</h2>
+            </ModalHeader>
+            <ModalBody>
+              <KeyValueTable
+                rows={[
+                  { label: "Log ID", value: selectedLog.id },
+                  { label: "Method", value: selectedLog.method },
+                  { label: "Path", value: selectedLog.path },
+                  { label: "Status Code", value: String(selectedLog.statusCode) },
+                  { label: "Duration", value: `${selectedLog.duration}ms` },
+                  { label: "IP Address", value: selectedLog.ipAddress },
+                  { label: "API Key ID", value: selectedLog.apiKeyId },
+                  { label: "Timestamp", value: new Date(selectedLog.createdAt).toLocaleString() },
+                ]}
+              />
+            </ModalBody>
+          </>
+        )}
+      </Modal>
     </div>
   );
 }
