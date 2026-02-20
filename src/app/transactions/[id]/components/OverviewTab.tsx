@@ -64,7 +64,7 @@ export function OverviewTab({ transaction }: { transaction: Transaction }) {
       <div>
         <SectionHeading>Risk factors</SectionHeading>
         <div className="overflow-x-auto rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]">
-          <table className="w-full">
+          <table className="-mb-px w-full">
             <thead>
               <tr className="border-b border-[var(--color-border)]">
                 <th className="px-4 py-2.5 text-left text-xs font-semibold uppercase tracking-[0.5px] text-[var(--color-text-tertiary)]">Factor</th>
@@ -74,7 +74,7 @@ export function OverviewTab({ transaction }: { transaction: Transaction }) {
             </thead>
             <tbody>
               {riskFactors.map((f) => (
-                <tr key={f.name} className="border-b border-[var(--color-border)] last:border-b-0">
+                <tr key={f.name} className="border-b border-[var(--color-border)]">
                   <td className="px-4 py-3 text-sm font-medium text-[var(--color-text)]">{f.name}</td>
                   <td className="px-4 py-3">
                     <Badge color={getRiskColor(f.level) as BadgeProps["color"]} size="sm">{f.level.charAt(0).toUpperCase() + f.level.slice(1)}</Badge>

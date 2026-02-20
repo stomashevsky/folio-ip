@@ -3,77 +3,98 @@
 import { useState } from "react";
 import Image from "next/image";
 import { InlineEmpty, DocumentViewer } from "@/components/shared";
-import { StatusBadge } from "@/components/shared/StatusBadge";
-import { VERIFICATION_TYPE_LABELS } from "@/lib/constants/verification-type-labels";
+import { COUNTRY_LABEL_MAP } from "@/lib/constants/countries";
+import { DOCUMENT_SECTION_TITLES, ID_CLASS_LABELS } from "@/lib/constants/document-labels";
 import { formatDateTime } from "@/lib/utils/format";
-import type { Verification, DocumentViewerItem } from "@/lib/types";
+import type { Verification, VerificationType, DocumentViewerItem } from "@/lib/types";
 
-interface DocumentEntry {
-  label: string;
-  url: string;
-  type: string;
-  capturedAt: string;
-  status: string;
-  verificationId: string;
-}
+const DOCUMENT_TYPES: VerificationType[] = ["government_id", "document", "health_insurance_card", "vehicle_insurance"];
 
-function extractDocuments(verifications: Verification[]): DocumentEntry[] {
-  const docs: DocumentEntry[] = [];
+function groupDocuments(verifications: Verification[]): Map<string, Verification[]> {
+  const groups = new Map<string, Verification[]>();
   for (const v of verifications) {
-    if (!v.photos) continue;
-    const typeLabel = VERIFICATION_TYPE_LABELS[v.type] ?? v.type;
-    for (const photo of v.photos) {
-      docs.push({
-        label: `${typeLabel} — ${photo.label}`,
-        url: photo.url,
-        type: typeLabel,
-        capturedAt: v.createdAt,
-        status: v.status,
-        verificationId: v.id,
-      });
-    }
+    if (!DOCUMENT_TYPES.includes(v.type) || !v.photos?.length) continue;
+    const section = DOCUMENT_SECTION_TITLES[v.type] ?? v.type;
+    const list = groups.get(section) ?? [];
+    list.push(v);
+    groups.set(section, list);
   }
-  return docs;
+  return groups;
 }
+
+const TH = "px-4 py-2.5 text-left text-xs font-semibold uppercase tracking-[0.5px] text-[var(--color-text-tertiary)]";
 
 export function DocumentsTab({ verifications }: { verifications: Verification[] }) {
-  const documents = extractDocuments(verifications);
+  const groups = groupDocuments(verifications);
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
-  if (documents.length === 0) {
+  if (groups.size === 0) {
     return <InlineEmpty>No documents linked to this case.</InlineEmpty>;
   }
 
-  const viewerItems: DocumentViewerItem[] = documents.map((doc) => ({
-    photo: { url: doc.url, label: doc.label, captureMethod: "auto" as const },
-    verificationType: doc.type,
-  }));
+  const allVerifications = Array.from(groups.values()).flat();
+  const viewerItems: DocumentViewerItem[] = allVerifications.flatMap((v) =>
+    (v.photos ?? []).map((photo) => ({
+      photo,
+      extractedData: v.extractedData,
+      verificationType: DOCUMENT_SECTION_TITLES[v.type] ?? v.type,
+    }))
+  );
+
+  let globalIndex = 0;
 
   return (
     <>
-      <div className="grid gap-4 md:grid-cols-2">
-        {documents.map((doc, i) => (
-          <button
-            key={`${doc.verificationId}-${doc.label}`}
-            type="button"
-            className="group flex cursor-pointer gap-4 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4 text-left outline-none transition-colors hover:bg-[var(--color-surface-secondary)]"
-            onClick={() => setLightboxIndex(i)}
-          >
-            <Image
-              src={doc.url}
-              alt={doc.label}
-              width={80}
-              height={80}
-              className="h-20 w-20 shrink-0 rounded-lg border border-[var(--color-border)] object-contain transition-opacity group-hover:opacity-90"
-            />
-            <div className="min-w-0 flex-1">
-              <p className="truncate text-sm font-medium text-[var(--color-text)]">{doc.label}</p>
-              <p className="mt-1 text-xs text-[var(--color-text-tertiary)]">{formatDateTime(doc.capturedAt)} UTC</p>
-              <div className="mt-2">
-                <StatusBadge status={doc.status} />
-              </div>
+      <div className="space-y-6">
+        {Array.from(groups.entries()).map(([section, entries]) => (
+          <div key={section}>
+            <h3 className="heading-sm mb-3">{section}</h3>
+            <div className="overflow-hidden rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]">
+              <table className="-mb-px w-full">
+                <thead>
+                  <tr className="border-b border-[var(--color-border)]">
+                    <th className={TH} />
+                    <th className={TH}>Country</th>
+                    <th className={TH}>ID class</th>
+                    <th className={TH}>Date processed</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {entries.map((v) => {
+                    const viewerIdx = globalIndex;
+                    globalIndex += v.photos?.length ?? 0;
+
+                    return (
+                      <tr
+                        key={v.id}
+                        className="cursor-pointer border-b border-[var(--color-border)] transition-colors last:border-b-0 hover:bg-[var(--color-surface-secondary)]"
+                        onClick={() => setLightboxIndex(viewerIdx)}
+                      >
+                        <td className="w-[72px] px-4 py-3">
+                          <Image
+                            src={v.photos![0].url}
+                            alt={v.countryCode ?? "ID"}
+                            width={48}
+                            height={36}
+                            className="h-9 w-12 shrink-0 rounded border border-[var(--color-border)] object-cover"
+                          />
+                        </td>
+                        <td className="px-4 py-3 text-sm text-[var(--color-text)]">
+                          {v.countryCode ? (COUNTRY_LABEL_MAP[v.countryCode] ?? v.countryCode) : "—"}
+                        </td>
+                        <td className="px-4 py-3 text-sm text-[var(--color-text)]">
+                          {v.idClass ? (ID_CLASS_LABELS[v.idClass] ?? v.idClass) : "—"}
+                        </td>
+                        <td className="px-4 py-3 text-sm text-[var(--color-text-secondary)]">
+                          {v.completedAt ? `${formatDateTime(v.completedAt)} UTC` : "—"}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
             </div>
-          </button>
+          </div>
         ))}
       </div>
 

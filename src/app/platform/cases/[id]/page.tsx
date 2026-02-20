@@ -91,7 +91,7 @@ function CaseDetailContent() {
   return (
     <div className="flex h-full flex-col">
       <TopBar
-        title="Case"
+        title={caseItem.title}
         backHref="/platform/cases"
         actions={
           <div className="flex items-center gap-2">
@@ -117,21 +117,21 @@ function CaseDetailContent() {
 
       <div className="flex flex-1 flex-col overflow-auto md:flex-row md:overflow-hidden">
         <div className="flex shrink-0 flex-col md:min-w-0 md:flex-1 md:overflow-auto">
-          <div className="shrink-0 overflow-x-auto px-4 pt-4 md:px-6" style={{ "--color-ring": "transparent" } as React.CSSProperties}>
+          <div className="shrink-0 px-4 pt-4 md:px-6">
             <Tabs
               value={activeTab}
               onChange={(v) => setActiveTab(v as Tab)}
               variant="underline"
-              aria-label="Case sections"
               size="lg"
+              aria-label="Case sections"
             >
               <Tabs.Tab value="Overview">Overview</Tabs.Tab>
-              <Tabs.Tab value="Inquiries" badge={caseInquiries.length ? { content: caseInquiries.length, pill: true } : undefined}>Inquiries</Tabs.Tab>
-              <Tabs.Tab value="Verifications" badge={caseVerifications.length ? { content: caseVerifications.length, pill: true } : undefined}>Verifications</Tabs.Tab>
-              <Tabs.Tab value="Reports" badge={caseReports.length ? { content: caseReports.length, pill: true } : undefined}>Reports</Tabs.Tab>
+              <Tabs.Tab value="Inquiries" badge={caseInquiries.length > 0 ? { content: caseInquiries.length, pill: true, variant: "soft" } : undefined}>Inquiries</Tabs.Tab>
+              <Tabs.Tab value="Verifications" badge={caseVerifications.length > 0 ? { content: caseVerifications.length, pill: true, variant: "soft" } : undefined}>Verifications</Tabs.Tab>
+              <Tabs.Tab value="Reports" badge={caseReports.length > 0 ? { content: caseReports.length, pill: true, variant: "soft" } : undefined}>Reports</Tabs.Tab>
               <Tabs.Tab value="Documents">Documents</Tabs.Tab>
               <Tabs.Tab value="Comments">Comments</Tabs.Tab>
-              <Tabs.Tab value="Activity" badge={events.length ? { content: events.length, pill: true } : undefined}>Activity</Tabs.Tab>
+              <Tabs.Tab value="Activity" badge={events.length > 0 ? { content: events.length, pill: true, variant: "soft" } : undefined}>Activity</Tabs.Tab>
             </Tabs>
           </div>
 

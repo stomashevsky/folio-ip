@@ -85,7 +85,7 @@ function InquiryDetailContent() {
     <div className="flex h-full flex-col">
       {/* Header */}
       <TopBar
-        title="Inquiry"
+        title={inquiry.templateName}
         backHref="/inquiries"
         actions={
           <div className="flex items-center gap-2">
@@ -115,20 +115,20 @@ function InquiryDetailContent() {
         {/* Main content */}
         <div className="flex shrink-0 flex-col md:min-w-0 md:flex-1 md:overflow-auto">
           {/* Tabs */}
-          <div className="shrink-0 overflow-x-auto px-4 pt-4 md:px-6" style={{ "--color-ring": "transparent" } as React.CSSProperties}>
+          <div className="shrink-0 px-4 pt-4 md:px-6">
             <Tabs
               value={activeTab}
               onChange={(v) => setActiveTab(v as Tab)}
               variant="underline"
-              aria-label="Inquiry sections"
               size="lg"
+              aria-label="Inquiry sections"
             >
               <Tabs.Tab value="Overview">Overview</Tabs.Tab>
-              <Tabs.Tab value="Verifications" badge={verifications.length ? { content: verifications.length, pill: true } : undefined}>Verifications</Tabs.Tab>
-              <Tabs.Tab value="Sessions" badge={sessions.length ? { content: sessions.length, pill: true } : undefined}>Sessions</Tabs.Tab>
+              <Tabs.Tab value="Verifications" badge={verifications.length > 0 ? { content: verifications.length, pill: true, variant: "soft" } : undefined}>Verifications</Tabs.Tab>
+              <Tabs.Tab value="Sessions" badge={sessions.length > 0 ? { content: sessions.length, pill: true, variant: "soft" } : undefined}>Sessions</Tabs.Tab>
               <Tabs.Tab value="Signals">Signals</Tabs.Tab>
-              <Tabs.Tab value="Reports" badge={reports.length ? { content: reports.length, pill: true } : undefined}>Reports</Tabs.Tab>
-              <Tabs.Tab value="List Matches" badge={totalMatches > 0 ? { content: totalMatches, pill: true } : undefined}>List Matches</Tabs.Tab>
+              <Tabs.Tab value="Reports" badge={reports.length > 0 ? { content: reports.length, pill: true, variant: "soft" } : undefined}>Reports</Tabs.Tab>
+              <Tabs.Tab value="List Matches" badge={totalMatches > 0 ? { content: totalMatches, pill: true, variant: "soft" } : undefined}>List Matches</Tabs.Tab>
             </Tabs>
           </div>
 

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import { Search } from "@plexui/ui/components/Icon";
+import { Input } from "@plexui/ui/components/Input";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import { CardHeader } from "@/components/shared/CardHeader";
 import { KeyValueTable } from "@/components/shared/KeyValueTable";
@@ -13,13 +14,11 @@ import type { Verification } from "@/lib/types";
 interface VerificationCardProps {
   verification: Verification;
   onOpenLightbox: (verificationId: string, photoIndex: number) => void;
-  checkVariant?: "name-first" | "status-first";
 }
 
 export function VerificationCard({
   verification: v,
   onOpenLightbox,
-  checkVariant = "name-first",
 }: VerificationCardProps) {
   const [checksSearch, setChecksSearch] = useState("");
 
@@ -45,10 +44,10 @@ export function VerificationCard({
         )
       : null;
 
-  const headers = CHECK_TABLE_HEADERS[checkVariant];
+  const headers = CHECK_TABLE_HEADERS;
 
   return (
-    <div className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]">
+    <div className="overflow-hidden rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]">
       <CardHeader
         title={typeLabel}
         badge={<StatusBadge status={v.status} />}
@@ -75,7 +74,7 @@ export function VerificationCard({
                   height={160}
                   className="h-[160px] w-auto rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] object-contain transition-opacity group-hover:opacity-90"
                 />
-                <span className="w-full truncate text-center text-xs text-[var(--color-text-tertiary)]">
+                <span className="w-full truncate text-left text-xs text-[var(--color-text-tertiary)]">
                   {photo.label}
                 </span>
               </button>
@@ -98,28 +97,28 @@ export function VerificationCard({
       )}
 
       <div>
-        <div className="flex items-center gap-2 border-y border-[var(--color-border)] bg-[var(--color-surface-secondary)] px-4 py-2">
+        <div className="flex items-center gap-2 border-b border-[var(--color-border)] bg-[var(--color-surface-secondary)] px-4 py-2">
           <span className="heading-xs text-[var(--color-text)]">Checks</span>
-          <div className="relative ml-auto">
-            <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[var(--color-text-tertiary)]" />
-            <input
-              type="text"
+          <div className="ml-auto w-48">
+            <Input
               placeholder="Search..."
               value={checksSearch}
               onChange={(e) => setChecksSearch(e.target.value)}
-              className="h-8 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] pl-8 pr-3 text-xs text-[var(--color-text)] placeholder:text-[var(--color-text-tertiary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary-solid-bg)]"
+              onClear={checksSearch ? () => setChecksSearch("") : undefined}
+              startAdornment={<Search style={{ width: 16, height: 16 }} />}
+              size="sm"
             />
           </div>
         </div>
         {filteredChecks.length > 0 ? (
-          <table className="w-full">
+          <table className="-mb-px w-full">
             <thead>
               <tr className="border-b border-[var(--color-border)]">
                 {headers.map((h) => (
                   <th
                     key={h.label}
                     className={`${h.width ?? ""} px-4 py-2 text-xs font-semibold uppercase tracking-[0.5px] text-[var(--color-text-tertiary)] ${
-                      h.align === "center" ? "text-center" : "text-left"
+                      h.align === "center" ? "text-center" : h.align === "right" ? "text-right" : "text-left"
                     }`}
                   >
                     {h.label}
@@ -129,7 +128,7 @@ export function VerificationCard({
             </thead>
             <tbody>
               {filteredChecks.map((check, i) => (
-                <CheckRow key={i} check={check} variant={checkVariant} />
+                <CheckRow key={i} check={check} />
               ))}
             </tbody>
           </table>

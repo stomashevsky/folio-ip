@@ -143,7 +143,7 @@ export default function QueueDetailPage() {
           <SectionHeading size="xs" badge={queueCases.length}>Cases in Queue</SectionHeading>
           {queueCases.length > 0 ? (
             <div className="mt-4 overflow-x-auto rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]">
-              <table className="w-full">
+              <table className="-mb-px w-full">
                 <thead>
                   <tr className="border-b border-[var(--color-border)]">
                     <th className="px-4 py-2.5 text-left text-xs font-semibold uppercase tracking-[0.5px] text-[var(--color-text-tertiary)]">Title</th>
@@ -155,7 +155,7 @@ export default function QueueDetailPage() {
                 </thead>
                 <tbody>
                   {queueCases.map((c) => (
-                    <tr key={c.id} className="border-b border-[var(--color-border)] last:border-b-0 hover:bg-[var(--color-surface-secondary)]">
+                    <tr key={c.id} className="border-b border-[var(--color-border)] hover:bg-[var(--color-surface-secondary)]">
                       <td className="px-4 py-3">
                         <Link href={`/platform/cases/${c.id}`} className="text-sm font-medium text-[var(--color-text)] hover:text-[var(--color-primary-solid-bg)] hover:underline">
                           {c.title}

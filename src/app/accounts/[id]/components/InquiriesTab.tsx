@@ -13,7 +13,7 @@ export function InquiriesTab({ inquiries }: { inquiries: Inquiry[] }) {
 
   return (
     <div className="overflow-x-auto rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]">
-      <table className="w-full">
+      <table className="-mb-px w-full">
         <thead>
           <tr className="border-b border-[var(--color-border)]">
             <th className="px-4 py-2.5 text-left text-xs font-semibold uppercase tracking-[0.5px] text-[var(--color-text-tertiary)]">
@@ -45,7 +45,7 @@ export function InquiriesTab({ inquiries }: { inquiries: Inquiry[] }) {
           {inquiries.map((inquiry) => (
             <tr
               key={inquiry.id}
-              className="border-b border-[var(--color-border)] last:border-b-0 hover:bg-[var(--color-surface-secondary)]"
+              className="border-b border-[var(--color-border)] hover:bg-[var(--color-surface-secondary)]"
             >
               <td className="px-4 py-3">
                 <div>

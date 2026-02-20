@@ -51,7 +51,7 @@ export function RelatedTab({ transaction }: { transaction: Transaction }) {
         </SectionHeading>
         {otherTransactions.length > 0 ? (
           <div className="overflow-x-auto rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]">
-            <table className="w-full">
+            <table className="-mb-px w-full">
               <thead>
                 <tr className="border-b border-[var(--color-border)]">
                   <th className="whitespace-nowrap px-4 py-2.5 text-left text-xs font-semibold uppercase tracking-[0.5px] text-[var(--color-text-tertiary)]">
@@ -75,7 +75,7 @@ export function RelatedTab({ transaction }: { transaction: Transaction }) {
                 {otherTransactions.map((txn) => (
                   <tr
                     key={txn.id}
-                    className="border-b border-[var(--color-border)] last:border-b-0"
+                    className="border-b border-[var(--color-border)]"
                   >
                     <td className="px-4 py-3">
                       <Link

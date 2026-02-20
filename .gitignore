@@ -42,3 +42,4 @@ next-env.d.ts
 
 # skills (opencode plugins)
 /skills/
+scripts/

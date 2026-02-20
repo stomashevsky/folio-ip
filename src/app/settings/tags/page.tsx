@@ -106,7 +106,7 @@ export default function TagsPage() {
           <>
             {/* Desktop table */}
             <div className="hidden overflow-x-auto rounded-lg border border-[var(--color-border)] md:block">
-              <table className="w-full">
+              <table className="-mb-px w-full">
                 <thead>
                   <tr className="border-b border-[var(--color-border)] bg-[var(--color-surface-secondary)]">
                     <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.5px] text-[var(--color-text-tertiary)]">
@@ -124,7 +124,7 @@ export default function TagsPage() {
                   {tags.map((tag) => (
                     <tr
                       key={tag.name}
-                      className="border-b border-[var(--color-border)] last:border-b-0"
+                      className="border-b border-[var(--color-border)]"
                     >
                       <td className="px-4 py-3">
                         <Badge color="secondary" size="sm">

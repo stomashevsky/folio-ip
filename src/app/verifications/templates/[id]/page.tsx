@@ -255,7 +255,7 @@ function VerificationTemplateDetailContent() {
 
         <SectionHeading size="xs">Checks</SectionHeading>
         <div className="mb-8">
-          <table className="w-full">
+          <table className="-mb-px w-full">
             <thead>
               <tr className="border-b border-[var(--color-border)]">
                 <th className="pb-2 text-left text-xs font-medium uppercase tracking-wider text-[var(--color-text-tertiary)]">Name</th>
@@ -266,7 +266,7 @@ function VerificationTemplateDetailContent() {
             </thead>
             <tbody>
               {form.checks.map((check, i) => (
-                <tr key={check.name} className="border-b border-[var(--color-border)] last:border-b-0">
+                <tr key={check.name} className="border-b border-[var(--color-border)]">
                   <td className="py-3 pr-3">
                     <p className={`text-sm ${check.enabled ? "text-[var(--color-text)]" : "text-[var(--color-text-tertiary)]"}`}>
                       {check.name}

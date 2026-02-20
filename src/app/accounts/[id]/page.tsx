@@ -23,7 +23,7 @@ import { DotsHorizontal, Plus } from "@plexui/ui/components/Icon";
 import { Menu } from "@plexui/ui/components/Menu";
 import { Tabs } from "@plexui/ui/components/Tabs";
 import { useParams } from "next/navigation";
-import { Suspense, useState, type CSSProperties } from "react";
+import { Suspense, useState } from "react";
 import {
   OverviewTab,
   InquiriesTab,
@@ -31,10 +31,9 @@ import {
   ReportsTab,
   ListMatchesTab,
   DocumentsTab,
-  ActivityTab,
 } from "./components";
 
-const tabs = ["Overview", "Inquiries", "Verifications", "Reports", "List Matches", "Documents", "Activity"] as const;
+const tabs = ["Overview", "Inquiries", "Verifications", "Reports", "List Matches", "Documents"] as const;
 type Tab = (typeof tabs)[number];
 
 export default function AccountDetailPage() {
@@ -60,6 +59,9 @@ function AccountDetailContent() {
     (report) => report.accountId === account?.id
   );
   const totalMatches = accountReports.reduce((sum, r) => sum + (r.matchCount ?? 0), 0);
+  const documentCount = accountVerifications.filter(
+    (v) => ["government_id", "document", "health_insurance_card", "vehicle_insurance"].includes(v.type) && v.photos?.length
+  ).length;
 
   const [tags, setTags] = useState<string[]>(() =>
     Array.from(
@@ -84,7 +86,7 @@ function AccountDetailContent() {
   return (
     <div className="flex h-full flex-col">
       <TopBar
-        title="Account"
+        title={account.name}
         backHref="/accounts"
         actions={
           <div className="flex items-center gap-2">
@@ -113,69 +115,20 @@ function AccountDetailContent() {
 
       <div className="flex flex-1 flex-col overflow-auto md:flex-row md:overflow-hidden">
         <div className="flex shrink-0 flex-col md:min-w-0 md:flex-1 md:overflow-auto">
-          <div
-            className="shrink-0 overflow-x-auto px-4 pt-4 md:px-6"
-            style={{ "--color-ring": "transparent" } as CSSProperties}
-          >
+          <div className="shrink-0 px-4 pt-4 md:px-6">
             <Tabs
               value={activeTab}
               onChange={(value) => setActiveTab(value as Tab)}
               variant="underline"
-              aria-label="Account sections"
               size="lg"
+              aria-label="Account sections"
             >
               <Tabs.Tab value="Overview">Overview</Tabs.Tab>
-              <Tabs.Tab
-                value="Inquiries"
-                badge={
-                  accountInquiries.length
-                    ? { content: accountInquiries.length, pill: true }
-                    : undefined
-                }
-              >
-                Inquiries
-              </Tabs.Tab>
-              <Tabs.Tab
-                value="Verifications"
-                badge={
-                  accountVerifications.length
-                    ? { content: accountVerifications.length, pill: true }
-                    : undefined
-                }
-              >
-                Verifications
-              </Tabs.Tab>
-              <Tabs.Tab
-                value="Reports"
-                badge={
-                  accountReports.length
-                    ? { content: accountReports.length, pill: true }
-                    : undefined
-                }
-              >
-                Reports
-              </Tabs.Tab>
-              <Tabs.Tab
-                value="List Matches"
-                badge={
-                  totalMatches > 0
-                    ? { content: totalMatches, pill: true }
-                    : undefined
-                }
-              >
-                List Matches
-              </Tabs.Tab>
-              <Tabs.Tab value="Documents">Documents</Tabs.Tab>
-              <Tabs.Tab
-                value="Activity"
-                badge={
-                  events.length
-                    ? { content: events.length, pill: true }
-                    : undefined
-                }
-              >
-                Activity
-              </Tabs.Tab>
+              <Tabs.Tab value="Inquiries" badge={accountInquiries.length > 0 ? { content: accountInquiries.length, pill: true, variant: "soft" } : undefined}>Inquiries</Tabs.Tab>
+              <Tabs.Tab value="Verifications" badge={accountVerifications.length > 0 ? { content: accountVerifications.length, pill: true, variant: "soft" } : undefined}>Verifications</Tabs.Tab>
+              <Tabs.Tab value="Reports" badge={accountReports.length > 0 ? { content: accountReports.length, pill: true, variant: "soft" } : undefined}>Reports</Tabs.Tab>
+              <Tabs.Tab value="List Matches" badge={totalMatches > 0 ? { content: totalMatches, pill: true, variant: "soft" } : undefined}>List Matches</Tabs.Tab>
+              <Tabs.Tab value="Documents" badge={documentCount > 0 ? { content: documentCount, pill: true, variant: "soft" } : undefined}>Documents</Tabs.Tab>
             </Tabs>
           </div>
 
@@ -201,9 +154,6 @@ function AccountDetailContent() {
             )}
             {activeTab === "Documents" && (
               <DocumentsTab verifications={accountVerifications} />
-            )}
-            {activeTab === "Activity" && (
-              <ActivityTab events={events} />
             )}
           </div>
         </div>

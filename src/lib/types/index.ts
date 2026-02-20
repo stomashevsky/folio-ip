@@ -71,6 +71,8 @@ export interface Verification {
   checks: Check[];
   extractedData?: Record<string, string>;
   photos?: VerificationPhoto[];
+  countryCode?: string;
+  idClass?: string;
 }
 
 export interface VerificationPhoto {

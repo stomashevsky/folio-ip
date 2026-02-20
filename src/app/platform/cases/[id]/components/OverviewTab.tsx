@@ -157,7 +157,7 @@ export function OverviewTab({
           <div>
             <SectionHeading badge={relatedCases.length}>Related cases</SectionHeading>
             <div className="overflow-x-auto rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]">
-              <table className="w-full">
+              <table className="-mb-px w-full">
                 <thead>
                   <tr className="border-b border-[var(--color-border)]">
                     <th className="px-4 py-2.5 text-left text-xs font-semibold uppercase tracking-[0.5px] text-[var(--color-text-tertiary)]">Title</th>
@@ -167,7 +167,7 @@ export function OverviewTab({
                 </thead>
                 <tbody>
                   {relatedCases.map((rc) => (
-                    <tr key={rc.id} className="border-b border-[var(--color-border)] last:border-b-0 hover:bg-[var(--color-surface-secondary)]">
+                    <tr key={rc.id} className="border-b border-[var(--color-border)] hover:bg-[var(--color-surface-secondary)]">
                       <td className="px-4 py-3">
                         <Link href={`/platform/cases/${rc.id}`} className="text-sm font-medium text-[var(--color-text)] hover:text-[var(--color-primary-solid-bg)] hover:underline">
                           {rc.title}

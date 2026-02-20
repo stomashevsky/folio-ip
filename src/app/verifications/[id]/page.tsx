@@ -101,7 +101,7 @@ function VerificationDetailContent() {
   return (
     <div className="flex h-full flex-col">
       <TopBar
-        title="Verification"
+        title={typeLabel}
         backHref="/verifications"
         actions={
           <div className="flex items-center gap-2">
@@ -140,7 +140,7 @@ function VerificationDetailContent() {
               </div>
             )}
 
-            <div className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]">
+            <div className="overflow-hidden rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]">
               <CardHeader
                 title={`${typeLabel} verification`}
                 badge={<StatusBadge status={verification.status} />}
@@ -172,43 +172,40 @@ function VerificationDetailContent() {
                             {photo.label}
                           </span>
                         </button>
-                        <div className="mt-2 space-y-0.5">
-                          <p className="text-xs text-[var(--color-text-tertiary)]">
-                            Capture method ({photo.label.toLowerCase()})
-                          </p>
-                          <p className="text-xs text-[var(--color-text)]">
-                            {photo.captureMethod === "auto" ? "Live (autocapture)" : "Manual"}
-                          </p>
-                        </div>
+                        <p className="mt-1 text-xs text-[var(--color-text-tertiary)]">
+                          {photo.captureMethod === "auto" ? "Autocapture" : "Manual"}
+                        </p>
                       </div>
                     ))}
                   </div>
                 </div>
               )}
 
-              <KeyValueTable
-                bare
-                rows={[
-                  ...(verification.extractedData
-                    ? Object.entries(verification.extractedData).map(
-                        ([key, val]) => ({
-                          label: key,
-                          value:
-                            (key === "Full name" || key === "Address") &&
-                            typeof val === "string"
-                              ? toTitleCase(val)
-                              : val,
-                        }),
-                      )
-                    : []),
-                  { label: "Sourced from", value: "User" },
-                ]}
-              />
+              <div className="-mb-px">
+                <KeyValueTable
+                  bare
+                  rows={[
+                    ...(verification.extractedData
+                      ? Object.entries(verification.extractedData).map(
+                          ([key, val]) => ({
+                            label: key,
+                            value:
+                              (key === "Full name" || key === "Address") &&
+                              typeof val === "string"
+                                ? toTitleCase(val)
+                                : val,
+                          }),
+                        )
+                      : []),
+                    { label: "Sourced from", value: "User" },
+                  ]}
+                />
+              </div>
             </div>
 
             {/* Checks – separate block */}
-            <div className="mt-6 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]">
-              <div className="px-4 py-3">
+            <div className="mt-6 overflow-hidden rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]">
+              <div className="bg-[var(--color-surface-secondary)] px-4 py-2">
                 <span className="heading-xs text-[var(--color-text)]">
                   Checks
                 </span>
@@ -261,14 +258,14 @@ function VerificationDetailContent() {
 
               <div className="min-h-[200px]">
               {filteredChecks.length > 0 ? (
-                <table className="w-full">
+                <table className="-mb-px w-full">
                   <thead>
-                    <tr className="border-y border-[var(--color-border)]">
-                      {CHECK_TABLE_HEADERS["status-first"].map((h) => (
+                    <tr className="border-b border-[var(--color-border)]">
+                      {CHECK_TABLE_HEADERS.map((h) => (
                         <th
                           key={h.label}
                           className={`${h.width ?? ""} px-4 py-2 text-xs font-semibold uppercase tracking-[0.5px] text-[var(--color-text-tertiary)] ${
-                            h.align === "center" ? "text-center" : "text-left"
+                            h.align === "center" ? "text-center" : h.align === "right" ? "text-right" : "text-left"
                           }`}
                         >
                           {h.label}
@@ -278,7 +275,7 @@ function VerificationDetailContent() {
                   </thead>
                   <tbody>
                     {filteredChecks.map((check, i) => (
-                      <CheckRow key={i} check={check} variant="status-first" />
+                      <CheckRow key={i} check={check} />
                     ))}
                   </tbody>
                 </table>

@@ -58,7 +58,7 @@ function ReportDetailContent() {
   return (
     <div className="flex h-full flex-col">
       <TopBar
-        title="Report"
+        title={reportType}
         backHref="/reports"
         actions={
           <Menu>
@@ -83,16 +83,16 @@ function ReportDetailContent() {
 
       <div className="flex flex-1 flex-col overflow-auto md:flex-row md:overflow-hidden">
         <div className="flex shrink-0 flex-col md:min-w-0 md:flex-1 md:overflow-auto">
-          <div className="shrink-0 overflow-x-auto px-4 pt-4 md:px-6" style={{ "--color-ring": "transparent" } as React.CSSProperties}>
+          <div className="shrink-0 px-4 pt-4 md:px-6">
             <Tabs
               value={activeTab}
               onChange={(v) => setActiveTab(v as Tab)}
               variant="underline"
-              aria-label="Report sections"
               size="lg"
+              aria-label="Report sections"
             >
               <Tabs.Tab value="Overview">Overview</Tabs.Tab>
-              <Tabs.Tab value="Matches" badge={report.matchCount ? { content: report.matchCount, pill: true } : undefined}>Matches</Tabs.Tab>
+              <Tabs.Tab value="Matches" badge={report.matchCount > 0 ? { content: report.matchCount, pill: true, variant: "soft" } : undefined}>Matches</Tabs.Tab>
               <Tabs.Tab value="Monitoring">Monitoring</Tabs.Tab>
             </Tabs>
           </div>

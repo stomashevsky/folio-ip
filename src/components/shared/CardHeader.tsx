@@ -28,7 +28,7 @@ export function CardHeader({
     : null;
 
   return (
-    <div className="border-b border-[var(--color-border)] px-4 py-3">
+    <div className="border-b border-[var(--color-border)] bg-[var(--color-surface-secondary)] px-4 py-3">
       <div className="flex items-center justify-between">
         <span className="heading-xs inline-flex items-center gap-2 text-[var(--color-text)]">
           {icon && (

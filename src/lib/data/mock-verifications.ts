@@ -70,9 +70,18 @@ const personPhotos = [
   },
 ] satisfies { govId: VerificationPhoto[]; selfie: VerificationPhoto[] }[];
 
-/** Get photo set for a person index (cycles through 3 people) */
+const personDocMeta = [
+  { countryCode: "PT", idClass: "id" },
+  { countryCode: "IT", idClass: "id" },
+  { countryCode: "CH", idClass: "pp" },
+];
+
 function getPersonPhotos(personIndex: number) {
   return personPhotos[personIndex % personPhotos.length];
+}
+
+function getPersonDocMeta(personIndex: number) {
+  return personDocMeta[personIndex % personDocMeta.length];
 }
 
 const govIdChecksFailed: Check[] = govIdChecksAllPassed.map((c) =>
@@ -106,6 +115,8 @@ export const mockVerifications: Verification[] = [
     completedAt: "2026-02-10T16:53:09.000Z",
     checks: govIdChecksAllPassed,
     photos: getPersonPhotos(0).govId,
+    countryCode: "PT",
+    idClass: "id",
     extractedData: {
       "Full name": "ALEXANDER J SAMPLE",
       "Birthdate": "17 Jul 1977",
@@ -135,6 +146,8 @@ export const mockVerifications: Verification[] = [
     completedAt: "2026-02-10T14:25:30.000Z",
     checks: govIdChecksAllPassed,
     photos: getPersonPhotos(1).govId,
+    countryCode: "IT",
+    idClass: "id",
     extractedData: {
       "Full name": "MARIA GONZALEZ",
       "Birthdate": "03 Mar 1990",
@@ -162,6 +175,8 @@ export const mockVerifications: Verification[] = [
     completedAt: "2026-02-10T12:12:00.000Z",
     checks: govIdChecksFailed,
     photos: getPersonPhotos(2).govId,
+    countryCode: "CH",
+    idClass: "pp",
     extractedData: {
       "Full name": "JOHN WILLIAMS",
       "Birthdate": "15 Aug 1985",
@@ -187,6 +202,8 @@ export const mockVerifications: Verification[] = [
     completedAt: "2026-02-10T10:36:40.000Z",
     checks: govIdChecksAllPassed,
     photos: getPersonPhotos(0).govId,
+    countryCode: "PT",
+    idClass: "id",
     extractedData: {
       "Full name": "YUKI TANAKA",
       "Birthdate": "22 Dec 1988",
@@ -208,6 +225,19 @@ export const mockVerifications: Verification[] = [
 
 /* ── Generate verifications from shared seed data ── */
 import { generatedPeople } from "./mock-data-seed";
+
+const regionToCode: Record<string, string> = {
+  us: "US", ca: "CA", uk: "GB", de: "DE", fr: "FR", es: "ES", it: "IT",
+  nl: "NL", se: "SE", no: "NO", pl: "PL", cz: "CZ", ch: "CH",
+  jp: "JP", kr: "KR", cn: "CN", in: "IN", sg: "SG", au: "AU", nz: "NZ",
+  br: "BR", mx: "MX", ar: "AR", co: "CO", ae: "AE", sa: "SA",
+  pk: "PK", tr: "TR", eg: "EG", ng: "NG", ke: "KE", za: "ZA", sn: "SN", il: "IL",
+};
+
+const idClassByRegion: Record<string, string> = {
+  us: "dl", ca: "dl", uk: "dl", au: "dl", nz: "dl",
+  ch: "pp", sg: "pp", ae: "pp", sa: "pp",
+};
 
 let verIdx = 200;
 
@@ -250,6 +280,8 @@ for (const p of generatedPeople) {
       completedAt: new Date(attemptTime.getTime() + 8000 + attempt * 2000).toISOString(),
       checks: govChecks,
       photos: photos.govId,
+      countryCode: getPersonDocMeta(p.index).countryCode,
+      idClass: getPersonDocMeta(p.index).idClass,
       extractedData: {
         "Full name": p.name.toUpperCase(),
         "Birthdate": p.birthdateFormatted,

@@ -64,7 +64,7 @@ export default function DomainManagerPage() {
         {/* Custom Domains */}
         <SectionHeading size="xs">Custom Domains</SectionHeading>
         <div className="rounded-lg border border-[var(--color-border)] overflow-hidden mb-6">
-          <table className="w-full">
+          <table className="-mb-px w-full">
             <thead>
               <tr className="border-b border-[var(--color-border)] bg-[var(--color-surface)]">
                 <th className="px-4 py-3 text-left text-sm font-medium text-[var(--color-text)]">
@@ -88,7 +88,7 @@ export default function DomainManagerPage() {
               {domains.map((domain) => (
                 <tr
                   key={domain.id}
-                  className="border-b border-[var(--color-border)] last:border-b-0"
+                  className="border-b border-[var(--color-border)]"
                 >
                   <td className="px-4 py-3 text-sm font-medium text-[var(--color-text)]">
                     {domain.domain}

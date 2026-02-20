@@ -1,19 +1,12 @@
 import { Badge } from "@plexui/ui/components/Badge";
 import { Tooltip } from "@plexui/ui/components/Tooltip";
-import { CheckCircle, InfoCircle } from "@plexui/ui/components/Icon";
+import { InfoCircle } from "@plexui/ui/components/Icon";
 import { checkDescriptions } from "@/lib/data/check-descriptions";
 import { CHECK_CATEGORY_LABELS, CHECK_CATEGORY_DESCRIPTIONS } from "@/lib/constants/check-category-labels";
 import type { Check } from "@/lib/types";
 
-type CheckRowVariant = "name-first" | "status-first";
-
 interface CheckRowProps {
   check: Check;
-  /** Column layout variant.
-   *  - `"name-first"` (default): Name → Category → Required → Status
-   *  - `"status-first"`: Status → Name → Category → Required
-   */
-  variant?: CheckRowVariant;
 }
 
 /* ─── Shared cells ─── */
@@ -50,7 +43,7 @@ function CategoryCell({ check }: { check: Check }) {
 
 function StatusCell({ check }: { check: Check }) {
   return (
-    <td className="w-[100px] px-4 py-2.5">
+    <td className="w-[100px] px-4 py-2.5 text-right">
       {check.status === "passed" ? (
         <Badge color="success" size="sm">Passed</Badge>
       ) : check.status === "failed" ? (
@@ -62,63 +55,32 @@ function StatusCell({ check }: { check: Check }) {
   );
 }
 
-/* ─── Variant-specific required cells ─── */
-
-function RequiredCellText({ check }: { check: Check }) {
+function RequiredCell({ check }: { check: Check }) {
   return (
-    <td className="w-[80px] px-4 py-2.5 text-center text-sm text-[var(--color-text-tertiary)]">
+    <td className="w-[80px] px-4 py-2.5 text-left text-sm text-[var(--color-text-tertiary)]">
       {check.required && "✓"}
-    </td>
-  );
-}
-
-function RequiredCellIcon({ check }: { check: Check }) {
-  return (
-    <td className="w-[80px] px-4 py-2.5 text-center">
-      {check.required && (
-        <CheckCircle className="mx-auto h-4 w-4 text-[var(--color-text-tertiary)]" />
-      )}
     </td>
   );
 }
 
 /* ─── Table header helpers ─── */
 
-export const CHECK_TABLE_HEADERS: Record<CheckRowVariant, { label: string; align?: "center" | "left"; width?: string }[]> = {
-  "name-first": [
-    { label: "Check name", width: "w-2/5" },
-    { label: "Type", width: "w-[190px]" },
-    { label: "Required", width: "w-[80px]", align: "center" },
-    { label: "Status", width: "w-[100px]" },
-  ],
-  "status-first": [
-    { label: "Status", width: "w-[100px]" },
-    { label: "Check name", width: "w-2/5" },
-    { label: "Type", width: "w-[190px]" },
-    { label: "Required", width: "w-[80px]", align: "center" },
-  ],
-};
+export const CHECK_TABLE_HEADERS: { label: string; align?: "center" | "left" | "right"; width?: string }[] = [
+  { label: "Check name", width: "w-2/5" },
+  { label: "Type", width: "w-[190px]" },
+  { label: "Required", width: "w-[80px]" },
+  { label: "Status", width: "w-[100px]", align: "right" },
+];
 
 /* ─── Component ─── */
 
-export function CheckRow({ check, variant = "name-first" }: CheckRowProps) {
+export function CheckRow({ check }: CheckRowProps) {
   return (
-    <tr className="border-b border-[var(--color-border)] last:border-b-0">
-      {variant === "name-first" ? (
-        <>
-          <NameCell check={check} />
-          <CategoryCell check={check} />
-          <RequiredCellText check={check} />
-          <StatusCell check={check} />
-        </>
-      ) : (
-        <>
-          <StatusCell check={check} />
-          <NameCell check={check} />
-          <CategoryCell check={check} />
-          <RequiredCellIcon check={check} />
-        </>
-      )}
+    <tr className="border-b border-[var(--color-border)]">
+      <NameCell check={check} />
+      <CategoryCell check={check} />
+      <RequiredCell check={check} />
+      <StatusCell check={check} />
     </tr>
   );
 }

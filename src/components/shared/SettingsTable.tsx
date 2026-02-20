@@ -21,7 +21,7 @@ export function SettingsTable<T>({
     <>
       {/* Desktop table */}
       <div className="hidden overflow-x-auto rounded-lg border border-[var(--color-border)] md:block">
-        <table className="w-full">
+        <table className="-mb-px w-full">
           <thead>
             <tr className="border-b border-[var(--color-border)] bg-[var(--color-surface-secondary)]">
               {columns.map((col) => (
@@ -40,7 +40,7 @@ export function SettingsTable<T>({
             {data.map((item) => (
               <tr
                 key={keyExtractor(item)}
-                className="border-b border-[var(--color-border)] last:border-b-0"
+                className="border-b border-[var(--color-border)]"
               >
                 {columns.map((col) => (
                   <td

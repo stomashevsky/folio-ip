@@ -81,7 +81,7 @@ export function ListMatchesTab({ reports }: { reports: Report[] }) {
 
       {filtered.length > 0 ? (
         <div className="overflow-x-auto rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]">
-          <table className="w-full table-fixed">
+          <table className="-mb-px w-full table-fixed">
             <colgroup>
               <col className="w-[20%]" />
               <col className="w-[18%]" />
@@ -132,7 +132,7 @@ export function ListMatchesTab({ reports }: { reports: Report[] }) {
               {filtered.map((match) => (
                 <tr
                   key={`${match.reportId}-${match.id}`}
-                  className="border-b border-[var(--color-border)] last:border-b-0 hover:bg-[var(--color-surface-secondary)]"
+                  className="border-b border-[var(--color-border)] hover:bg-[var(--color-surface-secondary)]"
                 >
                   <td className="px-4 py-3">
                     <div>

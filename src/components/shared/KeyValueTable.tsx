@@ -58,7 +58,7 @@ function SectionHeader({
 
 function Row({ label, value }: KeyValueRow) {
   return (
-    <tr className="border-b border-[var(--color-border)] last:border-b-0">
+    <tr className="border-b border-[var(--color-border)]">
       <td className="px-4 py-2.5 text-sm text-[var(--color-text-tertiary)]">
         {label}
       </td>
@@ -76,34 +76,38 @@ export function KeyValueTable({
   labelWidth = "w-2/5",
   bare = false,
 }: KeyValueTableProps) {
+  const tableEl = (
+    <table className={`w-full table-fixed${bare ? "" : " -mb-px"}`}>
+      <colgroup>
+        <col className={labelWidth} />
+        <col />
+      </colgroup>
+      <tbody>
+        {rows?.map((row, i) => (
+          <Row key={i} label={row.label} value={row.value} />
+        ))}
+        {sections?.map((section) => (
+          <SectionRows key={section.title} section={section} />
+        ))}
+      </tbody>
+    </table>
+  );
+
   const content = (
     <>
       {title && (
-        <div className="border-b border-[var(--color-border)] px-4 py-3">
+        <div className="border-b border-[var(--color-border)] bg-[var(--color-surface-secondary)] px-4 py-2">
           <span className="heading-xs text-[var(--color-text)]">{title}</span>
         </div>
       )}
-      <table className="w-full table-fixed">
-        <colgroup>
-          <col className={labelWidth} />
-          <col />
-        </colgroup>
-        <tbody>
-          {rows?.map((row, i) => (
-            <Row key={i} label={row.label} value={row.value} />
-          ))}
-          {sections?.map((section) => (
-            <SectionRows key={section.title} section={section} />
-          ))}
-        </tbody>
-      </table>
+      {tableEl}
     </>
   );
 
   if (bare) return content;
 
   return (
-    <div className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]">
+    <div className="overflow-hidden rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]">
       {content}
     </div>
   );

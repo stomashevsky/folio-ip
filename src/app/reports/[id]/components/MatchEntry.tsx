@@ -18,7 +18,7 @@ const thClass =
 
 function MatchRow({ match }: { match: ReportMatch }) {
   return (
-    <tr className="border-b border-[var(--color-border)] last:border-b-0 hover:bg-[var(--color-surface-secondary)]">
+    <tr className="border-b border-[var(--color-border)] hover:bg-[var(--color-surface-secondary)]">
       <td className="px-4 py-3">
         <div>
           <p className="text-sm font-medium text-[var(--color-text)]">
@@ -78,7 +78,7 @@ function MatchRow({ match }: { match: ReportMatch }) {
 export function MatchTable({ matches }: { matches: ReportMatch[] }) {
   return (
     <div className="overflow-x-auto rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]">
-      <table className="w-full table-fixed">
+      <table className="-mb-px w-full table-fixed">
         <colgroup>
           <col className="w-[22%]" />
           <col className="w-[18%]" />

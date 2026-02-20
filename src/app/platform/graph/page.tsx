@@ -699,17 +699,17 @@ export default function GraphPage() {
           </div>
         </div>
 
-        <div className="shrink-0 overflow-x-auto px-4 pt-4 md:px-6" style={{ "--color-ring": "transparent" } as React.CSSProperties}>
+        <div className="shrink-0 px-4 pt-4 md:px-6">
           <Tabs
             value={activeTab}
             onChange={setActiveTab}
             variant="underline"
-            aria-label="Graph sections"
             size="lg"
+            aria-label="Graph sections"
           >
             <Tabs.Tab value="explorer">Explorer</Tabs.Tab>
             <Tabs.Tab value="query">Query</Tabs.Tab>
-            <Tabs.Tab value="clusters" badge={{ content: clusters.length, pill: true }}>Clusters</Tabs.Tab>
+            <Tabs.Tab value="clusters" badge={{ content: clusters.length, pill: true, variant: "soft" }}>Clusters</Tabs.Tab>
           </Tabs>
           <p className="mt-2 text-sm text-[var(--color-text-secondary)]">
             Visualize connections between accounts, inquiries, verifications, and devices. Click on a node to see its details and connections.
@@ -1013,7 +1013,7 @@ export default function GraphPage() {
               <div>
                 <SectionHeading size="xs">Recent Connections</SectionHeading>
                 <div className="mt-4 overflow-x-auto rounded-lg border border-[var(--color-border)]">
-                  <table className="w-full text-sm">
+                  <table className="-mb-px w-full text-sm">
                     <thead>
                       <tr className="border-b border-[var(--color-border)] bg-[var(--color-surface)]">
                         <th className="px-4 py-3 text-left font-medium text-[var(--color-text-secondary)]">Source</th>
@@ -1026,7 +1026,7 @@ export default function GraphPage() {
                     </thead>
                     <tbody>
                       {filteredConnections.slice(0, 15).map((conn) => (
-                        <tr key={conn.id} className="border-b border-[var(--color-border)] last:border-b-0 hover:bg-[var(--color-nav-hover-bg)]">
+                        <tr key={conn.id} className="border-b border-[var(--color-border)] hover:bg-[var(--color-nav-hover-bg)]">
                           <td className="px-4 py-3">
                             <Badge color={badgeColor(conn.sourceType)} variant="soft" size="sm">
                               {conn.sourceType}:{conn.sourceId}

@@ -1,7 +1,7 @@
 import { Badge } from "@plexui/ui/components/Badge";
 import { ShieldCheck, ExclamationMarkCircleFilled } from "@plexui/ui/components/Icon";
 import { EmptyMessage } from "@plexui/ui/components/EmptyMessage";
-import { SectionHeading, KeyValueTable } from "@/components/shared";
+import { SectionHeading, KeyValueTable, CardHeader } from "@/components/shared";
 import { REPORT_TYPE_LABELS } from "@/lib/constants/report-type-labels";
 import { formatDateTime, toTitleCase } from "@/lib/utils/format";
 import type { Report } from "@/lib/types";
@@ -13,23 +13,23 @@ export function ScreeningResults({ report }: { report: Report }) {
 
   return (
     <div className="space-y-6">
-      <div className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6">
-        <div className="flex items-center justify-between">
-          <h2 className="heading-sm text-[var(--color-text)]">
-            Screening results
-          </h2>
-          {hasMatches ? (
-            <Badge color="danger" size="sm">
-              {report.matchCount} match{report.matchCount > 1 ? "es" : ""}
-            </Badge>
-          ) : (
-            <Badge color="success" size="sm">
-              Clear
-            </Badge>
-          )}
-        </div>
+      <div className="overflow-hidden rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]">
+        <CardHeader
+          title="Screening results"
+          badge={
+            hasMatches ? (
+              <Badge color="danger" size="sm">
+                {report.matchCount} match{report.matchCount > 1 ? "es" : ""}
+              </Badge>
+            ) : (
+              <Badge color="success" size="sm">
+                Clear
+              </Badge>
+            )
+          }
+        />
 
-        <div className="mt-4">
+        <div className="px-4 py-6">
           {!hasMatches ? (
             <EmptyMessage fill="none">
               <EmptyMessage.Icon size="sm">
