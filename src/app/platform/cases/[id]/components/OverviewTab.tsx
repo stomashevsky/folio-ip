@@ -95,6 +95,7 @@ export function OverviewTab({
       <div>
         <SectionHeading>Linked entities</SectionHeading>
         <KeyValueTable
+          labelWidth="w-1/4"
           rows={[
             ...(caseItem.accountId
               ? [
@@ -103,14 +104,14 @@ export function OverviewTab({
                     value: (
                       <Link
                         href={`/accounts/${caseItem.accountId}`}
-                        className="hover:underline"
+                        className="group"
                       >
-                        <span className="text-sm font-medium text-[var(--color-text)]">
+                        <span className="text-sm font-medium text-[var(--color-text)] group-hover:underline">
                           {caseItem.accountName ?? caseItem.accountId}
                         </span>
-                        <span className="ml-2 font-mono text-xs text-[var(--color-text-tertiary)]">
+                        <p className="truncate font-mono text-xs text-[var(--color-text-tertiary)]">
                           {caseItem.accountId}
-                        </span>
+                        </p>
                       </Link>
                     ),
                   },
@@ -123,7 +124,7 @@ export function OverviewTab({
                     value: (
                       <Link
                         href={`/inquiries/${caseItem.inquiryId}`}
-                        className="font-mono text-sm text-[var(--color-primary-solid-bg)] hover:underline"
+                        className="truncate font-mono text-sm text-[var(--color-primary-solid-bg)] hover:underline"
                       >
                         {caseItem.inquiryId}
                       </Link>

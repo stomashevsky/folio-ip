@@ -97,14 +97,15 @@ export function OverviewTab({ transaction }: { transaction: Transaction }) {
       <div>
         <SectionHeading>Parties</SectionHeading>
         <KeyValueTable
+          labelWidth="w-1/4"
           rows={[
             {
               label: "Sender",
               value: (
-                <Link href={`/accounts/${transaction.accountId}`} className="hover:underline">
-                  <span className="text-sm font-medium text-[var(--color-text)]">{transaction.accountName}</span>
-                  <span className="ml-2 font-mono text-xs text-[var(--color-text-tertiary)]">{transaction.accountId}</span>
-                  <span className="ml-2 text-xs text-[var(--color-text-tertiary)]">United States</span>
+                <Link href={`/accounts/${transaction.accountId}`} className="group">
+                  <span className="text-sm font-medium text-[var(--color-text)] group-hover:underline">{transaction.accountName}</span>
+                  <p className="truncate font-mono text-xs text-[var(--color-text-tertiary)]">{transaction.accountId}</p>
+                  <p className="text-xs text-[var(--color-text-tertiary)]">United States</p>
                 </Link>
               ),
             },
@@ -113,8 +114,8 @@ export function OverviewTab({ transaction }: { transaction: Transaction }) {
               value: (
                 <div>
                   <span className="text-sm font-medium text-[var(--color-text)]">External Payee</span>
-                  <span className="ml-2 font-mono text-xs text-[var(--color-text-tertiary)]">ext_recipient_001</span>
-                  <span className="ml-2 text-xs text-[var(--color-text-tertiary)]">United Kingdom</span>
+                  <p className="truncate font-mono text-xs text-[var(--color-text-tertiary)]">ext_recipient_001</p>
+                  <p className="text-xs text-[var(--color-text-tertiary)]">United Kingdom</p>
                 </div>
               ),
             },

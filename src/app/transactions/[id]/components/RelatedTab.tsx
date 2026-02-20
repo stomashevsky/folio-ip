@@ -23,20 +23,21 @@ export function RelatedTab({ transaction }: { transaction: Transaction }) {
       <div>
         <SectionHeading>Linked account</SectionHeading>
         <KeyValueTable
+          labelWidth="w-1/4"
           rows={[
             {
               label: "Account",
               value: (
                 <Link
                   href={`/accounts/${transaction.accountId}`}
-                  className="hover:underline"
+                  className="group"
                 >
-                  <span className="text-sm font-medium text-[var(--color-text)]">
+                  <span className="text-sm font-medium text-[var(--color-text)] group-hover:underline">
                     {transaction.accountName}
                   </span>
-                  <span className="ml-2 font-mono text-xs text-[var(--color-text-tertiary)]">
+                  <p className="truncate font-mono text-xs text-[var(--color-text-tertiary)]">
                     {transaction.accountId}
-                  </span>
+                  </p>
                 </Link>
               ),
             },
