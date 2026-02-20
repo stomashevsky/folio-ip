@@ -14,9 +14,9 @@ import { Button } from "@plexui/ui/components/Button";
 import { Tabs } from "@plexui/ui/components/Tabs";
 import { DotsHorizontal } from "@plexui/ui/components/Icon";
 import { Menu } from "@plexui/ui/components/Menu";
-import { OverviewTab, ActivityTab } from "./components";
+import { OverviewTab, RelatedTab, LabelsTab, ActivityTab } from "./components";
 
-const tabs = ["Overview", "Activity"] as const;
+const tabs = ["Overview", "Related", "Labels", "Activity"] as const;
 type Tab = (typeof tabs)[number];
 
 export default function TransactionDetailPage() {
@@ -83,12 +83,16 @@ function TransactionDetailContent() {
               size="lg"
             >
               <Tabs.Tab value="Overview">Overview</Tabs.Tab>
+              <Tabs.Tab value="Related">Related</Tabs.Tab>
+              <Tabs.Tab value="Labels">Labels</Tabs.Tab>
               <Tabs.Tab value="Activity">Activity</Tabs.Tab>
             </Tabs>
           </div>
 
           <div className="flex-1 overflow-auto px-4 py-6 md:px-6">
             {activeTab === "Overview" && <OverviewTab transaction={transaction} />}
+            {activeTab === "Related" && <RelatedTab transaction={transaction} />}
+            {activeTab === "Labels" && <LabelsTab tags={tags} onEditTags={() => setTagModalOpen(true)} />}
             {activeTab === "Activity" && <ActivityTab transaction={transaction} />}
           </div>
         </div>

@@ -2,6 +2,7 @@ import type { TimelineEvent } from "@/lib/types";
 import { mockInquiries } from "./mock-inquiries";
 import { mockVerifications } from "./mock-verifications";
 import { mockReports } from "./mock-reports";
+import { mockCases } from "./mock-cases";
 
 /**
  * Generate realistic timeline events for an inquiry based on its status and verifications.
@@ -372,4 +373,112 @@ export function getEventsForReport(reportId: string): TimelineEvent[] {
     reportEventCache.set(reportId, events);
   }
   return reportEventCache.get(reportId)!;
+}
+
+const caseEventCache = new Map<string, TimelineEvent[]>();
+
+export function getEventsForCase(caseId: string): TimelineEvent[] {
+  if (!caseEventCache.has(caseId)) {
+    const caseItem = mockCases.find((c) => c.id === caseId);
+    if (!caseItem) {
+      caseEventCache.set(caseId, []);
+      return [];
+    }
+
+    const events: TimelineEvent[] = [];
+    let idx = 0;
+    const eid = () => `evt_case_${caseId}_${idx++}`;
+    const createdDate = new Date(caseItem.createdAt);
+
+    // Case created
+    events.push({
+      id: eid(),
+      timestamp: caseItem.createdAt,
+      type: "case.created",
+      level: "info",
+      description: `Case created: ${caseItem.title}`,
+    });
+
+    // Assigned
+    if (caseItem.assignee) {
+      events.push({
+        id: eid(),
+        timestamp: new Date(createdDate.getTime() + 5000).toISOString(),
+        type: "case.assigned",
+        level: "info",
+        description: `Assigned to ${caseItem.assignee}`,
+        actor: "system",
+      });
+    }
+
+    // Queue assignment
+    if (caseItem.queue) {
+      events.push({
+        id: eid(),
+        timestamp: new Date(createdDate.getTime() + 3000).toISOString(),
+        type: "case.queued",
+        level: "info",
+        description: `Added to ${caseItem.queue} queue`,
+        actor: "system",
+      });
+    }
+
+    // Priority set
+    if (caseItem.priority !== "low") {
+      events.push({
+        id: eid(),
+        timestamp: new Date(createdDate.getTime() + 4000).toISOString(),
+        type: "case.priority",
+        level: caseItem.priority === "critical" ? "warning" : "info",
+        description: `Priority set to ${caseItem.priority}`,
+        actor: "system",
+      });
+    }
+
+    // Status changes based on current status
+    if (caseItem.status === "in_review") {
+      events.push({
+        id: eid(),
+        timestamp: caseItem.updatedAt,
+        type: "case.status_changed",
+        level: "info",
+        description: "Status changed to In Review",
+        actor: caseItem.assignee ?? "system",
+      });
+    } else if (caseItem.status === "escalated") {
+      events.push({
+        id: eid(),
+        timestamp: caseItem.updatedAt,
+        type: "case.escalated",
+        level: "warning",
+        description: "Case escalated for further investigation",
+        actor: caseItem.assignee ?? "system",
+      });
+    } else if (caseItem.status === "resolved" && caseItem.resolvedAt) {
+      events.push({
+        id: eid(),
+        timestamp: caseItem.resolvedAt,
+        type: "case.resolved",
+        level: "success",
+        description: "Case resolved",
+        actor: caseItem.assignee ?? "system",
+      });
+    } else if (caseItem.status === "closed" && caseItem.resolvedAt) {
+      events.push({
+        id: eid(),
+        timestamp: caseItem.resolvedAt,
+        type: "case.closed",
+        level: "success",
+        description: "Case closed",
+        actor: caseItem.assignee ?? "system",
+      });
+    }
+
+    events.sort(
+      (a, b) =>
+        new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+    );
+    caseEventCache.set(caseId, events);
+  }
+  return caseEventCache.get(caseId)!;
 }

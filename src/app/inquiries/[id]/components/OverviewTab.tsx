@@ -25,12 +25,14 @@ export function OverviewTab({
   sessions,
   signals,
   behavioralRisk,
+  totalMatches,
 }: {
   inquiry: (typeof mockInquiries)[0];
   verifications: typeof mockVerifications;
   sessions: ReturnType<typeof getSessionsForInquiry>;
   signals: InquirySignal[];
   behavioralRisk: BehavioralRisk | null;
+  totalMatches: number;
 }) {
   // Collect photos from verifications with extraction data
   const govIdVer = verifications.find((v) => v.type === "government_id");
@@ -70,6 +72,7 @@ export function OverviewTab({
             { label: "Time to Finish", value: inquiry.timeToFinish ? formatDuration(inquiry.timeToFinish) : "—" },
             { label: "Government ID Attempts", value: inquiry.verificationAttempts.governmentId },
             { label: "Selfie Attempts", value: inquiry.verificationAttempts.selfie },
+            { label: "List Matches", value: totalMatches },
           ]}
         />
       </div>

@@ -67,13 +67,16 @@ function ReportDetailContent() {
                 <DotsHorizontal />
               </Button>
             </Menu.Trigger>
-            <Menu.Content align="end" minWidth="auto">
-              <Menu.Item onSelect={() => {}}>Rerun report</Menu.Item>
-              <Menu.Separator />
-              <Menu.Item onSelect={() => {}}>Archive</Menu.Item>
-              <Menu.Separator />
-              <Menu.Item onSelect={() => {}} className="text-[var(--color-text-danger-ghost)]">Delete</Menu.Item>
-            </Menu.Content>
+              <Menu.Content align="end" minWidth="auto">
+                <Menu.Item onSelect={() => {}}>Rerun report</Menu.Item>
+                <Menu.Item onSelect={() => {}}>
+                  {report.continuousMonitoring ? "Pause monitoring" : "Resume monitoring"}
+                </Menu.Item>
+                <Menu.Separator />
+                <Menu.Item onSelect={() => {}}>Archive</Menu.Item>
+                <Menu.Separator />
+                <Menu.Item onSelect={() => {}} className="text-[var(--color-text-danger-ghost)]">Delete</Menu.Item>
+              </Menu.Content>
           </Menu>
         }
       />

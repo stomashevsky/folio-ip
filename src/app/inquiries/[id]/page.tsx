@@ -141,6 +141,7 @@ function InquiryDetailContent() {
                 sessions={sessions}
                 signals={featuredSignals}
                 behavioralRisk={behavioralRisk}
+                totalMatches={totalMatches}
               />
             )}
             {activeTab === "Verifications" && (

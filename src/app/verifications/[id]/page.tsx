@@ -331,6 +331,13 @@ function VerificationDetailContent() {
                   {verification.inquiryId}
                 </Link>
               </InfoRow>
+              {inquiry && (
+                <InfoRow label="Template">
+                  <span className="text-[var(--color-primary-solid-bg)]">
+                    {inquiry.templateName}
+                  </span>
+                </InfoRow>
+              )}
               <InfoRow label="Created At">
                 {formatDateTime(verification.createdAt)} UTC
               </InfoRow>

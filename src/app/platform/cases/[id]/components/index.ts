@@ -1,4 +1,3 @@
 export { OverviewTab } from "./OverviewTab";
-export { RelatedTab } from "./RelatedTab";
-export { LabelsTab } from "./LabelsTab";
+export { CommentsTab } from "./CommentsTab";
 export { ActivityTab } from "./ActivityTab";

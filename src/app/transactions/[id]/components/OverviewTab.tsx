@@ -1,6 +1,9 @@
 import Link from "next/link";
+import { Alert } from "@plexui/ui/components/Alert";
 import { Badge } from "@plexui/ui/components/Badge";
 import { SectionHeading, KeyValueTable } from "@/components/shared";
+import { StatusBadge } from "@/components/shared/StatusBadge";
+import { formatDateTime } from "@/lib/utils/format";
 import type { Transaction } from "@/lib/types";
 
 type RiskLevel = "low" | "medium" | "high";
@@ -112,6 +115,62 @@ export function OverviewTab({ transaction }: { transaction: Transaction }) {
             <p className="mt-1 text-xs text-[var(--color-text-tertiary)]">United Kingdom</p>
           </div>
         </div>
+      </div>
+
+      <div>
+        <SectionHeading>Compliance</SectionHeading>
+        {transaction.riskScore > 50 && (
+          <div className="mb-3">
+            <Alert
+              color="warning"
+              variant="soft"
+              title="Elevated risk"
+              description={`This transaction has a risk score of ${transaction.riskScore}%, which exceeds the review threshold. Manual review is recommended.`}
+            />
+          </div>
+        )}
+        <KeyValueTable
+          rows={[
+            {
+              label: "Review Status",
+              value: transaction.reviewedAt ? (
+                <StatusBadge status={transaction.status} />
+              ) : (
+                <span className="text-[var(--color-text-tertiary)]">Pending review</span>
+              ),
+            },
+            {
+              label: "Reviewer",
+              value: transaction.reviewedBy ?? (
+                <span className="text-[var(--color-text-tertiary)]">—</span>
+              ),
+            },
+            {
+              label: "Review Date",
+              value: transaction.reviewedAt ? (
+                `${formatDateTime(transaction.reviewedAt)} UTC`
+              ) : (
+                <span className="text-[var(--color-text-tertiary)]">—</span>
+              ),
+            },
+          ]}
+        />
+      </div>
+
+      <div>
+        <SectionHeading>Metadata</SectionHeading>
+        <KeyValueTable
+          rows={[
+            {
+              label: "Description",
+              value: transaction.description ?? (
+                <span className="text-[var(--color-text-tertiary)]">—</span>
+              ),
+            },
+            { label: "Source", value: "API" },
+            { label: "Channel", value: "Online Banking" },
+          ]}
+        />
       </div>
     </div>
   );

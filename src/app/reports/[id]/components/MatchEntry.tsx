@@ -1,4 +1,5 @@
 import { Badge } from "@plexui/ui/components/Badge";
+import { Button } from "@plexui/ui/components/Button";
 import { Tooltip } from "@plexui/ui/components/Tooltip";
 import { InfoCircle } from "@plexui/ui/components/Icon";
 import { toTitleCase } from "@/lib/utils/format";
@@ -83,6 +84,18 @@ function MatchRow({ match }: { match: ReportMatch }) {
           {matchStatusLabels[match.status] ?? match.status}
         </Badge>
       </td>
+      <td className="px-4 py-3">
+        {match.status === "pending_review" && (
+          <div className="flex items-center gap-1">
+            <Button color="danger" variant="ghost" size="3xs" onClick={() => {}}>
+              Confirm
+            </Button>
+            <Button color="secondary" variant="ghost" size="3xs" onClick={() => {}}>
+              Dismiss
+            </Button>
+          </div>
+        )}
+      </td>
     </tr>
   );
 }
@@ -92,12 +105,13 @@ export function MatchTable({ matches }: { matches: ReportMatch[] }) {
     <div className="overflow-x-auto rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]">
       <table className="w-full table-fixed">
         <colgroup>
-          <col className="w-[25%]" />
           <col className="w-[22%]" />
+          <col className="w-[18%]" />
+          <col className="w-[80px]" />
+          <col className="w-[10%]" />
           <col className="w-[90px]" />
-          <col className="w-[12%]" />
-          <col className="w-[100px]" />
-          <col className="w-[130px]" />
+          <col className="w-[120px]" />
+          <col className="w-[140px]" />
         </colgroup>
         <thead>
           <tr className="border-b border-[var(--color-border)]">
@@ -133,6 +147,7 @@ export function MatchTable({ matches }: { matches: ReportMatch[] }) {
             <th className={thClass}>Country</th>
             <th className={thClass}>Type</th>
             <th className={thClass}>Status</th>
+            <th className={thClass}>Actions</th>
           </tr>
         </thead>
         <tbody>

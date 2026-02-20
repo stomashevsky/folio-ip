@@ -29,10 +29,12 @@ import {
   InquiriesTab,
   VerificationsTab,
   ReportsTab,
+  ListMatchesTab,
   DocumentsTab,
+  ActivityTab,
 } from "./components";
 
-const tabs = ["Overview", "Inquiries", "Verifications", "Reports", "Documents"] as const;
+const tabs = ["Overview", "Inquiries", "Verifications", "Reports", "List Matches", "Documents", "Activity"] as const;
 type Tab = (typeof tabs)[number];
 
 export default function AccountDetailPage() {
@@ -57,6 +59,7 @@ function AccountDetailContent() {
   const accountReports = mockReports.filter(
     (report) => report.accountId === account?.id
   );
+  const totalMatches = accountReports.reduce((sum, r) => sum + (r.matchCount ?? 0), 0);
 
   const [tags, setTags] = useState<string[]>(() =>
     Array.from(
@@ -152,7 +155,27 @@ function AccountDetailContent() {
               >
                 Reports
               </Tabs.Tab>
+              <Tabs.Tab
+                value="List Matches"
+                badge={
+                  totalMatches > 0
+                    ? { content: totalMatches, pill: true }
+                    : undefined
+                }
+              >
+                List Matches
+              </Tabs.Tab>
               <Tabs.Tab value="Documents">Documents</Tabs.Tab>
+              <Tabs.Tab
+                value="Activity"
+                badge={
+                  events.length
+                    ? { content: events.length, pill: true }
+                    : undefined
+                }
+              >
+                Activity
+              </Tabs.Tab>
             </Tabs>
           </div>
 
@@ -173,8 +196,14 @@ function AccountDetailContent() {
             {activeTab === "Reports" && (
               <ReportsTab reports={accountReports} />
             )}
+            {activeTab === "List Matches" && (
+              <ListMatchesTab reports={accountReports} />
+            )}
             {activeTab === "Documents" && (
               <DocumentsTab verifications={accountVerifications} />
+            )}
+            {activeTab === "Activity" && (
+              <ActivityTab events={events} />
             )}
           </div>
         </div>
