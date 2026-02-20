@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { TopBar, TOPBAR_CONTROL_SIZE, TOPBAR_TOOLBAR_PILL } from "@/components/layout/TopBar";
+import { TABLE_PAGE_WRAPPER } from "@/lib/constants/page-layout";
 import { TableSearch, InlineEmpty } from "@/components/shared";
 import { Button } from "@plexui/ui/components/Button";
 import { Badge } from "@plexui/ui/components/Badge";
@@ -160,7 +161,7 @@ export default function UtilitiesPage() {
   }
 
   return (
-    <div className="flex h-full flex-col overflow-hidden">
+    <div className={TABLE_PAGE_WRAPPER}>
       <TopBar
         title="Utilities"
         toolbar={

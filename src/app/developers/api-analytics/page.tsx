@@ -1,6 +1,7 @@
 "use client";
 
 import { TopBar } from "@/components/layout/TopBar";
+import { TABLE_PAGE_WRAPPER } from "@/lib/constants/page-layout";
 import { MetricCard, SectionHeading, DataTable, ChartCard } from "@/components/shared";
 import { SimpleBarChart } from "@/components/charts/SimpleBarChart";
 import type { ColumnDef } from "@tanstack/react-table";
@@ -194,7 +195,7 @@ export default function ApiAnalyticsPage() {
   const requestVolumeData = generateRequestVolumeData();
 
   return (
-    <div className="flex h-full flex-col overflow-hidden">
+    <div className={TABLE_PAGE_WRAPPER}>
       <TopBar title="API Analytics" />
 
       <div className="flex min-h-0 flex-1 flex-col overflow-auto px-4 py-6 md:px-6">
