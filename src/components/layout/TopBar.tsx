@@ -6,8 +6,8 @@ export const TOPBAR_CONTROL_SIZE: ControlSize = "sm";
 
 /** Toolbar controls (Select filters, DateRangePicker, Clear Filters, TableSearch) use pill shape */
 export const TOPBAR_TOOLBAR_PILL = true;
-/** Action buttons (Create X, Export, Save, etc.) use squared shape */
-export const TOPBAR_ACTION_PILL = false;
+/** Action buttons (Create X, Export, Save, etc.) use pill shape */
+export const TOPBAR_ACTION_PILL = true;
 
 export interface BreadcrumbItem {
   label: string;
