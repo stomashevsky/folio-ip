@@ -11,9 +11,9 @@ import { idCell, dateTimeCell, statusCell } from "@/lib/utils/columnHelpers";
 import type { ColumnDef, VisibilityState } from "@tanstack/react-table";
 import type { Workflow } from "@/lib/types";
 import { Button } from "@plexui/ui/components/Button";
+import { Badge } from "@plexui/ui/components/Badge";
 import { Select } from "@plexui/ui/components/Select";
 import { SegmentedControl } from "@plexui/ui/components/SegmentedControl";
-import { EmptyMessage } from "@plexui/ui/components/EmptyMessage";
 import { Plus } from "@plexui/ui/components/Icon";
 import { WORKFLOW_STATUS_OPTIONS, WORKFLOW_TRIGGER_OPTIONS } from "@/lib/constants/filter-options";
 import { TemplatePickerModal } from "@/components/shared";
@@ -22,6 +22,23 @@ import {
   WORKFLOW_COLUMN_CONFIG,
   WORKFLOW_DEFAULT_VISIBILITY,
 } from "@/lib/constants/column-configs";
+
+interface WorkflowModule {
+  id: string;
+  name: string;
+  description: string;
+  status: "published" | "draft";
+  stepsCount: number;
+  usedByCount: number;
+}
+
+const MOCK_MODULES: WorkflowModule[] = [
+  { id: "mod_001", name: "Risk Score Evaluation", description: "Evaluate risk score and route based on thresholds", status: "published", stepsCount: 3, usedByCount: 4 },
+  { id: "mod_002", name: "PEP & Sanctions Check", description: "Run PEP and sanctions screening with match handling", status: "published", stepsCount: 5, usedByCount: 3 },
+  { id: "mod_003", name: "Document Retry Logic", description: "Retry failed document verifications with exponential backoff", status: "published", stepsCount: 4, usedByCount: 2 },
+  { id: "mod_004", name: "Email Notification", description: "Send templated email notifications with variable substitution", status: "draft", stepsCount: 2, usedByCount: 0 },
+  { id: "mod_005", name: "Case Creation", description: "Create a case with auto-assignment and SLA configuration", status: "published", stepsCount: 3, usedByCount: 5 },
+];
 
 const STATUS_OPTIONS = WORKFLOW_STATUS_OPTIONS;
 const COLUMN_CONFIG: ColumnConfig[] = WORKFLOW_COLUMN_CONFIG;
@@ -254,13 +271,28 @@ export default function WorkflowsPage() {
           />
         </div>
       ) : (
-        <div className="flex min-h-0 flex-1 items-center justify-center">
-          <EmptyMessage>
-            <EmptyMessage.Title>No modules yet</EmptyMessage.Title>
-            <EmptyMessage.Description>
-              Modules are reusable workflow fragments that can be shared across workflows.
-            </EmptyMessage.Description>
-          </EmptyMessage>
+        <div className={TABLE_PAGE_CONTENT}>
+          <div className="space-y-3">
+            {MOCK_MODULES.map((mod) => (
+              <div
+                key={mod.id}
+                className="flex items-center justify-between rounded-lg border border-[var(--color-border)] p-4"
+              >
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-medium text-[var(--color-text)]">{mod.name}</span>
+                    <Badge color={mod.status === "published" ? "success" : "secondary"} size="sm">{mod.status}</Badge>
+                  </div>
+                  <p className="mt-1 text-2xs text-[var(--color-text-secondary)]">{mod.description}</p>
+                  <div className="mt-2 flex items-center gap-3 text-2xs text-[var(--color-text-tertiary)]">
+                    <span>{mod.stepsCount} steps</span>
+                    <span>Used in {mod.usedByCount} workflows</span>
+                  </div>
+                </div>
+                <Button color="secondary" variant="outline" size="sm">Edit</Button>
+              </div>
+            ))}
+          </div>
         </div>
       )}
 

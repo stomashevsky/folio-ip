@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import { useRouter } from "next/navigation";
 import { TopBar, TOPBAR_CONTROL_SIZE, TOPBAR_TOOLBAR_PILL } from "@/components/layout/TopBar";
 import { TABLE_PAGE_WRAPPER, TABLE_PAGE_CONTENT } from "@/lib/constants/page-layout";
 import { DataTable, TableSearch } from "@/components/shared";
@@ -77,6 +78,7 @@ const columns: ColumnDef<WorkflowRun, unknown>[] = [
 ];
 
 export default function WorkflowRunsPage() {
+  const router = useRouter();
   const { workflowRuns } = useTemplateStore();
 
   const [search, setSearch] = useState("");
@@ -161,6 +163,7 @@ export default function WorkflowRunsPage() {
           initialSorting={[{ id: "startedAt", desc: true }]}
           columnVisibility={columnVisibility}
           onColumnVisibilityChange={setColumnVisibility}
+          onRowClick={(row) => router.push(`/platform/workflows/runs/${row.id}`)}
           mobileColumnVisibility={{
             id: true,
             workflowName: true,
