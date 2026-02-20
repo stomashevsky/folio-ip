@@ -87,6 +87,67 @@ export const CHECK_REQUIREMENT_OPTIONS = [
   { value: "optional", label: "Optional" },
 ];
 
+// Workflow filter options
+
+export const WORKFLOW_STATUS_OPTIONS = [
+  { value: "active", label: "Active" },
+  { value: "draft", label: "Draft" },
+  { value: "archived", label: "Archived" },
+  { value: "disabled", label: "Disabled" },
+];
+
+export const WORKFLOW_TRIGGER_OPTIONS = [
+  { value: "inquiry.completed", label: "Inquiry completed" },
+  { value: "inquiry.created", label: "Inquiry created" },
+  { value: "verification.passed", label: "Verification passed" },
+  { value: "verification.failed", label: "Verification failed" },
+  { value: "report.ready", label: "Report ready" },
+  { value: "account.created", label: "Account created" },
+  { value: "manual", label: "Manual" },
+];
+
+export const WORKFLOW_RUN_STATUS_OPTIONS = [
+  { value: "completed", label: "Completed" },
+  { value: "running", label: "Running" },
+  { value: "failed", label: "Failed" },
+  { value: "canceled", label: "Canceled" },
+];
+
+// Transaction filter options
+
+export const TRANSACTION_STATUS_OPTIONS = [
+  { value: "created", label: "Created" },
+  { value: "reviewed", label: "Reviewed" },
+  { value: "approved", label: "Approved" },
+  { value: "declined", label: "Declined" },
+  { value: "flagged", label: "Flagged" },
+];
+
+export const TRANSACTION_TYPE_OPTIONS = [
+  { value: "payment", label: "Payment" },
+  { value: "withdrawal", label: "Withdrawal" },
+  { value: "transfer", label: "Transfer" },
+  { value: "deposit", label: "Deposit" },
+  { value: "refund", label: "Refund" },
+];
+
+// Case filter options
+
+export const CASE_STATUS_OPTIONS = [
+  { value: "open", label: "Open" },
+  { value: "in_review", label: "In Review" },
+  { value: "resolved", label: "Resolved" },
+  { value: "escalated", label: "Escalated" },
+  { value: "closed", label: "Closed" },
+];
+
+export const CASE_PRIORITY_OPTIONS = [
+  { value: "low", label: "Low" },
+  { value: "medium", label: "Medium" },
+  { value: "high", label: "High" },
+  { value: "critical", label: "Critical" },
+];
+
 // Template filter options
 
 export const TEMPLATE_STATUS_OPTIONS = [

@@ -131,6 +131,106 @@ export const REPORT_TEMPLATE_DEFAULT_VISIBILITY: VisibilityState = {
   updatedAt: true,
 };
 
+// Workflow columns
+
+export const WORKFLOW_COLUMN_CONFIG: ColumnConfig[] = [
+  { id: "name", label: "Name" },
+  { id: "id", label: "Workflow ID" },
+  { id: "description", label: "Description" },
+  { id: "status", label: "Status" },
+  { id: "trigger", label: "Trigger" },
+  { id: "runsCount", label: "Runs" },
+  { id: "lastRunAt", label: "Last run" },
+  { id: "updatedAt", label: "Last updated at" },
+];
+
+export const WORKFLOW_DEFAULT_VISIBILITY: VisibilityState = {
+  name: true,
+  id: false,
+  description: true,
+  status: true,
+  trigger: true,
+  runsCount: true,
+  lastRunAt: false,
+  updatedAt: true,
+};
+
+export const WORKFLOW_RUN_COLUMN_CONFIG: ColumnConfig[] = [
+  { id: "id", label: "Run ID" },
+  { id: "workflowName", label: "Workflow" },
+  { id: "status", label: "Status" },
+  { id: "triggeredBy", label: "Triggered by" },
+  { id: "startedAt", label: "Started at" },
+  { id: "completedAt", label: "Completed at" },
+  { id: "stepsExecuted", label: "Steps" },
+];
+
+export const WORKFLOW_RUN_DEFAULT_VISIBILITY: VisibilityState = {
+  id: true,
+  workflowName: true,
+  status: true,
+  triggeredBy: true,
+  startedAt: true,
+  completedAt: false,
+  stepsExecuted: true,
+};
+
+// Transaction columns
+
+export const TRANSACTION_COLUMN_CONFIG: ColumnConfig[] = [
+  { id: "accountName", label: "Account" },
+  { id: "id", label: "Transaction ID" },
+  { id: "type", label: "Type" },
+  { id: "amount", label: "Amount" },
+  { id: "status", label: "Status" },
+  { id: "riskScore", label: "Risk score" },
+  { id: "createdAt", label: "Created at" },
+  { id: "reviewedAt", label: "Reviewed at" },
+  { id: "description", label: "Description" },
+  { id: "tags", label: "Tags" },
+];
+
+export const TRANSACTION_DEFAULT_VISIBILITY: VisibilityState = {
+  accountName: true,
+  id: true,
+  type: true,
+  amount: true,
+  status: true,
+  riskScore: true,
+  createdAt: true,
+  reviewedAt: false,
+  description: false,
+  tags: false,
+};
+
+// Case columns
+
+export const CASE_COLUMN_CONFIG: ColumnConfig[] = [
+  { id: "id", label: "Case ID" },
+  { id: "title", label: "Title" },
+  { id: "accountName", label: "Account" },
+  { id: "status", label: "Status" },
+  { id: "priority", label: "Priority" },
+  { id: "queue", label: "Queue" },
+  { id: "assignee", label: "Assignee" },
+  { id: "createdAt", label: "Created at" },
+  { id: "updatedAt", label: "Updated at" },
+  { id: "tags", label: "Tags" },
+];
+
+export const CASE_DEFAULT_VISIBILITY: VisibilityState = {
+  id: true,
+  title: true,
+  accountName: true,
+  status: true,
+  priority: true,
+  queue: true,
+  assignee: true,
+  createdAt: true,
+  updatedAt: false,
+  tags: false,
+};
+
 // Account columns
 
 export const ACCOUNT_COLUMN_CONFIG: ColumnConfig[] = [

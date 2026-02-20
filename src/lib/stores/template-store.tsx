@@ -12,20 +12,30 @@ import {
   mockInquiryTemplates,
   mockReportTemplates,
   mockVerificationTemplates,
+  mockWorkflows,
+  mockWorkflowRuns,
+  mockCases,
 } from "@/lib/data";
 import type {
+  Case,
   InquiryTemplate,
   ReportTemplate,
   VerificationTemplate,
+  Workflow,
+  WorkflowRun,
 } from "@/lib/types";
 
 type InquiryTemplateCreateInput = Omit<InquiryTemplate, "id" | "createdAt" | "updatedAt">;
 type VerificationTemplateCreateInput = Omit<VerificationTemplate, "id" | "createdAt" | "updatedAt">;
 type ReportTemplateCreateInput = Omit<ReportTemplate, "id" | "createdAt" | "updatedAt">;
+type WorkflowCreateInput = Omit<Workflow, "id" | "createdAt" | "updatedAt">;
+type CaseCreateInput = Omit<Case, "id" | "createdAt" | "updatedAt">;
 
 type InquiryTemplateUpdateInput = Partial<Omit<InquiryTemplate, "id" | "createdAt">>;
 type VerificationTemplateUpdateInput = Partial<Omit<VerificationTemplate, "id" | "createdAt">>;
 type ReportTemplateUpdateInput = Partial<Omit<ReportTemplate, "id" | "createdAt">>;
+type WorkflowUpdateInput = Partial<Omit<Workflow, "id" | "createdAt">>;
+type CaseUpdateInput = Partial<Omit<Case, "id" | "createdAt">>;
 
 type TemplateStoreValue = {
   inquiryTemplates: {
@@ -49,6 +59,24 @@ type TemplateStoreValue = {
     update: (id: string, input: ReportTemplateUpdateInput) => ReportTemplate | undefined;
     delete: (id: string) => void;
   };
+  workflows: {
+    getAll: () => Workflow[];
+    getById: (id: string) => Workflow | undefined;
+    create: (input: WorkflowCreateInput) => Workflow;
+    update: (id: string, input: WorkflowUpdateInput) => Workflow | undefined;
+    delete: (id: string) => void;
+  };
+  workflowRuns: {
+    getAll: () => WorkflowRun[];
+    getByWorkflowId: (workflowId: string) => WorkflowRun[];
+  };
+  cases: {
+    getAll: () => Case[];
+    getById: (id: string) => Case | undefined;
+    create: (input: CaseCreateInput) => Case;
+    update: (id: string, input: CaseUpdateInput) => Case | undefined;
+    delete: (id: string) => void;
+  };
 };
 
 const TemplateStoreContext = createContext<TemplateStoreValue | undefined>(undefined);
@@ -57,7 +85,7 @@ function cloneData<T>(value: T): T {
   return JSON.parse(JSON.stringify(value)) as T;
 }
 
-function randomId(prefix: "itmpl_" | "vtmpl_" | "rptp_") {
+function randomId(prefix: "itmpl_" | "vtmpl_" | "rptp_" | "wfl_" | "case_") {
   return `${prefix}${Math.random().toString(36).slice(2, 14)}`;
 }
 
@@ -65,6 +93,9 @@ export function TemplateProvider({ children }: { children: ReactNode }) {
   const [inquiryTemplates, setInquiryTemplates] = useState<InquiryTemplate[]>(() => cloneData(mockInquiryTemplates));
   const [verificationTemplates, setVerificationTemplates] = useState<VerificationTemplate[]>(() => cloneData(mockVerificationTemplates));
   const [reportTemplates, setReportTemplates] = useState<ReportTemplate[]>(() => cloneData(mockReportTemplates));
+  const [workflows, setWorkflows] = useState<Workflow[]>(() => cloneData(mockWorkflows));
+  const [workflowRuns] = useState<WorkflowRun[]>(() => cloneData(mockWorkflowRuns));
+  const [cases, setCases] = useState<Case[]>(() => cloneData(mockCases));
 
   const value = useMemo<TemplateStoreValue>(
     () => ({
@@ -167,8 +198,52 @@ export function TemplateProvider({ children }: { children: ReactNode }) {
           setReportTemplates((prev) => prev.filter((template) => template.id !== id));
         },
       },
+      workflows: {
+        getAll: () => workflows,
+        getById: (id) => workflows.find((w) => w.id === id),
+        create: (input) => {
+          const now = new Date().toISOString();
+          const w: Workflow = { id: randomId("wfl_"), createdAt: now, updatedAt: now, ...input };
+          setWorkflows((prev) => [w, ...prev]);
+          return w;
+        },
+        update: (id, input) => {
+          const existing = workflows.find((w) => w.id === id);
+          if (!existing) return undefined;
+          const updated: Workflow = { ...existing, ...input, updatedAt: new Date().toISOString() };
+          setWorkflows((prev) => prev.map((w) => (w.id === id ? updated : w)));
+          return updated;
+        },
+        delete: (id) => {
+          setWorkflows((prev) => prev.filter((w) => w.id !== id));
+        },
+      },
+      workflowRuns: {
+        getAll: () => workflowRuns,
+        getByWorkflowId: (workflowId) => workflowRuns.filter((r) => r.workflowId === workflowId),
+      },
+      cases: {
+        getAll: () => cases,
+        getById: (id) => cases.find((c) => c.id === id),
+        create: (input) => {
+          const now = new Date().toISOString();
+          const c: Case = { id: randomId("case_"), createdAt: now, updatedAt: now, ...input };
+          setCases((prev) => [c, ...prev]);
+          return c;
+        },
+        update: (id, input) => {
+          const existing = cases.find((c) => c.id === id);
+          if (!existing) return undefined;
+          const updated: Case = { ...existing, ...input, updatedAt: new Date().toISOString() };
+          setCases((prev) => prev.map((c) => (c.id === id ? updated : c)));
+          return updated;
+        },
+        delete: (id) => {
+          setCases((prev) => prev.filter((c) => c.id !== id));
+        },
+      },
     }),
-    [inquiryTemplates, verificationTemplates, reportTemplates],
+    [inquiryTemplates, verificationTemplates, reportTemplates, workflows, workflowRuns, cases],
   );
 
   return (

@@ -465,4 +465,98 @@ export interface InquirySignal {
   category: SignalCategory;
 }
 
+// ─── Workflows ───
+
+export type WorkflowStatus = "active" | "draft" | "archived" | "disabled";
+
+export type WorkflowTriggerType =
+  | "inquiry.completed"
+  | "inquiry.created"
+  | "verification.passed"
+  | "verification.failed"
+  | "report.ready"
+  | "account.created"
+  | "manual";
+
+export interface WorkflowTrigger {
+  event: WorkflowTriggerType;
+  conditions?: Record<string, string>;
+}
+
+export interface WorkflowStep {
+  id: string;
+  type: "action" | "condition" | "delay" | "webhook";
+  label: string;
+  config: Record<string, unknown>;
+}
+
+export interface Workflow {
+  id: string; // wfl_...
+  name: string;
+  description?: string;
+  status: WorkflowStatus;
+  trigger: WorkflowTrigger;
+  steps: WorkflowStep[];
+  lastPublishedAt?: string;
+  createdAt: string;
+  updatedAt: string;
+  runsCount: number;
+  lastRunAt?: string;
+}
+
+export interface WorkflowRun {
+  id: string; // wfr_...
+  workflowId: string;
+  workflowName: string;
+  status: "completed" | "running" | "failed" | "canceled";
+  triggeredBy: string;
+  startedAt: string;
+  completedAt?: string;
+  stepsExecuted: number;
+  stepsTotal: number;
+}
+
+// ─── Transactions ───
+
+export type TransactionStatus = "created" | "reviewed" | "approved" | "declined" | "flagged";
+export type TransactionType = "payment" | "withdrawal" | "transfer" | "deposit" | "refund";
+
+export interface Transaction {
+  id: string; // txn_...
+  accountId: string;
+  accountName: string;
+  type: TransactionType;
+  status: TransactionStatus;
+  amount: number;
+  currency: string;
+  description?: string;
+  riskScore: number; // 0-100
+  createdAt: string;
+  reviewedAt?: string;
+  reviewedBy?: string;
+  tags: string[];
+}
+
+// ─── Cases ───
+
+export type CaseStatus = "open" | "in_review" | "resolved" | "escalated" | "closed";
+export type CasePriority = "low" | "medium" | "high" | "critical";
+
+export interface Case {
+  id: string; // case_...
+  accountId?: string;
+  accountName?: string;
+  inquiryId?: string;
+  status: CaseStatus;
+  priority: CasePriority;
+  queue?: string;
+  assignee?: string;
+  title: string;
+  description?: string;
+  tags: string[];
+  createdAt: string;
+  updatedAt: string;
+  resolvedAt?: string;
+}
+
 export type { StoredFlowChatKey } from "./flow-chat";

@@ -3,6 +3,7 @@ import type {
   ReportType,
   VerificationType,
   VerificationCheckConfig,
+  WorkflowTriggerType,
 } from "@/lib/types";
 
 // ─── Shared types ───
@@ -432,6 +433,65 @@ export const INQUIRY_TEMPLATE_PRESETS: TemplatePreset<"inquiry">[] = [
         { verificationType: "vehicle_insurance", required: true, onPass: "approve", onFail: "needs_review", onRetry: "retry", maxRetries: 2 },
       ],
       settings: { expiresInDays: 30 },
+    },
+  },
+];
+
+// ─── Workflow Presets ───
+
+export interface WorkflowPresetDefaults {
+  name: string;
+  description?: string;
+  triggerEvent: WorkflowTriggerType;
+  triggerConditions?: string;
+}
+
+export interface WorkflowPreset {
+  id: string;
+  name: string;
+  description: string;
+  defaults: WorkflowPresetDefaults;
+}
+
+export const WORKFLOW_PRESETS: WorkflowPreset[] = [
+  {
+    id: "wfl_preset_auto_approve",
+    name: "Auto-approve Low Risk",
+    description: "Automatically approve inquiries when the risk score is below a configured threshold.",
+    defaults: {
+      name: "Auto-approve Low Risk",
+      description: "Automatically approve inquiries with risk score below threshold",
+      triggerEvent: "inquiry.completed",
+      triggerConditions: "riskScore: < 30",
+    },
+  },
+  {
+    id: "wfl_preset_escalate_failed",
+    name: "Escalate Failed Verifications",
+    description: "Route failed verifications to a manual review queue and notify the review team.",
+    defaults: {
+      name: "Escalate Failed Verifications",
+      description: "Route failed verifications to manual review queue",
+      triggerEvent: "verification.failed",
+    },
+  },
+  {
+    id: "wfl_preset_pep_screening",
+    name: "PEP Screening on Account Creation",
+    description: "Automatically run PEP screening when a new account is created and alert compliance on matches.",
+    defaults: {
+      name: "PEP Screening on Account Creation",
+      description: "Run PEP screening when new account is created",
+      triggerEvent: "account.created",
+    },
+  },
+  {
+    id: "wfl_preset_custom",
+    name: "Custom Workflow",
+    description: "Start from scratch with a blank workflow and configure your own trigger and steps.",
+    defaults: {
+      name: "",
+      triggerEvent: "inquiry.completed",
     },
   },
 ];
