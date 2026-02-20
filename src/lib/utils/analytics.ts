@@ -3,6 +3,8 @@ import type {
   RateTimeSeriesPoint,
   VerificationRatePoint,
   ReportRatePoint,
+  TransactionRatePoint,
+  CaseRatePoint,
   FunnelTimeSeriesPoint,
   AnalyticsInterval,
 } from "@/lib/types";
@@ -153,6 +155,60 @@ export function aggregateReportRates(
     date,
     matchRate: Math.round((b.matchSum / b.count) * 10) / 10,
     readyRate: Math.round((b.readySum / b.count) * 10) / 10,
+  }));
+}
+
+export function aggregateTransactionRates(
+  data: TransactionRatePoint[],
+  interval: AnalyticsInterval,
+): TransactionRatePoint[] {
+  if (interval === "daily") return data;
+
+  const buckets = new Map<string, { approvalSum: number; flaggedSum: number; count: number }>();
+
+  for (const point of data) {
+    const key = bucketKey(point.date, interval);
+    const existing = buckets.get(key);
+    if (existing) {
+      existing.approvalSum += point.approvalRate;
+      existing.flaggedSum += point.flaggedRate;
+      existing.count += 1;
+    } else {
+      buckets.set(key, { approvalSum: point.approvalRate, flaggedSum: point.flaggedRate, count: 1 });
+    }
+  }
+
+  return Array.from(buckets.entries()).map(([date, b]) => ({
+    date,
+    approvalRate: Math.round((b.approvalSum / b.count) * 10) / 10,
+    flaggedRate: Math.round((b.flaggedSum / b.count) * 10) / 10,
+  }));
+}
+
+export function aggregateCaseRates(
+  data: CaseRatePoint[],
+  interval: AnalyticsInterval,
+): CaseRatePoint[] {
+  if (interval === "daily") return data;
+
+  const buckets = new Map<string, { resolutionSum: number; slaSum: number; count: number }>();
+
+  for (const point of data) {
+    const key = bucketKey(point.date, interval);
+    const existing = buckets.get(key);
+    if (existing) {
+      existing.resolutionSum += point.resolutionRate;
+      existing.slaSum += point.slaComplianceRate;
+      existing.count += 1;
+    } else {
+      buckets.set(key, { resolutionSum: point.resolutionRate, slaSum: point.slaComplianceRate, count: 1 });
+    }
+  }
+
+  return Array.from(buckets.entries()).map(([date, b]) => ({
+    date,
+    resolutionRate: Math.round((b.resolutionSum / b.count) * 10) / 10,
+    slaComplianceRate: Math.round((b.slaSum / b.count) * 10) / 10,
   }));
 }
 

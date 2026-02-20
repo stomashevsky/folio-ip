@@ -1,8 +1,10 @@
 "use client";
 
 import { TopBar } from "@/components/layout/TopBar";
-import { SummaryCard, SectionHeading, DataTable } from "@/components/shared";
+import { MetricCard, SectionHeading, DataTable, ChartCard } from "@/components/shared";
+import { SimpleBarChart } from "@/components/charts/SimpleBarChart";
 import type { ColumnDef } from "@tanstack/react-table";
+import type { TimeSeriesPoint } from "@/lib/types";
 import { Badge } from "@plexui/ui/components/Badge";
 
 interface EndpointMetric {
@@ -165,26 +167,50 @@ const statusCodeColumns: ColumnDef<StatusCodeBreakdown, unknown>[] = [
   },
 ];
 
+// Generate 30 days of mock API request volume data
+function generateRequestVolumeData(): TimeSeriesPoint[] {
+  const data: TimeSeriesPoint[] = [];
+  const today = new Date();
+  
+  for (let i = 29; i >= 0; i--) {
+    const date = new Date(today);
+    date.setDate(date.getDate() - i);
+    
+    // Seeded random: use date as seed for consistent values
+    const seed = date.getTime();
+    const random = Math.sin(seed) * 10000 % 1;
+    const value = Math.floor(3000 + random * 3000);
+    
+    data.push({
+      date: date.toISOString().split('T')[0],
+      value,
+    });
+  }
+  
+  return data;
+}
+
 export default function ApiAnalyticsPage() {
+  const requestVolumeData = generateRequestVolumeData();
+
   return (
     <div className="flex h-full flex-col overflow-hidden">
       <TopBar title="API Analytics" />
 
       <div className="flex min-h-0 flex-1 flex-col overflow-auto px-4 py-6 md:px-6">
-        {/* Stats Row */}
+        {/* Metrics Row */}
         <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <SummaryCard label="Total Requests">
-            <div className="heading-lg text-[var(--color-text)]">124,567</div>
-          </SummaryCard>
-          <SummaryCard label="Avg Latency">
-            <div className="heading-lg text-[var(--color-text)]">45ms</div>
-          </SummaryCard>
-          <SummaryCard label="Error Rate">
-            <div className="heading-lg text-[var(--color-text)]">2.1%</div>
-          </SummaryCard>
-          <SummaryCard label="Active Keys">
-            <div className="heading-lg text-[var(--color-text)]">8</div>
-          </SummaryCard>
+          <MetricCard label="Total Requests" value="124,567" variant="compact" />
+          <MetricCard label="Avg Latency" value="45ms" variant="compact" />
+          <MetricCard label="Error Rate" value="2.1%" variant="compact" />
+          <MetricCard label="Active Keys" value="8" variant="compact" />
+        </div>
+
+        {/* Request Volume Chart */}
+        <div className="mb-8">
+          <ChartCard title="API Request Volume" description="30-day trend">
+            <SimpleBarChart data={requestVolumeData} label="Requests" />
+          </ChartCard>
         </div>
 
         {/* Endpoint Breakdown */}

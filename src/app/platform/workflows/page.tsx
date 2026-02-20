@@ -159,6 +159,12 @@ export default function WorkflowsPage() {
             )}
           </div>
         }
+        tabs={
+          <Tabs aria-label="Workflow sections" value={activeTab} onChange={setActiveTab} size="md">
+            <Tabs.Tab value="workflows">Workflows</Tabs.Tab>
+            <Tabs.Tab value="modules">Modules</Tabs.Tab>
+          </Tabs>
+        }
         toolbar={
           activeTab === "workflows" ? (
             <>
@@ -215,13 +221,6 @@ export default function WorkflowsPage() {
           ) : undefined
         }
       />
-
-      <div className="border-b border-[var(--color-border)] px-4 md:px-6">
-        <Tabs aria-label="Workflow sections" value={activeTab} onChange={setActiveTab} size="md">
-          <Tabs.Tab value="workflows">Workflows</Tabs.Tab>
-          <Tabs.Tab value="modules">Modules</Tabs.Tab>
-        </Tabs>
-      </div>
 
       {activeTab === "workflows" ? (
         <div className="flex min-h-0 flex-1 flex-col px-4 pt-4 md:px-6">

@@ -25,6 +25,12 @@ export {
   generateReportTimeSeries,
   generateReportRateTimeSeries,
   deriveReportHighlights,
+  generateTransactionTimeSeries,
+  generateTransactionRateTimeSeries,
+  deriveTransactionHighlights,
+  generateCaseTimeSeries,
+  generateCaseRateTimeSeries,
+  deriveCaseHighlights,
 } from "./mock-analytics";
 export {
   mockInquiryTemplates,

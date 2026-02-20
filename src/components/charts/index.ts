@@ -8,4 +8,6 @@ export { RatesLineChart } from "./RatesLineChart";
 export { ReportRatesChart } from "./ReportRatesChart";
 export { SimpleBarChart } from "./SimpleBarChart";
 export { StatusDonutChart } from "./StatusDonutChart";
+export { TransactionRatesChart } from "./TransactionRatesChart";
+export { CaseRatesChart } from "./CaseRatesChart";
 export { VerificationRatesChart } from "./VerificationRatesChart";

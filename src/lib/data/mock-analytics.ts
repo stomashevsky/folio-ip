@@ -7,6 +7,8 @@ import type {
   RateTimeSeriesPoint,
   VerificationRatePoint,
   ReportRatePoint,
+  TransactionRatePoint,
+  CaseRatePoint,
   FunnelTimeSeriesPoint,
   SankeyFunnelData,
   SankeyLinkType,
@@ -474,5 +476,149 @@ export function deriveReportHighlights(days: number): HighlightMetric[] {
     { label: "Match Rate", value: `${Math.round(matchRate * 10) / 10}%`, tooltip: "% of reports with at least one match" },
     { label: "No Match Rate", value: `${Math.round(noMatchRate * 10) / 10}%`, tooltip: "% of reports with no matches" },
     { label: "Avg Processing", value: `${avgSeconds}s`, tooltip: "Average time to complete a report" },
+  ];
+}
+
+// ─── Transaction Analytics ───
+
+export function generateTransactionTimeSeries(
+  periodOrDays: "all" | "3m" | "30d" | "7d" | number,
+): TimeSeriesPoint[] {
+  const lengths: Record<string, number> = { all: 365, "3m": 90, "30d": 30, "7d": 7 };
+  const count = typeof periodOrDays === "number"
+    ? Math.max(1, Math.round(periodOrDays))
+    : lengths[periodOrDays];
+  const endDate = new Date("2026-02-10");
+
+  let walk = 0;
+  return Array.from({ length: count }, (_, i) => {
+    const date = new Date(endDate);
+    date.setDate(date.getDate() - (count - 1 - i));
+    const dayOfWeek = date.getDay();
+
+    const trend = 35 + (i / count) * 15;
+    const weekendFactor = dayOfWeek === 0 || dayOfWeek === 6 ? 0.6 : 1.0;
+    walk += (seededRandom(i * 14 + count * 4) - 0.5) * 7;
+    walk = walk * 0.91;
+    const noise = (seededRandom(i * 21 + count * 8) - 0.5) * 10;
+    const spike = seededRandom(i * 39 + count * 12) > 0.94 ? 12 + seededRandom(i * 49) * 8 : 0;
+    const value = Math.round((trend + walk + noise + spike) * weekendFactor);
+
+    return {
+      date: date.toISOString().split("T")[0],
+      value: Math.max(4, value),
+    };
+  });
+}
+
+export function generateTransactionRateTimeSeries(days: number): TransactionRatePoint[] {
+  const endDate = new Date("2026-02-10");
+
+  return Array.from({ length: days }, (_, i) => {
+    const date = new Date(endDate);
+    date.setDate(date.getDate() - (days - 1 - i));
+
+    const approvalNoise = (seededRandom(i * 33 + 1900) - 0.5) * 10;
+    const approvalRate = Math.max(60, Math.min(100, 88 + approvalNoise));
+
+    const flaggedNoise = (seededRandom(i * 39 + 2100) - 0.5) * 6;
+    const flaggedRate = Math.max(1, Math.min(25, 8 + flaggedNoise));
+
+    return {
+      date: date.toISOString().split("T")[0],
+      approvalRate: Math.round(approvalRate * 10) / 10,
+      flaggedRate: Math.round(flaggedRate * 10) / 10,
+    };
+  });
+}
+
+export function deriveTransactionHighlights(days: number): HighlightMetric[] {
+  const dailyRate = 38;
+  const total = Math.round(dailyRate * days * (0.85 + seededRandom(days * 4) * 0.3));
+  const totalVolume = Math.round(total * (120 + seededRandom(days * 6) * 80));
+  const avgAmount = total > 0 ? Math.round(totalVolume / total) : 0;
+  const approvalRate = 85 + seededRandom(days * 8) * 10;
+  const flaggedRate = 5 + seededRandom(days * 10) * 8;
+  const avgProcessing = 1.2 + seededRandom(days * 14) * 2.5;
+
+  return [
+    { label: "Total Transactions", value: total.toLocaleString(), tooltip: "All transactions monitored in this period" },
+    { label: "Total Volume", value: `$${(totalVolume / 1000).toFixed(0)}k`, tooltip: "Combined dollar amount of all transactions" },
+    { label: "Avg Amount", value: `$${avgAmount.toLocaleString()}`, tooltip: "Average transaction amount" },
+    { label: "Approval Rate", value: `${Math.round(approvalRate * 10) / 10}%`, tooltip: "% of transactions approved" },
+    { label: "Flagged Rate", value: `${Math.round(flaggedRate * 10) / 10}%`, tooltip: "% of transactions flagged for review" },
+    { label: "Avg Processing", value: `${avgProcessing.toFixed(1)}s`, tooltip: "Average time to process a transaction" },
+  ];
+}
+
+// ─── Case Analytics ───
+
+export function generateCaseTimeSeries(
+  periodOrDays: "all" | "3m" | "30d" | "7d" | number,
+): TimeSeriesPoint[] {
+  const lengths: Record<string, number> = { all: 365, "3m": 90, "30d": 30, "7d": 7 };
+  const count = typeof periodOrDays === "number"
+    ? Math.max(1, Math.round(periodOrDays))
+    : lengths[periodOrDays];
+  const endDate = new Date("2026-02-10");
+
+  let walk = 0;
+  return Array.from({ length: count }, (_, i) => {
+    const date = new Date(endDate);
+    date.setDate(date.getDate() - (count - 1 - i));
+    const dayOfWeek = date.getDay();
+
+    const trend = 8 + (i / count) * 6;
+    const weekendFactor = dayOfWeek === 0 || dayOfWeek === 6 ? 0.4 : 1.0;
+    walk += (seededRandom(i * 16 + count * 5) - 0.5) * 4;
+    walk = walk * 0.89;
+    const noise = (seededRandom(i * 23 + count * 9) - 0.5) * 5;
+    const spike = seededRandom(i * 47 + count * 14) > 0.96 ? 5 + seededRandom(i * 57) * 4 : 0;
+    const value = Math.round((trend + walk + noise + spike) * weekendFactor);
+
+    return {
+      date: date.toISOString().split("T")[0],
+      value: Math.max(1, value),
+    };
+  });
+}
+
+export function generateCaseRateTimeSeries(days: number): CaseRatePoint[] {
+  const endDate = new Date("2026-02-10");
+
+  return Array.from({ length: days }, (_, i) => {
+    const date = new Date(endDate);
+    date.setDate(date.getDate() - (days - 1 - i));
+
+    const resolutionNoise = (seededRandom(i * 43 + 2300) - 0.5) * 12;
+    const resolutionRate = Math.max(50, Math.min(100, 78 + resolutionNoise));
+
+    const slaNoise = (seededRandom(i * 47 + 2500) - 0.5) * 8;
+    const slaComplianceRate = Math.max(70, Math.min(100, 94 + slaNoise));
+
+    return {
+      date: date.toISOString().split("T")[0],
+      resolutionRate: Math.round(resolutionRate * 10) / 10,
+      slaComplianceRate: Math.round(slaComplianceRate * 10) / 10,
+    };
+  });
+}
+
+export function deriveCaseHighlights(days: number): HighlightMetric[] {
+  const dailyRate = 5.2;
+  const total = Math.round(dailyRate * days * (0.8 + seededRandom(days * 5) * 0.4));
+  const openCount = Math.round(total * (0.25 + seededRandom(days * 7) * 0.1));
+  const resolvedCount = Math.round(total * (0.4 + seededRandom(days * 9) * 0.15));
+  const escalatedCount = total - openCount - resolvedCount;
+  const avgResolutionDays = 1.8 + seededRandom(days * 11) * 1.5;
+  const slaRate = 90 + seededRandom(days * 13) * 8;
+
+  return [
+    { label: "Total Cases", value: total.toLocaleString(), tooltip: "All cases created in this period" },
+    { label: "Open", value: openCount.toLocaleString(), tooltip: "Cases currently open" },
+    { label: "Resolved", value: resolvedCount.toLocaleString(), tooltip: "Cases resolved in this period" },
+    { label: "Escalated", value: escalatedCount.toLocaleString(), tooltip: "Cases escalated for review" },
+    { label: "Avg Resolution", value: `${avgResolutionDays.toFixed(1)}d`, tooltip: "Average time to resolve a case" },
+    { label: "SLA Compliance", value: `${Math.round(slaRate * 10) / 10}%`, tooltip: "% of cases resolved within SLA" },
   ];
 }

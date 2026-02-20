@@ -35,7 +35,7 @@ export function TopBar({ title, description, actions, toolbar, tabs, breadcrumb,
       className={`sticky top-0 z-10 shrink-0 bg-[var(--color-surface)] px-4 md:px-6 ${
         noBorder ? "" : "border-b border-[var(--color-border)]"
       } ${
-        hasTabs ? "pb-0 pt-3" : noBorder ? "pb-0 pt-3" : "py-3"
+        hasTabs && !hasToolbar ? "pb-0 pt-3" : noBorder ? "pb-0 pt-3" : "py-3"
       }`}
     >
       {/* Breadcrumb row */}

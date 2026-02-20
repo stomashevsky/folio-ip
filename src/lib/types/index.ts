@@ -379,6 +379,20 @@ export interface ReportRatePoint {
   readyRate: number; // 0-100
 }
 
+// Transaction rate time series: approval + flagged rates per day
+export interface TransactionRatePoint {
+  date: string; // ISO 8601 date
+  approvalRate: number; // 0-100
+  flaggedRate: number; // 0-100
+}
+
+// Case rate time series: resolution + SLA compliance rates per day
+export interface CaseRatePoint {
+  date: string; // ISO 8601 date
+  resolutionRate: number; // 0-100
+  slaComplianceRate: number; // 0-100
+}
+
 // Highlights strip: compact metrics shown in a horizontal row
 export interface HighlightMetric {
   label: string;
