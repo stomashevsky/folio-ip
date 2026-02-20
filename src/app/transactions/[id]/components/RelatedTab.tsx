@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { SectionHeading, InlineEmpty } from "@/components/shared";
+import { SectionHeading, InlineEmpty, KeyValueTable } from "@/components/shared";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import { mockTransactions } from "@/lib/data";
 import { formatDateTime } from "@/lib/utils/format";
@@ -22,20 +22,26 @@ export function RelatedTab({ transaction }: { transaction: Transaction }) {
     <div className="space-y-6">
       <div>
         <SectionHeading>Linked account</SectionHeading>
-        <Link
-          href={`/accounts/${transaction.accountId}`}
-          className="block rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4 transition-colors hover:bg-[var(--color-nav-hover-bg)]"
-        >
-          <p className="text-xs font-medium uppercase tracking-wide text-[var(--color-text-tertiary)]">
-            Account
-          </p>
-          <p className="mt-1 text-sm font-medium text-[var(--color-text)]">
-            {transaction.accountName}
-          </p>
-          <p className="mt-0.5 truncate font-mono text-xs text-[var(--color-primary-solid-bg)]">
-            {transaction.accountId}
-          </p>
-        </Link>
+        <KeyValueTable
+          rows={[
+            {
+              label: "Account",
+              value: (
+                <Link
+                  href={`/accounts/${transaction.accountId}`}
+                  className="hover:underline"
+                >
+                  <span className="text-sm font-medium text-[var(--color-text)]">
+                    {transaction.accountName}
+                  </span>
+                  <span className="ml-2 font-mono text-xs text-[var(--color-text-tertiary)]">
+                    {transaction.accountId}
+                  </span>
+                </Link>
+              ),
+            },
+          ]}
+        />
       </div>
 
       <div>

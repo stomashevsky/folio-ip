@@ -94,53 +94,61 @@ export function OverviewTab({
 
       <div>
         <SectionHeading>Linked entities</SectionHeading>
-        <div className="grid gap-3 md:grid-cols-2">
-          {caseItem.accountId && (
-            <Link
-              href={`/accounts/${caseItem.accountId}`}
-              className="block rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4 transition-colors hover:bg-[var(--color-nav-hover-bg)]"
-            >
-              <p className="text-xs font-medium uppercase tracking-wide text-[var(--color-text-tertiary)]">
-                Account
-              </p>
-              <p className="mt-1 text-sm font-medium text-[var(--color-text)]">
-                {caseItem.accountName ?? caseItem.accountId}
-              </p>
-              <p className="mt-0.5 truncate font-mono text-xs text-[var(--color-primary-solid-bg)]">
-                {caseItem.accountId}
-              </p>
-            </Link>
-          )}
-          {caseItem.inquiryId && (
-            <Link
-              href={`/inquiries/${caseItem.inquiryId}`}
-              className="block rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4 transition-colors hover:bg-[var(--color-nav-hover-bg)]"
-            >
-              <p className="text-xs font-medium uppercase tracking-wide text-[var(--color-text-tertiary)]">
-                Inquiry
-              </p>
-              <p className="mt-1 truncate font-mono text-sm text-[var(--color-primary-solid-bg)]">
-                {caseItem.inquiryId}
-              </p>
-            </Link>
-          )}
-          <div className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4">
-            <p className="text-xs font-medium uppercase tracking-wide text-[var(--color-text-tertiary)]">
-              Verifications
-            </p>
-            <p className="mt-1 text-sm text-[var(--color-text-secondary)]">
-              {verificationsCount} linked {verificationsCount === 1 ? "verification" : "verifications"}
-            </p>
-          </div>
-          <div className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4">
-            <p className="text-xs font-medium uppercase tracking-wide text-[var(--color-text-tertiary)]">
-              Reports
-            </p>
-            <p className="mt-1 text-sm text-[var(--color-text-secondary)]">
-              {reportsCount} linked {reportsCount === 1 ? "report" : "reports"}
-            </p>
-          </div>
-        </div>
+        <KeyValueTable
+          rows={[
+            ...(caseItem.accountId
+              ? [
+                  {
+                    label: "Account",
+                    value: (
+                      <Link
+                        href={`/accounts/${caseItem.accountId}`}
+                        className="hover:underline"
+                      >
+                        <span className="text-sm font-medium text-[var(--color-text)]">
+                          {caseItem.accountName ?? caseItem.accountId}
+                        </span>
+                        <span className="ml-2 font-mono text-xs text-[var(--color-text-tertiary)]">
+                          {caseItem.accountId}
+                        </span>
+                      </Link>
+                    ),
+                  },
+                ]
+              : []),
+            ...(caseItem.inquiryId
+              ? [
+                  {
+                    label: "Inquiry",
+                    value: (
+                      <Link
+                        href={`/inquiries/${caseItem.inquiryId}`}
+                        className="font-mono text-sm text-[var(--color-primary-solid-bg)] hover:underline"
+                      >
+                        {caseItem.inquiryId}
+                      </Link>
+                    ),
+                  },
+                ]
+              : []),
+            {
+              label: "Verifications",
+              value: (
+                <span className="text-sm text-[var(--color-text-secondary)]">
+                  {verificationsCount} linked
+                </span>
+              ),
+            },
+            {
+              label: "Reports",
+              value: (
+                <span className="text-sm text-[var(--color-text-secondary)]">
+                  {reportsCount} linked
+                </span>
+              ),
+            },
+          ]}
+        />
       </div>
 
       {caseItem.accountId && (() => {
@@ -150,30 +158,34 @@ export function OverviewTab({
         return relatedCases.length > 0 ? (
           <div>
             <SectionHeading badge={relatedCases.length}>Related cases</SectionHeading>
-            <div className="grid gap-3 md:grid-cols-2">
-              {relatedCases.map((rc) => (
-                <Link
-                  key={rc.id}
-                  href={`/platform/cases/${rc.id}`}
-                  className="block rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4 transition-colors hover:bg-[var(--color-nav-hover-bg)]"
-                >
-                  <p className="text-sm font-medium text-[var(--color-text)]">
-                    {rc.title}
-                  </p>
-                  <p className="mt-0.5 truncate font-mono text-xs text-[var(--color-text-tertiary)]">
-                    {rc.id}
-                  </p>
-                  <div className="mt-2 flex gap-1.5">
-                    <StatusBadge status={rc.status} />
-                    <Badge
-                      color={PRIORITY_COLORS[rc.priority] ?? "secondary"}
-                      size="sm"
-                    >
-                      {rc.priority.charAt(0).toUpperCase() + rc.priority.slice(1)}
-                    </Badge>
-                  </div>
-                </Link>
-              ))}
+            <div className="overflow-x-auto rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-[var(--color-border)]">
+                    <th className="px-4 py-2.5 text-left text-xs font-semibold uppercase tracking-[0.5px] text-[var(--color-text-tertiary)]">Title</th>
+                    <th className="px-4 py-2.5 text-left text-xs font-semibold uppercase tracking-[0.5px] text-[var(--color-text-tertiary)]">Status</th>
+                    <th className="px-4 py-2.5 text-left text-xs font-semibold uppercase tracking-[0.5px] text-[var(--color-text-tertiary)]">Priority</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {relatedCases.map((rc) => (
+                    <tr key={rc.id} className="border-b border-[var(--color-border)] last:border-b-0 hover:bg-[var(--color-surface-secondary)]">
+                      <td className="px-4 py-3">
+                        <Link href={`/platform/cases/${rc.id}`} className="text-sm font-medium text-[var(--color-text)] hover:text-[var(--color-primary-solid-bg)] hover:underline">
+                          {rc.title}
+                        </Link>
+                        <p className="truncate font-mono text-xs text-[var(--color-text-tertiary)]">{rc.id}</p>
+                      </td>
+                      <td className="px-4 py-3"><StatusBadge status={rc.status} /></td>
+                      <td className="px-4 py-3">
+                        <Badge color={PRIORITY_COLORS[rc.priority] ?? "secondary"} size="sm">
+                          {rc.priority.charAt(0).toUpperCase() + rc.priority.slice(1)}
+                        </Badge>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </div>
         ) : null;

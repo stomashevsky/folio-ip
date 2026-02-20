@@ -96,25 +96,30 @@ export function OverviewTab({ transaction }: { transaction: Transaction }) {
 
       <div>
         <SectionHeading>Parties</SectionHeading>
-        <div className="grid gap-4 md:grid-cols-2">
-          <div className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4">
-            <p className="text-xs font-medium uppercase tracking-wide text-[var(--color-text-tertiary)]">Sender</p>
-            <p className="mt-2 text-sm font-medium text-[var(--color-text)]">{transaction.accountName}</p>
-            <Link
-              href={`/accounts/${transaction.accountId}`}
-              className="mt-1 block truncate font-mono text-xs text-[var(--color-primary-solid-bg)] hover:underline"
-            >
-              {transaction.accountId}
-            </Link>
-            <p className="mt-1 text-xs text-[var(--color-text-tertiary)]">United States</p>
-          </div>
-          <div className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4">
-            <p className="text-xs font-medium uppercase tracking-wide text-[var(--color-text-tertiary)]">Receiver</p>
-            <p className="mt-2 text-sm font-medium text-[var(--color-text)]">External Payee</p>
-            <p className="mt-1 font-mono text-xs text-[var(--color-text-secondary)]">ext_recipient_001</p>
-            <p className="mt-1 text-xs text-[var(--color-text-tertiary)]">United Kingdom</p>
-          </div>
-        </div>
+        <KeyValueTable
+          rows={[
+            {
+              label: "Sender",
+              value: (
+                <Link href={`/accounts/${transaction.accountId}`} className="hover:underline">
+                  <span className="text-sm font-medium text-[var(--color-text)]">{transaction.accountName}</span>
+                  <span className="ml-2 font-mono text-xs text-[var(--color-text-tertiary)]">{transaction.accountId}</span>
+                  <span className="ml-2 text-xs text-[var(--color-text-tertiary)]">United States</span>
+                </Link>
+              ),
+            },
+            {
+              label: "Receiver",
+              value: (
+                <div>
+                  <span className="text-sm font-medium text-[var(--color-text)]">External Payee</span>
+                  <span className="ml-2 font-mono text-xs text-[var(--color-text-tertiary)]">ext_recipient_001</span>
+                  <span className="ml-2 text-xs text-[var(--color-text-tertiary)]">United Kingdom</span>
+                </div>
+              ),
+            },
+          ]}
+        />
       </div>
 
       <div>
