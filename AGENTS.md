@@ -21,7 +21,7 @@
 | `status-colors.ts` | `STATUS_COLORS` map → CSS var tokens | StatusBadge, charts, dashboard |
 | `report-type-labels.ts` | `REPORT_TYPE_LABELS` | Reports list + detail pages |
 | `date-shortcuts.ts` | `DASHBOARD_DATE_SHORTCUTS`, `LIST_PAGE_DATE_SHORTCUTS` | Dashboard, list pages |
-| `nav-config.ts` | `dashboardNavItems`, `settingsNavGroups`, `navSections`, `isRouteActive()`, `isSectionActive()` | AppSidebar, SettingsSidebar, Navbar, MobileSidebarContent |
+| `nav-config.ts` | `globalSections`, `getActiveGlobalSection()`, `isRouteActive()`, `isSectionActive()` | AppSidebar, Navbar, MobileSidebarContent, SidebarSwitch |
 | `mock-user.ts` | `MOCK_USER` (name, email, org, avatarColor) | Navbar, sidebar, settings pages |
 
 ### Shared components (`src/components/shared/`)
@@ -228,12 +228,13 @@ All imported from `@plexui/ui/hooks/{hookName}`:
 | Verification | `ver_` | initiated → submitted → passed / failed / requires_retry |
 | Report | `rep_` | pending → ready (no_matches / match) |
 | Account | `act_` | default → custom statuses |
+| Case | `case_` | open → in_review → resolved / escalated |
+| Transaction | `txn_` | created → reviewed → approved / declined |
 
 **Relationships:** Account 1→N Inquiries 1→N Verifications, Reports
 
 ### Features We Do NOT Implement
-- **Cases** — Persona has a Cases feature. We do NOT implement this.
-- **Transactions** — Persona has a Transactions feature. We do NOT implement this. No pages, nav items, types, or references.
+- None currently — all Persona sections are in scope.
 
 ### Status Badge Colors
 | Status | Color |

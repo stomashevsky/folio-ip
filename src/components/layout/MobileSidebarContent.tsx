@@ -18,24 +18,11 @@ import { Sun, Moon, SystemMode } from "@plexui/ui/components/Icon";
 import { usePathname, useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
 import {
-  type NavItem,
-  dashboardNavItems,
-  analyticsNavItems,
-  templatesNavItems,
-  settingsNavGroups,
-  navSections,
+  globalSections,
+  getActiveGlobalSection,
   isRouteActive,
-  isSectionActive,
 } from "@/lib/constants/nav-config";
 import { MOCK_USER } from "@/lib/constants/mock-user";
-
-/** Return the flat sidebar items for the current section. */
-function getItemsForSection(pathname: string): NavItem[] | null {
-  if (pathname.startsWith("/analytics")) return analyticsNavItems;
-  if (pathname.startsWith("/templates")) return templatesNavItems;
-  if (pathname.startsWith("/settings")) return null; // grouped, handled separately
-  return dashboardNavItems;
-}
 
 function MobileThemeSwitcher() {
   const { theme, setTheme } = useTheme();
@@ -59,110 +46,70 @@ function MobileThemeSwitcher() {
   );
 }
 
-/**
- * Mobile menu overlay — replaces page content with navigation when open.
- * Uses the PlexUI inline-replacement pattern (not SidebarMobile drawer).
- * On desktop, always renders children.
- */
 export function MobileMenuOverlay({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const { openMobile, setOpenMobile, isMobile } = useSidebar();
 
-  // Desktop: always render children, no mobile menu
-  if (!isMobile) {
+  if (!isMobile || !openMobile) {
     return <>{children}</>;
   }
 
-  const switchSection = (href: string) => {
-    router.push(href);
-  };
+  const activeSection = getActiveGlobalSection(pathname);
 
   const navigate = (href: string) => {
     router.push(href);
     setOpenMobile(false);
   };
 
-  if (!openMobile) {
-    return <>{children}</>;
-  }
-
-  const isSettings = pathname?.startsWith("/settings");
-  const flatItems = getItemsForSection(pathname);
-
-  // Menu is open — replace page content with navigation
   return (
     <div className="flex h-full flex-col p-3">
-      {/* Section toggle: Dashboard / Analytics / Templates / Settings */}
-       <div className="mb-3 flex gap-1">
-         {navSections.map((section) => (
-           <button
-             key={section.href}
-             type="button"
-             aria-label={`Switch to ${section.label}`}
-             onClick={() => switchSection(section.href)}
-             className={`flex h-8 cursor-pointer items-center rounded-lg px-3 text-sm transition-colors ${
-               isSectionActive(pathname, section.href)
-                 ? "bg-[var(--color-nav-active-bg)] font-medium text-[var(--color-text)]"
-                 : "text-[var(--color-text-secondary)] hover:text-[var(--color-text)]"
-             }`}
-           >
-             {section.label}
-           </button>
-         ))}
-       </div>
-
-      {/* Navigation items — scrollable */}
-      <div className="flex-1 overflow-auto">
-        {isSettings ? (
-          /* Settings: grouped navigation */
-          <SidebarContent className="!p-0 ![mask-image:none]">
-            {settingsNavGroups.map((group) => (
-              <SidebarGroup key={group.label || "top"}>
-                {group.label && (
-                  <SidebarGroupLabel size="lg">{group.label}</SidebarGroupLabel>
-                )}
-                <SidebarGroupContent>
-                  <SidebarMenu>
-                    {group.items.map((item) => (
-                      <SidebarMenuItem key={item.href}>
-                        <SidebarMenuButton
-                          isActive={isRouteActive(pathname, item.href)}
-                          onClick={() => navigate(item.href)}
-                        >
-                          <SidebarMenuButtonLabel>
-                            {item.title}
-                          </SidebarMenuButtonLabel>
-                        </SidebarMenuButton>
-                      </SidebarMenuItem>
-                    ))}
-                  </SidebarMenu>
-                </SidebarGroupContent>
-              </SidebarGroup>
-            ))}
-          </SidebarContent>
-        ) : (
-          /* Dashboard / Analytics / Templates: flat navigation */
-          <SidebarContent className="!p-0 ![mask-image:none]">
-            <SidebarMenu>
-              {(flatItems ?? []).map((item) => (
-                <SidebarMenuItem key={item.href}>
-                  <SidebarMenuButton
-                    isActive={isRouteActive(pathname, item.href)}
-                    onClick={() => navigate(item.href)}
-                  >
-                    <SidebarMenuButtonLabel>
-                      {item.title}
-                    </SidebarMenuButtonLabel>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarContent>
-        )}
+      <div className="mb-3 flex flex-wrap gap-1">
+        {globalSections.map((section) => (
+          <button
+            key={section.id}
+            type="button"
+            aria-label={`Switch to ${section.label}`}
+            onClick={() => router.push(section.href)}
+            className={`flex h-8 cursor-pointer items-center rounded-lg px-3 text-sm transition-colors ${
+              activeSection.id === section.id
+                ? "bg-[var(--color-nav-active-bg)] font-medium text-[var(--color-text)]"
+                : "text-[var(--color-text-secondary)] hover:text-[var(--color-text)]"
+            }`}
+          >
+            {section.label}
+          </button>
+        ))}
       </div>
 
-      {/* Profile menu — pinned bottom */}
+      <div className="flex-1 overflow-auto">
+        <SidebarContent className="!p-0 ![mask-image:none]">
+          {activeSection.sidebarGroups.map((group) => (
+            <SidebarGroup key={group.label || "top"}>
+              {group.label && (
+                <SidebarGroupLabel size="lg">{group.label}</SidebarGroupLabel>
+              )}
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  {group.items.map((item) => (
+                    <SidebarMenuItem key={item.href}>
+                      <SidebarMenuButton
+                        isActive={isRouteActive(pathname, item.href)}
+                        onClick={() => navigate(item.href)}
+                      >
+                        <SidebarMenuButtonLabel>
+                          {item.title}
+                        </SidebarMenuButtonLabel>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  ))}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+          ))}
+        </SidebarContent>
+      </div>
+
       <div className="shrink-0 border-t border-[var(--color-border)] pt-3">
         <Menu>
            <Menu.Trigger asChild>

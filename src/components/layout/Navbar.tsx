@@ -9,7 +9,7 @@ import { SidebarMobileMenuButton } from "@plexui/ui/components/Sidebar";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
-import { navSections, isSectionActive } from "@/lib/constants/nav-config";
+import { globalSections, getActiveGlobalSection } from "@/lib/constants/nav-config";
 import { MOCK_USER } from "@/lib/constants/mock-user";
 
 function ThemeSwitcher() {
@@ -51,21 +51,24 @@ export function Navbar() {
         </Link>
       </div>
 
-      {/* Center: Nav items (desktop) */}
+      {/* Center: Global section tabs (desktop) */}
       <nav className="hidden items-center gap-1 md:flex">
-        {navSections.map((item) => (
+        {globalSections.map((section) => {
+          const isActive = getActiveGlobalSection(pathname).id === section.id;
+          return (
             <Link
-              key={item.href}
-              href={item.href}
+              key={section.id}
+              href={section.href}
               className={`relative flex h-8 items-center rounded-lg px-3 text-sm transition-colors ${
-                isSectionActive(pathname, item.href)
+                isActive
                   ? "bg-[var(--color-nav-active-bg)] font-medium text-[var(--color-text)]"
                   : "text-[var(--color-text-secondary)] hover:text-[var(--color-text)]"
               }`}
             >
-              {item.label}
+              {section.label}
             </Link>
-          ))}
+          );
+        })}
       </nav>
 
       {/* Right: Avatar (desktop) | Menu button (mobile) */}

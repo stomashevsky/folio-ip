@@ -9,80 +9,247 @@ export type NavGroup = {
 };
 
 // ---------------------------------------------------------------------------
-// Sidebar items per section
+// Global section IDs
 // ---------------------------------------------------------------------------
 
-/** Dashboard sidebar — flat list of entity pages. */
-export const dashboardNavItems: NavItem[] = [
-  { title: "Overview", href: "/" },
-  { title: "Inquiries", href: "/inquiries" },
-  { title: "Verifications", href: "/verifications" },
-  { title: "Reports", href: "/reports" },
-  { title: "Accounts", href: "/accounts" },
-];
+export type GlobalSectionId =
+  | "identity"
+  | "platform"
+  | "developers"
+  | "settings";
 
-/** Analytics sidebar — analytics per entity type. */
-export const analyticsNavItems: NavItem[] = [
-  { title: "Inquiries", href: "/analytics/inquiries" },
-  { title: "Verifications", href: "/analytics/verifications" },
-  { title: "Reports", href: "/analytics/reports" },
-];
+export type GlobalSection = {
+  id: GlobalSectionId;
+  label: string;
+  /** Default href when clicking the section tab. */
+  href: string;
+  /** Sidebar groups shown when this section is active. */
+  sidebarGroups: NavGroup[];
+  /** Route prefixes that belong to this section (for active-state detection). */
+  prefixes: string[];
+};
 
-/** Templates sidebar — templates per entity type. */
-export const templatesNavItems: NavItem[] = [
-  { title: "Inquiries", href: "/templates/inquiries" },
-  { title: "Verifications", href: "/templates/verifications" },
-  { title: "Reports", href: "/templates/reports" },
-];
+// ---------------------------------------------------------------------------
+// Identity section
+// Matches Persona: Home, Inquiries, Verifications, Reports, Accounts, Transactions
+// ---------------------------------------------------------------------------
 
-/** Settings sidebar — grouped navigation. */
-export const settingsNavGroups: NavGroup[] = [
+const identitySidebarGroups: NavGroup[] = [
   {
-    label: "",
-    items: [{ title: "Your profile", href: "/settings" }],
+    label: "Dashboard",
+    items: [
+      { title: "Overview", href: "/" },
+      { title: "Inquiries", href: "/inquiries" },
+      { title: "Verifications", href: "/verifications" },
+      { title: "Reports", href: "/reports" },
+      { title: "Accounts", href: "/accounts" },
+      { title: "Transactions", href: "/transactions" },
+    ],
+  },
+  {
+    label: "Analytics",
+    items: [
+      { title: "Inquiries", href: "/inquiries/analytics" },
+      { title: "Verifications", href: "/verifications/analytics" },
+      { title: "Reports", href: "/reports/analytics" },
+      { title: "Transactions", href: "/transactions/analytics" },
+    ],
+  },
+  {
+    label: "Templates",
+    items: [
+      { title: "Inquiries", href: "/inquiries/templates" },
+      { title: "Verifications", href: "/verifications/templates" },
+      { title: "Reports", href: "/reports/templates" },
+    ],
+  },
+  {
+    label: "Configuration",
+    items: [
+      { title: "Signals", href: "/inquiries/signals" },
+      { title: "Themes", href: "/inquiries/themes" },
+      { title: "Account Types", href: "/accounts/types" },
+      { title: "Transaction Types", href: "/transactions/types" },
+    ],
+  },
+];
+
+// ---------------------------------------------------------------------------
+// Platform section
+// Matches Persona: Cases, Workflows, Graph, Data, Utilities, Integrations
+// ---------------------------------------------------------------------------
+
+const platformSidebarGroups: NavGroup[] = [
+  {
+    label: "Cases",
+    items: [
+      { title: "All Cases", href: "/platform/cases" },
+      { title: "Queues", href: "/platform/cases/queues" },
+      { title: "Analytics", href: "/platform/cases/analytics" },
+      { title: "Templates", href: "/platform/cases/templates" },
+      { title: "Assignment Policies", href: "/platform/cases/assignment-policies" },
+      { title: "Actions", href: "/platform/cases/actions" },
+    ],
+  },
+  {
+    label: "Workflows",
+    items: [
+      { title: "All Workflows", href: "/platform/workflows" },
+      { title: "Workflow Runs", href: "/platform/workflows/runs" },
+    ],
+  },
+  {
+    label: "Graph",
+    items: [
+      { title: "Explorer", href: "/platform/graph" },
+      { title: "Templates", href: "/platform/graph/templates" },
+      { title: "Configuration", href: "/platform/graph/configuration" },
+    ],
+  },
+  {
+    label: "Data",
+    items: [
+      { title: "Exports", href: "/platform/data/exports" },
+      { title: "Imports", href: "/platform/data/imports" },
+    ],
+  },
+  {
+    label: "Utilities",
+    items: [
+      { title: "Tags", href: "/platform/utilities/tags" },
+      { title: "Lists", href: "/platform/utilities/lists" },
+    ],
+  },
+  {
+    label: "Integrations",
+    items: [{ title: "Marketplace", href: "/platform/integrations" }],
+  },
+];
+
+// ---------------------------------------------------------------------------
+// Developers section
+// ---------------------------------------------------------------------------
+
+const developersSidebarGroups: NavGroup[] = [
+  {
+    label: "API",
+    items: [
+      { title: "API Keys", href: "/developers/api-keys" },
+      { title: "API Logs", href: "/developers/api-logs" },
+      { title: "Analytics", href: "/developers/api-analytics" },
+      { title: "Rate Limits", href: "/developers/api-rate-limits" },
+    ],
+  },
+  {
+    label: "Webhooks & Events",
+    items: [
+      { title: "Webhooks", href: "/developers/webhooks" },
+      { title: "Webhook Events", href: "/developers/webhook-events" },
+      { title: "Events", href: "/developers/events" },
+    ],
+  },
+];
+
+// ---------------------------------------------------------------------------
+// Settings section (maps to Persona's "Admin")
+// ---------------------------------------------------------------------------
+
+const settingsSidebarGroups: NavGroup[] = [
+  {
+    label: "Team",
+    items: [
+      { title: "Users", href: "/settings/team" },
+      { title: "Roles", href: "/settings/team/roles" },
+      { title: "Teams", href: "/settings/team/teams" },
+      { title: "Sessions", href: "/settings/team/sessions" },
+      { title: "Audit Logs", href: "/settings/team/audit-logs" },
+    ],
   },
   {
     label: "Organization",
     items: [
-      { title: "General", href: "/settings/organization" },
-      { title: "API keys", href: "/settings/api-keys" },
-      { title: "Team", href: "/settings/team" },
-      { title: "Webhooks", href: "/settings/webhooks" },
+      { title: "Information", href: "/settings/organization" },
+      { title: "Security", href: "/settings/security" },
+      { title: "Billing", href: "/settings/billing" },
+      { title: "Domain Manager", href: "/settings/domain-manager" },
+      { title: "SMTP Test", href: "/settings/smtp-test" },
     ],
   },
   {
-    label: "Project",
+    label: "Profile & Project",
     items: [
-      { title: "General", href: "/settings/project" },
+      { title: "Your Profile", href: "/settings" },
       { title: "Notifications", href: "/settings/notifications" },
-      { title: "Tags", href: "/settings/tags" },
+      { title: "Project Settings", href: "/settings/project" },
     ],
+  },
+  {
+    label: "Documentation",
+    items: [{ title: "Getting Started", href: "/settings/getting-started" }],
   },
 ];
 
 // ---------------------------------------------------------------------------
-// Navbar sections
+// All global sections
 // ---------------------------------------------------------------------------
 
-/** Top-level section tabs shown in navbar and mobile nav. */
-export const navSections = [
-  { label: "Dashboard", href: "/" },
-  { label: "Analytics", href: "/analytics/inquiries" },
-  { label: "Templates", href: "/templates/inquiries" },
-  { label: "Settings", href: "/settings" },
+export const globalSections: GlobalSection[] = [
+  {
+    id: "identity",
+    label: "Identity",
+    href: "/",
+    sidebarGroups: identitySidebarGroups,
+    prefixes: [
+      "/inquiries",
+      "/verifications",
+      "/reports",
+      "/accounts",
+      "/transactions",
+    ],
+  },
+  {
+    id: "platform",
+    label: "Platform",
+    href: "/platform/cases",
+    sidebarGroups: platformSidebarGroups,
+    prefixes: ["/platform"],
+  },
+  {
+    id: "developers",
+    label: "Developers",
+    href: "/developers/api-keys",
+    sidebarGroups: developersSidebarGroups,
+    prefixes: ["/developers"],
+  },
+  {
+    id: "settings",
+    label: "Settings",
+    href: "/settings/team",
+    sidebarGroups: settingsSidebarGroups,
+    prefixes: ["/settings"],
+  },
 ];
+
+// ---------------------------------------------------------------------------
+// Backward-compatible exports (used by existing components during migration)
+// ---------------------------------------------------------------------------
+
+/** @deprecated Use `globalSections` and `getActiveGlobalSection()` instead. */
+export const dashboardNavItems: NavItem[] =
+  identitySidebarGroups[0].items;
+
+/** @deprecated Use `globalSections` and `getActiveGlobalSection()` instead. */
+export const settingsNavGroups: NavGroup[] = settingsSidebarGroups;
+
+/** @deprecated Use `globalSections` instead. */
+export const navSections = globalSections.map((s) => ({
+  label: s.label,
+  href: s.href,
+}));
 
 // ---------------------------------------------------------------------------
 // Active-state helpers
 // ---------------------------------------------------------------------------
-
-/** Paths that belong to the Dashboard section (for navbar active state). */
-const dashboardPrefixes = [
-  "/inquiries",
-  "/verifications",
-  "/reports",
-  "/accounts",
-];
 
 /**
  * Check whether a given pathname matches a navigation href.
@@ -94,23 +261,30 @@ export function isRouteActive(pathname: string, href: string): boolean {
 }
 
 /**
+ * Determine which global section is active for a given pathname.
+ * Identity is the fallback (default) section.
+ */
+export function getActiveGlobalSection(pathname: string): GlobalSection {
+  // Check non-identity sections first (they have unique prefixes)
+  for (const section of globalSections) {
+    if (section.id === "identity") continue;
+    if (section.prefixes.some((p) => pathname.startsWith(p))) {
+      return section;
+    }
+  }
+  // Fallback to Identity
+  return globalSections[0];
+}
+
+/**
  * Check whether a navbar section tab is active.
- * Dashboard is active for "/" and all entity pages.
- * Analytics/Templates use their prefix. Settings uses its prefix.
  */
 export function isSectionActive(
   pathname: string,
   sectionHref: string,
 ): boolean {
-  // Dashboard: "/" and all entity prefixes
-  if (sectionHref === "/") {
-    return (
-      pathname === "/" ||
-      dashboardPrefixes.some((p) => pathname.startsWith(p))
-    );
-  }
-  // Analytics/Templates/Settings: match section prefix
-  // Extract the top-level segment, e.g. "/analytics/inquiries" → "/analytics"
-  const sectionPrefix = "/" + sectionHref.split("/")[1];
-  return pathname.startsWith(sectionPrefix);
+  const section = globalSections.find((s) => s.href === sectionHref);
+  if (!section) return false;
+  const active = getActiveGlobalSection(pathname);
+  return active.id === section.id;
 }

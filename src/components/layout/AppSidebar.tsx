@@ -2,57 +2,67 @@
 
 import {
   Sidebar,
-  SidebarCard,
-  SidebarCardContent,
-  SidebarCardTitleLink,
   SidebarContent,
-  SidebarFooter,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuButtonLabel,
   SidebarMenuItem,
 } from "@plexui/ui/components/Sidebar";
 import { usePathname, useRouter } from "next/navigation";
-import { type NavItem, isRouteActive } from "@/lib/constants/nav-config";
+import type { NavGroup } from "@/lib/constants/nav-config";
 
-interface AppSidebarProps {
-  items: NavItem[];
+function isItemActive(pathname: string, href: string, allHrefs: string[]): boolean {
+  if (href === "/") return pathname === "/";
+  const isMatch = pathname === href || pathname.startsWith(href + "/");
+  if (!isMatch) return false;
+  return !allHrefs.some(
+    (other) => other !== href && other.startsWith(href + "/") &&
+      (pathname === other || pathname.startsWith(other + "/")),
+  );
 }
 
-export function AppSidebar({ items }: AppSidebarProps) {
+interface AppSidebarProps {
+  groups: NavGroup[];
+}
+
+export function AppSidebar({ groups }: AppSidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
+
+  const allHrefs = groups.flatMap((g) => g.items.map((i) => i.href));
 
   return (
     <Sidebar>
       <SidebarContent>
-        <SidebarMenu>
-          {items.map((item) => (
-            <SidebarMenuItem key={item.href}>
-              <SidebarMenuButton
-                isActive={isRouteActive(pathname, item.href)}
-                onClick={() => router.push(item.href)}
-              >
-                <SidebarMenuButtonLabel>
-                  {item.title}
-                </SidebarMenuButtonLabel>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          ))}
-        </SidebarMenu>
+        {groups.map((group) => (
+          <SidebarGroup key={group.label || "top"}>
+            {group.label && (
+              <SidebarGroupLabel size="lg">{group.label}</SidebarGroupLabel>
+            )}
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {group.items.map((item) => (
+                  <SidebarMenuItem key={item.href}>
+                    <SidebarMenuButton
+                      isActive={isItemActive(pathname, item.href, allHrefs)}
+                      onClick={() => router.push(item.href)}
+                    >
+                      <SidebarMenuButtonLabel>
+                        {item.title}
+                      </SidebarMenuButtonLabel>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        ))}
       </SidebarContent>
 
-      <SidebarFooter>
-        <SidebarCard dismissible onDismiss={() => {}}>
-          <SidebarCardTitleLink href="#" onClick={(e) => e.preventDefault()}>
-            Sandbox Mode
-          </SidebarCardTitleLink>
-          <SidebarCardContent>
-            You are using simulated data. Connect a live environment to see real
-            results.
-          </SidebarCardContent>
-        </SidebarCard>
-      </SidebarFooter>
+
     </Sidebar>
   );
 }

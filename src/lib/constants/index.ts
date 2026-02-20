@@ -109,14 +109,14 @@ export {
 export { MOCK_USER } from "./mock-user";
 export {
   dashboardNavItems,
-  analyticsNavItems,
-  templatesNavItems,
   settingsNavGroups,
   navSections,
+  globalSections,
+  getActiveGlobalSection,
   isRouteActive,
   isSectionActive,
 } from "./nav-config";
-export type { NavItem, NavGroup } from "./nav-config";
+export type { NavItem, NavGroup, GlobalSection, GlobalSectionId } from "./nav-config";
 export { REPORT_TYPE_LABELS } from "./report-type-labels";
 export { STATUS_COLORS } from "./status-colors";
 export { VERIFICATION_TYPE_LABELS } from "./verification-type-labels";

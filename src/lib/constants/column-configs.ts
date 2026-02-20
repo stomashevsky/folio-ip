@@ -86,7 +86,7 @@ export const INQUIRY_TEMPLATE_COLUMN_CONFIG: ColumnConfig[] = [
 
 export const INQUIRY_TEMPLATE_DEFAULT_VISIBILITY: VisibilityState = {
   name: true,
-  id: true,
+  id: false,
   description: true,
   status: true,
   lastPublishedAt: true,
@@ -106,7 +106,7 @@ export const VERIFICATION_TEMPLATE_COLUMN_CONFIG: ColumnConfig[] = [
 
 export const VERIFICATION_TEMPLATE_DEFAULT_VISIBILITY: VisibilityState = {
   name: true,
-  id: true,
+  id: false,
   type: true,
   status: true,
   lastPublishedAt: true,
@@ -125,7 +125,7 @@ export const REPORT_TEMPLATE_COLUMN_CONFIG: ColumnConfig[] = [
 
 export const REPORT_TEMPLATE_DEFAULT_VISIBILITY: VisibilityState = {
   name: true,
-  id: true,
+  id: false,
   type: true,
   status: true,
   updatedAt: true,

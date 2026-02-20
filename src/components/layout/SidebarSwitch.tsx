@@ -2,27 +2,11 @@
 
 import { usePathname } from "next/navigation";
 import { AppSidebar } from "./AppSidebar";
-import { SettingsSidebar } from "./SettingsSidebar";
-import {
-  dashboardNavItems,
-  analyticsNavItems,
-  templatesNavItems,
-} from "@/lib/constants/nav-config";
+import { getActiveGlobalSection } from "@/lib/constants/nav-config";
 
 export function SidebarSwitch() {
   const pathname = usePathname();
+  const section = getActiveGlobalSection(pathname);
 
-  if (pathname?.startsWith("/settings")) {
-    return <SettingsSidebar />;
-  }
-
-  if (pathname?.startsWith("/analytics")) {
-    return <AppSidebar items={analyticsNavItems} />;
-  }
-
-  if (pathname?.startsWith("/templates")) {
-    return <AppSidebar items={templatesNavItems} />;
-  }
-
-  return <AppSidebar items={dashboardNavItems} />;
+  return <AppSidebar groups={section.sidebarGroups} />;
 }
