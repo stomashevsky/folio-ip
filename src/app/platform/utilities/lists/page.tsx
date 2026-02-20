@@ -1,5 +1,218 @@
-import { ComingSoonPage } from "@/components/shared";
+"use client";
+
+import { useState, useMemo } from "react";
+import { TopBar } from "@/components/layout/TopBar";
+import { DataTable, TableSearch } from "@/components/shared";
+import { ColumnSettings, type ColumnConfig } from "@/components/shared/ColumnSettings";
+import { dateTimeCell } from "@/lib/utils/columnHelpers";
+import type { ColumnDef, VisibilityState } from "@tanstack/react-table";
+import { Badge } from "@plexui/ui/components/Badge";
+import { Button } from "@plexui/ui/components/Button";
+import { Plus } from "@plexui/ui/components/Icon";
+
+interface List {
+  id: string;
+  name: string;
+  description: string;
+  type: "allowlist" | "blocklist" | "watchlist";
+  itemCount: number;
+  updatedAt: string;
+  createdAt: string;
+}
+
+const mockLists: List[] = [
+  {
+    id: "list_001",
+    name: "Trusted IPs",
+    description: "IP addresses approved for direct access",
+    type: "allowlist",
+    itemCount: 234,
+    updatedAt: "2025-02-20T14:30:00Z",
+    createdAt: "2025-02-01T10:00:00Z",
+  },
+  {
+    id: "list_002",
+    name: "Blocked Countries",
+    description: "Countries restricted from platform access",
+    type: "blocklist",
+    itemCount: 45,
+    updatedAt: "2025-02-19T11:15:00Z",
+    createdAt: "2025-01-15T09:30:00Z",
+  },
+  {
+    id: "list_003",
+    name: "VIP Accounts",
+    description: "High-value customer accounts requiring priority",
+    type: "watchlist",
+    itemCount: 156,
+    updatedAt: "2025-02-20T13:45:00Z",
+    createdAt: "2025-01-20T14:20:00Z",
+  },
+  {
+    id: "list_004",
+    name: "Sanctioned Entities",
+    description: "OFAC and international sanctions lists",
+    type: "blocklist",
+    itemCount: 892,
+    updatedAt: "2025-02-18T16:00:00Z",
+    createdAt: "2025-01-10T08:45:00Z",
+  },
+  {
+    id: "list_005",
+    name: "Approved Domains",
+    description: "Email domains allowed for registration",
+    type: "allowlist",
+    itemCount: 567,
+    updatedAt: "2025-02-20T12:30:00Z",
+    createdAt: "2025-01-25T11:15:00Z",
+  },
+  {
+    id: "list_006",
+    name: "Flagged Devices",
+    description: "Devices with suspicious activity patterns",
+    type: "watchlist",
+    itemCount: 123,
+    updatedAt: "2025-02-17T10:00:00Z",
+    createdAt: "2025-02-05T13:30:00Z",
+  },
+];
+
+const COLUMN_CONFIG: ColumnConfig[] = [
+  { id: "name", label: "Name" },
+  { id: "description", label: "Description" },
+  { id: "type", label: "Type" },
+  { id: "itemCount", label: "Items" },
+  { id: "updatedAt", label: "Updated at" },
+  { id: "createdAt", label: "Created at" },
+];
+
+const DEFAULT_VISIBILITY: VisibilityState = {
+  name: true,
+  description: true,
+  type: true,
+  itemCount: true,
+  updatedAt: true,
+  createdAt: true,
+};
+
+const columns: ColumnDef<List, unknown>[] = [
+  {
+    accessorKey: "name",
+    header: "Name",
+    size: 200,
+    cell: ({ row }) => <span className="font-medium">{row.original.name}</span>,
+  },
+  {
+    accessorKey: "description",
+    header: "Description",
+    size: 280,
+    cell: ({ row }) => (
+      <span className="text-[var(--color-text-secondary)]">
+        {row.original.description}
+      </span>
+    ),
+  },
+  {
+    accessorKey: "type",
+    header: "Type",
+    size: 120,
+    cell: ({ row }) => {
+      const colorMap: Record<string, "success" | "danger" | "warning"> = {
+        allowlist: "success",
+        blocklist: "danger",
+        watchlist: "warning",
+      };
+      return (
+        <Badge color={colorMap[row.original.type]} variant="soft" size="sm">
+          {row.original.type.charAt(0).toUpperCase() +
+            row.original.type.slice(1)}
+        </Badge>
+      );
+    },
+  },
+  {
+    accessorKey: "itemCount",
+    header: "Items",
+    size: 100,
+    cell: ({ row }) => <span>{row.original.itemCount}</span>,
+  },
+  {
+    accessorKey: "updatedAt",
+    header: "Updated at (UTC)",
+    size: 180,
+    cell: dateTimeCell<List>((r) => r.updatedAt),
+  },
+  {
+    accessorKey: "createdAt",
+    header: "Created at (UTC)",
+    size: 180,
+    cell: dateTimeCell<List>((r) => r.createdAt),
+  },
+];
 
 export default function UtilityListsPage() {
-  return <ComingSoonPage title="Lists" description="Create and manage custom lists." />;
+  const [search, setSearch] = useState("");
+  const [columnVisibility, setColumnVisibility] =
+    useState<VisibilityState>(DEFAULT_VISIBILITY);
+
+  const filteredData = useMemo(() => {
+    if (!search) return mockLists;
+
+    const searchLower = search.toLowerCase();
+    return mockLists.filter(
+      (list) =>
+        list.name.toLowerCase().includes(searchLower) ||
+        list.description.toLowerCase().includes(searchLower)
+    );
+  }, [search]);
+
+  return (
+    <div className="flex h-full flex-col overflow-hidden">
+      <TopBar
+        title="Lists"
+        actions={
+          <ColumnSettings
+            columns={COLUMN_CONFIG}
+            visibility={columnVisibility}
+            onVisibilityChange={setColumnVisibility}
+          />
+        }
+        toolbar={
+          <>
+            <Button
+              color="primary"
+              size="md"
+              pill={false}
+              onClick={() => {}}
+            >
+              <Plus />
+              <span className="hidden md:inline">Create List</span>
+            </Button>
+
+            <TableSearch
+              value={search}
+              onChange={setSearch}
+              placeholder="Search lists..."
+            />
+          </>
+        }
+      />
+
+      <div className="flex min-h-0 flex-1 flex-col px-4 pt-2 md:px-6">
+        <DataTable
+          data={filteredData}
+          columns={columns}
+          globalFilter={search}
+          pageSize={50}
+          initialSorting={[{ id: "updatedAt", desc: true }]}
+          columnVisibility={columnVisibility}
+          onColumnVisibilityChange={setColumnVisibility}
+          mobileColumnVisibility={{
+            description: false,
+            createdAt: false,
+          }}
+        />
+      </div>
+    </div>
+  );
 }
