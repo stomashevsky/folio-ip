@@ -30,3 +30,4 @@ export { AnalyticsPageLayout } from "./AnalyticsPageLayout";
 export { DetailPageSidebar } from "./DetailPageSidebar";
 export { ConfirmDeleteModal } from "./ConfirmDeleteModal";
 export { TemplateDetailTopBar } from "./TemplateDetailTopBar";
+export { ComingSoonPage } from "./ComingSoonPage";

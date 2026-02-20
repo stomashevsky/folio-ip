@@ -63,7 +63,7 @@ export function TopBar({ title, description, actions, toolbar, tabs, breadcrumb,
         <div>
           {hasBack ? (
             <h1 className="m-0">
-              <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[18px] font-medium leading-[29px] tracking-[-0.01em] text-[var(--color-text)]">
+              <div className="heading-md flex flex-wrap items-center gap-x-2 gap-y-1 text-[var(--color-text)]">
                 <span className="flex shrink-0 items-center gap-2">
                   {onBackClick ? (
                     <button type="button" onClick={onBackClick} className="cursor-pointer text-[var(--color-text-secondary)] hover:text-[var(--color-text)]">
@@ -80,7 +80,7 @@ export function TopBar({ title, description, actions, toolbar, tabs, breadcrumb,
               </div>
             </h1>
           ) : (
-            <h1 className="text-[18px] font-medium leading-[29px] tracking-[-0.01em] text-[var(--color-text)]">
+            <h1 className="heading-md text-[var(--color-text)]">
               {title}
             </h1>
           )}

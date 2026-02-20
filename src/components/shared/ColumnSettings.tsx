@@ -7,6 +7,7 @@ import { Switch } from "@plexui/ui/components/Switch";
 import { Input } from "@plexui/ui/components/Input";
 import { Button } from "@plexui/ui/components/Button";
 import { SettingsSlider, Search } from "@plexui/ui/components/Icon";
+import type { ControlSize } from "@plexui/ui/types";
 
 export interface ColumnConfig {
   id: string;
@@ -17,12 +18,14 @@ interface ColumnSettingsProps {
   columns: ColumnConfig[];
   visibility: VisibilityState;
   onVisibilityChange: (visibility: VisibilityState) => void;
+  size?: ControlSize;
 }
 
 export function ColumnSettings({
   columns,
   visibility,
   onVisibilityChange,
+  size = "md",
 }: ColumnSettingsProps) {
   const [search, setSearch] = useState("");
 
@@ -46,7 +49,7 @@ export function ColumnSettings({
         <Button
           color="secondary"
           variant="outline"
-          size="sm"
+          size={size}
           pill={false}
         >
           <SettingsSlider />

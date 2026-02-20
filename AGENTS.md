@@ -4,6 +4,8 @@
 
 **Every repeated value, pattern, or UI element MUST be extracted into a shared module.** This is the #1 architectural principle of the codebase. Hardcoded one-offs cause drift and break consistency.
 
+**ZERO TOLERANCE**: No hardcoded sizes, colors, spacings, or patterns — ANYWHERE. If a value is used by a shared component (e.g., TopBar action button size), it must come from a constant or prop with a sensible default. Pages should never override shared component internals with ad-hoc values.
+
 ### What "no hardcoding" means in practice:
 
 1. **Data constants** — status colors, filter options, nav config, date shortcuts, user data, report type labels → `src/lib/constants/`
@@ -13,6 +15,8 @@
 5. **UI patterns** — if a pattern appears in 2+ places, extract to `src/components/shared/`
 6. **Hooks** — shared behavior (`useScrollLock`, `useIsMobile`) → `src/lib/hooks/`
 7. **Modal behavior** — use shared `<Modal>` component (handles portal, overlay, Escape, scroll lock), never reimplement
+8. **Component props** — shared components define sensible defaults; pages use props, never duplicate/override internals
+9. **Layout constants** — TopBar button sizes, toolbar gaps, page padding → defined once in the shared component, not per-page
 
 ### Shared constants (`src/lib/constants/`)
 

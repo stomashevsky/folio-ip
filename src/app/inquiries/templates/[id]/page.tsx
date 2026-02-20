@@ -19,6 +19,7 @@ import type { InquiryTemplate, TemplateStatus } from "@/lib/types";
 import { Badge } from "@plexui/ui/components/Badge";
 import { Button } from "@plexui/ui/components/Button";
 import { Input } from "@plexui/ui/components/Input";
+import { Textarea } from "@plexui/ui/components/Textarea";
 import { Menu } from "@plexui/ui/components/Menu";
 import { DotsHorizontal, Undo, Redo } from "@plexui/ui/components/Icon";
 
@@ -188,7 +189,7 @@ function InquiryTemplateDetailContent() {
               <Button
                 color="secondary"
                 variant="soft"
-                size="sm"
+                size="md"
                 pill={false}
                 disabled={!codeHistoryState.canUndo}
                 onClick={() => codeHistoryActions?.undo()}
@@ -199,7 +200,7 @@ function InquiryTemplateDetailContent() {
               <Button
                 color="secondary"
                 variant="soft"
-                size="sm"
+                size="md"
                 pill={false}
                 disabled={!codeHistoryState.canRedo}
                 onClick={() => codeHistoryActions?.redo()}
@@ -210,7 +211,7 @@ function InquiryTemplateDetailContent() {
               {!isNew && (
                 <Menu>
                   <Menu.Trigger>
-                    <Button color="secondary" variant="soft" size="sm" pill={false} className="[--button-ring-color:transparent]">
+                    <Button color="secondary" variant="soft" size="md" pill={false} className="[--button-ring-color:transparent]">
                       <DotsHorizontal />
                     </Button>
                   </Menu.Trigger>
@@ -232,7 +233,7 @@ function InquiryTemplateDetailContent() {
               )}
               <Button
                 color="primary"
-                size="sm"
+                size="md"
                 pill={false}
                 onClick={() => save()}
                 loading={saveState === "saving"}
@@ -261,7 +262,7 @@ function InquiryTemplateDetailContent() {
               </div>
               <div>
                 <label className="mb-1 block text-xs font-medium text-[var(--color-text)]">Description</label>
-                <Input value={form.description} onChange={(e) => patch({ description: e.target.value })} placeholder="Optional description" size="sm" />
+                <Textarea value={form.description} onChange={(e) => patch({ description: e.target.value })} placeholder="Optional description" rows={2} />
               </div>
               <div>
                 <label className="mb-1 block text-xs font-medium text-[var(--color-text)]">Expires in (days)</label>

@@ -1,24 +1,5 @@
-"use client";
-
-import { TopBar } from "@/components/layout/TopBar";
-import { EmptyMessage } from "@plexui/ui/components/EmptyMessage";
-import { Search } from "@plexui/ui/components/Icon";
+import { ComingSoonPage } from "@/components/shared";
 
 export default function CaseQueuesPage() {
-  return (
-    <div className="flex h-full flex-col">
-      <TopBar title="Case Queues" />
-      <div className="flex flex-1 items-center justify-center p-8">
-        <EmptyMessage>
-          <EmptyMessage.Icon>
-            <Search />
-          </EmptyMessage.Icon>
-          <EmptyMessage.Title>Coming soon</EmptyMessage.Title>
-          <EmptyMessage.Description>
-            Manage case review queues and assignments.
-          </EmptyMessage.Description>
-        </EmptyMessage>
-      </div>
-    </div>
-  );
+  return <ComingSoonPage title="Case Queues" description="Manage case review queues and assignments." />;
 }

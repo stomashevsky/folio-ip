@@ -186,9 +186,9 @@ function ReportTemplateDetailContent() {
             {!isNew && (
               <Menu>
                 <Menu.Trigger>
-                  <Button color="secondary" variant="soft" size="sm" pill={false} className="[--button-ring-color:transparent]">
-                    <DotsHorizontal />
-                  </Button>
+                   <Button color="secondary" variant="soft" size="md" pill={false} className="[--button-ring-color:transparent]">
+                     <DotsHorizontal />
+                   </Button>
                 </Menu.Trigger>
                 <Menu.Content minWidth="auto">
                   {canPublish && (
@@ -202,7 +202,7 @@ function ReportTemplateDetailContent() {
                 </Menu.Content>
               </Menu>
             )}
-            <Button color="primary" size="sm" pill={false} onClick={() => save()} loading={saveState === "saving"} disabled={!isDirty || saveState !== "idle"}>{saveState === "saved" ? "Saved!" : "Save"}</Button>
+            <Button color="primary" size="md" pill={false} onClick={() => save()} loading={saveState === "saving"} disabled={!isDirty || saveState !== "idle"}>{saveState === "saved" ? "Saved!" : "Save"}</Button>
           </div>
         }
       />
