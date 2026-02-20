@@ -4,6 +4,7 @@ import { Suspense, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useParams } from "next/navigation";
+import { Alert } from "@plexui/ui/components/Alert";
 import { Button } from "@plexui/ui/components/Button";
 import { DotsHorizontal, Plus, Search } from "@plexui/ui/components/Icon";
 import { Menu } from "@plexui/ui/components/Menu";
@@ -128,6 +129,17 @@ function VerificationDetailContent() {
         {/* Main content */}
         <div className="flex shrink-0 flex-col md:min-w-0 md:flex-1 md:overflow-auto">
           <div className="flex-1 overflow-auto px-4 py-6 md:px-6">
+            {verification.status === "requires_retry" && (
+              <div className="mb-4">
+                <Alert
+                  color="warning"
+                  variant="soft"
+                  title="Retry required"
+                  description="This verification could not be completed and requires the user to retry. A new verification attempt will be created when the user restarts the flow."
+                />
+              </div>
+            )}
+
             <div className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]">
               <CardHeader
                 title={`${typeLabel} verification`}

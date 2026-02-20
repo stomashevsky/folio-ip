@@ -28,6 +28,7 @@ import {
   SessionsTab,
   SignalsTab,
   ReportsTab,
+  ListMatchesTab,
 } from "./components";
 
 const tabs = [
@@ -36,6 +37,7 @@ const tabs = [
   "Sessions",
   "Signals",
   "Reports",
+  "List Matches",
 ] as const;
 type Tab = (typeof tabs)[number];
 
@@ -60,6 +62,7 @@ function InquiryDetailContent() {
     (v) => v.inquiryId === inquiry?.id
   );
   const reports = mockReports.filter((r) => r.inquiryId === inquiry?.id);
+  const totalMatches = reports.reduce((sum, r) => sum + (r.matchCount ?? 0), 0);
 
   if (!inquiry) {
     return (
@@ -125,6 +128,7 @@ function InquiryDetailContent() {
               <Tabs.Tab value="Sessions" badge={sessions.length ? { content: sessions.length, pill: true } : undefined}>Sessions</Tabs.Tab>
               <Tabs.Tab value="Signals">Signals</Tabs.Tab>
               <Tabs.Tab value="Reports" badge={reports.length ? { content: reports.length, pill: true } : undefined}>Reports</Tabs.Tab>
+              <Tabs.Tab value="List Matches" badge={totalMatches > 0 ? { content: totalMatches, pill: true } : undefined}>List Matches</Tabs.Tab>
             </Tabs>
           </div>
 
@@ -145,6 +149,9 @@ function InquiryDetailContent() {
             {activeTab === "Sessions" && <SessionsTab sessions={sessions} />}
             {activeTab === "Signals" && <SignalsTab signals={signals} />}
             {activeTab === "Reports" && <ReportsTab reports={reports} />}
+            {activeTab === "List Matches" && (
+              <ListMatchesTab reports={reports} />
+            )}
           </div>
         </div>
 

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { Button } from "@plexui/ui/components/Button";
 import { Badge } from "@plexui/ui/components/Badge";
+import { Tabs } from "@plexui/ui/components/Tabs";
 import { DotsHorizontal } from "@plexui/ui/components/Icon";
 import { Menu } from "@plexui/ui/components/Menu";
 import { TopBar } from "@/components/layout/TopBar";
@@ -19,7 +20,11 @@ import { REPORT_TYPE_LABELS } from "@/lib/constants/report-type-labels";
 import { mockReports, getEventsForReport } from "@/lib/data";
 import { formatDateTime, toTitleCase } from "@/lib/utils/format";
 import { getAllKnownTags } from "@/lib/utils/tags";
-import { ScreeningResults } from "./components";
+import { useTabParam } from "@/lib/hooks/useTabParam";
+import { OverviewTab, MatchesTab, MonitoringTab } from "./components";
+
+const tabs = ["Overview", "Matches", "Monitoring"] as const;
+type Tab = (typeof tabs)[number];
 
 export default function ReportDetailPage() {
   return (
@@ -31,6 +36,7 @@ export default function ReportDetailPage() {
 
 function ReportDetailContent() {
   const params = useParams();
+  const [activeTab, setActiveTab] = useTabParam(tabs, "Overview");
   const report = mockReports.find((r) => r.id === params.id);
   const [tags, setTags] = useState<string[]>([]);
   const [tagModalOpen, setTagModalOpen] = useState(false);
@@ -74,8 +80,24 @@ function ReportDetailContent() {
 
       <div className="flex flex-1 flex-col overflow-auto md:flex-row md:overflow-hidden">
         <div className="flex shrink-0 flex-col md:min-w-0 md:flex-1 md:overflow-auto">
+          <div className="shrink-0 overflow-x-auto px-4 pt-4 md:px-6" style={{ "--color-ring": "transparent" } as React.CSSProperties}>
+            <Tabs
+              value={activeTab}
+              onChange={(v) => setActiveTab(v as Tab)}
+              variant="underline"
+              aria-label="Report sections"
+              size="lg"
+            >
+              <Tabs.Tab value="Overview">Overview</Tabs.Tab>
+              <Tabs.Tab value="Matches" badge={report.matchCount ? { content: report.matchCount, pill: true } : undefined}>Matches</Tabs.Tab>
+              <Tabs.Tab value="Monitoring">Monitoring</Tabs.Tab>
+            </Tabs>
+          </div>
+
           <div className="flex-1 overflow-auto px-4 py-6 md:px-6">
-            <ScreeningResults report={report} />
+            {activeTab === "Overview" && <OverviewTab report={report} />}
+            {activeTab === "Matches" && <MatchesTab report={report} />}
+            {activeTab === "Monitoring" && <MonitoringTab report={report} />}
           </div>
         </div>
 

@@ -11,7 +11,7 @@ import type { ColumnDef, VisibilityState } from "@tanstack/react-table";
 import type { Workflow } from "@/lib/types";
 import { Button } from "@plexui/ui/components/Button";
 import { Select } from "@plexui/ui/components/Select";
-import { Tabs } from "@plexui/ui/components/Tabs";
+import { SegmentedControl } from "@plexui/ui/components/SegmentedControl";
 import { EmptyMessage } from "@plexui/ui/components/EmptyMessage";
 import { Plus } from "@plexui/ui/components/Icon";
 import { WORKFLOW_STATUS_OPTIONS, WORKFLOW_TRIGGER_OPTIONS } from "@/lib/constants/filter-options";
@@ -159,66 +159,75 @@ export default function WorkflowsPage() {
             )}
           </div>
         }
-        tabs={
-          <Tabs aria-label="Workflow sections" value={activeTab} onChange={setActiveTab} size="md">
-            <Tabs.Tab value="workflows">Workflows</Tabs.Tab>
-            <Tabs.Tab value="modules">Modules</Tabs.Tab>
-          </Tabs>
-        }
         toolbar={
-          activeTab === "workflows" ? (
-            <>
-              <TableSearch
-                value={search}
-                onChange={setSearch}
-                placeholder="Search workflows..."
-              />
+          <>
+            <SegmentedControl
+              aria-label="Workflow sections"
+              value={activeTab}
+              onChange={setActiveTab}
+              size="sm"
+              pill
+            >
+              <SegmentedControl.Tab value="workflows">Workflows</SegmentedControl.Tab>
+              <SegmentedControl.Tab value="modules">Modules</SegmentedControl.Tab>
+            </SegmentedControl>
 
-              <div className="w-36">
-                <Select
-                  multiple
-                  clearable
-                  block
-                  pill
-                  listMinWidth={180}
-                  options={STATUS_OPTIONS}
-                  value={statusFilter}
-                  onChange={(opts) => setStatusFilter(opts.map((o) => o.value))}
-                  placeholder="Status"
-                  variant="outline"
-                  size="sm"
+            {activeTab === "workflows" && (
+              <>
+                <div className="mx-1 h-5 w-px bg-[var(--color-border)]" />
+
+                <TableSearch
+                  value={search}
+                  onChange={setSearch}
+                  placeholder="Search workflows..."
                 />
-              </div>
 
-              <div className="w-48">
-                <Select
-                  multiple
-                  clearable
-                  block
-                  pill
-                  listMinWidth={220}
-                  options={WORKFLOW_TRIGGER_OPTIONS}
-                  value={triggerFilter}
-                  onChange={(opts) => setTriggerFilter(opts.map((o) => o.value))}
-                  placeholder="Trigger"
-                  variant="outline"
-                  size="sm"
-                />
-              </div>
+                <div className="w-36">
+                  <Select
+                    multiple
+                    clearable
+                    block
+                    pill
+                    listMinWidth={180}
+                    options={STATUS_OPTIONS}
+                    value={statusFilter}
+                    onChange={(opts) => setStatusFilter(opts.map((o) => o.value))}
+                    placeholder="Status"
+                    variant="outline"
+                    size="sm"
+                  />
+                </div>
 
-              {hasActiveFilters && (
-                <Button
-                  color="secondary"
-                  variant="soft"
-                  size="sm"
-                  pill
-                  onClick={clearAllFilters}
-                >
-                  Clear filters
-                </Button>
-              )}
-            </>
-          ) : undefined
+                <div className="w-48">
+                  <Select
+                    multiple
+                    clearable
+                    block
+                    pill
+                    listMinWidth={220}
+                    options={WORKFLOW_TRIGGER_OPTIONS}
+                    value={triggerFilter}
+                    onChange={(opts) => setTriggerFilter(opts.map((o) => o.value))}
+                    placeholder="Trigger"
+                    variant="outline"
+                    size="sm"
+                  />
+                </div>
+
+                {hasActiveFilters && (
+                  <Button
+                    color="secondary"
+                    variant="soft"
+                    size="sm"
+                    pill
+                    onClick={clearAllFilters}
+                  >
+                    Clear filters
+                  </Button>
+                )}
+              </>
+            )}
+          </>
         }
       />
 

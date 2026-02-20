@@ -26,11 +26,13 @@ import { useParams } from "next/navigation";
 import { Suspense, useState, type CSSProperties } from "react";
 import {
   OverviewTab,
+  InquiriesTab,
   VerificationsTab,
   ReportsTab,
+  DocumentsTab,
 } from "./components";
 
-const tabs = ["Overview", "Verifications", "Reports"] as const;
+const tabs = ["Overview", "Inquiries", "Verifications", "Reports", "Documents"] as const;
 type Tab = (typeof tabs)[number];
 
 export default function AccountDetailPage() {
@@ -121,6 +123,16 @@ function AccountDetailContent() {
             >
               <Tabs.Tab value="Overview">Overview</Tabs.Tab>
               <Tabs.Tab
+                value="Inquiries"
+                badge={
+                  accountInquiries.length
+                    ? { content: accountInquiries.length, pill: true }
+                    : undefined
+                }
+              >
+                Inquiries
+              </Tabs.Tab>
+              <Tabs.Tab
                 value="Verifications"
                 badge={
                   accountVerifications.length
@@ -140,6 +152,7 @@ function AccountDetailContent() {
               >
                 Reports
               </Tabs.Tab>
+              <Tabs.Tab value="Documents">Documents</Tabs.Tab>
             </Tabs>
           </div>
 
@@ -151,11 +164,17 @@ function AccountDetailContent() {
                 verifications={accountVerifications}
               />
             )}
+            {activeTab === "Inquiries" && (
+              <InquiriesTab inquiries={accountInquiries} />
+            )}
             {activeTab === "Verifications" && (
               <VerificationsTab verifications={accountVerifications} />
             )}
             {activeTab === "Reports" && (
               <ReportsTab reports={accountReports} />
+            )}
+            {activeTab === "Documents" && (
+              <DocumentsTab verifications={accountVerifications} />
             )}
           </div>
         </div>

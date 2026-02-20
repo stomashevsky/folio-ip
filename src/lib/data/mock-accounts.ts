@@ -15,6 +15,10 @@ export const mockAccounts: Account[] = [
     inquiryCount: 1,
     verificationCount: 2,
     reportCount: 2,
+    phone: "+1 (415) 555-0134",
+    email: "alexander.sample@email.com",
+    nationality: "United States",
+    gender: "Male",
   },
   {
     id: "act_7FgHiJkLmNoPqRsTuVwXyZaBcDeF",
@@ -30,6 +34,10 @@ export const mockAccounts: Account[] = [
     inquiryCount: 1,
     verificationCount: 2,
     reportCount: 1,
+    phone: "+34 91 555-0187",
+    email: "maria.gonzalez@email.com",
+    nationality: "Spain",
+    gender: "Female",
   },
   {
     id: "act_9HiJkLmNoPqRsTuVwXyZaBcDeFgH",
@@ -44,6 +52,10 @@ export const mockAccounts: Account[] = [
     inquiryCount: 1,
     verificationCount: 2,
     reportCount: 0,
+    phone: "+44 20 7946-0958",
+    email: "john.williams@email.com",
+    nationality: "United Kingdom",
+    gender: "Male",
   },
   {
     id: "act_2AbCdEfGhIjKlMnOpQrStUvWxYz",
@@ -59,6 +71,10 @@ export const mockAccounts: Account[] = [
     inquiryCount: 1,
     verificationCount: 2,
     reportCount: 2,
+    phone: "+81 3-5555-0142",
+    email: "yuki.tanaka@email.com",
+    nationality: "Japan",
+    gender: "Female",
   },
   {
     id: "act_4EfGhIjKlMnOpQrStUvWxYzAbCdE",
@@ -73,6 +89,10 @@ export const mockAccounts: Account[] = [
     inquiryCount: 1,
     verificationCount: 0,
     reportCount: 0,
+    phone: "+1 (312) 555-0199",
+    email: "emma.johnson@email.com",
+    nationality: "United States",
+    gender: "Female",
   },
   {
     id: "act_6GhIjKlMnOpQrStUvWxYzAbCdEfG",
@@ -87,6 +107,10 @@ export const mockAccounts: Account[] = [
     inquiryCount: 1,
     verificationCount: 2,
     reportCount: 1,
+    phone: "+52 55 5555-0176",
+    email: "carlos.martinez@email.com",
+    nationality: "Mexico",
+    gender: "Male",
   },
   {
     id: "act_8IjKlMnOpQrStUvWxYzAbCdEfGhI",
@@ -102,6 +126,10 @@ export const mockAccounts: Account[] = [
     inquiryCount: 1,
     verificationCount: 2,
     reportCount: 1,
+    phone: "+33 1 55 55 01 63",
+    email: "sophie.dupont@email.com",
+    nationality: "France",
+    gender: "Female",
   },
   {
     id: "act_5OpQrStUvWxYzAbCdEfGhIjKlMnO",
@@ -116,6 +144,10 @@ export const mockAccounts: Account[] = [
     inquiryCount: 1,
     verificationCount: 2,
     reportCount: 1,
+    phone: "+46 8 555 01 88",
+    email: "lars.eriksson@email.com",
+    nationality: "Sweden",
+    gender: "Male",
   },
 ];
 

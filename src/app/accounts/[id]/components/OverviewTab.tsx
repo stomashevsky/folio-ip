@@ -2,9 +2,8 @@ import { useState } from "react";
 import Image from "next/image";
 import { Avatar } from "@plexui/ui/components/Avatar";
 import { SectionHeading, KeyValueTable, DocumentViewer } from "@/components/shared";
-import { formatDate, toTitleCase } from "@/lib/utils/format";
+import { formatDate, formatDateTime, toTitleCase } from "@/lib/utils/format";
 import type { Account, Inquiry, Verification, DocumentViewerItem } from "@/lib/types";
-import { InquiriesTab } from "./InquiriesTab";
 
 export function OverviewTab({
   account,
@@ -25,6 +24,10 @@ export function OverviewTab({
     : [];
 
   const [lightboxOpen, setLightboxOpen] = useState(false);
+
+  const latestInquiry = inquiries.length > 0
+    ? inquiries.reduce((latest, inq) => (inq.createdAt > latest.createdAt ? inq : latest))
+    : null;
 
   return (
     <div className="space-y-6">
@@ -56,14 +59,24 @@ export function OverviewTab({
               { label: "Address", value: account.address ?? "—" },
               { label: "Birthdate", value: account.birthdate ? formatDate(account.birthdate) : "—" },
               { label: "Age", value: account.age ? `${account.age}` : "—" },
+              { label: "Gender", value: account.gender ?? "—" },
+              { label: "Nationality", value: account.nationality ?? "—" },
+              { label: "Email", value: account.email ?? "—" },
+              { label: "Phone", value: account.phone ?? "—" },
             ]}
           />
         </div>
       </div>
 
       <div>
-        <SectionHeading badge={inquiries.length}>Inquiries</SectionHeading>
-        <InquiriesTab inquiries={inquiries} />
+        <SectionHeading>Summary</SectionHeading>
+        <KeyValueTable
+          rows={[
+            { label: "Total Inquiries", value: inquiries.length },
+            { label: "Total Verifications", value: verifications.length },
+            { label: "Latest Inquiry", value: latestInquiry ? `${formatDateTime(latestInquiry.createdAt)} UTC` : "—" },
+          ]}
+        />
       </div>
 
       {lightboxOpen && viewerItems.length > 0 && (

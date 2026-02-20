@@ -136,6 +136,10 @@ export interface Account {
   inquiryCount: number;
   verificationCount: number;
   reportCount: number;
+  phone?: string;
+  email?: string;
+  nationality?: string;
+  gender?: string;
 }
 
 // ─── Templates ───

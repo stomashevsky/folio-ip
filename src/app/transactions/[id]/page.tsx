@@ -2,7 +2,7 @@
 
 import { TopBar } from "@/components/layout/TopBar";
 import { StatusBadge } from "@/components/shared/StatusBadge";
-import { NotFoundPage, TagEditModal, InfoRow, DetailPageSidebar, InlineEmpty } from "@/components/shared";
+import { NotFoundPage, TagEditModal, InfoRow, DetailPageSidebar } from "@/components/shared";
 import { mockTransactions } from "@/lib/data";
 import { formatDateTime } from "@/lib/utils/format";
 import { getAllKnownTags } from "@/lib/utils/tags";
@@ -12,9 +12,9 @@ import { Suspense, useState } from "react";
 import { useTabParam } from "@/lib/hooks/useTabParam";
 import { Button } from "@plexui/ui/components/Button";
 import { Tabs } from "@plexui/ui/components/Tabs";
-import { Badge } from "@plexui/ui/components/Badge";
 import { DotsHorizontal } from "@plexui/ui/components/Icon";
 import { Menu } from "@plexui/ui/components/Menu";
+import { OverviewTab, ActivityTab } from "./components";
 
 const tabs = ["Overview", "Activity"] as const;
 type Tab = (typeof tabs)[number];
@@ -45,19 +45,6 @@ function TransactionDetailContent() {
       />
     );
   }
-
-  const transactionTypeColor = {
-    payment: "secondary",
-    withdrawal: "warning",
-    transfer: "info",
-    deposit: "success",
-    refund: "discovery",
-  } as const;
-
-  const formattedAmount = new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: transaction.currency,
-  }).format(transaction.amount);
 
   return (
     <div className="flex h-full flex-col">
@@ -101,54 +88,8 @@ function TransactionDetailContent() {
           </div>
 
           <div className="flex-1 overflow-auto px-4 py-6 md:px-6">
-            {activeTab === "Overview" && (
-              <div className="space-y-6">
-                <div className="grid gap-4 md:grid-cols-2">
-                  <div>
-                    <p className="text-sm text-[var(--color-text-secondary)]">Type</p>
-                    <div className="mt-2">
-                      <Badge
-                        color={transactionTypeColor[transaction.type]}
-                        variant="soft"
-                        size="md"
-                        pill
-                      >
-                        {transaction.type.charAt(0).toUpperCase() + transaction.type.slice(1)}
-                      </Badge>
-                    </div>
-                  </div>
-
-                  <div>
-                    <p className="text-sm text-[var(--color-text-secondary)]">Amount</p>
-                    <p className="mt-2 text-lg font-semibold">{formattedAmount}</p>
-                  </div>
-
-                  <div>
-                    <p className="text-sm text-[var(--color-text-secondary)]">Risk Score</p>
-                    <div className="mt-2 flex items-center gap-2">
-                      <div className="h-2 flex-1 overflow-hidden rounded-full bg-[var(--color-border)]">
-                        <div
-                          className="h-full bg-[var(--color-danger-solid-bg)]"
-                          style={{ width: `${transaction.riskScore}%` }}
-                        />
-                      </div>
-                      <span className="text-sm font-medium">{transaction.riskScore}%</span>
-                    </div>
-                  </div>
-                </div>
-
-                {transaction.description && (
-                  <div>
-                    <p className="text-sm text-[var(--color-text-secondary)]">Description</p>
-                    <p className="mt-2 text-sm">{transaction.description}</p>
-                  </div>
-                )}
-              </div>
-            )}
-
-            {activeTab === "Activity" && (
-              <InlineEmpty>No activity yet.</InlineEmpty>
-            )}
+            {activeTab === "Overview" && <OverviewTab transaction={transaction} />}
+            {activeTab === "Activity" && <ActivityTab transaction={transaction} />}
           </div>
         </div>
 
@@ -180,7 +121,7 @@ function TransactionDetailContent() {
                 <span className="capitalize">{transaction.type}</span>
               </InfoRow>
               <InfoRow label="Amount">
-                {formattedAmount}
+                {new Intl.NumberFormat("en-US", { style: "currency", currency: transaction.currency }).format(transaction.amount)}
               </InfoRow>
               <InfoRow label="Currency">
                 {transaction.currency}
