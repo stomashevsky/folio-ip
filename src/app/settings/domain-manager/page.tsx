@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { TopBar } from "@/components/layout/TopBar";
-import { SectionHeading } from "@/components/shared";
+import { SectionHeading, CopyButton } from "@/components/shared";
 import { Button } from "@plexui/ui/components/Button";
 import { Badge } from "@plexui/ui/components/Badge";
 import { Input } from "@plexui/ui/components/Input";
@@ -35,11 +35,26 @@ const mockDomains: Domain[] = [
 
 export default function DomainManagerPage() {
   const [newDomain, setNewDomain] = useState("");
+  const [domains, setDomains] = useState(mockDomains);
 
   const handleAddDomain = () => {
     if (newDomain.trim()) {
+      setDomains((prev) => [
+        ...prev,
+        {
+          id: `dom_${Date.now()}`,
+          domain: newDomain.trim(),
+          status: "pending" as const,
+          ssl: "inactive" as const,
+          addedAt: new Date().toISOString().split("T")[0],
+        },
+      ]);
       setNewDomain("");
     }
+  };
+
+  const handleRemoveDomain = (id: string) => {
+    setDomains((prev) => prev.filter((d) => d.id !== id));
   };
 
   return (
@@ -64,10 +79,13 @@ export default function DomainManagerPage() {
                 <th className="px-4 py-3 text-left text-sm font-medium text-[var(--color-text)]">
                   Added
                 </th>
+                <th className="px-4 py-3 text-right text-sm font-medium text-[var(--color-text)]">
+                  Actions
+                </th>
               </tr>
             </thead>
             <tbody>
-              {mockDomains.map((domain) => (
+              {domains.map((domain) => (
                 <tr
                   key={domain.id}
                   className="border-b border-[var(--color-border)] last:border-b-0"
@@ -99,6 +117,17 @@ export default function DomainManagerPage() {
                   </td>
                   <td className="px-4 py-3 text-sm text-[var(--color-text-secondary)]">
                     {domain.addedAt}
+                  </td>
+                  <td className="px-4 py-3 text-right text-sm">
+                    <Button
+                      color="danger"
+                      variant="ghost"
+                      size="sm"
+                      pill={false}
+                      onClick={() => handleRemoveDomain(domain.id)}
+                    >
+                      Remove
+                    </Button>
                   </td>
                 </tr>
               ))}
@@ -134,10 +163,18 @@ export default function DomainManagerPage() {
 
         {/* DNS Configuration */}
         <SectionHeading size="xs">DNS Configuration</SectionHeading>
-        <div className="rounded-lg bg-[var(--color-surface)] border border-[var(--color-border)] p-4 font-mono text-sm text-[var(--color-text-secondary)]">
-          <p>Type: CNAME</p>
-          <p>Name: verify</p>
-          <p>Value: custom.folio-app.com</p>
+        <p className="text-sm text-[var(--color-text-secondary)] mb-3">
+          Add the following CNAME record to your DNS provider:
+        </p>
+        <div className="rounded-lg bg-[var(--color-surface)] border border-[var(--color-border)] p-4">
+          <div className="flex items-center justify-between">
+            <div className="font-mono text-sm text-[var(--color-text-secondary)]">
+              <p>Type: CNAME</p>
+              <p>Name: verify</p>
+              <p>Value: custom.folio-app.com</p>
+            </div>
+            <CopyButton value="CNAME verify custom.folio-app.com" />
+          </div>
         </div>
       </div>
     </div>

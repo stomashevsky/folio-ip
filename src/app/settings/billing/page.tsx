@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { TopBar } from "@/components/layout/TopBar";
 import { SectionHeading } from "@/components/shared";
 import { Button } from "@plexui/ui/components/Button";
@@ -51,6 +52,16 @@ const billingHistory: BillingHistoryItem[] = [
 ];
 
 export default function BillingPage() {
+  const [upgradeState, setUpgradeState] = useState<"idle" | "loading" | "done">("idle");
+
+  const handleUpgrade = () => {
+    setUpgradeState("loading");
+    setTimeout(() => {
+      setUpgradeState("done");
+      setTimeout(() => setUpgradeState("idle"), 1500);
+    }, 600);
+  };
+
   return (
     <div className="flex h-full flex-col overflow-auto">
       <TopBar title="Billing" />
@@ -73,8 +84,10 @@ export default function BillingPage() {
               variant="outline"
               size="sm"
               pill={false}
+              onClick={handleUpgrade}
+              loading={upgradeState === "loading"}
             >
-              Upgrade Plan
+              {upgradeState === "done" ? "Request sent!" : "Upgrade Plan"}
             </Button>
             <Button
               color="secondary"
@@ -147,6 +160,9 @@ export default function BillingPage() {
                 <th className="px-4 py-3 text-left text-sm font-medium text-[var(--color-text)]">
                   Status
                 </th>
+                <th className="px-4 py-3 text-right text-sm font-medium text-[var(--color-text)]">
+                  Invoice
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -173,6 +189,11 @@ export default function BillingPage() {
                       {item.status.charAt(0).toUpperCase() +
                         item.status.slice(1)}
                     </Badge>
+                  </td>
+                  <td className="px-4 py-3 text-right text-sm">
+                    <Button color="secondary" variant="ghost" size="sm" pill={false}>
+                      Download
+                    </Button>
                   </td>
                 </tr>
               ))}

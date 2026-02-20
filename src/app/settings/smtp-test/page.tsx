@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { TopBar } from "@/components/layout/TopBar";
 import { SectionHeading } from "@/components/shared";
 import { Button } from "@plexui/ui/components/Button";
@@ -46,6 +46,17 @@ export default function SmtpTestPage() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [testEmail, setTestEmail] = useState("");
+  const [saveState, setSaveState] = useState<"idle" | "saving" | "saved">("idle");
+  const timerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+
+  const handleSave = () => {
+    setSaveState("saving");
+    clearTimeout(timerRef.current);
+    timerRef.current = setTimeout(() => {
+      setSaveState("saved");
+      timerRef.current = setTimeout(() => setSaveState("idle"), 1500);
+    }, 600);
+  };
 
   const handleSendTest = () => {
     if (testEmail.trim()) {
@@ -101,10 +112,22 @@ export default function SmtpTestPage() {
           </Field>
         </div>
 
-        <div className="mb-6">
+        <div className="mb-8">
           <Field label="Encryption" description="Connection encryption method">
             <Input value="TLS" disabled />
           </Field>
+        </div>
+
+        <div className="mb-10">
+          <Button
+            color="primary"
+            pill={false}
+            onClick={handleSave}
+            loading={saveState === "saving"}
+            disabled={saveState !== "idle"}
+          >
+            {saveState === "saved" ? "Saved!" : "Save Configuration"}
+          </Button>
         </div>
 
         {/* Send Test Email */}

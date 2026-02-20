@@ -1,12 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { TopBar } from "@/components/layout/TopBar";
 import { SectionHeading } from "@/components/shared";
 import { Field } from "@plexui/ui/components/Field";
 import { Switch } from "@plexui/ui/components/Switch";
 import { Input } from "@plexui/ui/components/Input";
 import { Textarea } from "@plexui/ui/components/Textarea";
+import { Button } from "@plexui/ui/components/Button";
 
 export default function SecurityPage() {
   const [twoFactorRequired, setTwoFactorRequired] = useState(false);
@@ -18,6 +19,17 @@ export default function SecurityPage() {
   const [requireNumbers, setRequireNumbers] = useState(true);
   const [requireSpecialChars, setRequireSpecialChars] = useState(true);
   const [minLength, setMinLength] = useState("8");
+  const [saveState, setSaveState] = useState<"idle" | "saving" | "saved">("idle");
+  const timerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+
+  const handleSave = () => {
+    setSaveState("saving");
+    clearTimeout(timerRef.current);
+    timerRef.current = setTimeout(() => {
+      setSaveState("saved");
+      timerRef.current = setTimeout(() => setSaveState("idle"), 1500);
+    }, 600);
+  };
 
   return (
     <div className="flex h-full flex-col overflow-auto">
@@ -120,6 +132,16 @@ export default function SecurityPage() {
             />
           </Field>
         </div>
+
+        <Button
+          color="primary"
+          pill={false}
+          onClick={handleSave}
+          loading={saveState === "saving"}
+          disabled={saveState !== "idle"}
+        >
+          {saveState === "saved" ? "Saved!" : "Save"}
+        </Button>
       </div>
     </div>
   );
