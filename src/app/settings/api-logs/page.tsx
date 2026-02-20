@@ -7,9 +7,10 @@ import { DataTable, TableSearch, Modal, ModalHeader, ModalBody, KeyValueTable } 
 import { ColumnSettings, type ColumnConfig } from "@/components/shared/ColumnSettings";
 import { idCell, dateTimeCell } from "@/lib/utils/columnHelpers";
 import type { ColumnDef, VisibilityState } from "@tanstack/react-table";
-import { Badge } from "@plexui/ui/components/Badge";
+import { Badge, type BadgeProps } from "@plexui/ui/components/Badge";
 import { Select } from "@plexui/ui/components/Select";
 import { Button } from "@plexui/ui/components/Button";
+import { getHttpMethodColor, getHttpStatusColor } from "@/lib/utils/format";
 
 interface ApiLog {
   id: string;
@@ -180,26 +181,19 @@ const DEFAULT_VISIBILITY: VisibilityState = {
 };
 
 const columns: ColumnDef<ApiLog, unknown>[] = [
-  {
-    accessorKey: "method",
-    header: "Method",
-    size: 100,
-    cell: ({ row }) => {
-      const method = row.original.method;
-      const colorMap: Record<string, "info" | "secondary" | "warning" | "danger"> = {
-        GET: "secondary",
-        POST: "info",
-        PUT: "warning",
-        PATCH: "warning",
-        DELETE: "danger",
-      };
-      return (
-        <Badge color={colorMap[method]} variant="soft">
-          {method}
-        </Badge>
-      );
-    },
-  },
+   {
+     accessorKey: "method",
+     header: "Method",
+     size: 100,
+     cell: ({ row }) => {
+       const method = row.original.method;
+       return (
+         <Badge color={getHttpMethodColor(method) as BadgeProps["color"]} variant="soft">
+           {method}
+         </Badge>
+       );
+     },
+   },
   {
     accessorKey: "path",
     header: "Path",
@@ -210,28 +204,19 @@ const columns: ColumnDef<ApiLog, unknown>[] = [
       </span>
     ),
   },
-  {
-    accessorKey: "statusCode",
-    header: "Status Code",
-    size: 120,
-    cell: ({ row }) => {
-      const code = row.original.statusCode;
-      const colorMap: Record<number, "success" | "warning" | "danger"> = {
-        200: "success",
-        201: "success",
-        204: "success",
-        400: "warning",
-        404: "warning",
-        500: "danger",
-      };
-      const category = code >= 500 ? "danger" : code >= 400 ? "warning" : "success";
-      return (
-        <Badge color={colorMap[code] || category} variant="soft">
-          {code}
-        </Badge>
-      );
-    },
-  },
+   {
+     accessorKey: "statusCode",
+     header: "Status Code",
+     size: 120,
+     cell: ({ row }) => {
+       const code = row.original.statusCode;
+       return (
+         <Badge color={getHttpStatusColor(code) as BadgeProps["color"]} variant="soft">
+           {code}
+         </Badge>
+       );
+     },
+   },
   {
     accessorKey: "duration",
     header: "Duration (ms)",

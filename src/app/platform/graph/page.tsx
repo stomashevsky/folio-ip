@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState, useCallback, useEffect } from "react";
+import { getRiskColor, getNodeTypeColor } from "@/lib/utils/format";
 import {
   ReactFlow,
   Background,
@@ -67,17 +68,8 @@ const NODE_STYLES: Record<string, { background: string; border: string; color: s
 
 type BadgeColor = "info" | "discovery" | "success" | "warning" | "caution" | "secondary" | "danger";
 
-const BADGE_COLORS: Record<string, BadgeColor> = {
-  account: "info",
-  inquiry: "discovery",
-  verification: "success",
-  device: "warning",
-  ip_address: "caution",
-  email: "info",
-};
-
 function badgeColor(key: string): BadgeColor {
-  return BADGE_COLORS[key] ?? "secondary";
+  return getNodeTypeColor(key) as BadgeColor;
 }
 
 const ENTITY_TYPE_OPTIONS = [
@@ -101,11 +93,7 @@ const RELATIONSHIP_TYPE_OPTIONS = [
   { value: "similar_document", label: "Similar Document" },
 ];
 
-const RISK_COLORS: Record<string, "success" | "warning" | "danger"> = {
-  low: "success",
-  medium: "warning",
-  high: "danger",
-};
+
 
 const MOCK_CONNECTIONS: GraphConnection[] = [
   // ── Cluster: "clean_onboarding" — Normal user, clean KYC ──
@@ -888,7 +876,7 @@ export default function GraphPage() {
                         {selectedEntity.type}
                       </Badge>
                       {selectedEntity.riskLevel && (
-                        <Badge color={RISK_COLORS[selectedEntity.riskLevel]} variant="outline" size="sm">
+                        <Badge color={getRiskColor(selectedEntity.riskLevel) as BadgeColor} variant="outline" size="sm">
                           {selectedEntity.riskLevel} risk
                         </Badge>
                       )}
@@ -1052,7 +1040,7 @@ export default function GraphPage() {
                           <td className="px-4 py-3 text-[var(--color-text)]">{conn.relationship}</td>
                           <td className="px-4 py-3">
                             {conn.riskLevel && (
-                              <Badge color={RISK_COLORS[conn.riskLevel]} variant="outline" size="sm">
+                              <Badge color={getRiskColor(conn.riskLevel) as BadgeColor} variant="outline" size="sm">
                                 {conn.riskLevel}
                               </Badge>
                             )}
@@ -1117,7 +1105,7 @@ export default function GraphPage() {
                       </div>
                       <div>
                         <p className="text-xs text-[var(--color-text-tertiary)]">Risk</p>
-                        <Badge color={RISK_COLORS[cluster.avgRisk] ?? "secondary"} variant="outline" size="sm">
+                        <Badge color={getRiskColor(cluster.avgRisk) as BadgeColor} variant="outline" size="sm">
                           {cluster.avgRisk}
                         </Badge>
                       </div>

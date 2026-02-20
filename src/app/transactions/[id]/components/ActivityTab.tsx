@@ -1,7 +1,7 @@
-import { Badge } from "@plexui/ui/components/Badge";
+import { Badge, type BadgeProps } from "@plexui/ui/components/Badge";
 import { InlineEmpty } from "@/components/shared";
 import type { Transaction } from "@/lib/types";
-import { formatDateTime } from "@/lib/utils/format";
+import { formatDateTime, getEventLevelColor } from "@/lib/utils/format";
 
 interface ActivityEvent {
   timestamp: string;
@@ -10,12 +10,7 @@ interface ActivityEvent {
   type: "info" | "warning" | "success" | "danger";
 }
 
-const typeColors: Record<string, "secondary" | "warning" | "success" | "danger"> = {
-  info: "secondary",
-  warning: "warning",
-  success: "success",
-  danger: "danger",
-};
+
 
 function generateEvents(txn: Transaction): ActivityEvent[] {
   const events: ActivityEvent[] = [
@@ -58,7 +53,7 @@ export function ActivityTab({ transaction }: { transaction: Transaction }) {
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2">
               <p className="text-sm font-medium text-[var(--color-text)]">{event.title}</p>
-              <Badge color={typeColors[event.type]} size="sm">{event.type.charAt(0).toUpperCase() + event.type.slice(1)}</Badge>
+              <Badge color={getEventLevelColor(event.type) as BadgeProps["color"]} size="sm">{event.type.charAt(0).toUpperCase() + event.type.slice(1)}</Badge>
             </div>
             <p className="mt-0.5 text-sm text-[var(--color-text-secondary)]">{event.description}</p>
             <p className="mt-1 text-xs text-[var(--color-text-tertiary)]">{formatDateTime(event.timestamp)} UTC</p>

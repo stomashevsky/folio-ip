@@ -3,13 +3,14 @@
 import { useParams } from "next/navigation";
 import { TopBar, TOPBAR_CONTROL_SIZE, TOPBAR_ACTION_PILL } from "@/components/layout/TopBar";
 import { NotFoundPage, SectionHeading } from "@/components/shared";
-import { Badge } from "@plexui/ui/components/Badge";
+import { Badge, type BadgeProps } from "@plexui/ui/components/Badge";
 import { Button } from "@plexui/ui/components/Button";
 import { Input } from "@plexui/ui/components/Input";
 import { Textarea } from "@plexui/ui/components/Textarea";
 import { Field } from "@plexui/ui/components/Field";
 import { Switch } from "@plexui/ui/components/Switch";
 import { Select } from "@plexui/ui/components/Select";
+import { getRiskColor } from "@/lib/utils/format";
 
 interface TransactionTypeConfig {
   id: string;
@@ -27,12 +28,6 @@ const RISK_LEVEL_OPTIONS = [
   { value: "medium", label: "Medium" },
   { value: "high", label: "High" },
 ];
-
-const RISK_COLORS: Record<string, "success" | "warning" | "danger"> = {
-  low: "success",
-  medium: "warning",
-  high: "danger",
-};
 
 const MOCK_TRANSACTION_TYPES: TransactionTypeConfig[] = [
   { id: "txtype_1", name: "Payment", description: "Standard payment transactions", riskLevel: "low", requiresReview: false, autoApproveThreshold: 5000, createdAt: "2025-12-01T10:00:00Z", updatedAt: "2025-12-15T14:30:00Z" },
@@ -57,7 +52,7 @@ export default function TransactionTypeDetailPage() {
         backHref="/transactions/types"
         actions={
           <div className="flex items-center gap-2">
-            <Badge color={RISK_COLORS[txType.riskLevel]} variant="soft" size="sm">
+            <Badge color={getRiskColor(txType.riskLevel) as BadgeProps["color"]} variant="soft" size="sm">
               {txType.riskLevel.charAt(0).toUpperCase() + txType.riskLevel.slice(1)} Risk
             </Badge>
             <Button color="primary" size={TOPBAR_CONTROL_SIZE} pill={TOPBAR_ACTION_PILL}>

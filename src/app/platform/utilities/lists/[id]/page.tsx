@@ -4,7 +4,8 @@ import { useState, useMemo } from "react";
 import { useParams } from "next/navigation";
 import { TopBar, TOPBAR_CONTROL_SIZE, TOPBAR_ACTION_PILL } from "@/components/layout/TopBar";
 import { NotFoundPage, SectionHeading, DataTable, TableSearch } from "@/components/shared";
-import { Badge } from "@plexui/ui/components/Badge";
+import { Badge, type BadgeProps } from "@plexui/ui/components/Badge";
+import { getListTypeColor } from "@/lib/utils/format";
 import { Button } from "@plexui/ui/components/Button";
 import { Plus, FileUpload } from "@plexui/ui/components/Icon";
 import { dateTimeCell } from "@/lib/utils/columnHelpers";
@@ -27,11 +28,7 @@ interface ListItem {
   addedBy: string;
 }
 
-const TYPE_COLORS: Record<string, "success" | "danger" | "warning"> = {
-  allowlist: "success",
-  blocklist: "danger",
-  watchlist: "warning",
-};
+
 
 const MOCK_LISTS: List[] = [
   { id: "list_001", name: "Trusted IPs", description: "IP addresses approved for direct access", type: "allowlist", itemCount: 234, updatedAt: "2025-02-20T14:30:00Z", createdAt: "2025-02-01T10:00:00Z" },
@@ -115,7 +112,7 @@ export default function ListDetailPage() {
         backHref="/platform/utilities/lists"
         actions={
           <div className="flex items-center gap-2">
-            <Badge color={TYPE_COLORS[list.type]} variant="soft" size="sm">
+            <Badge color={getListTypeColor(list.type) as BadgeProps["color"]} variant="soft" size="sm">
               {list.type.charAt(0).toUpperCase() + list.type.slice(1)}
             </Badge>
             <Button color="secondary" variant="outline" size={TOPBAR_CONTROL_SIZE} pill={TOPBAR_ACTION_PILL}>

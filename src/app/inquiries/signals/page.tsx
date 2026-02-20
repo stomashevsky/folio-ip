@@ -6,8 +6,9 @@ import { TABLE_PAGE_WRAPPER, TABLE_PAGE_CONTENT } from "@/lib/constants/page-lay
 import { DataTable, TableSearch } from "@/components/shared";
 import { ColumnSettings, type ColumnConfig } from "@/components/shared/ColumnSettings";
 import { dateTimeCell } from "@/lib/utils/columnHelpers";
+import { getRiskColor, getSignalCategoryColor } from "@/lib/utils/format";
 import type { ColumnDef, VisibilityState } from "@tanstack/react-table";
-import { Badge } from "@plexui/ui/components/Badge";
+import { Badge, type BadgeProps } from "@plexui/ui/components/Badge";
 import { Select } from "@plexui/ui/components/Select";
 import { Button } from "@plexui/ui/components/Button";
 
@@ -161,14 +162,8 @@ const columns: ColumnDef<Signal, unknown>[] = [
     size: 120,
     cell: ({ row }) => {
       const category = row.original.category;
-      const colorMap: Record<string, "info" | "secondary" | "warning" | "discovery"> = {
-        featured: "info",
-        risk: "warning",
-        behavioral: "discovery",
-        device: "secondary",
-      };
       return (
-        <Badge color={colorMap[category]} variant="soft">
+        <Badge color={getSignalCategoryColor(category) as BadgeProps["color"]} variant="soft">
           {category.charAt(0).toUpperCase() + category.slice(1)}
         </Badge>
       );
@@ -180,13 +175,8 @@ const columns: ColumnDef<Signal, unknown>[] = [
     size: 110,
     cell: ({ row }) => {
       const severity = row.original.severity;
-      const colorMap: Record<string, "success" | "warning" | "danger"> = {
-        low: "success",
-        medium: "warning",
-        high: "danger",
-      };
       return (
-        <Badge color={colorMap[severity]} variant="soft">
+        <Badge color={getRiskColor(severity) as BadgeProps["color"]} variant="soft">
           {severity.charAt(0).toUpperCase() + severity.slice(1)}
         </Badge>
       );

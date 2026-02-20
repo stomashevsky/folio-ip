@@ -5,7 +5,8 @@ import { TopBar, TOPBAR_CONTROL_SIZE, TOPBAR_TOOLBAR_PILL } from "@/components/l
 import { TABLE_PAGE_WRAPPER } from "@/lib/constants/page-layout";
 import { TableSearch, InlineEmpty } from "@/components/shared";
 import { Button } from "@plexui/ui/components/Button";
-import { Badge } from "@plexui/ui/components/Badge";
+import { Badge, type BadgeProps } from "@plexui/ui/components/Badge";
+import { getStatusColor } from "@/lib/utils/format";
 import { Select } from "@plexui/ui/components/Select";
 
 interface Tool {
@@ -126,11 +127,7 @@ const STATUS_OPTIONS = [
   { value: "deprecated", label: "Deprecated" },
 ];
 
-const statusColorMap: Record<string, "success" | "info" | "secondary"> = {
-  active: "success",
-  beta: "info",
-  deprecated: "secondary",
-};
+
 
 export default function UtilitiesPage() {
   const [search, setSearch] = useState("");
@@ -217,7 +214,7 @@ export default function UtilitiesPage() {
                 className="flex flex-col rounded-lg border border-[var(--color-border)] p-5 transition-colors hover:border-[var(--color-text-secondary)]"
               >
                 <div className="mb-3 flex items-center justify-between">
-                  <Badge color={statusColorMap[tool.status]} variant="soft" size="sm">
+                  <Badge color={getStatusColor(tool.status) as BadgeProps["color"]} variant="soft" size="sm">
                     {tool.status.charAt(0).toUpperCase() + tool.status.slice(1)}
                   </Badge>
                   <span className="text-xs text-[var(--color-text-tertiary)]">

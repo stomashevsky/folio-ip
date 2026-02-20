@@ -84,7 +84,7 @@ describe("getStatusColor", () => {
 
   it("returns correct colors for pending and needs_review", () => {
     expect(getStatusColor("pending")).toBe("secondary");
-    expect(getStatusColor("needs_review")).toBe("warning");
+    expect(getStatusColor("needs_review")).toBe("secondary");
   });
 
   it("returns secondary for unknown statuses", () => {

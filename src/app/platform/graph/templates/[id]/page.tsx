@@ -3,13 +3,13 @@
 import { useParams } from "next/navigation";
 import { TopBar, TOPBAR_CONTROL_SIZE, TOPBAR_ACTION_PILL } from "@/components/layout/TopBar";
 import { NotFoundPage, SectionHeading } from "@/components/shared";
-import { Badge } from "@plexui/ui/components/Badge";
+import { Badge, type BadgeProps } from "@plexui/ui/components/Badge";
 import { Button } from "@plexui/ui/components/Button";
 import { Input } from "@plexui/ui/components/Input";
 import { Textarea } from "@plexui/ui/components/Textarea";
 import { Field } from "@plexui/ui/components/Field";
 import { Switch } from "@plexui/ui/components/Switch";
-import { formatDateTime } from "@/lib/utils/format";
+import { formatDateTime, getNodeTypeColor } from "@/lib/utils/format";
 
 interface GraphTemplate {
   id: string;
@@ -29,12 +29,7 @@ const MOCK_TEMPLATES: GraphTemplate[] = [
   { id: "tpl_005", name: "Fraud Ring Detection", description: "Suspicious pattern detection across entities", nodeTypes: ["account", "device", "inquiry"], edgeTypes: ["same_ip", "same_device", "linked_to"], isDefault: false, createdAt: "2025-02-11T11:20:00Z" },
 ];
 
-const NODE_TYPE_COLORS: Record<string, "info" | "discovery" | "success" | "warning"> = {
-  account: "info",
-  inquiry: "discovery",
-  verification: "success",
-  device: "warning",
-};
+
 
 export default function GraphTemplateDetailPage() {
   const params = useParams();
@@ -98,7 +93,7 @@ export default function GraphTemplateDetailPage() {
               return (
                 <div key={nodeType} className="flex items-center justify-between rounded-lg border border-[var(--color-border)] px-4 py-3">
                   <div className="flex items-center gap-3">
-                    <Badge color={NODE_TYPE_COLORS[nodeType] ?? "secondary"} variant="soft" size="sm">
+                    <Badge color={getNodeTypeColor(nodeType) as BadgeProps["color"]} variant="soft" size="sm">
                       {nodeType.replace("_", " ")}
                     </Badge>
                   </div>

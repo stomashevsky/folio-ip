@@ -7,7 +7,8 @@ import { DataTable, TableSearch, ColumnSettings } from "@/components/shared";
 import type { ColumnConfig } from "@/components/shared/ColumnSettings";
 import { dateTimeCell } from "@/lib/utils/columnHelpers";
 import { Button } from "@plexui/ui/components/Button";
-import { Badge } from "@plexui/ui/components/Badge";
+import { Badge, type BadgeProps } from "@plexui/ui/components/Badge";
+import { getRiskColor } from "@/lib/utils/format";
 import { Plus } from "@plexui/ui/components/Icon";
 import { Select } from "@plexui/ui/components/Select";
 import type { ColumnDef, VisibilityState } from "@tanstack/react-table";
@@ -100,18 +101,7 @@ const DEFAULT_VISIBILITY: VisibilityState = {
   createdAt: true,
 };
 
-const getRiskLevelColor = (level: string) => {
-  switch (level) {
-    case "low":
-      return "success";
-    case "medium":
-      return "warning";
-    case "high":
-      return "danger";
-    default:
-      return "secondary";
-  }
-};
+
 
 const columns: ColumnDef<TransactionTypeConfig, unknown>[] = [
   {
@@ -138,7 +128,7 @@ const columns: ColumnDef<TransactionTypeConfig, unknown>[] = [
     size: 120,
     cell: ({ row }) => (
       <Badge
-        color={getRiskLevelColor(row.original.riskLevel)}
+        color={getRiskColor(row.original.riskLevel) as BadgeProps["color"]}
         variant="soft"
         size="sm"
       >

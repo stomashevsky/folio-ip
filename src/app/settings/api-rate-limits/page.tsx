@@ -6,7 +6,8 @@ import { TABLE_PAGE_WRAPPER, TABLE_PAGE_CONTENT } from "@/lib/constants/page-lay
 import { DataTable, TableSearch } from "@/components/shared";
 import { ColumnSettings, type ColumnConfig } from "@/components/shared/ColumnSettings";
 import type { ColumnDef, VisibilityState } from "@tanstack/react-table";
-import { Badge } from "@plexui/ui/components/Badge";
+import { Badge, type BadgeProps } from "@plexui/ui/components/Badge";
+import { getRateLimitStatusColor } from "@/lib/utils/format";
 import { Select } from "@plexui/ui/components/Select";
 import { Button } from "@plexui/ui/components/Button";
 
@@ -159,19 +160,9 @@ const columns: ColumnDef<RateLimit, unknown>[] = [
     size: 120,
     cell: ({ row }) => {
       const status = row.original.status;
-      const colorMap: Record<string, "success" | "warning" | "danger"> = {
-        active: "success",
-        warning: "warning",
-        exceeded: "danger",
-      };
-      const labelMap: Record<string, string> = {
-        active: "Active",
-        warning: "Warning",
-        exceeded: "Exceeded",
-      };
       return (
-        <Badge color={colorMap[status]} variant="soft">
-          {labelMap[status]}
+        <Badge color={getRateLimitStatusColor(status) as BadgeProps["color"]} variant="soft">
+          {status.charAt(0).toUpperCase() + status.slice(1)}
         </Badge>
       );
     },

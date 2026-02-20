@@ -7,7 +7,8 @@ import { DataTable, TableSearch, Modal, ModalHeader, ModalBody, KeyValueTable } 
 import { ColumnSettings, type ColumnConfig } from "@/components/shared/ColumnSettings";
 import { dateTimeCell } from "@/lib/utils/columnHelpers";
 import type { ColumnDef, VisibilityState } from "@tanstack/react-table";
-import { Badge } from "@plexui/ui/components/Badge";
+import { Badge, type BadgeProps } from "@plexui/ui/components/Badge";
+import { getHttpStatusColor, getDeliveryStatusColor } from "@/lib/utils/format";
 import { Select } from "@plexui/ui/components/Select";
 import { Button } from "@plexui/ui/components/Button";
 
@@ -225,9 +226,8 @@ const columns: ColumnDef<WebhookEvent, unknown>[] = [
       if (code === 0) {
         return <span className="text-[var(--color-text-tertiary)]">—</span>;
       }
-      const category = code >= 500 ? "danger" : code >= 400 ? "warning" : "success";
       return (
-        <Badge color={category} variant="soft">
+        <Badge color={getHttpStatusColor(code) as BadgeProps["color"]} variant="soft">
           {code}
         </Badge>
       );
@@ -239,14 +239,8 @@ const columns: ColumnDef<WebhookEvent, unknown>[] = [
     size: 120,
     cell: ({ row }) => {
       const status = row.original.status;
-      const colorMap: Record<string, "success" | "danger" | "warning" | "info"> = {
-        delivered: "success",
-        failed: "danger",
-        pending: "info",
-        retrying: "warning",
-      };
       return (
-        <Badge color={colorMap[status]} variant="soft">
+        <Badge color={getDeliveryStatusColor(status) as BadgeProps["color"]} variant="soft">
           {status}
         </Badge>
       );

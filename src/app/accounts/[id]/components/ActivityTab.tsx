@@ -1,16 +1,9 @@
 "use client";
 
-import { Badge } from "@plexui/ui/components/Badge";
+import { Badge, type BadgeProps } from "@plexui/ui/components/Badge";
 import { InlineEmpty } from "@/components/shared";
 import type { TimelineEvent } from "@/lib/types";
-import { formatDateTime } from "@/lib/utils/format";
-
-const LEVEL_COLORS: Record<string, "secondary" | "warning" | "success" | "danger"> = {
-  info: "secondary",
-  warning: "warning",
-  success: "success",
-  error: "danger",
-};
+import { formatDateTime, getEventLevelColor } from "@/lib/utils/format";
 
 export function ActivityTab({ events }: { events: TimelineEvent[] }) {
   if (events.length === 0) {
@@ -30,7 +23,7 @@ export function ActivityTab({ events }: { events: TimelineEvent[] }) {
               <p className="text-sm font-medium text-[var(--color-text)]">
                 {event.description}
               </p>
-              <Badge color={LEVEL_COLORS[event.level] ?? "secondary"} size="sm">
+              <Badge color={getEventLevelColor(event.level) as BadgeProps["color"]} size="sm">
                 {event.level}
               </Badge>
             </div>

@@ -1,20 +1,13 @@
 import Link from "next/link";
 import { Alert } from "@plexui/ui/components/Alert";
-import { Badge } from "@plexui/ui/components/Badge";
+import { Badge, type BadgeProps } from "@plexui/ui/components/Badge";
 import { SectionHeading, KeyValueTable } from "@/components/shared";
 import { StatusBadge } from "@/components/shared/StatusBadge";
-import { formatDateTime } from "@/lib/utils/format";
+import { formatDateTime, getRiskColor } from "@/lib/utils/format";
 import type { Transaction } from "@/lib/types";
 
-type RiskLevel = "low" | "medium" | "high";
-const levelColors: Record<RiskLevel, "success" | "warning" | "danger"> = {
-  low: "success",
-  medium: "warning",
-  high: "danger",
-};
-
 function getRiskFactors(txn: Transaction) {
-  const factors: { name: string; level: RiskLevel; description: string }[] = [];
+  const factors: { name: string; level: "low" | "medium" | "high"; description: string }[] = [];
   if (txn.riskScore >= 60) factors.push({ name: "Transaction velocity", level: "high", description: "Multiple transactions in short timeframe" });
   else factors.push({ name: "Transaction velocity", level: "low", description: "Normal transaction frequency" });
   if (txn.amount > 5000) factors.push({ name: "Amount threshold", level: "medium", description: `Above $5,000 single transaction limit` });
@@ -84,7 +77,7 @@ export function OverviewTab({ transaction }: { transaction: Transaction }) {
                 <tr key={f.name} className="border-b border-[var(--color-border)] last:border-b-0">
                   <td className="px-4 py-3 text-sm font-medium text-[var(--color-text)]">{f.name}</td>
                   <td className="px-4 py-3">
-                    <Badge color={levelColors[f.level]} size="sm">{f.level.charAt(0).toUpperCase() + f.level.slice(1)}</Badge>
+                    <Badge color={getRiskColor(f.level) as BadgeProps["color"]} size="sm">{f.level.charAt(0).toUpperCase() + f.level.slice(1)}</Badge>
                   </td>
                   <td className="px-4 py-3 text-sm text-[var(--color-text-secondary)]">{f.description}</td>
                 </tr>

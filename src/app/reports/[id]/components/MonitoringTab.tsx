@@ -1,4 +1,5 @@
-import { Badge } from "@plexui/ui/components/Badge";
+import { Badge, type BadgeProps } from "@plexui/ui/components/Badge";
+import { getMonitoringResultColor } from "@/lib/utils/format";
 import { SectionHeading, KeyValueTable, InlineEmpty } from "@/components/shared";
 import type { Report } from "@/lib/types";
 
@@ -21,10 +22,10 @@ function generateMonitoringChecks(report: Report): MonitoringCheck[] {
   ];
 }
 
-const resultBadge: Record<string, { color: "success" | "danger" | "warning"; label: string }> = {
-  clear: { color: "success", label: "Clear" },
-  match_found: { color: "danger", label: "Match found" },
-  error: { color: "warning", label: "Error" },
+const RESULT_LABELS: Record<string, string> = {
+  clear: "Clear",
+  match_found: "Match found",
+  error: "Error",
 };
 
 function formatDate(iso: string) {
@@ -93,7 +94,8 @@ export function MonitoringTab({ report }: { report: Report }) {
               </thead>
               <tbody>
                 {checks.map((check, i) => {
-                  const badge = resultBadge[check.result] ?? resultBadge.clear;
+                  const resultColor = getMonitoringResultColor(check.result) as BadgeProps["color"];
+                  const resultLabel = RESULT_LABELS[check.result] ?? "Clear";
                   return (
                     <tr
                       key={i}
@@ -106,8 +108,8 @@ export function MonitoringTab({ report }: { report: Report }) {
                         {check.source}
                       </td>
                       <td className="px-4 py-3">
-                        <Badge color={badge.color} size="sm">
-                          {badge.label}
+                        <Badge color={resultColor} size="sm">
+                          {resultLabel}
                         </Badge>
                       </td>
                       <td className="px-4 py-3 text-sm text-[var(--color-text)]">

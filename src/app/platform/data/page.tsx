@@ -7,7 +7,8 @@ import { DataTable, TableSearch, SummaryCard } from "@/components/shared";
 import { ColumnSettings, type ColumnConfig } from "@/components/shared/ColumnSettings";
 import { dateTimeCell } from "@/lib/utils/columnHelpers";
 import type { ColumnDef, VisibilityState } from "@tanstack/react-table";
-import { Badge } from "@plexui/ui/components/Badge";
+import { Badge, type BadgeProps } from "@plexui/ui/components/Badge";
+import { getDataOpStatusColor } from "@/lib/utils/format";
 import { Select } from "@plexui/ui/components/Select";
 import { Button } from "@plexui/ui/components/Button";
 
@@ -63,11 +64,7 @@ const DEFAULT_VISIBILITY: VisibilityState = {
   createdAt: true,
 };
 
-const statusColorMap: Record<string, "success" | "warning" | "danger"> = {
-  completed: "success",
-  processing: "warning",
-  failed: "danger",
-};
+
 
 const columns: ColumnDef<ActivityRecord, unknown>[] = [
   {
@@ -99,7 +96,7 @@ const columns: ColumnDef<ActivityRecord, unknown>[] = [
     header: "Status",
     size: 120,
     cell: ({ row }) => (
-      <Badge color={statusColorMap[row.original.status]} variant="soft" size="sm">
+      <Badge color={getDataOpStatusColor(row.original.status) as BadgeProps["color"]} variant="soft" size="sm">
         {row.original.status.charAt(0).toUpperCase() + row.original.status.slice(1)}
       </Badge>
     ),

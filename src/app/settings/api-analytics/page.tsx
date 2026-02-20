@@ -6,7 +6,8 @@ import { MetricCard, SectionHeading, DataTable, ChartCard } from "@/components/s
 import { SimpleBarChart } from "@/components/charts/SimpleBarChart";
 import type { ColumnDef } from "@tanstack/react-table";
 import type { TimeSeriesPoint } from "@/lib/types";
-import { Badge } from "@plexui/ui/components/Badge";
+import { Badge, type BadgeProps } from "@plexui/ui/components/Badge";
+import { getHttpMethodColor } from "@/lib/utils/format";
 
 interface EndpointMetric {
   id: string;
@@ -85,26 +86,19 @@ const endpointColumns: ColumnDef<EndpointMetric, unknown>[] = [
       </span>
     ),
   },
-  {
-    accessorKey: "method",
-    header: "Method",
-    size: 100,
-    cell: ({ row }) => {
-      const method = row.original.method;
-      const colorMap: Record<string, "info" | "secondary" | "warning" | "danger"> = {
-        GET: "secondary",
-        POST: "info",
-        PUT: "warning",
-        PATCH: "warning",
-        DELETE: "danger",
-      };
-      return (
-        <Badge color={colorMap[method]} variant="soft">
-          {method}
-        </Badge>
-      );
-    },
-  },
+   {
+     accessorKey: "method",
+     header: "Method",
+     size: 100,
+     cell: ({ row }) => {
+       const method = row.original.method;
+       return (
+         <Badge color={getHttpMethodColor(method) as BadgeProps["color"]} variant="soft">
+           {method}
+         </Badge>
+       );
+     },
+   },
   {
     accessorKey: "requestCount",
     header: "Requests",

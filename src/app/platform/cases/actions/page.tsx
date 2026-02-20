@@ -9,7 +9,8 @@ import { ColumnSettings, type ColumnConfig } from "@/components/shared/ColumnSet
 import { dateTimeCell } from "@/lib/utils/columnHelpers";
 import type { ColumnDef, VisibilityState } from "@tanstack/react-table";
 import { Button } from "@plexui/ui/components/Button";
-import { Badge } from "@plexui/ui/components/Badge";
+import { Badge, type BadgeProps } from "@plexui/ui/components/Badge";
+import { getActionTypeColor } from "@/lib/utils/format";
 import { Plus } from "@plexui/ui/components/Icon";
 import { Select } from "@plexui/ui/components/Select";
 
@@ -145,14 +146,8 @@ const columns: ColumnDef<CaseAction, unknown>[] = [
     size: 140,
     cell: ({ row }) => {
       const type = row.original.actionType;
-      const colorMap: Record<string, "discovery" | "secondary" | "warning" | "info"> = {
-        email: "discovery",
-        webhook: "secondary",
-        status_change: "warning",
-        assign: "info",
-      };
       return (
-        <Badge color={colorMap[type] ?? "secondary"} size="sm">
+        <Badge color={getActionTypeColor(type) as BadgeProps["color"]} size="sm">
           {type.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}
         </Badge>
       );

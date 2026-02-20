@@ -1,4 +1,5 @@
-import { Badge } from "@plexui/ui/components/Badge";
+import { Badge, type BadgeProps } from "@plexui/ui/components/Badge";
+import { getRiskColor } from "@/lib/utils/format";
 import { SectionHeading, KeyValueTable } from "@/components/shared";
 import { behavioralRiskDescriptions } from "@/lib/data/check-descriptions";
 import type { KeyValueSection } from "@/components/shared/KeyValueTable";
@@ -6,7 +7,7 @@ import type { BehavioralRisk } from "@/lib/types";
 import { InfoTip } from "./InfoTip";
 
 function ThreatBadge({ level }: { level: string }) {
-  const color = level === "low" ? "success" : level === "medium" ? "warning" : "danger";
+  const color = getRiskColor(level) as BadgeProps["color"];
   const label = level.charAt(0).toUpperCase() + level.slice(1);
   return (
     <Badge color={color} size="sm">

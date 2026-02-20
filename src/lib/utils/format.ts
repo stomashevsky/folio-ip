@@ -72,15 +72,31 @@ export function getStatusColor(status: string): string {
     draft: "secondary",
     archived: "secondary",
     disabled: "secondary",
+    beta: "info",
+    deprecated: "secondary",
+    published: "success",
+    processing: "warning",
+    delivered: "success",
+    retrying: "warning",
+    exceeded: "danger",
   };
   return map[status] ?? "secondary";
+}
+
+export function getRiskColor(level: string): string {
+  const map: Record<string, string> = {
+    low: "success",
+    medium: "warning",
+    high: "danger",
+  };
+  return map[level] ?? "secondary";
 }
 
 export function getPriorityColor(priority: string): string {
   const map: Record<string, string> = {
     critical: "danger",
     high: "warning",
-    medium: "secondary",
+    medium: "caution",
     low: "success",
   };
   return map[priority] ?? "secondary";
@@ -96,6 +112,152 @@ export function getRoleBadgeColor(role: string): string {
 
 export function getActiveBadgeColor(active: boolean): string {
   return active ? "success" : "secondary";
+}
+
+// ── HTTP ──
+
+export function getHttpMethodColor(method: string): string {
+  const map: Record<string, string> = {
+    GET: "secondary",
+    POST: "info",
+    PUT: "warning",
+    PATCH: "warning",
+    DELETE: "danger",
+  };
+  return map[method] ?? "secondary";
+}
+
+export function getHttpStatusColor(code: number): string {
+  if (code >= 500) return "danger";
+  if (code >= 400) return "warning";
+  return "success";
+}
+
+// ── Delivery / operations ──
+
+export function getDeliveryStatusColor(status: string): string {
+  const map: Record<string, string> = {
+    delivered: "success",
+    failed: "danger",
+    pending: "info",
+    retrying: "warning",
+  };
+  return map[status] ?? "secondary";
+}
+
+export function getDataOpStatusColor(status: string): string {
+  const map: Record<string, string> = {
+    completed: "success",
+    processing: "warning",
+    failed: "danger",
+    queued: "secondary",
+  };
+  return map[status] ?? "secondary";
+}
+
+// ── Lists & matching ──
+
+export function getListTypeColor(type: string): string {
+  const map: Record<string, string> = {
+    allowlist: "success",
+    blocklist: "danger",
+    watchlist: "warning",
+  };
+  return map[type] ?? "secondary";
+}
+
+export function getMatchTypeColor(type: string): string {
+  const map: Record<string, string> = {
+    exact: "danger",
+    partial: "warning",
+  };
+  return map[type] ?? "secondary";
+}
+
+export function getMatchStatusColor(status: string): string {
+  const map: Record<string, string> = {
+    pending_review: "warning",
+    confirmed: "danger",
+  };
+  return map[status] ?? "secondary";
+}
+
+export function getMatchScoreColor(score: number): string {
+  if (score >= 85) return "danger";
+  if (score >= 70) return "warning";
+  return "secondary";
+}
+
+// ── Domain-specific ──
+
+export function getNodeTypeColor(type: string): string {
+  const map: Record<string, string> = {
+    account: "info",
+    inquiry: "discovery",
+    verification: "success",
+    device: "warning",
+    ip_address: "caution",
+    email: "info",
+  };
+  return map[type] ?? "secondary";
+}
+
+export function getEventLevelColor(level: string): string {
+  const map: Record<string, string> = {
+    info: "secondary",
+    warning: "warning",
+    success: "success",
+    error: "danger",
+    danger: "danger",
+  };
+  return map[level] ?? "secondary";
+}
+
+export function getFormatColor(format: string): string {
+  const map: Record<string, string> = {
+    csv: "secondary",
+    json: "info",
+    xlsx: "discovery",
+    pdf: "warning",
+  };
+  return map[format] ?? "secondary";
+}
+
+export function getSignalCategoryColor(category: string): string {
+  const map: Record<string, string> = {
+    featured: "info",
+    risk: "warning",
+    behavioral: "discovery",
+  };
+  return map[category] ?? "secondary";
+}
+
+export function getActionTypeColor(type: string): string {
+  const map: Record<string, string> = {
+    email: "discovery",
+    webhook: "secondary",
+    status_change: "warning",
+    assign: "info",
+  };
+  return map[type] ?? "secondary";
+}
+
+export function getRateLimitStatusColor(status: string): string {
+  const map: Record<string, string> = {
+    active: "success",
+    warning: "warning",
+    exceeded: "danger",
+  };
+  return map[status] ?? "secondary";
+}
+
+export function getMonitoringResultColor(result: string): string {
+  const map: Record<string, string> = {
+    clear: "success",
+    match_found: "danger",
+    error: "warning",
+  };
+  return map[result] ?? "secondary";
 }
 
 const TITLE_CASE_LOWER_WORDS = new Set([

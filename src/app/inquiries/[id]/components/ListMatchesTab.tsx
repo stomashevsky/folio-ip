@@ -3,46 +3,21 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Input } from "@plexui/ui/components/Input";
-import { Badge } from "@plexui/ui/components/Badge";
+import { Badge, type BadgeProps } from "@plexui/ui/components/Badge";
 import { Tooltip } from "@plexui/ui/components/Tooltip";
 import { Search, InfoCircle } from "@plexui/ui/components/Icon";
 import { InlineEmpty, SectionHeading } from "@/components/shared";
-import { toTitleCase } from "@/lib/utils/format";
+import { toTitleCase, getMatchTypeColor, getMatchStatusColor, getMatchScoreColor } from "@/lib/utils/format";
 import { REPORT_TYPE_LABELS } from "@/lib/constants/report-type-labels";
 import type { Report, ReportMatch } from "@/lib/types";
 
-type BadgeColor =
-  | "danger"
-  | "warning"
-  | "secondary"
-  | "success"
-  | "info"
-  | "discovery"
-  | "caution";
-
-const matchTypeColors: Record<string, BadgeColor> = {
-  exact: "danger",
-  partial: "warning",
-  fuzzy: "secondary",
-};
+type BadgeColor = BadgeProps["color"];
 
 const matchStatusLabels: Record<string, string> = {
   pending_review: "Pending Review",
   confirmed: "Confirmed",
   dismissed: "Dismissed",
 };
-
-const matchStatusColors: Record<string, BadgeColor> = {
-  pending_review: "warning",
-  confirmed: "danger",
-  dismissed: "secondary",
-};
-
-function getScoreColor(score: number): BadgeColor {
-  if (score >= 85) return "danger";
-  if (score >= 70) return "warning";
-  return "secondary";
-}
 
 interface AggregatedMatch extends ReportMatch {
   reportId: string;
@@ -175,7 +150,7 @@ export function ListMatchesTab({ reports }: { reports: Report[] }) {
                     {match.source}
                   </td>
                   <td className="px-4 py-3">
-                    <Badge color={getScoreColor(match.score)} size="sm">
+                    <Badge color={getMatchScoreColor(match.score) as BadgeColor} size="sm">
                       {match.score}%
                     </Badge>
                   </td>
@@ -184,7 +159,7 @@ export function ListMatchesTab({ reports }: { reports: Report[] }) {
                   </td>
                   <td className="px-4 py-3">
                     <Badge
-                      color={matchTypeColors[match.matchType] ?? "secondary"}
+                      color={getMatchTypeColor(match.matchType) as BadgeColor}
                       size="sm"
                     >
                       {match.matchType.charAt(0).toUpperCase() + match.matchType.slice(1)}
@@ -192,7 +167,7 @@ export function ListMatchesTab({ reports }: { reports: Report[] }) {
                   </td>
                   <td className="px-4 py-3">
                     <Badge
-                      color={matchStatusColors[match.status] ?? "secondary"}
+                      color={getMatchStatusColor(match.status) as BadgeColor}
                       size="sm"
                       variant="outline"
                     >

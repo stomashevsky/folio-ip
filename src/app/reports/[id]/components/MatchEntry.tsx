@@ -1,42 +1,17 @@
-import { Badge } from "@plexui/ui/components/Badge";
+import { Badge, type BadgeProps } from "@plexui/ui/components/Badge";
 import { Button } from "@plexui/ui/components/Button";
 import { Tooltip } from "@plexui/ui/components/Tooltip";
 import { InfoCircle } from "@plexui/ui/components/Icon";
-import { toTitleCase } from "@/lib/utils/format";
+import { toTitleCase, getMatchTypeColor, getMatchStatusColor, getMatchScoreColor } from "@/lib/utils/format";
 import type { ReportMatch } from "@/lib/types";
 
-type BadgeColor =
-  | "danger"
-  | "warning"
-  | "secondary"
-  | "success"
-  | "info"
-  | "discovery"
-  | "caution";
-
-const matchTypeColors: Record<string, BadgeColor> = {
-  exact: "danger",
-  partial: "warning",
-  fuzzy: "secondary",
-};
+type BadgeColor = BadgeProps["color"];
 
 const matchStatusLabels: Record<string, string> = {
   pending_review: "Pending Review",
   confirmed: "Confirmed",
   dismissed: "Dismissed",
 };
-
-const matchStatusColors: Record<string, BadgeColor> = {
-  pending_review: "warning",
-  confirmed: "danger",
-  dismissed: "secondary",
-};
-
-function getScoreColor(score: number): BadgeColor {
-  if (score >= 85) return "danger";
-  if (score >= 70) return "warning";
-  return "secondary";
-}
 
 const thClass =
   "px-4 py-2.5 text-left text-xs font-semibold uppercase tracking-[0.5px] text-[var(--color-text-tertiary)]";
@@ -60,7 +35,7 @@ function MatchRow({ match }: { match: ReportMatch }) {
         {match.source}
       </td>
       <td className="px-4 py-3">
-        <Badge color={getScoreColor(match.score)} size="sm">
+        <Badge color={getMatchScoreColor(match.score) as BadgeColor} size="sm">
           {match.score}%
         </Badge>
       </td>
@@ -69,7 +44,7 @@ function MatchRow({ match }: { match: ReportMatch }) {
       </td>
       <td className="px-4 py-3">
         <Badge
-          color={matchTypeColors[match.matchType] ?? "secondary"}
+          color={getMatchTypeColor(match.matchType) as BadgeColor}
           size="sm"
         >
           {match.matchType.charAt(0).toUpperCase() + match.matchType.slice(1)}
@@ -77,7 +52,7 @@ function MatchRow({ match }: { match: ReportMatch }) {
       </td>
       <td className="px-4 py-3">
         <Badge
-          color={matchStatusColors[match.status] ?? "secondary"}
+          color={getMatchStatusColor(match.status) as BadgeColor}
           size="sm"
           variant="outline"
         >
