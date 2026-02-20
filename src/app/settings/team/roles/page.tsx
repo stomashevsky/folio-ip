@@ -6,6 +6,7 @@ import { DataTable, TableSearch } from "@/components/shared";
 import { dateTimeCell } from "@/lib/utils/columnHelpers";
 import { Plus } from "@plexui/ui/components/Icon";
 import { Button } from "@plexui/ui/components/Button";
+import { Select } from "@plexui/ui/components/Select";
 import type { ColumnDef } from "@tanstack/react-table";
 
 interface Role {
@@ -17,6 +18,15 @@ interface Role {
   createdAt: string;
   updatedAt: string;
 }
+
+const MEMBERS_COUNT_OPTIONS = [
+  { value: "1", label: "1 member" },
+  { value: "2", label: "2 members" },
+  { value: "3", label: "3 members" },
+  { value: "4", label: "4 members" },
+  { value: "5", label: "5 members" },
+  { value: "8", label: "8 members" },
+];
 
 const mockRoles: Role[] = [
   {
@@ -132,16 +142,28 @@ const columns: ColumnDef<Role, unknown>[] = [
 
 export default function TeamRolesPage() {
   const [search, setSearch] = useState("");
+  const [membersFilter, setMembersFilter] = useState<string[]>([]);
 
   const filteredData = useMemo(() => {
-    if (!search.trim()) return mockRoles;
-    const query = search.toLowerCase();
-    return mockRoles.filter(
-      (role) =>
-        role.name.toLowerCase().includes(query) ||
-        role.description.toLowerCase().includes(query)
-    );
-  }, [search]);
+    let result = mockRoles;
+
+    if (search.trim()) {
+      const query = search.toLowerCase();
+      result = result.filter(
+        (role) =>
+          role.name.toLowerCase().includes(query) ||
+          role.description.toLowerCase().includes(query)
+      );
+    }
+
+    if (membersFilter.length > 0) {
+      result = result.filter((role) =>
+        membersFilter.includes(role.membersCount.toString())
+      );
+    }
+
+    return result;
+  }, [search, membersFilter]);
 
   return (
     <div className="flex h-full flex-col overflow-hidden">
@@ -154,11 +176,28 @@ export default function TeamRolesPage() {
           </Button>
         }
         toolbar={
-          <TableSearch
-            value={search}
-            onChange={setSearch}
-            placeholder="Search roles..."
-          />
+          <>
+            <TableSearch
+              value={search}
+              onChange={setSearch}
+              placeholder="Search roles..."
+            />
+            <div className="w-40">
+              <Select
+                multiple
+                clearable
+                block
+                pill
+                listMinWidth={180}
+                options={MEMBERS_COUNT_OPTIONS}
+                value={membersFilter}
+                onChange={(opts) => setMembersFilter(opts.map((o) => o.value))}
+                placeholder="Members"
+                variant="outline"
+                size="sm"
+              />
+            </div>
+          </>
         }
       />
 

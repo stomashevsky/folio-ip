@@ -9,6 +9,7 @@ import type { ColumnDef, VisibilityState } from "@tanstack/react-table";
 import { Badge } from "@plexui/ui/components/Badge";
 import { Button } from "@plexui/ui/components/Button";
 import { Plus } from "@plexui/ui/components/Icon";
+import { Select } from "@plexui/ui/components/Select";
 
 interface List {
   id: string;
@@ -19,6 +20,12 @@ interface List {
   updatedAt: string;
   createdAt: string;
 }
+
+const TYPE_OPTIONS = [
+  { value: "allowlist", label: "Allowlist" },
+  { value: "blocklist", label: "Blocklist" },
+  { value: "watchlist", label: "Watchlist" },
+];
 
 const mockLists: List[] = [
   {
@@ -152,19 +159,26 @@ const columns: ColumnDef<List, unknown>[] = [
 
 export default function UtilityListsPage() {
   const [search, setSearch] = useState("");
+  const [typeFilter, setTypeFilter] = useState<string[]>([]);
   const [columnVisibility, setColumnVisibility] =
     useState<VisibilityState>(DEFAULT_VISIBILITY);
 
   const filteredData = useMemo(() => {
-    if (!search) return mockLists;
+    let result = mockLists;
+
+    if (typeFilter.length > 0) {
+      result = result.filter((list) => typeFilter.includes(list.type));
+    }
+
+    if (!search) return result;
 
     const searchLower = search.toLowerCase();
-    return mockLists.filter(
+    return result.filter(
       (list) =>
         list.name.toLowerCase().includes(searchLower) ||
         list.description.toLowerCase().includes(searchLower)
     );
-  }, [search]);
+  }, [search, typeFilter]);
 
   return (
     <div className="flex h-full flex-col overflow-hidden">
@@ -194,6 +208,21 @@ export default function UtilityListsPage() {
               onChange={setSearch}
               placeholder="Search lists..."
             />
+            <div className="w-40">
+              <Select
+                multiple
+                clearable
+                block
+                pill
+                listMinWidth={180}
+                options={TYPE_OPTIONS}
+                value={typeFilter}
+                onChange={(opts) => setTypeFilter(opts.map((o) => o.value))}
+                placeholder="Type"
+                variant="outline"
+                size="sm"
+              />
+            </div>
           </>
         }
       />

@@ -9,6 +9,7 @@ import type { ColumnDef, VisibilityState } from "@tanstack/react-table";
 import { Button } from "@plexui/ui/components/Button";
 import { Badge } from "@plexui/ui/components/Badge";
 import { Plus } from "@plexui/ui/components/Icon";
+import { Select } from "@plexui/ui/components/Select";
 
 interface AssignmentPolicy {
   id: string;
@@ -17,9 +18,15 @@ interface AssignmentPolicy {
   strategy: "round_robin" | "least_busy" | "manual" | "skill_based";
   priority: string;
   queue: string;
+  status: "active" | "inactive";
   enabled: boolean;
   createdAt: string;
 }
+
+const STATUS_OPTIONS = [
+  { value: "active", label: "Active" },
+  { value: "inactive", label: "Inactive" },
+];
 
 const MOCK_POLICIES: AssignmentPolicy[] = [
   {
@@ -29,6 +36,7 @@ const MOCK_POLICIES: AssignmentPolicy[] = [
     strategy: "round_robin",
     priority: "medium",
     queue: "General Review",
+    status: "active",
     enabled: true,
     createdAt: "2025-01-10T08:00:00Z",
   },
@@ -39,6 +47,7 @@ const MOCK_POLICIES: AssignmentPolicy[] = [
     strategy: "least_busy",
     priority: "high",
     queue: "Fraud Investigation",
+    status: "active",
     enabled: true,
     createdAt: "2025-01-15T09:30:00Z",
   },
@@ -49,6 +58,7 @@ const MOCK_POLICIES: AssignmentPolicy[] = [
     strategy: "skill_based",
     priority: "critical",
     queue: "Compliance",
+    status: "active",
     enabled: true,
     createdAt: "2025-01-20T10:15:00Z",
   },
@@ -59,6 +69,7 @@ const MOCK_POLICIES: AssignmentPolicy[] = [
     strategy: "manual",
     priority: "high",
     queue: "VIP Accounts",
+    status: "inactive",
     enabled: false,
     createdAt: "2025-01-25T11:00:00Z",
   },
@@ -161,20 +172,27 @@ const columns: ColumnDef<AssignmentPolicy, unknown>[] = [
 
 export default function CaseAssignmentPoliciesPage() {
   const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string[]>([]);
   const [columnVisibility, setColumnVisibility] =
     useState<VisibilityState>(DEFAULT_VISIBILITY);
 
   const filteredData = useMemo(() => {
-    if (!search) return MOCK_POLICIES;
+    let result = MOCK_POLICIES;
+
+    if (statusFilter.length > 0) {
+      result = result.filter((p) => statusFilter.includes(p.status));
+    }
+
+    if (!search) return result;
 
     const lowerSearch = search.toLowerCase();
-    return MOCK_POLICIES.filter(
+    return result.filter(
       (p) =>
         p.name.toLowerCase().includes(lowerSearch) ||
         p.description.toLowerCase().includes(lowerSearch) ||
         p.queue.toLowerCase().includes(lowerSearch)
     );
-  }, [search]);
+  }, [search, statusFilter]);
 
   return (
     <div className="flex h-full flex-col overflow-hidden">
@@ -194,11 +212,28 @@ export default function CaseAssignmentPoliciesPage() {
           </div>
         }
         toolbar={
-          <TableSearch
-            value={search}
-            onChange={setSearch}
-            placeholder="Search policies..."
-          />
+          <>
+            <TableSearch
+              value={search}
+              onChange={setSearch}
+              placeholder="Search policies..."
+            />
+            <div className="w-36">
+              <Select
+                multiple
+                clearable
+                block
+                pill
+                listMinWidth={180}
+                options={STATUS_OPTIONS}
+                value={statusFilter}
+                onChange={(opts) => setStatusFilter(opts.map((o) => o.value))}
+                placeholder="Status"
+                variant="outline"
+                size="sm"
+              />
+            </div>
+          </>
         }
       />
 

@@ -8,6 +8,7 @@ import { dateTimeCell } from "@/lib/utils/columnHelpers";
 import type { ColumnDef, VisibilityState } from "@tanstack/react-table";
 import { Button } from "@plexui/ui/components/Button";
 import { Plus } from "@plexui/ui/components/Icon";
+import { Select } from "@plexui/ui/components/Select";
 
 interface Tag {
   id: string;
@@ -17,6 +18,19 @@ interface Tag {
   createdBy: string;
   createdAt: string;
 }
+
+const CREATED_BY_OPTIONS = [
+  { value: "John Smith", label: "John Smith" },
+  { value: "Sarah Johnson", label: "Sarah Johnson" },
+  { value: "Mike Chen", label: "Mike Chen" },
+  { value: "Emma Davis", label: "Emma Davis" },
+  { value: "Alex Rodriguez", label: "Alex Rodriguez" },
+  { value: "Lisa Wong", label: "Lisa Wong" },
+  { value: "James Miller", label: "James Miller" },
+  { value: "Patricia Brown", label: "Patricia Brown" },
+  { value: "Robert Taylor", label: "Robert Taylor" },
+  { value: "Jennifer Lee", label: "Jennifer Lee" },
+];
 
 const mockTags: Tag[] = [
   {
@@ -156,19 +170,26 @@ const columns: ColumnDef<Tag, unknown>[] = [
 
 export default function UtilityTagsPage() {
   const [search, setSearch] = useState("");
+  const [createdByFilter, setCreatedByFilter] = useState<string[]>([]);
   const [columnVisibility, setColumnVisibility] =
     useState<VisibilityState>(DEFAULT_VISIBILITY);
 
   const filteredData = useMemo(() => {
-    if (!search) return mockTags;
+    let result = mockTags;
+
+    if (createdByFilter.length > 0) {
+      result = result.filter((tag) => createdByFilter.includes(tag.createdBy));
+    }
+
+    if (!search) return result;
 
     const searchLower = search.toLowerCase();
-    return mockTags.filter(
+    return result.filter(
       (tag) =>
         tag.name.toLowerCase().includes(searchLower) ||
         tag.createdBy.toLowerCase().includes(searchLower)
     );
-  }, [search]);
+  }, [search, createdByFilter]);
 
   return (
     <div className="flex h-full flex-col overflow-hidden">
@@ -198,6 +219,21 @@ export default function UtilityTagsPage() {
               onChange={setSearch}
               placeholder="Search tags..."
             />
+            <div className="w-48">
+              <Select
+                multiple
+                clearable
+                block
+                pill
+                listMinWidth={200}
+                options={CREATED_BY_OPTIONS}
+                value={createdByFilter}
+                onChange={(opts) => setCreatedByFilter(opts.map((o) => o.value))}
+                placeholder="Created By"
+                variant="outline"
+                size="sm"
+              />
+            </div>
           </>
         }
       />

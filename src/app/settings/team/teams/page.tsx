@@ -6,6 +6,7 @@ import { DataTable, TableSearch, ColumnSettings } from "@/components/shared";
 import type { ColumnConfig } from "@/components/shared/ColumnSettings";
 import { Button } from "@plexui/ui/components/Button";
 import { Plus } from "@plexui/ui/components/Icon";
+import { Select } from "@plexui/ui/components/Select";
 import type { ColumnDef, VisibilityState } from "@tanstack/react-table";
 
 interface Team {
@@ -16,6 +17,13 @@ interface Team {
   lead: string;
   createdAt: string;
 }
+
+const LEAD_OPTIONS = [
+  { value: "Alice Johnson", label: "Alice Johnson" },
+  { value: "Bob Smith", label: "Bob Smith" },
+  { value: "Carol White", label: "Carol White" },
+  { value: "David Brown", label: "David Brown" },
+];
 
 const mockTeams: Team[] = [
   {
@@ -123,19 +131,29 @@ const columns: ColumnDef<Team, unknown>[] = [
 
 export default function TeamsPage() {
   const [search, setSearch] = useState("");
+  const [leadFilter, setLeadFilter] = useState<string[]>([]);
   const [columnVisibility, setColumnVisibility] =
     useState<VisibilityState>(DEFAULT_VISIBILITY);
 
   const filteredData = useMemo(() => {
-    if (!search.trim()) return mockTeams;
-    const query = search.toLowerCase();
-    return mockTeams.filter(
-      (team) =>
-        team.name.toLowerCase().includes(query) ||
-        team.description.toLowerCase().includes(query) ||
-        team.lead.toLowerCase().includes(query)
-    );
-  }, [search]);
+    let result = mockTeams;
+
+    if (search.trim()) {
+      const query = search.toLowerCase();
+      result = result.filter(
+        (team) =>
+          team.name.toLowerCase().includes(query) ||
+          team.description.toLowerCase().includes(query) ||
+          team.lead.toLowerCase().includes(query)
+      );
+    }
+
+    if (leadFilter.length > 0) {
+      result = result.filter((team) => leadFilter.includes(team.lead));
+    }
+
+    return result;
+  }, [search, leadFilter]);
 
   return (
     <div className="flex h-full flex-col overflow-hidden">
@@ -154,6 +172,21 @@ export default function TeamsPage() {
               onChange={setSearch}
               placeholder="Search teams..."
             />
+            <div className="w-40">
+              <Select
+                multiple
+                clearable
+                block
+                pill
+                listMinWidth={180}
+                options={LEAD_OPTIONS}
+                value={leadFilter}
+                onChange={(opts) => setLeadFilter(opts.map((o) => o.value))}
+                placeholder="Lead"
+                variant="outline"
+                size="sm"
+              />
+            </div>
             <ColumnSettings
               columns={COLUMN_CONFIG}
               visibility={columnVisibility}

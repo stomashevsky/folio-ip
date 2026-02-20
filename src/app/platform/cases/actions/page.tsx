@@ -9,6 +9,7 @@ import type { ColumnDef, VisibilityState } from "@tanstack/react-table";
 import { Button } from "@plexui/ui/components/Button";
 import { Badge } from "@plexui/ui/components/Badge";
 import { Plus } from "@plexui/ui/components/Icon";
+import { Select } from "@plexui/ui/components/Select";
 
 interface CaseAction {
   id: string;
@@ -16,9 +17,15 @@ interface CaseAction {
   description: string;
   trigger: string;
   actionType: "email" | "webhook" | "status_change" | "assign";
+  type: "manual" | "automated";
   enabled: boolean;
   createdAt: string;
 }
+
+const TYPE_OPTIONS = [
+  { value: "manual", label: "Manual" },
+  { value: "automated", label: "Automated" },
+];
 
 const MOCK_ACTIONS: CaseAction[] = [
   {
@@ -27,6 +34,7 @@ const MOCK_ACTIONS: CaseAction[] = [
     description: "Send email notification when fraud is detected",
     trigger: "status_change:fraud_detected",
     actionType: "email",
+    type: "manual",
     enabled: true,
     createdAt: "2025-01-10T08:00:00Z",
   },
@@ -36,6 +44,7 @@ const MOCK_ACTIONS: CaseAction[] = [
     description: "Post case data to external compliance system",
     trigger: "case_created",
     actionType: "webhook",
+    type: "automated",
     enabled: true,
     createdAt: "2025-01-15T09:30:00Z",
   },
@@ -45,6 +54,7 @@ const MOCK_ACTIONS: CaseAction[] = [
     description: "Automatically escalate high priority cases",
     trigger: "priority:high",
     actionType: "status_change",
+    type: "automated",
     enabled: true,
     createdAt: "2025-01-20T10:15:00Z",
   },
@@ -54,6 +64,7 @@ const MOCK_ACTIONS: CaseAction[] = [
     description: "Assign VIP account cases to VIP queue",
     trigger: "account_type:vip",
     actionType: "assign",
+    type: "manual",
     enabled: true,
     createdAt: "2025-01-25T11:00:00Z",
   },
@@ -63,6 +74,7 @@ const MOCK_ACTIONS: CaseAction[] = [
     description: "Notify compliance team of regulatory cases",
     trigger: "case_type:compliance",
     actionType: "email",
+    type: "automated",
     enabled: false,
     createdAt: "2025-02-01T12:45:00Z",
   },
@@ -72,6 +84,7 @@ const MOCK_ACTIONS: CaseAction[] = [
     description: "Alert when SLA is about to breach",
     trigger: "sla_threshold:80%",
     actionType: "email",
+    type: "manual",
     enabled: true,
     createdAt: "2025-02-05T14:20:00Z",
   },
@@ -166,20 +179,27 @@ const columns: ColumnDef<CaseAction, unknown>[] = [
 
 export default function CaseActionsPage() {
   const [search, setSearch] = useState("");
+  const [typeFilter, setTypeFilter] = useState<string[]>([]);
   const [columnVisibility, setColumnVisibility] =
     useState<VisibilityState>(DEFAULT_VISIBILITY);
 
   const filteredData = useMemo(() => {
-    if (!search) return MOCK_ACTIONS;
+    let result = MOCK_ACTIONS;
+
+    if (typeFilter.length > 0) {
+      result = result.filter((a) => typeFilter.includes(a.type));
+    }
+
+    if (!search) return result;
 
     const lowerSearch = search.toLowerCase();
-    return MOCK_ACTIONS.filter(
+    return result.filter(
       (a) =>
         a.name.toLowerCase().includes(lowerSearch) ||
         a.description.toLowerCase().includes(lowerSearch) ||
         a.trigger.toLowerCase().includes(lowerSearch)
     );
-  }, [search]);
+  }, [search, typeFilter]);
 
   return (
     <div className="flex h-full flex-col overflow-hidden">
@@ -199,11 +219,28 @@ export default function CaseActionsPage() {
           </div>
         }
         toolbar={
-          <TableSearch
-            value={search}
-            onChange={setSearch}
-            placeholder="Search actions..."
-          />
+          <>
+            <TableSearch
+              value={search}
+              onChange={setSearch}
+              placeholder="Search actions..."
+            />
+            <div className="w-36">
+              <Select
+                multiple
+                clearable
+                block
+                pill
+                listMinWidth={180}
+                options={TYPE_OPTIONS}
+                value={typeFilter}
+                onChange={(opts) => setTypeFilter(opts.map((o) => o.value))}
+                placeholder="Type"
+                variant="outline"
+                size="sm"
+              />
+            </div>
+          </>
         }
       />
 

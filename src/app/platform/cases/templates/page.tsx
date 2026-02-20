@@ -9,18 +9,25 @@ import type { ColumnDef, VisibilityState } from "@tanstack/react-table";
 import { Button } from "@plexui/ui/components/Button";
 import { Badge } from "@plexui/ui/components/Badge";
 import { Plus } from "@plexui/ui/components/Icon";
+import { Select } from "@plexui/ui/components/Select";
 
 interface CaseTemplate {
   id: string;
   name: string;
   description: string;
-  status: "active" | "draft";
+  status: "active" | "draft" | "archived";
   priority: string;
   queue: string;
   stepsCount: number;
   createdAt: string;
   updatedAt: string;
 }
+
+const STATUS_OPTIONS = [
+  { value: "active", label: "Active" },
+  { value: "draft", label: "Draft" },
+  { value: "archived", label: "Archived" },
+];
 
 const MOCK_TEMPLATES: CaseTemplate[] = [
   {
@@ -170,20 +177,27 @@ const columns: ColumnDef<CaseTemplate, unknown>[] = [
 
 export default function CaseTemplatesPage() {
   const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string[]>([]);
   const [columnVisibility, setColumnVisibility] =
     useState<VisibilityState>(DEFAULT_VISIBILITY);
 
   const filteredData = useMemo(() => {
-    if (!search) return MOCK_TEMPLATES;
+    let result = MOCK_TEMPLATES;
+
+    if (statusFilter.length > 0) {
+      result = result.filter((t) => statusFilter.includes(t.status));
+    }
+
+    if (!search) return result;
 
     const lowerSearch = search.toLowerCase();
-    return MOCK_TEMPLATES.filter(
+    return result.filter(
       (t) =>
         t.name.toLowerCase().includes(lowerSearch) ||
         t.description.toLowerCase().includes(lowerSearch) ||
         t.queue.toLowerCase().includes(lowerSearch)
     );
-  }, [search]);
+  }, [search, statusFilter]);
 
   return (
     <div className="flex h-full flex-col overflow-hidden">
@@ -203,11 +217,28 @@ export default function CaseTemplatesPage() {
           </div>
         }
         toolbar={
-          <TableSearch
-            value={search}
-            onChange={setSearch}
-            placeholder="Search templates..."
-          />
+          <>
+            <TableSearch
+              value={search}
+              onChange={setSearch}
+              placeholder="Search templates..."
+            />
+            <div className="w-36">
+              <Select
+                multiple
+                clearable
+                block
+                pill
+                listMinWidth={180}
+                options={STATUS_OPTIONS}
+                value={statusFilter}
+                onChange={(opts) => setStatusFilter(opts.map((o) => o.value))}
+                placeholder="Status"
+                variant="outline"
+                size="sm"
+              />
+            </div>
+          </>
         }
       />
 

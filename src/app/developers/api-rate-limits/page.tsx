@@ -6,6 +6,8 @@ import { DataTable, TableSearch } from "@/components/shared";
 import { ColumnSettings, type ColumnConfig } from "@/components/shared/ColumnSettings";
 import type { ColumnDef, VisibilityState } from "@tanstack/react-table";
 import { Badge } from "@plexui/ui/components/Badge";
+import { Select } from "@plexui/ui/components/Select";
+import { Button } from "@plexui/ui/components/Button";
 
 interface RateLimit {
   id: string;
@@ -16,6 +18,12 @@ interface RateLimit {
   currentUsage: number;
   status: "active" | "exceeded" | "warning";
 }
+
+const STATUS_OPTIONS = [
+  { value: "active", label: "Active" },
+  { value: "warning", label: "Warning" },
+  { value: "exceeded", label: "Exceeded" },
+];
 
 const mockRateLimits: RateLimit[] = [
   {
@@ -171,18 +179,33 @@ const columns: ColumnDef<RateLimit, unknown>[] = [
 
 export default function ApiRateLimitsPage() {
   const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string[]>([]);
   const [columnVisibility, setColumnVisibility] =
     useState<VisibilityState>(DEFAULT_VISIBILITY);
 
+  const hasActiveFilters = statusFilter.length > 0;
+
   const filteredData = useMemo(() => {
-    if (!search) return mockRateLimits;
-    const searchLower = search.toLowerCase();
-    return mockRateLimits.filter(
-      (item) =>
-        item.name.toLowerCase().includes(searchLower) ||
-        item.endpoint.toLowerCase().includes(searchLower)
-    );
-  }, [search]);
+    return mockRateLimits.filter((item) => {
+      if (statusFilter.length > 0 && !statusFilter.includes(item.status)) {
+        return false;
+      }
+
+      if (search) {
+        const searchLower = search.toLowerCase();
+        return (
+          item.name.toLowerCase().includes(searchLower) ||
+          item.endpoint.toLowerCase().includes(searchLower)
+        );
+      }
+
+      return true;
+    });
+  }, [statusFilter, search]);
+
+  function clearAllFilters() {
+    setStatusFilter([]);
+  }
 
   return (
     <div className="flex h-full flex-col overflow-hidden">
@@ -196,11 +219,41 @@ export default function ApiRateLimitsPage() {
           />
         }
         toolbar={
-          <TableSearch
-            value={search}
-            onChange={setSearch}
-            placeholder="Search rate limits..."
-          />
+          <>
+            <TableSearch
+              value={search}
+              onChange={setSearch}
+              placeholder="Search rate limits..."
+            />
+
+            <div className="w-40">
+              <Select
+                multiple
+                clearable
+                block
+                pill
+                listMinWidth={180}
+                options={STATUS_OPTIONS}
+                value={statusFilter}
+                onChange={(opts) => setStatusFilter(opts.map((o) => o.value))}
+                placeholder="Status"
+                variant="outline"
+                size="sm"
+              />
+            </div>
+
+            {hasActiveFilters && (
+              <Button
+                color="secondary"
+                variant="soft"
+                size="sm"
+                pill
+                onClick={clearAllFilters}
+              >
+                Clear filters
+              </Button>
+            )}
+          </>
         }
       />
 
