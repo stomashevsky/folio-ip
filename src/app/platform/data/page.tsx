@@ -100,7 +100,7 @@ function formatDateTime(isoString: string): string {
   });
 }
 
-function getStatusColor(status: string): "success" | "warning" | "danger" {
+function getStatusColor(status: string): "success" | "warning" | "danger" | "secondary" {
   switch (status) {
     case "completed":
       return "success";
@@ -109,7 +109,7 @@ function getStatusColor(status: string): "success" | "warning" | "danger" {
     case "failed":
       return "danger";
     default:
-      return "secondary" as any;
+      return "secondary";
   }
 }
 

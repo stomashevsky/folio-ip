@@ -95,7 +95,7 @@ export function workflowFlowToElements(flow: WorkflowFlowDefinition): { nodes: N
 
   for (const [stepId, step] of Object.entries(flow.steps)) {
     nodes.push(createStepNode(stepId, step));
-    addStepEdges(edges, stepId, step, flow);
+    addStepEdges(edges, stepId, step);
   }
 
   if (flow.output !== undefined) {
@@ -165,7 +165,7 @@ function createStepNode(stepId: string, step: WorkflowFlowStep): Node {
   }
 }
 
-function addStepEdges(edges: Edge[], stepId: string, step: WorkflowFlowStep, flow: WorkflowFlowDefinition): void {
+function addStepEdges(edges: Edge[], stepId: string, step: WorkflowFlowStep): void {
   if (step.type === "action" || step.type === "wait") {
     if (step.next) {
       edges.push(buildEdge(`edge__${stepId}__next__${step.next}`, stepId, step.next, undefined, "default", "primary", 50));

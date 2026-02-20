@@ -562,6 +562,7 @@ export interface WorkflowFlowWaitStep {
   target_object?: string; // step ID that created the object
   events?: string[];
   timeout_seconds?: number;
+  error_on_expiration?: boolean;
   next?: string;
 }
 

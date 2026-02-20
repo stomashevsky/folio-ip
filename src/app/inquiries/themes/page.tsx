@@ -7,8 +7,6 @@ import { ColumnSettings, type ColumnConfig } from "@/components/shared/ColumnSet
 import { dateTimeCell } from "@/lib/utils/columnHelpers";
 import type { ColumnDef, VisibilityState } from "@tanstack/react-table";
 import { Badge } from "@plexui/ui/components/Badge";
-import { Button } from "@plexui/ui/components/Button";
-import { Plus } from "@plexui/ui/components/Icon";
 
 interface Theme {
   id: string;

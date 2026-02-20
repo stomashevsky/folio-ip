@@ -3,7 +3,7 @@
 import { useState, useMemo } from "react";
 import { TopBar } from "@/components/layout/TopBar";
 import { DataTable, TableSearch } from "@/components/shared";
-import { idCell, dateTimeCell } from "@/lib/utils/columnHelpers";
+import { dateTimeCell } from "@/lib/utils/columnHelpers";
 import { Plus } from "@plexui/ui/components/Icon";
 import { Button } from "@plexui/ui/components/Button";
 import type { ColumnDef } from "@tanstack/react-table";

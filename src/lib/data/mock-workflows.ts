@@ -89,6 +89,7 @@ export const mockWorkflows: Workflow[] = [
     status: "active",
     trigger: {
       event: "account.created",
+      conditions: { country: "in high_risk_countries" },
     },
     steps: [
       {

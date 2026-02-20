@@ -130,14 +130,14 @@ const columns: ColumnDef<CaseAction, unknown>[] = [
     size: 140,
     cell: ({ row }) => {
       const type = row.original.actionType;
-      const colorMap: Record<string, any> = {
-        email: "primary",
+      const colorMap: Record<string, "discovery" | "secondary" | "warning" | "info"> = {
+        email: "discovery",
         webhook: "secondary",
         status_change: "warning",
         assign: "info",
       };
       return (
-        <Badge color={colorMap[type] || "secondary"} size="sm">
+        <Badge color={colorMap[type] ?? "secondary"} size="sm">
           {type.replace(/_/g, " ")}
         </Badge>
       );

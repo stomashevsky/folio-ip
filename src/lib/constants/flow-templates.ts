@@ -763,6 +763,7 @@ steps:
     events:
       - case.resolved
     timeout_seconds: 604800
+    error_on_expiration: false
     next: resolution_check
 
   resolution_check:
@@ -914,6 +915,7 @@ steps:
     events:
       - case.resolved
     timeout_seconds: 2592000
+    error_on_expiration: false
     next: case_decision
 
   case_decision:

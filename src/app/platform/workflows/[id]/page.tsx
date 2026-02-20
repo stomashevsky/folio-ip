@@ -23,7 +23,8 @@ import { Input } from "@plexui/ui/components/Input";
 import { Textarea } from "@plexui/ui/components/Textarea";
 import { Select } from "@plexui/ui/components/Select";
 import { Menu } from "@plexui/ui/components/Menu";
-import { DotsHorizontal, Undo, Redo } from "@plexui/ui/components/Icon";
+import { DotsHorizontal, Undo, Redo, PlayCircle } from "@plexui/ui/components/Icon";
+
 
 interface WorkflowForm {
   name: string;
@@ -100,6 +101,7 @@ function WorkflowDetailContent() {
   const [editorPanel, setEditorPanel] = useState<FlowEditorPanel>("chat");
   const [codeHistoryState, setCodeHistoryState] = useState({ canUndo: false, canRedo: false });
   const [codeHistoryActions, setCodeHistoryActions] = useState<{ undo: () => void; redo: () => void } | null>(null);
+  const [showSimulateMsg, setShowSimulateMsg] = useState(false);
   const saveTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
   const [prevId, setPrevId] = useState(id);
   if (prevId !== id) {
@@ -173,9 +175,14 @@ function WorkflowDetailContent() {
           <span className="flex items-center gap-2">
             {title}
             {!isNew && (
-              <Badge color={getStatusColor(form.status) as "warning" | "success" | "secondary"} size="sm">
-                {form.status}
-              </Badge>
+              <>
+                <Badge color={getStatusColor(form.status) as "warning" | "success" | "secondary"} size="sm">
+                  {form.status}
+                </Badge>
+                <Badge color={form.lastPublishedAt ? "info" : "secondary"} variant="outline" size="sm">
+                  {form.lastPublishedAt ? "Version: Published" : "Version: Draft"}
+                </Badge>
+              </>
             )}
           </span>
         }
@@ -217,6 +224,19 @@ function WorkflowDetailContent() {
                 className="[--button-ring-color:transparent]"
               >
                 <Redo />
+              </Button>
+              <Button
+                color="secondary"
+                variant="outline"
+                size="md"
+                pill={false}
+                onClick={() => {
+                  setShowSimulateMsg(true);
+                  setTimeout(() => setShowSimulateMsg(false), 3000);
+                }}
+              >
+                <PlayCircle />
+                <span className="hidden md:inline">Simulate</span>
               </Button>
               {!isNew && (
                 <Menu>
@@ -301,6 +321,11 @@ function WorkflowDetailContent() {
         />
       </div>
 
+      {showSimulateMsg && (
+        <div className="absolute bottom-4 left-1/2 z-50 -translate-x-1/2 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-2 shadow-200">
+          <span className="text-sm text-[var(--color-text-secondary)]">Simulation is not yet available</span>
+        </div>
+      )}
       <ConfirmLeaveModal open={showLeaveConfirm} onConfirm={confirmLeave} onCancel={cancelLeave} />
     </div>
   );

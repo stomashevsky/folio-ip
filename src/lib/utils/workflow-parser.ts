@@ -148,6 +148,9 @@ function parseWaitStep(stepId: string, raw: Record<string, unknown>): WorkflowFl
   if (typeof raw.timeout_seconds === "number" && Number.isFinite(raw.timeout_seconds)) {
     step.timeout_seconds = raw.timeout_seconds;
   }
+  if (typeof raw.error_on_expiration === "boolean") {
+    step.error_on_expiration = raw.error_on_expiration;
+  }
   const next = parseOptionalString(raw.next, `steps.${stepId}.next`);
   if (next) step.next = next;
   return step;

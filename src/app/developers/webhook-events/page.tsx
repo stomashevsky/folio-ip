@@ -4,7 +4,7 @@ import { useState, useMemo } from "react";
 import { TopBar } from "@/components/layout/TopBar";
 import { DataTable, TableSearch } from "@/components/shared";
 import { ColumnSettings, type ColumnConfig } from "@/components/shared/ColumnSettings";
-import { idCell, dateTimeCell, statusCell } from "@/lib/utils/columnHelpers";
+import { dateTimeCell } from "@/lib/utils/columnHelpers";
 import type { ColumnDef, VisibilityState } from "@tanstack/react-table";
 import { Badge } from "@plexui/ui/components/Badge";
 import { Select } from "@plexui/ui/components/Select";
