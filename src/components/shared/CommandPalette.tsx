@@ -51,10 +51,6 @@ export function CommandPalette() {
     );
   }, [query, allItems]);
 
-  useEffect(() => {
-    setActiveIndex(0);
-  }, [filtered]);
-
   const handleClose = useCallback(() => {
     setOpen(false);
     setQuery("");
@@ -122,7 +118,7 @@ export function CommandPalette() {
           <input
             ref={inputRef}
             value={query}
-            onChange={(e) => setQuery(e.target.value)}
+            onChange={(e) => { setQuery(e.target.value); setActiveIndex(0); }}
             onKeyDown={handleInputKeyDown}
             placeholder="Search pages..."
             className="w-full bg-transparent text-sm text-[var(--color-text)] placeholder:text-[var(--color-text-tertiary)] outline-none"

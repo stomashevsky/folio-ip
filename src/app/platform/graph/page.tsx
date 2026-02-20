@@ -23,6 +23,8 @@ import { Switch } from "@plexui/ui/components/Switch";
 import { Tabs } from "@plexui/ui/components/Tabs";
 import {
   CloseBold,
+  CollapseLg,
+  ExpandMd,
   PlayCircle,
   Reload,
   SettingsCog,
@@ -358,6 +360,7 @@ export default function GraphPage() {
   const [queryResult, setQueryResult] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("explorer");
 
+  const [isFullscreen, setIsFullscreen] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [edgeType, setEdgeType] = useState("smoothstep");
   const [bgVariant, setBgVariant] = useState("dots");
@@ -579,7 +582,14 @@ export default function GraphPage() {
 
         <div className="min-h-0 flex-1 px-4 py-6 md:px-6">
           {activeTab === "explorer" && (
-            <div className="relative overflow-hidden rounded-xl border border-[var(--color-border)]" style={{ height: "calc(100vh - 340px)", minHeight: 400 }}>
+            <div
+              className={
+                isFullscreen
+                  ? "fixed inset-0 z-50 bg-[var(--color-surface)]"
+                  : "relative overflow-hidden rounded-xl border border-[var(--color-border)]"
+              }
+              style={isFullscreen ? undefined : { height: "calc(100vh - 280px)", minHeight: 500 }}
+            >
               <ReactFlowProvider>
                 <ReactFlow
                   nodes={nodes}
@@ -609,13 +619,25 @@ export default function GraphPage() {
               </ReactFlowProvider>
 
               <div className="absolute left-3 top-3 z-10">
-                <button
-                  type="button"
-                  className="flex h-8 w-8 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] shadow-100 transition-colors hover:bg-[var(--color-nav-hover-bg)]"
-                  onClick={() => setShowSettings((v) => !v)}
-                >
-                  <SettingsCog style={{ width: 16, height: 16 }} />
-                </button>
+                <div className="flex gap-1.5">
+                  <button
+                    type="button"
+                    className="flex h-8 w-8 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] shadow-100 transition-colors hover:bg-[var(--color-nav-hover-bg)]"
+                    onClick={() => setShowSettings((v) => !v)}
+                  >
+                    <SettingsCog style={{ width: 16, height: 16 }} />
+                  </button>
+                  <button
+                    type="button"
+                    className="flex h-8 w-8 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] shadow-100 transition-colors hover:bg-[var(--color-nav-hover-bg)]"
+                    onClick={() => setIsFullscreen((v) => !v)}
+                  >
+                    {isFullscreen
+                      ? <CollapseLg style={{ width: 16, height: 16 }} />
+                      : <ExpandMd style={{ width: 16, height: 16 }} />
+                    }
+                  </button>
+                </div>
 
                 {showSettings && (
                   <div className="mt-2 w-64 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4 shadow-200">

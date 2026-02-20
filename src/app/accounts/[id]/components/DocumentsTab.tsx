@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { Badge } from "@plexui/ui/components/Badge";
 import { InlineEmpty, DocumentViewer } from "@/components/shared";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import { VERIFICATION_TYPE_LABELS } from "@/lib/constants/verification-type-labels";
