@@ -163,19 +163,19 @@ function RunDetailContent() {
                   <SectionHeading size="xs">Summary</SectionHeading>
                   <div className="mt-2 grid grid-cols-2 gap-3 md:grid-cols-4">
                     <div className="rounded-lg border border-[var(--color-border)] p-3">
-                      <div className="text-2xs text-[var(--color-text-tertiary)]">Status</div>
+                      <div className="text-xs text-[var(--color-text-tertiary)]">Status</div>
                       <div className="mt-1"><StatusBadge status={run.status} /></div>
                     </div>
                     <div className="rounded-lg border border-[var(--color-border)] p-3">
-                      <div className="text-2xs text-[var(--color-text-tertiary)]">Steps</div>
+                      <div className="text-xs text-[var(--color-text-tertiary)]">Steps</div>
                       <div className="mt-1 heading-xs">{run.stepsExecuted} / {run.stepsTotal}</div>
                     </div>
                     <div className="rounded-lg border border-[var(--color-border)] p-3">
-                      <div className="text-2xs text-[var(--color-text-tertiary)]">Duration</div>
+                      <div className="text-xs text-[var(--color-text-tertiary)]">Duration</div>
                       <div className="mt-1 heading-xs">{durationSec ? `${durationSec}s` : "Running..."}</div>
                     </div>
                     <div className="rounded-lg border border-[var(--color-border)] p-3">
-                      <div className="text-2xs text-[var(--color-text-tertiary)]">Triggered by</div>
+                      <div className="text-xs text-[var(--color-text-tertiary)]">Triggered by</div>
                       <div className="mt-1 heading-xs capitalize">{run.triggeredBy}</div>
                     </div>
                   </div>
@@ -215,12 +215,12 @@ function RunDetailContent() {
                           {step.status}
                         </Badge>
                       </div>
-                      <div className="mt-1 flex items-center gap-3 text-2xs text-[var(--color-text-tertiary)]">
+                      <div className="mt-1 flex items-center gap-3 text-xs text-[var(--color-text-tertiary)]">
                         {step.startedAt && <span>Started: {formatDateTime(step.startedAt)}</span>}
                         {step.durationMs != null && <span>{step.durationMs}ms</span>}
                       </div>
                       {step.error && (
-                        <div className="mt-1 rounded bg-[var(--color-danger-soft-bg)] px-2 py-1 text-2xs text-[var(--color-text-danger-soft)]">
+                        <div className="mt-1 rounded bg-[var(--color-danger-soft-bg)] px-2 py-1 text-xs text-[var(--color-text-danger-soft)]">
                           {step.error}
                         </div>
                       )}

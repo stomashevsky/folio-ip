@@ -94,7 +94,7 @@ const columns: ColumnDef<Workflow, unknown>[] = [
       if (!conds || Object.keys(conds).length === 0) return <span className="text-[var(--color-text-tertiary)]">—</span>;
       const parts = Object.entries(conds).map(([k, v]) => `${k} ${v}`);
       return (
-        <span className="text-2xs text-[var(--color-text-secondary)]">
+        <span className="text-xs text-[var(--color-text-secondary)]">
           Where {parts.join(", ")}
         </span>
       );
@@ -283,8 +283,8 @@ export default function WorkflowsPage() {
                     <span className="text-sm font-medium text-[var(--color-text)]">{mod.name}</span>
                     <Badge color={mod.status === "published" ? "success" : "secondary"} size="sm">{mod.status.charAt(0).toUpperCase() + mod.status.slice(1)}</Badge>
                   </div>
-                  <p className="mt-1 text-2xs text-[var(--color-text-secondary)]">{mod.description}</p>
-                  <div className="mt-2 flex items-center gap-3 text-2xs text-[var(--color-text-tertiary)]">
+                  <p className="mt-1 text-xs text-[var(--color-text-secondary)]">{mod.description}</p>
+                  <div className="mt-2 flex items-center gap-3 text-xs text-[var(--color-text-tertiary)]">
                     <span>{mod.stepsCount} steps</span>
                     <span>Used in {mod.usedByCount} workflows</span>
                   </div>

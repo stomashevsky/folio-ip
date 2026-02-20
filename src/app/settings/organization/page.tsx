@@ -71,15 +71,15 @@ export default function OrganizationGeneralPage() {
           </div>
           <div className="grid grid-cols-3 divide-x divide-[var(--color-border)]">
             <div className="px-4 py-3">
-              <p className="text-2xs uppercase tracking-wide text-[var(--color-text-tertiary)]">Members</p>
+              <p className="text-xs uppercase tracking-wide text-[var(--color-text-tertiary)]">Members</p>
               <p className="mt-1 heading-sm text-[var(--color-text)]">6</p>
             </div>
             <div className="px-4 py-3">
-              <p className="text-2xs uppercase tracking-wide text-[var(--color-text-tertiary)]">Inquiries (month)</p>
+              <p className="text-xs uppercase tracking-wide text-[var(--color-text-tertiary)]">Inquiries (month)</p>
               <p className="mt-1 heading-sm text-[var(--color-text)]">1,247 / 5,000</p>
             </div>
             <div className="px-4 py-3">
-              <p className="text-2xs uppercase tracking-wide text-[var(--color-text-tertiary)]">Reports (month)</p>
+              <p className="text-xs uppercase tracking-wide text-[var(--color-text-tertiary)]">Reports (month)</p>
               <p className="mt-1 heading-sm text-[var(--color-text)]">342 / 2,000</p>
             </div>
           </div>

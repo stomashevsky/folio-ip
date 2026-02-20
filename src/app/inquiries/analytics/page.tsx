@@ -197,14 +197,14 @@ function InquiryAnalyticsContent() {
               >
                 <div className="flex items-center justify-between">
                   <h4 className="text-sm font-medium text-[var(--color-text)]">{query.name}</h4>
-                  <span className="text-2xs text-[var(--color-text-tertiary)]">{query.createdAt}</span>
+                  <span className="text-xs text-[var(--color-text-tertiary)]">{query.createdAt}</span>
                 </div>
                 <p className="mt-1 text-xs text-[var(--color-text-secondary)]">{query.description}</p>
                 <div className="mt-2 flex gap-2">
-                  <span className="rounded-md bg-[var(--color-surface-secondary)] px-2 py-0.5 text-2xs text-[var(--color-text-tertiary)]">
+                  <span className="rounded-md bg-[var(--color-surface-secondary)] px-2 py-0.5 text-xs text-[var(--color-text-tertiary)]">
                     {query.interval}
                   </span>
-                  <span className="rounded-md bg-[var(--color-surface-secondary)] px-2 py-0.5 text-2xs text-[var(--color-text-tertiary)]">
+                  <span className="rounded-md bg-[var(--color-surface-secondary)] px-2 py-0.5 text-xs text-[var(--color-text-tertiary)]">
                     {query.dateRange}
                   </span>
                 </div>

@@ -905,7 +905,7 @@ export default function GraphPage() {
                   <div className="px-4 py-3">
                     <p className="font-mono text-sm text-[var(--color-text)]">{selectedEntity.id}</p>
                     {selectedEntity.clusterId && (
-                      <p className="mt-1 text-2xs text-[var(--color-text-tertiary)]">
+                      <p className="mt-1 text-xs text-[var(--color-text-tertiary)]">
                         Cluster: {selectedEntity.clusterId}
                         {selectedEntity.clusterId.startsWith("fraud_ring") && (
                           <Badge color="danger" variant="soft" size="sm" className="ml-2">
@@ -915,7 +915,7 @@ export default function GraphPage() {
                       </p>
                     )}
                     {selectedEntity.createdAt && (
-                      <p className="mt-1 text-2xs text-[var(--color-text-tertiary)]">
+                      <p className="mt-1 text-xs text-[var(--color-text-tertiary)]">
                         First seen: {formatDateTime(selectedEntity.createdAt)}
                       </p>
                     )}
@@ -944,8 +944,8 @@ export default function GraphPage() {
                               <span className="text-[var(--color-text-secondary)]">{otherId}</span>
                             </span>
                             <span className="flex items-center gap-2">
-                              <span className="text-2xs text-[var(--color-text-tertiary)]">{conn.relationship}</span>
-                              <span className="font-mono text-2xs text-[var(--color-text-tertiary)]">
+                              <span className="text-xs text-[var(--color-text-tertiary)]">{conn.relationship}</span>
+                              <span className="font-mono text-xs text-[var(--color-text-tertiary)]">
                                 {conn.strength.toFixed(2)}
                               </span>
                             </span>
@@ -963,7 +963,7 @@ export default function GraphPage() {
             <div className="space-y-6">
               <div>
                 <SectionHeading size="xs">Graph Query</SectionHeading>
-                <p className="mt-1 text-xs text-[var(--color-text-tertiary)]">
+                <p className="mt-1 text-sm text-[var(--color-text-secondary)]">
                   Use Graph Query Language to search for patterns, clusters, and anomalies.
                 </p>
                 <div className="mt-3 flex gap-2">
@@ -1014,7 +1014,7 @@ export default function GraphPage() {
                       }}
                     >
                       <p className="text-sm font-medium text-[var(--color-text)]">{sq.label}</p>
-                      <p className="mt-1 truncate font-mono text-2xs text-[var(--color-text-tertiary)]">
+                      <p className="mt-1 truncate font-mono text-xs text-[var(--color-text-tertiary)]">
                         {sq.query}
                       </p>
                     </button>
@@ -1100,7 +1100,7 @@ export default function GraphPage() {
                       </span>
                       {cluster.isFraudRing && (
                         <Badge color="danger" variant="soft" size="sm">
-                          <Warning style={{ width: 10, height: 10 }} />
+                          <Warning />
                           Fraud Ring
                         </Badge>
                       )}
@@ -1108,15 +1108,15 @@ export default function GraphPage() {
 
                     <div className="mt-3 grid grid-cols-3 gap-2">
                       <div>
-                        <p className="text-2xs text-[var(--color-text-tertiary)]">Nodes</p>
+                        <p className="text-xs text-[var(--color-text-tertiary)]">Nodes</p>
                         <p className="heading-xs">{cluster.nodeCount}</p>
                       </div>
                       <div>
-                        <p className="text-2xs text-[var(--color-text-tertiary)]">Edges</p>
+                        <p className="text-xs text-[var(--color-text-tertiary)]">Edges</p>
                         <p className="heading-xs">{cluster.edgeCount}</p>
                       </div>
                       <div>
-                        <p className="text-2xs text-[var(--color-text-tertiary)]">Risk</p>
+                        <p className="text-xs text-[var(--color-text-tertiary)]">Risk</p>
                         <Badge color={RISK_COLORS[cluster.avgRisk] ?? "secondary"} variant="outline" size="sm">
                           {cluster.avgRisk}
                         </Badge>

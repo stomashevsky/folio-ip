@@ -258,10 +258,10 @@ function VerificationTemplateDetailContent() {
           <table className="w-full">
             <thead>
               <tr className="border-b border-[var(--color-border)]">
-                <th className="pb-2 text-left text-2xs font-medium uppercase tracking-wider text-[var(--color-text-tertiary)]">Name</th>
-                <th className="w-28 pb-2 text-left text-2xs font-medium uppercase tracking-wider text-[var(--color-text-tertiary)]">Category</th>
-                <th className="w-20 pb-2 text-center text-2xs font-medium uppercase tracking-wider text-[var(--color-text-tertiary)]">Required</th>
-                <th className="w-20 pb-2 text-center text-2xs font-medium uppercase tracking-wider text-[var(--color-text-tertiary)]">Enabled</th>
+                <th className="pb-2 text-left text-xs font-medium uppercase tracking-wider text-[var(--color-text-tertiary)]">Name</th>
+                <th className="w-28 pb-2 text-left text-xs font-medium uppercase tracking-wider text-[var(--color-text-tertiary)]">Category</th>
+                <th className="w-20 pb-2 text-center text-xs font-medium uppercase tracking-wider text-[var(--color-text-tertiary)]">Required</th>
+                <th className="w-20 pb-2 text-center text-xs font-medium uppercase tracking-wider text-[var(--color-text-tertiary)]">Enabled</th>
               </tr>
             </thead>
             <tbody>

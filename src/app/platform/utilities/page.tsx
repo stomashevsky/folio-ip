@@ -220,7 +220,7 @@ export default function UtilitiesPage() {
                   <Badge color={statusColorMap[tool.status]} variant="soft" size="sm">
                     {tool.status.charAt(0).toUpperCase() + tool.status.slice(1)}
                   </Badge>
-                  <span className="text-2xs text-[var(--color-text-tertiary)]">
+                  <span className="text-xs text-[var(--color-text-tertiary)]">
                     {tool.category}
                   </span>
                 </div>
@@ -229,7 +229,7 @@ export default function UtilitiesPage() {
                   {tool.description}
                 </p>
                 <div className="flex items-center justify-between">
-                  <span className="text-2xs text-[var(--color-text-tertiary)]">
+                  <span className="text-xs text-[var(--color-text-tertiary)]">
                     {tool.usageCount.toLocaleString()} runs
                   </span>
                   <Button color="secondary" size="sm" pill onClick={() => {}}>
