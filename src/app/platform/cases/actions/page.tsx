@@ -153,7 +153,7 @@ const columns: ColumnDef<CaseAction, unknown>[] = [
       };
       return (
         <Badge color={colorMap[type] ?? "secondary"} size="sm">
-          {type.replace(/_/g, " ")}
+          {type.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}
         </Badge>
       );
     },

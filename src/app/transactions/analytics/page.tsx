@@ -82,7 +82,7 @@ function TransactionAnalyticsContent() {
             </div>
             <div className="mt-6 flex items-center">
               <div className="w-[120px]">
-                <Select options={INTERVAL_OPTIONS} value={interval} onChange={(opt) => { if (opt) setInterval(opt.value as AnalyticsInterval); }} size="sm" pill={false} variant="outline" listMinWidth={120} />
+                <Select options={INTERVAL_OPTIONS} value={interval} onChange={(opt) => { if (opt) setInterval(opt.value as AnalyticsInterval); }} size="sm" pill variant="outline" listMinWidth={120} />
               </div>
             </div>
             <div className="mt-3 space-y-4">
@@ -107,7 +107,7 @@ function TransactionAnalyticsContent() {
             </div>
             <div className="mt-6 flex items-center">
               <div className="w-[120px]">
-                <Select options={INTERVAL_OPTIONS} value={interval} onChange={(opt) => { if (opt) setInterval(opt.value as AnalyticsInterval); }} size="sm" pill={false} variant="outline" listMinWidth={120} />
+                <Select options={INTERVAL_OPTIONS} value={interval} onChange={(opt) => { if (opt) setInterval(opt.value as AnalyticsInterval); }} size="sm" pill variant="outline" listMinWidth={120} />
               </div>
             </div>
             <div className="mt-3 space-y-4">

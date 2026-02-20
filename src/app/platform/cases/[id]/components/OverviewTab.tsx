@@ -1,18 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { Badge } from "@plexui/ui/components/Badge";
+import { Badge, type BadgeProps } from "@plexui/ui/components/Badge";
 import { SectionHeading, KeyValueTable } from "@/components/shared";
 import { StatusBadge } from "@/components/shared/StatusBadge";
+import { getPriorityColor } from "@/lib/utils/format";
 import { mockCases } from "@/lib/data";
 import type { Case } from "@/lib/types";
 
-const PRIORITY_COLORS: Record<string, "danger" | "warning" | "secondary"> = {
-  critical: "danger",
-  high: "warning",
-  medium: "secondary",
-  low: "secondary",
-};
+
 
 function getSlaProgress(caseItem: Case) {
   const created = new Date(caseItem.createdAt).getTime();
@@ -56,7 +52,8 @@ export function OverviewTab({
               label: "Priority",
               value: (
                 <Badge
-                  color={PRIORITY_COLORS[caseItem.priority] ?? "secondary"}
+                  color={getPriorityColor(caseItem.priority) as BadgeProps["color"]}
+                  variant="soft"
                   size="sm"
                 >
                   {caseItem.priority.charAt(0).toUpperCase() +
@@ -179,7 +176,7 @@ export function OverviewTab({
                       </td>
                       <td className="px-4 py-3"><StatusBadge status={rc.status} /></td>
                       <td className="px-4 py-3">
-                        <Badge color={PRIORITY_COLORS[rc.priority] ?? "secondary"} size="sm">
+                        <Badge color={getPriorityColor(rc.priority) as BadgeProps["color"]} variant="soft" size="sm">
                           {rc.priority.charAt(0).toUpperCase() + rc.priority.slice(1)}
                         </Badge>
                       </td>

@@ -52,7 +52,7 @@ export const mockInquiries: Inquiry[] = [
     timeToFinish: 500,
 
     verificationAttempts: { governmentId: 1, selfie: 1 },
-    tags: ["High-risk"],
+    tags: ["High Risk"],
   },
   {
     id: "inq_7VwXyZaAbBcCdDdEeFfGgHhIiJjKk",
@@ -129,7 +129,7 @@ export const mockInquiries: Inquiry[] = [
     timeToFinish: 535,
 
     verificationAttempts: { governmentId: 1, selfie: 2 },
-    tags: ["EU-resident"],
+    tags: ["EU Resident"],
   },
   {
     id: "inq_1HhIiJjKkLlMmNnOoPpQqRrSsTtUu",

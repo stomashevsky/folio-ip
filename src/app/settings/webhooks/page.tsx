@@ -1,16 +1,20 @@
 "use client";
 
-import { useState } from "react";
-import { TopBar, TOPBAR_CONTROL_SIZE, TOPBAR_ACTION_PILL } from "@/components/layout/TopBar";
+import { useState, useMemo } from "react";
+import { TopBar, TOPBAR_CONTROL_SIZE, TOPBAR_TOOLBAR_PILL, TOPBAR_ACTION_PILL } from "@/components/layout/TopBar";
+import { TABLE_PAGE_WRAPPER, TABLE_PAGE_CONTENT } from "@/lib/constants/page-layout";
 import {
+  DataTable,
+  TableSearch,
   ConfirmDeleteModal,
   Modal,
   ModalBody,
   ModalFooter,
   ModalHeader,
-  SettingsTable,
 } from "@/components/shared";
+import { ColumnSettings, type ColumnConfig } from "@/components/shared/ColumnSettings";
 import { getActiveBadgeColor } from "@/lib/utils/format";
+import type { ColumnDef, VisibilityState } from "@tanstack/react-table";
 import { Button } from "@plexui/ui/components/Button";
 import { Badge } from "@plexui/ui/components/Badge";
 import { Input } from "@plexui/ui/components/Input";
@@ -18,6 +22,7 @@ import { Field } from "@plexui/ui/components/Field";
 import { Checkbox } from "@plexui/ui/components/Checkbox";
 import { Menu } from "@plexui/ui/components/Menu";
 import { DotsHorizontal, Plus } from "@plexui/ui/components/Icon";
+import { Select } from "@plexui/ui/components/Select";
 
 const WEBHOOK_EVENTS = [
   { value: "inquiry.created", label: "Inquiry created" },
@@ -65,6 +70,27 @@ const initialWebhooks: WebhookItem[] = [
 
 const EMPTY_DRAFT = { url: "", events: [] as string[] };
 
+const STATUS_OPTIONS = [
+  { value: "active", label: "Active" },
+  { value: "disabled", label: "Disabled" },
+];
+
+const COLUMN_CONFIG: ColumnConfig[] = [
+  { id: "url", label: "Endpoint URL" },
+  { id: "events", label: "Events" },
+  { id: "created", label: "Created" },
+  { id: "status", label: "Status" },
+  { id: "actions", label: "Actions" },
+];
+
+const DEFAULT_VISIBILITY: VisibilityState = {
+  url: true,
+  events: true,
+  created: true,
+  status: true,
+  actions: true,
+};
+
 export default function WebhooksPage() {
   const [webhooks, setWebhooks] = useState<WebhookItem[]>(initialWebhooks);
   const [modalOpen, setModalOpen] = useState(false);
@@ -73,6 +99,10 @@ export default function WebhooksPage() {
     EMPTY_DRAFT,
   );
   const [deleting, setDeleting] = useState<WebhookItem | null>(null);
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string[]>([]);
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(DEFAULT_VISIBILITY);
+  const hasActiveFilters = statusFilter.length > 0;
 
   const openAdd = () => {
     setEditing(null);
@@ -149,161 +179,176 @@ export default function WebhooksPage() {
     setDeleting(null);
   };
 
+  function clearAllFilters() {
+    setStatusFilter([]);
+  }
+
+  const filteredData = useMemo(() => {
+    let result = webhooks;
+    if (statusFilter.length > 0) {
+      result = result.filter((w) => statusFilter.includes(w.status));
+    }
+    if (search) {
+      const lowerSearch = search.toLowerCase();
+      result = result.filter(
+        (w) =>
+          w.url.toLowerCase().includes(lowerSearch) ||
+          w.events.some((e) => e.toLowerCase().includes(lowerSearch)),
+      );
+    }
+    return result;
+  }, [webhooks, statusFilter, search]);
+
+  const columns: ColumnDef<WebhookItem, unknown>[] = [
+    {
+      accessorKey: "url",
+      header: "Endpoint URL",
+      size: 300,
+      cell: ({ row }) => (
+        <span className="font-mono text-sm text-[var(--color-text)]">
+          {row.original.url}
+        </span>
+      ),
+    },
+    {
+      accessorKey: "events",
+      header: "Events",
+      size: 280,
+      cell: ({ row }) => (
+        <div className="flex flex-wrap gap-1">
+          {row.original.events.map((event) => (
+            <Badge key={event} color="secondary" variant="soft">
+              {event}
+            </Badge>
+          ))}
+        </div>
+      ),
+    },
+    {
+      accessorKey: "created",
+      header: "Created",
+      size: 140,
+      cell: ({ row }) => (
+        <span className="text-sm text-[var(--color-text-secondary)]">
+          {row.original.created}
+        </span>
+      ),
+    },
+    {
+      accessorKey: "status",
+      header: "Status",
+      size: 100,
+      cell: ({ row }) => (
+        <Badge
+          color={
+            getActiveBadgeColor(row.original.status === "active") as
+              | "success"
+              | "secondary"
+          }
+          variant="soft"
+        >
+          {row.original.status === "active" ? "Active" : "Disabled"}
+        </Badge>
+      ),
+    },
+    {
+      id: "actions",
+      header: "",
+      size: 60,
+      cell: ({ row }) => {
+        const webhook = row.original;
+        return (
+          <Menu>
+            <Menu.Trigger>
+              <Button color="secondary" variant="ghost" size="sm" pill={false}>
+                <DotsHorizontal />
+              </Button>
+            </Menu.Trigger>
+            <Menu.Content align="end" minWidth="auto">
+              <Menu.Item onSelect={() => openEdit(webhook)}>Edit</Menu.Item>
+              <Menu.Item onSelect={() => handleToggleStatus(webhook.id)}>
+                {webhook.status === "active" ? "Disable" : "Enable"}
+              </Menu.Item>
+              <Menu.Separator />
+              <Menu.Item
+                onSelect={() => setDeleting(webhook)}
+                className="text-[var(--color-text-danger-ghost)]"
+              >
+                Delete
+              </Menu.Item>
+            </Menu.Content>
+          </Menu>
+        );
+      },
+    },
+  ];
+
   return (
-    <div className="flex h-full flex-col overflow-auto">
+    <div className={TABLE_PAGE_WRAPPER}>
       <TopBar
         title="Webhooks"
         actions={
-          <Button color="primary" pill={TOPBAR_ACTION_PILL} size={TOPBAR_CONTROL_SIZE} onClick={openAdd}>
-            <Plus />
-            Add endpoint
-          </Button>
+          <div className="flex items-center gap-2">
+            <ColumnSettings
+              columns={COLUMN_CONFIG}
+              visibility={columnVisibility}
+              onVisibilityChange={setColumnVisibility}
+            />
+            <Button color="primary" pill={TOPBAR_ACTION_PILL} size={TOPBAR_CONTROL_SIZE} onClick={openAdd}>
+              <Plus />
+              <span className="hidden md:inline">Add Endpoint</span>
+            </Button>
+          </div>
+        }
+        toolbar={
+          <>
+            <TableSearch
+              value={search}
+              onChange={setSearch}
+              placeholder="Search webhooks..."
+            />
+            <div className="w-36">
+              <Select
+                multiple
+                clearable
+                block
+                pill={TOPBAR_TOOLBAR_PILL}
+                listMinWidth={160}
+                options={STATUS_OPTIONS}
+                value={statusFilter}
+                onChange={(opts) => setStatusFilter(opts.map((o) => o.value))}
+                placeholder="Status"
+                variant="outline"
+                size={TOPBAR_CONTROL_SIZE}
+              />
+            </div>
+            {hasActiveFilters && (
+              <Button
+                color="secondary"
+                variant="soft"
+                size={TOPBAR_CONTROL_SIZE}
+                pill={TOPBAR_TOOLBAR_PILL}
+                onClick={clearAllFilters}
+              >
+                Clear filters
+              </Button>
+            )}
+          </>
         }
       />
-      <div className="px-4 py-8 md:px-6">
-        <p className="mb-6 text-sm text-[var(--color-text-secondary)]">
-          Webhook endpoints receive real-time notifications when events occur in
-          your organization.
-        </p>
 
-        <SettingsTable<WebhookItem>
-          data={webhooks}
-          keyExtractor={(w) => w.id}
-          columns={[
-            {
-              header: "Endpoint URL",
-              render: (webhook) => (
-                <span className="font-mono text-sm text-[var(--color-text)]">
-                  {webhook.url}
-                </span>
-              ),
-            },
-            {
-              header: "Events",
-              render: (webhook) => (
-                <div className="flex flex-wrap gap-1">
-                  {webhook.events.map((event) => (
-                    <Badge key={event} color="secondary">
-                      {event}
-                    </Badge>
-                  ))}
-                </div>
-              ),
-            },
-            {
-              header: "Created",
-              render: (webhook) => (
-                <span className="text-sm text-[var(--color-text-secondary)]">
-                  {webhook.created}
-                </span>
-              ),
-            },
-            {
-              header: "Status",
-              render: (webhook) => (
-                <Badge
-                  color={
-                    getActiveBadgeColor(webhook.status === "active") as
-                      | "success"
-                      | "secondary"
-                  }
-                >
-                  {webhook.status === "active" ? "Active" : "Disabled"}
-                </Badge>
-              ),
-            },
-            {
-              header: "",
-              align: "right" as const,
-              render: (webhook) => (
-                <Menu>
-                  <Menu.Trigger>
-                    <Button
-                      color="secondary"
-                      variant="ghost"
-                      size="sm"
-                      pill={false}
-                    >
-                      <DotsHorizontal />
-                    </Button>
-                  </Menu.Trigger>
-                  <Menu.Content align="end" minWidth="auto">
-                    <Menu.Item onSelect={() => openEdit(webhook)}>
-                      Edit
-                    </Menu.Item>
-                    <Menu.Item onSelect={() => handleToggleStatus(webhook.id)}>
-                      {webhook.status === "active" ? "Disable" : "Enable"}
-                    </Menu.Item>
-                    <Menu.Separator />
-                    <Menu.Item
-                      onSelect={() => setDeleting(webhook)}
-                      className="text-[var(--color-text-danger-ghost)]"
-                    >
-                      Delete
-                    </Menu.Item>
-                  </Menu.Content>
-                </Menu>
-              ),
-            },
-          ]}
-          renderMobileCard={(webhook) => (
-            <>
-              <div className="flex items-center justify-between">
-                <Badge
-                  color={
-                    getActiveBadgeColor(webhook.status === "active") as
-                      | "success"
-                      | "secondary"
-                  }
-                >
-                  {webhook.status === "active" ? "Active" : "Disabled"}
-                </Badge>
-                <div className="flex items-center gap-2">
-                  <span className="text-xs text-[var(--color-text-tertiary)]">
-                    {webhook.created}
-                  </span>
-                  <Menu>
-                    <Menu.Trigger>
-                      <Button
-                        color="secondary"
-                        variant="ghost"
-                        size="sm"
-                      >
-                        <DotsHorizontal />
-                      </Button>
-                    </Menu.Trigger>
-                    <Menu.Content align="end" minWidth="auto">
-                      <Menu.Item onSelect={() => openEdit(webhook)}>
-                        Edit
-                      </Menu.Item>
-                      <Menu.Item
-                        onSelect={() => handleToggleStatus(webhook.id)}
-                      >
-                        {webhook.status === "active" ? "Disable" : "Enable"}
-                      </Menu.Item>
-                      <Menu.Separator />
-                      <Menu.Item
-                        onSelect={() => setDeleting(webhook)}
-                        className="text-[var(--color-text-danger-ghost)]"
-                      >
-                        Delete
-                      </Menu.Item>
-                    </Menu.Content>
-                  </Menu>
-                </div>
-              </div>
-              <p className="mt-1.5 truncate font-mono text-xs text-[var(--color-text)]">
-                {webhook.url}
-              </p>
-              <div className="mt-2 flex flex-wrap gap-1">
-                {webhook.events.map((event) => (
-                  <Badge key={event} color="secondary">
-                    {event}
-                  </Badge>
-                ))}
-              </div>
-            </>
-          )}
+      <div className={TABLE_PAGE_CONTENT}>
+        <DataTable
+          data={filteredData}
+          columns={columns}
+          globalFilter={search}
+          pageSize={50}
+          columnVisibility={columnVisibility}
+          onColumnVisibilityChange={setColumnVisibility}
+          mobileColumnVisibility={{
+            events: false,
+            created: false,
+          }}
         />
       </div>
 

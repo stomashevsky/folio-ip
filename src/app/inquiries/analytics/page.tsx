@@ -155,7 +155,7 @@ function InquiryAnalyticsContent() {
                     if (opt) setInterval(opt.value as AnalyticsInterval);
                   }}
                   size="sm"
-                  pill={false}
+                  pill
                   variant="outline"
                   listMinWidth={120}
                 />
@@ -246,7 +246,7 @@ function InquiryAnalyticsContent() {
                         if (opt) setFunnelMetric(opt.value as SankeyMetric);
                       }}
                       size="sm"
-                      pill={false}
+                      pill
                       variant="outline"
                       align="end"
                       listMinWidth={340}
@@ -269,7 +269,7 @@ function InquiryAnalyticsContent() {
                     if (opt) setInterval(opt.value as AnalyticsInterval);
                   }}
                   size="sm"
-                  pill={false}
+                  pill
                   variant="outline"
                   listMinWidth={120}
                 />

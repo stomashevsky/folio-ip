@@ -146,7 +146,7 @@ export default function SmtpTestPage() {
               />
               <Button
                 color="primary"
-                size="sm"
+                size="md"
                 pill={false}
                 onClick={handleSendTest}
               >

@@ -14,7 +14,7 @@ export const mockTransactions: Transaction[] = [
     createdAt: "2026-01-05T10:30:00Z",
     reviewedAt: "2026-01-05T11:15:00Z",
     reviewedBy: "analyst_sarah",
-    tags: ["high-value"],
+    tags: ["High Value"],
   },
   {
     id: "txn_rS3tU5vW7xY9zA1bC3dE5fG",
@@ -29,7 +29,7 @@ export const mockTransactions: Transaction[] = [
     createdAt: "2026-01-08T14:45:00Z",
     reviewedAt: "2026-01-08T15:30:00Z",
     reviewedBy: "system",
-    tags: ["international", "high-value"],
+    tags: ["International", "High Value"],
   },
   {
     id: "txn_hI9jK1lM3nO5pQ7rS9tU1vW",
@@ -57,7 +57,7 @@ export const mockTransactions: Transaction[] = [
     createdAt: "2026-01-12T16:00:00Z",
     reviewedAt: "2026-01-12T16:45:00Z",
     reviewedBy: "analyst_james",
-    tags: ["high-risk", "high-value"],
+    tags: ["High Risk", "High Value"],
   },
   {
     id: "txn_nO6pQ8rS0tU2vW4xY6zA8bC",
@@ -72,7 +72,7 @@ export const mockTransactions: Transaction[] = [
     createdAt: "2026-01-15T11:30:00Z",
     reviewedAt: "2026-01-15T12:00:00Z",
     reviewedBy: "system",
-    tags: ["recurring"],
+    tags: ["Recurring"],
   },
   {
     id: "txn_dE0fG2hI4jK6lM8nO0pQ2rS",
@@ -100,7 +100,7 @@ export const mockTransactions: Transaction[] = [
     description: "International wire - Mexico",
     riskScore: 65,
     createdAt: "2026-01-20T10:00:00Z",
-    tags: ["international", "high-value"],
+    tags: ["International", "High Value"],
   },
   {
     id: "txn_jK8lM0nO2pQ4rS6tU8vW0xY",
@@ -130,7 +130,7 @@ export const mockTransactions: Transaction[] = [
     createdAt: "2026-01-25T09:45:00Z",
     reviewedAt: "2026-01-25T10:30:00Z",
     reviewedBy: "analyst_david",
-    tags: ["high-value"],
+    tags: ["High Value"],
   },
   {
     id: "txn_pQ6rS8tU0vW2xY4zA6bC8dE",
@@ -173,7 +173,7 @@ export const mockTransactions: Transaction[] = [
     createdAt: "2026-02-03T16:15:00Z",
     reviewedAt: "2026-02-03T17:00:00Z",
     reviewedBy: "analyst_robert",
-    tags: ["high-risk", "high-value", "international"],
+    tags: ["High Risk", "High Value", "International"],
   },
   {
     id: "txn_lM8nO0pQ2rS4tU6vW8xY0zA",
@@ -188,7 +188,7 @@ export const mockTransactions: Transaction[] = [
     createdAt: "2026-02-05T10:30:00Z",
     reviewedAt: "2026-02-05T11:00:00Z",
     reviewedBy: "system",
-    tags: ["recurring"],
+    tags: ["Recurring"],
   },
   {
     id: "txn_bC2dE4fG6hI8jK0lM2nO4pQ",
@@ -201,7 +201,7 @@ export const mockTransactions: Transaction[] = [
     description: "Disputed transaction refund",
     riskScore: 55,
     createdAt: "2026-02-07T13:45:00Z",
-    tags: ["disputed"],
+    tags: ["Disputed"],
   },
   {
     id: "txn_rS6tU8vW0xY2zA4bC6dE8fG",
@@ -216,7 +216,7 @@ export const mockTransactions: Transaction[] = [
     createdAt: "2026-02-09T15:00:00Z",
     reviewedAt: "2026-02-09T15:45:00Z",
     reviewedBy: "analyst_lisa",
-    tags: ["high-value"],
+    tags: ["High Value"],
   },
   {
     id: "txn_hI0jK2lM4nO6pQ8rS0tU2vW",
@@ -259,7 +259,7 @@ export const mockTransactions: Transaction[] = [
     createdAt: "2026-02-15T14:00:00Z",
     reviewedAt: "2026-02-15T14:45:00Z",
     reviewedBy: "system",
-    tags: ["high-value"],
+    tags: ["High Value"],
   },
   {
     id: "txn_dE6fG8hI0jK2lM4nO6pQ8rS",
@@ -274,7 +274,7 @@ export const mockTransactions: Transaction[] = [
     createdAt: "2026-02-17T10:45:00Z",
     reviewedAt: "2026-02-17T11:15:00Z",
     reviewedBy: "system",
-    tags: ["recurring"],
+    tags: ["Recurring"],
   },
   {
     id: "txn_tU0vW2xY4zA6bC8dE0fG2hI",
@@ -302,7 +302,7 @@ export const mockTransactions: Transaction[] = [
     description: "Large deposit - source unclear",
     riskScore: 72,
     createdAt: "2026-02-20T15:20:00Z",
-    tags: ["high-risk", "high-value"],
+    tags: ["High Risk", "High Value"],
   },
   {
     id: "txn_zA8bC0dE2fG4hI6jK8lM0nO",
@@ -330,7 +330,7 @@ export const mockTransactions: Transaction[] = [
     description: "Utility bill payment",
     riskScore: 6,
     createdAt: "2026-02-16T09:15:00Z",
-    tags: ["recurring"],
+    tags: ["Recurring"],
   },
   {
     id: "txn_fG4hI6jK8lM0nO2pQ4rS6tU",
@@ -345,6 +345,6 @@ export const mockTransactions: Transaction[] = [
     createdAt: "2026-02-14T16:30:00Z",
     reviewedAt: "2026-02-14T17:15:00Z",
     reviewedBy: "analyst_thomas",
-    tags: ["high-value"],
+    tags: ["High Value"],
   },
 ];

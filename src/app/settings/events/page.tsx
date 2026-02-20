@@ -197,14 +197,9 @@ const columns: ColumnDef<Event, unknown>[] = [
     size: 120,
     cell: ({ row }) => {
       const actorType = row.original.actorType;
-      const colorMap: Record<string, "info" | "secondary" | "warning"> = {
-        user: "info",
-        api: "secondary",
-        system: "warning",
-      };
       return (
-        <Badge color={colorMap[actorType]} variant="soft">
-          {actorType}
+        <Badge color="secondary" variant="soft">
+          {actorType.charAt(0).toUpperCase() + actorType.slice(1)}
         </Badge>
       );
     },
@@ -361,7 +356,7 @@ export default function EventsPage() {
                   { label: "Type", value: selectedEvent.type },
                   { label: "Resource Type", value: selectedEvent.resourceType },
                   { label: "Resource ID", value: selectedEvent.resourceId },
-                  { label: "Actor Type", value: selectedEvent.actorType },
+                  { label: "Actor Type", value: selectedEvent.actorType.charAt(0).toUpperCase() + selectedEvent.actorType.slice(1) },
                   { label: "Actor ID", value: selectedEvent.actorId },
                   { label: "Timestamp", value: new Date(selectedEvent.createdAt).toLocaleString() },
                 ]}

@@ -4,7 +4,8 @@ import { Suspense, useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { Button } from "@plexui/ui/components/Button";
-import { Badge } from "@plexui/ui/components/Badge";
+import { Badge, type BadgeProps } from "@plexui/ui/components/Badge";
+import { getPriorityColor } from "@/lib/utils/format";
 import { Tabs } from "@plexui/ui/components/Tabs";
 import { DotsHorizontal } from "@plexui/ui/components/Icon";
 import { Menu } from "@plexui/ui/components/Menu";
@@ -39,12 +40,7 @@ import {
 const tabs = ["Overview", "Inquiries", "Verifications", "Reports", "Documents", "Comments", "Activity"] as const;
 type Tab = (typeof tabs)[number];
 
-const PRIORITY_COLORS: Record<string, "danger" | "warning" | "secondary"> = {
-  critical: "danger",
-  high: "warning",
-  medium: "secondary",
-  low: "secondary",
-};
+
 
 export default function CaseDetailPage() {
   return (
@@ -175,7 +171,7 @@ function CaseDetailContent() {
                 <StatusBadge status={caseItem.status} />
               </InfoRow>
               <InfoRow label="Priority">
-                <Badge color={PRIORITY_COLORS[caseItem.priority] ?? "secondary"} size="sm">
+                <Badge color={getPriorityColor(caseItem.priority) as BadgeProps["color"]} variant="soft" size="sm">
                   {caseItem.priority.charAt(0).toUpperCase() + caseItem.priority.slice(1)}
                 </Badge>
               </InfoRow>

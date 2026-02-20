@@ -45,36 +45,45 @@ export function truncateId(id: string, showChars = 12): string {
 
 export function getStatusColor(status: string): string {
   const map: Record<string, string> = {
-    // Inquiry
     approved: "success",
     declined: "danger",
-    needs_review: "warning",
+    needs_review: "secondary",
     pending: "secondary",
     created: "secondary",
-    completed: "info",
+    completed: "success",
     expired: "secondary",
-    // Verification
     passed: "success",
     failed: "danger",
-    requires_retry: "caution",
+    requires_retry: "danger",
     initiated: "secondary",
-    submitted: "info",
+    submitted: "secondary",
     canceled: "secondary",
-    // Report
     no_matches: "success",
     match: "danger",
-    ready: "info",
-    // Account
+    ready: "secondary",
+    open: "secondary",
+    in_review: "secondary",
+    escalated: "danger",
+    resolved: "success",
     active: "success",
-    suspended: "warning",
+    suspended: "danger",
     closed: "danger",
     default: "secondary",
-    // Template
-    draft: "warning",
+    draft: "secondary",
     archived: "secondary",
     disabled: "secondary",
   };
   return map[status] ?? "secondary";
+}
+
+export function getPriorityColor(priority: string): string {
+  const map: Record<string, string> = {
+    critical: "danger",
+    high: "danger",
+    medium: "secondary",
+    low: "success",
+  };
+  return map[priority] ?? "secondary";
 }
 
 export function getRoleBadgeColor(role: string): string {
@@ -106,3 +115,5 @@ export function toTitleCase(str: string): string {
     )
     .join(" ");
 }
+
+

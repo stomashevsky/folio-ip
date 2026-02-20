@@ -396,15 +396,15 @@ const templateWeights: [string, number][] = [
 const tagWeights: [string[], number][] = [
   [[], 50],
   [["Premium"], 10],
-  [["High-risk"], 8],
-  [["EU-resident"], 7],
+  [["High Risk"], 8],
+  [["EU Resident"], 7],
   [["VIP"], 5],
   [["Re-verification"], 5],
   [["Expedited"], 4],
-  [["Manual-review"], 4],
-  [["API-created"], 3],
+  [["Manual Review"], 4],
+  [["API Created"], 3],
   [["Premium", "VIP"], 2],
-  [["High-risk", "Manual-review"], 2],
+  [["High Risk", "Manual Review"], 2],
 ];
 
 const refIdPrefixes = ["user_", "ext_", "cust_", "ref_"];
@@ -437,7 +437,7 @@ const edgeCases: (Omit<GeneratedPerson, "idNumber" | "issuingCountry" | "expirat
   {
     index: 2, name: "Carmen Muestra", region: "ch",
     status: "declined", templateName: "KYC + AML: GovID + Selfie",
-    tags: ["Manual-review"], createdAt: "2026-02-11T22:30:00.000Z",
+    tags: ["Manual Review"], createdAt: "2026-02-11T22:30:00.000Z",
     completedAt: "2026-02-11T22:41:15.000Z", timeToFinish: 675,
     verificationAttempts: { governmentId: 2, selfie: 1 },
     birthdate: "1995-08-01", age: 30, address: "Bahnhofstrasse 40, 8001 Zürich, Switzerland",
@@ -456,7 +456,7 @@ const edgeCases: (Omit<GeneratedPerson, "idNumber" | "issuingCountry" | "expirat
   {
     index: 4, name: "Sofia Osman", region: "ae",
     status: "needs_review", templateName: "KYC + AML: GovID + Selfie",
-    tags: ["High-risk"], referenceId: "ext_so_osman_2026",
+    tags: ["High Risk"], referenceId: "ext_so_osman_2026",
     createdAt: "2026-02-11T17:20:00.000Z",
     completedAt: "2026-02-11T17:27:10.000Z", timeToFinish: 430,
     verificationAttempts: { governmentId: 1, selfie: 1 },
@@ -465,7 +465,7 @@ const edgeCases: (Omit<GeneratedPerson, "idNumber" | "issuingCountry" | "expirat
   {
     index: 5, name: "Elena Wu", region: "cn",
     status: "needs_review", templateName: "KYC + AML: GovID + Selfie",
-    tags: ["High-risk", "Manual-review"], createdAt: "2026-02-11T15:10:00.000Z",
+    tags: ["High Risk", "Manual Review"], createdAt: "2026-02-11T15:10:00.000Z",
     completedAt: "2026-02-11T15:18:45.000Z", timeToFinish: 525,
     verificationAttempts: { governmentId: 1, selfie: 1 },
     birthdate: "1990-07-17", age: 35, address: "100 Nanjing East Rd, Huangpu, Shanghai 200002, China",
@@ -473,7 +473,7 @@ const edgeCases: (Omit<GeneratedPerson, "idNumber" | "issuingCountry" | "expirat
   {
     index: 6, name: "Tyler Brooks", region: "us",
     status: "pending", templateName: "KYC + AML: GovID + Selfie",
-    tags: ["API-created"], referenceId: "user_tyler_90821",
+    tags: ["API Created"], referenceId: "user_tyler_90821",
     createdAt: "2026-02-11T14:00:00.000Z",
     verificationAttempts: { governmentId: 0, selfie: 0 },
     birthdate: "2001-12-05", age: 24, address: "500 Michigan Ave, Chicago, IL 60611, USA",

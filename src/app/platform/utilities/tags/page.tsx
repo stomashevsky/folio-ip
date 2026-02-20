@@ -36,7 +36,7 @@ const CREATED_BY_OPTIONS = [
 const mockTags: Tag[] = [
   {
     id: "tag_001",
-    name: "high-risk",
+    name: "High Risk",
     color: "#ef4444",
     usageCount: 234,
     createdBy: "John Smith",
@@ -44,7 +44,7 @@ const mockTags: Tag[] = [
   },
   {
     id: "tag_002",
-    name: "vip",
+    name: "VIP",
     color: "#10b981",
     usageCount: 156,
     createdBy: "Sarah Johnson",
@@ -52,7 +52,7 @@ const mockTags: Tag[] = [
   },
   {
     id: "tag_003",
-    name: "returning-customer",
+    name: "Returning Customer",
     color: "#3b82f6",
     usageCount: 892,
     createdBy: "Mike Chen",
@@ -60,7 +60,7 @@ const mockTags: Tag[] = [
   },
   {
     id: "tag_004",
-    name: "flagged",
+    name: "Flagged",
     color: "#f59e0b",
     usageCount: 45,
     createdBy: "Emma Davis",
@@ -68,7 +68,7 @@ const mockTags: Tag[] = [
   },
   {
     id: "tag_005",
-    name: "manual-review",
+    name: "Manual Review",
     color: "#8b5cf6",
     usageCount: 123,
     createdBy: "Alex Rodriguez",
@@ -76,7 +76,7 @@ const mockTags: Tag[] = [
   },
   {
     id: "tag_006",
-    name: "auto-approved",
+    name: "Auto Approved",
     color: "#06b6d4",
     usageCount: 567,
     createdBy: "Lisa Wong",
@@ -84,7 +84,7 @@ const mockTags: Tag[] = [
   },
   {
     id: "tag_007",
-    name: "international",
+    name: "International",
     color: "#ec4899",
     usageCount: 234,
     createdBy: "James Miller",
@@ -92,7 +92,7 @@ const mockTags: Tag[] = [
   },
   {
     id: "tag_008",
-    name: "business",
+    name: "Business",
     color: "#14b8a6",
     usageCount: 345,
     createdBy: "Patricia Brown",
@@ -100,7 +100,7 @@ const mockTags: Tag[] = [
   },
   {
     id: "tag_009",
-    name: "compliance-hold",
+    name: "Compliance Hold",
     color: "#dc2626",
     usageCount: 78,
     createdBy: "Robert Taylor",
@@ -108,7 +108,7 @@ const mockTags: Tag[] = [
   },
   {
     id: "tag_010",
-    name: "expedited",
+    name: "Expedited",
     color: "#059669",
     usageCount: 456,
     createdBy: "Jennifer Lee",

@@ -129,7 +129,7 @@ function CaseAnalyticsContent() {
                     if (opt) setInterval(opt.value as AnalyticsInterval);
                   }}
                   size="sm"
-                  pill={false}
+                  pill
                   variant="outline"
                   listMinWidth={120}
                 />
@@ -181,7 +181,7 @@ function CaseAnalyticsContent() {
                     if (opt) setInterval(opt.value as AnalyticsInterval);
                   }}
                   size="sm"
-                  pill={false}
+                  pill
                   variant="outline"
                   listMinWidth={120}
                 />

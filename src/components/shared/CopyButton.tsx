@@ -36,7 +36,7 @@ export function CopyButton({ value, className }: CopyButtonProps) {
       <Button
         color="secondary"
         variant="ghost"
-        size="sm"
+        size="3xs"
         uniform
         pill={false}
         onClick={handleCopy}

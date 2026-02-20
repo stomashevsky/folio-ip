@@ -11,9 +11,10 @@ import { useTemplateStore } from "@/lib/stores/template-store";
 import type { ColumnDef, VisibilityState } from "@tanstack/react-table";
 import type { Case } from "@/lib/types";
 import { Button } from "@plexui/ui/components/Button";
-import { Badge } from "@plexui/ui/components/Badge";
+import { Badge, type BadgeProps } from "@plexui/ui/components/Badge";
 import { Select } from "@plexui/ui/components/Select";
 import { Plus } from "@plexui/ui/components/Icon";
+import { getPriorityColor } from "@/lib/utils/format";
 import {
   CASE_STATUS_OPTIONS,
   CASE_PRIORITY_OPTIONS,
@@ -66,8 +67,7 @@ const columns: ColumnDef<Case, unknown>[] = [
     size: 120,
     cell: ({ row }) => {
       const p = row.original.priority;
-      const color = p === "critical" || p === "high" ? "danger" : p === "medium" ? "warning" : "secondary";
-      return <Badge color={color} size="sm">{p.charAt(0).toUpperCase() + p.slice(1)}</Badge>;
+      return <Badge color={getPriorityColor(p) as BadgeProps["color"]} variant="soft" size="sm">{p.charAt(0).toUpperCase() + p.slice(1)}</Badge>;
     },
   },
   {

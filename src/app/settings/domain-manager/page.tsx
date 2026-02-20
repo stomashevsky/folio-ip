@@ -96,7 +96,7 @@ export default function DomainManagerPage() {
                   <td className="px-4 py-3 text-sm">
                     <Badge
                       color={
-                        domain.status === "verified" ? "success" : "warning"
+                        domain.status === "verified" ? "success" : "secondary"
                       }
                       variant="soft"
                       size="sm"
@@ -121,7 +121,7 @@ export default function DomainManagerPage() {
                   <td className="px-4 py-3 text-right text-sm">
                     <Button
                       color="danger"
-                      variant="ghost"
+                      variant="soft"
                       size="sm"
                       pill={false}
                       onClick={() => handleRemoveDomain(domain.id)}
@@ -151,7 +151,7 @@ export default function DomainManagerPage() {
               />
               <Button
                 color="primary"
-                size="sm"
+                size="md"
                 pill={false}
                 onClick={handleAddDomain}
               >

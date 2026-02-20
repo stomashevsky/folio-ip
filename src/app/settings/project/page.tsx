@@ -126,8 +126,8 @@ export default function ProjectGeneralPage() {
                 className={`flex items-center justify-between px-4 py-2.5 ${i < arr.length - 1 ? "border-b border-[var(--color-border)]" : ""}`}
               >
                 <code className="text-sm text-[var(--color-text)]">{origin}</code>
-                <Button color="secondary" variant="ghost" size="sm" pill={false}>
-                  Remove
+<Button color="secondary" variant="soft" size="sm" pill={false}>
+                   Remove
                 </Button>
               </div>
             ))}

@@ -6,9 +6,9 @@ import { TopBar, TOPBAR_CONTROL_SIZE, TOPBAR_ACTION_PILL } from "@/components/la
 import { NotFoundPage, SectionHeading, InlineEmpty, MetricCard } from "@/components/shared";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import { mockCases } from "@/lib/data";
-import { formatDateTime } from "@/lib/utils/format";
+import { formatDateTime, getPriorityColor } from "@/lib/utils/format";
 import { Avatar } from "@plexui/ui/components/Avatar";
-import { Badge } from "@plexui/ui/components/Badge";
+import { Badge, type BadgeProps } from "@plexui/ui/components/Badge";
 import { Button } from "@plexui/ui/components/Button";
 import { Input } from "@plexui/ui/components/Input";
 import { Select } from "@plexui/ui/components/Select";
@@ -38,12 +38,7 @@ const MOCK_QUEUES: CaseQueue[] = [
   { id: "queue_005", name: "Escalations", description: "Escalated and urgent cases", assignedTo: ["James Wilson", "Patricia Lee", "David Garcia"], slaHours: 4, createdAt: "2025-02-01T12:45:00Z", assignmentMode: "load_balanced" },
 ];
 
-const PRIORITY_COLORS: Record<string, "danger" | "warning" | "secondary"> = {
-  critical: "danger",
-  high: "warning",
-  medium: "secondary",
-  low: "secondary",
-};
+
 
 export default function QueueDetailPage() {
   const params = useParams();
@@ -168,7 +163,7 @@ export default function QueueDetailPage() {
                       </td>
                       <td className="px-4 py-3"><StatusBadge status={c.status} /></td>
                       <td className="px-4 py-3">
-                        <Badge color={PRIORITY_COLORS[c.priority] ?? "secondary"} size="sm">{c.priority.charAt(0).toUpperCase() + c.priority.slice(1)}</Badge>
+                        <Badge color={getPriorityColor(c.priority) as BadgeProps["color"]} variant="soft" size="sm">{c.priority.charAt(0).toUpperCase() + c.priority.slice(1)}</Badge>
                       </td>
                       <td className="px-4 py-3 text-sm text-[var(--color-text-secondary)]">{c.assignee ?? "Unassigned"}</td>
                       <td className="px-4 py-3 text-sm text-[var(--color-text-secondary)]">{formatDateTime(c.createdAt)}</td>

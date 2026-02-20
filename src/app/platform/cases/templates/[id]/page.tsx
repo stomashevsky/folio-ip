@@ -3,7 +3,8 @@
 import { useParams } from "next/navigation";
 import { TopBar, TOPBAR_CONTROL_SIZE, TOPBAR_ACTION_PILL } from "@/components/layout/TopBar";
 import { NotFoundPage, SectionHeading, StatusBadge } from "@/components/shared";
-import { Badge } from "@plexui/ui/components/Badge";
+import { Badge, type BadgeProps } from "@plexui/ui/components/Badge";
+import { getPriorityColor } from "@/lib/utils/format";
 import { Button } from "@plexui/ui/components/Button";
 import { Input } from "@plexui/ui/components/Input";
 import { Field } from "@plexui/ui/components/Field";
@@ -39,12 +40,7 @@ const WORKFLOW_STEPS = [
   { title: "Compliance Filing", description: "File required regulatory reports", required: false },
 ];
 
-const PRIORITY_COLORS: Record<string, "danger" | "warning" | "secondary"> = {
-  critical: "danger",
-  high: "warning",
-  medium: "secondary",
-  low: "secondary",
-};
+
 
 export default function CaseTemplateDetailPage() {
   const params = useParams();
@@ -83,7 +79,7 @@ export default function CaseTemplateDetailPage() {
           <div className="flex gap-6">
             <Field label="Priority">
               <div className="py-1">
-                <Badge color={PRIORITY_COLORS[template.priority] ?? "secondary"} variant="soft" size="sm">
+                <Badge color={getPriorityColor(template.priority) as BadgeProps["color"]} variant="soft" size="sm">
                   {template.priority.charAt(0).toUpperCase() + template.priority.slice(1)}
                 </Badge>
               </div>

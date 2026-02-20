@@ -131,7 +131,7 @@ export default function GettingStartedPage() {
                   <Link href={step.href}>
                     <Button
                       color="primary"
-                      variant="ghost"
+                      variant="soft"
                       size="sm"
                       pill={false}
                     >

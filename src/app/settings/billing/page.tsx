@@ -91,7 +91,7 @@ export default function BillingPage() {
             </Button>
             <Button
               color="secondary"
-              variant="ghost"
+              variant="soft"
               size="sm"
               pill={false}
             >
@@ -134,7 +134,7 @@ export default function BillingPage() {
           </div>
           <Button
             color="secondary"
-            variant="ghost"
+            variant="soft"
             size="sm"
             pill={false}
           >
@@ -182,7 +182,7 @@ export default function BillingPage() {
                   </td>
                   <td className="px-4 py-3 text-sm">
                     <Badge
-                      color={item.status === "paid" ? "success" : "warning"}
+                      color={item.status === "paid" ? "success" : "secondary"}
                       variant="soft"
                       size="sm"
                     >
@@ -191,7 +191,7 @@ export default function BillingPage() {
                     </Badge>
                   </td>
                   <td className="px-4 py-3 text-right text-sm">
-                    <Button color="secondary" variant="ghost" size="sm" pill={false}>
+                    <Button color="secondary" variant="soft" size="sm" pill={false}>
                       Download
                     </Button>
                   </td>

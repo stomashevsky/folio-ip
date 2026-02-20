@@ -7,9 +7,10 @@ import { TABLE_PAGE_WRAPPER, TABLE_PAGE_CONTENT } from "@/lib/constants/page-lay
 import { DataTable, TableSearch } from "@/components/shared";
 import { ColumnSettings, type ColumnConfig } from "@/components/shared/ColumnSettings";
 import { dateTimeCell, statusCell } from "@/lib/utils/columnHelpers";
+import { getPriorityColor } from "@/lib/utils/format";
 import type { ColumnDef, VisibilityState } from "@tanstack/react-table";
 import { Button } from "@plexui/ui/components/Button";
-import { Badge } from "@plexui/ui/components/Badge";
+import { Badge, type BadgeProps } from "@plexui/ui/components/Badge";
 import { Plus } from "@plexui/ui/components/Icon";
 import { Select } from "@plexui/ui/components/Select";
 
@@ -140,13 +141,7 @@ const columns: ColumnDef<CaseTemplate, unknown>[] = [
     size: 120,
     cell: ({ row }) => {
       const p = row.original.priority;
-      const color =
-        p === "critical" || p === "high"
-          ? "danger"
-          : p === "medium"
-            ? "warning"
-            : "secondary";
-      return <Badge color={color} size="sm">{p.charAt(0).toUpperCase() + p.slice(1)}</Badge>;
+      return <Badge color={getPriorityColor(p) as BadgeProps["color"]} variant="soft" size="sm">{p.charAt(0).toUpperCase() + p.slice(1)}</Badge>;
     },
   },
   {
