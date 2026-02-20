@@ -548,6 +548,7 @@ export interface WorkflowFlowRoute {
   label: string;
   when: string; // condition expression
   goto: string; // step ID
+  color?: "success" | "danger" | "caution" | "primary";
 }
 
 export interface WorkflowFlowActionStep {

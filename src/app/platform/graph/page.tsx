@@ -4,7 +4,9 @@ import { useMemo, useState, useCallback } from "react";
 import {
   ReactFlow,
   Background,
+  BackgroundVariant,
   Controls,
+  MiniMap,
   ReactFlowProvider,
   type Node,
   type Edge,
@@ -17,11 +19,13 @@ import { Badge } from "@plexui/ui/components/Badge";
 import { Button } from "@plexui/ui/components/Button";
 import { Select } from "@plexui/ui/components/Select";
 import { Input } from "@plexui/ui/components/Input";
+import { Switch } from "@plexui/ui/components/Switch";
 import { Tabs } from "@plexui/ui/components/Tabs";
 import {
   CloseBold,
   PlayCircle,
   Reload,
+  SettingsCog,
   Warning,
 } from "@plexui/ui/components/Icon";
 import { formatDateTime } from "@/lib/utils/format";
@@ -142,9 +146,24 @@ const SAMPLE_QUERIES = [
   { label: "Cross-cluster links", query: "MATCH (a1)-[r]-(a2) WHERE a1.cluster <> a2.cluster RETURN a1, r, a2" },
 ];
 
+interface GraphLayoutConfig {
+  clusterSpacing: number;
+  nodeRadiusBase: number;
+  nodeRadiusMult: number;
+  edgeType: string;
+}
+
+const DEFAULT_LAYOUT: GraphLayoutConfig = {
+  clusterSpacing: 700,
+  nodeRadiusBase: 160,
+  nodeRadiusMult: 20,
+  edgeType: "smoothstep",
+};
+
 function buildGraph(
   connections: GraphConnection[],
   highlightCluster?: string | null,
+  layout: GraphLayoutConfig = DEFAULT_LAYOUT,
 ): { nodes: Node[]; edges: Edge[]; entities: Map<string, GraphEntity> } {
   const entityMap = new Map<string, GraphEntity>();
 
@@ -182,13 +201,12 @@ function buildGraph(
 
   const clusterCenters: Record<string, { x: number; y: number }> = {};
   const clusters = Array.from(clusterMap.keys());
-  const clusterSpacing = 700;
   clusters.forEach((cluster, ci) => {
     const col = ci % 3;
     const row = Math.floor(ci / 3);
     clusterCenters[cluster] = {
-      x: col * clusterSpacing + 350,
-      y: row * clusterSpacing + 300,
+      x: col * layout.clusterSpacing + 350,
+      y: row * layout.clusterSpacing + 300,
     };
   });
 
@@ -197,7 +215,7 @@ function buildGraph(
     const clusterMembers = clusterMap.get(cluster) ?? [];
     const idx = clusterMembers.indexOf(key);
     const center = clusterCenters[cluster] ?? { x: 400, y: 300 };
-    const radius = 160 + clusterMembers.length * 20;
+    const radius = layout.nodeRadiusBase + clusterMembers.length * layout.nodeRadiusMult;
     const angle = (2 * Math.PI * idx) / clusterMembers.length - Math.PI / 2;
 
     const style = NODE_STYLES[entity.type] ?? NODE_STYLES.account;
@@ -248,7 +266,7 @@ function buildGraph(
       id: conn.id,
       source: `${conn.sourceType}:${conn.sourceId}`,
       target: `${conn.targetType}:${conn.targetId}`,
-      type: "smoothstep",
+      type: layout.edgeType,
       label: conn.relationship,
       animated: conn.strength > 0.85 || !!isFraud,
       style: {
@@ -311,6 +329,25 @@ function detectClusters(connections: GraphConnection[]): {
   });
 }
 
+const EDGE_TYPE_OPTIONS = [
+  { value: "smoothstep", label: "Smooth Step" },
+  { value: "default", label: "Bezier" },
+  { value: "straight", label: "Straight" },
+  { value: "step", label: "Step" },
+];
+
+const BG_VARIANT_OPTIONS = [
+  { value: "dots", label: "Dots" },
+  { value: "lines", label: "Lines" },
+  { value: "cross", label: "Cross" },
+];
+
+const BG_VARIANT_MAP: Record<string, BackgroundVariant> = {
+  dots: BackgroundVariant.Dots,
+  lines: BackgroundVariant.Lines,
+  cross: BackgroundVariant.Cross,
+};
+
 export default function GraphPage() {
   const [search, setSearch] = useState("");
   const [selectedNode, setSelectedNode] = useState<string | null>(null);
@@ -320,6 +357,21 @@ export default function GraphPage() {
   const [queryText, setQueryText] = useState("");
   const [queryResult, setQueryResult] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("explorer");
+
+  const [showSettings, setShowSettings] = useState(false);
+  const [edgeType, setEdgeType] = useState("smoothstep");
+  const [bgVariant, setBgVariant] = useState("dots");
+  const [bgGap, setBgGap] = useState(16);
+  const [snapToGrid, setSnapToGrid] = useState(false);
+  const [showMiniMap, setShowMiniMap] = useState(false);
+  const [clusterSpacing, setClusterSpacing] = useState(700);
+  const [nodeRadiusBase, setNodeRadiusBase] = useState(160);
+  const [nodeRadiusMult, setNodeRadiusMult] = useState(20);
+
+  const layoutConfig = useMemo<GraphLayoutConfig>(
+    () => ({ clusterSpacing, nodeRadiusBase, nodeRadiusMult, edgeType }),
+    [clusterSpacing, nodeRadiusBase, nodeRadiusMult, edgeType],
+  );
 
   const filteredConnections = useMemo(() => {
     return MOCK_CONNECTIONS.filter((conn) => {
@@ -336,8 +388,8 @@ export default function GraphPage() {
   }, [entityTypeFilter, relationshipFilter]);
 
   const { nodes: allNodes, edges: allEdges, entities } = useMemo(
-    () => buildGraph(filteredConnections, highlightCluster),
-    [filteredConnections, highlightCluster],
+    () => buildGraph(filteredConnections, highlightCluster, layoutConfig),
+    [filteredConnections, highlightCluster, layoutConfig],
   );
 
   const clusters = useMemo(() => detectClusters(filteredConnections), [filteredConnections]);
@@ -520,6 +572,9 @@ export default function GraphPage() {
             <Tabs.Tab value="query">Query</Tabs.Tab>
             <Tabs.Tab value="clusters" badge={{ content: clusters.length, pill: true }}>Clusters</Tabs.Tab>
           </Tabs>
+          <p className="mt-2 text-xs text-[var(--color-text-tertiary)]">
+            Visualize connections between accounts, inquiries, verifications, and devices. Click on a node to see its details and connections.
+          </p>
         </div>
 
         <div className="min-h-0 flex-1 px-4 py-6 md:px-6">
@@ -534,35 +589,136 @@ export default function GraphPage() {
                   proOptions={{ hideAttribution: true }}
                   minZoom={0.2}
                   maxZoom={2.5}
+                  snapToGrid={snapToGrid}
+                  snapGrid={[bgGap, bgGap]}
                   onNodeClick={handleNodeClick}
                   onPaneClick={() => setSelectedNode(null)}
                   nodesDraggable
                 >
-                  <Background gap={16} size={1} color="var(--color-border)" />
+                  <Background gap={bgGap} size={1} color="var(--color-border)" variant={BG_VARIANT_MAP[bgVariant] ?? BackgroundVariant.Dots} />
                   <Controls showInteractive={false} position="bottom-right" />
+                  {showMiniMap && (
+                    <MiniMap
+                      position="bottom-left"
+                      pannable
+                      zoomable
+                      style={{ background: "var(--color-surface)", border: "1px solid var(--color-border)" }}
+                    />
+                  )}
                 </ReactFlow>
               </ReactFlowProvider>
 
-              <div className="absolute bottom-3 left-3 z-10 flex flex-wrap gap-2 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2 shadow-100">
-                {ENTITY_TYPE_OPTIONS.map((opt) => (
-                  <div key={opt.value} className="flex items-center gap-1.5">
-                    <span
-                      className="inline-block h-2.5 w-2.5 rounded-full"
-                      style={{
-                        background: NODE_STYLES[opt.value]?.background ?? "var(--color-border)",
-                        border: `1px solid ${NODE_STYLES[opt.value]?.border ?? "var(--color-border)"}`,
-                      }}
-                    />
-                    <span className="text-2xs text-[var(--color-text-secondary)]">{opt.label}</span>
+              <div className="absolute left-3 top-3 z-10">
+                <button
+                  type="button"
+                  className="flex h-8 w-8 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] shadow-100 transition-colors hover:bg-[var(--color-nav-hover-bg)]"
+                  onClick={() => setShowSettings((v) => !v)}
+                >
+                  <SettingsCog style={{ width: 16, height: 16 }} />
+                </button>
+
+                {showSettings && (
+                  <div className="mt-2 w-64 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4 shadow-200">
+                    <p className="text-xs font-medium text-[var(--color-text)]">Graph Settings</p>
+
+                    <div className="mt-3 space-y-3">
+                      <div>
+                        <label className="text-2xs text-[var(--color-text-secondary)]">Edge Type</label>
+                        <div className="mt-1">
+                          <Select
+                            block
+                            size="sm"
+                            options={EDGE_TYPE_OPTIONS}
+                            value={edgeType}
+                            onChange={(opt) => setEdgeType(opt.value)}
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="text-2xs text-[var(--color-text-secondary)]">Background</label>
+                        <div className="mt-1">
+                          <Select
+                            block
+                            size="sm"
+                            options={BG_VARIANT_OPTIONS}
+                            value={bgVariant}
+                            onChange={(opt) => setBgVariant(opt.value)}
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="text-2xs text-[var(--color-text-secondary)]">Grid Gap</label>
+                        <div className="mt-1">
+                          <Input
+                            type="number"
+                            size="sm"
+                            value={bgGap}
+                            onChange={(e) => setBgGap(Number(e.target.value) || 8)}
+                            min={4}
+                            max={100}
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="text-2xs text-[var(--color-text-secondary)]">Cluster Spacing</label>
+                        <div className="mt-1">
+                          <Input
+                            type="number"
+                            size="sm"
+                            value={clusterSpacing}
+                            onChange={(e) => setClusterSpacing(Number(e.target.value) || 400)}
+                            min={200}
+                            max={2000}
+                            step={50}
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="text-2xs text-[var(--color-text-secondary)]">Node Radius Base</label>
+                        <div className="mt-1">
+                          <Input
+                            type="number"
+                            size="sm"
+                            value={nodeRadiusBase}
+                            onChange={(e) => setNodeRadiusBase(Number(e.target.value) || 100)}
+                            min={50}
+                            max={500}
+                            step={10}
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="text-2xs text-[var(--color-text-secondary)]">Node Radius Multiplier</label>
+                        <div className="mt-1">
+                          <Input
+                            type="number"
+                            size="sm"
+                            value={nodeRadiusMult}
+                            onChange={(e) => setNodeRadiusMult(Number(e.target.value) || 10)}
+                            min={0}
+                            max={100}
+                            step={5}
+                          />
+                        </div>
+                      </div>
+
+                      <div className="flex items-center justify-between">
+                        <span className="text-2xs text-[var(--color-text-secondary)]">Snap to Grid</span>
+                        <Switch checked={snapToGrid} onCheckedChange={setSnapToGrid} />
+                      </div>
+
+                      <div className="flex items-center justify-between">
+                        <span className="text-2xs text-[var(--color-text-secondary)]">Mini Map</span>
+                        <Switch checked={showMiniMap} onCheckedChange={setShowMiniMap} />
+                      </div>
+                    </div>
                   </div>
-                ))}
-                <div className="flex items-center gap-1.5">
-                  <span
-                    className="inline-block h-2.5 w-2.5 rounded-full border-2"
-                    style={{ borderColor: "var(--color-danger-solid-bg)", background: "transparent" }}
-                  />
-                  <span className="text-2xs text-[var(--color-text-danger-ghost)]">Fraud Ring</span>
-                </div>
+                )}
               </div>
 
               {selectedEntity && (
