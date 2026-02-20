@@ -23,6 +23,7 @@ import { DASHBOARD_DATE_SHORTCUTS, type DateRange } from "@/lib/constants/date-s
 import type { AnalyticsInterval } from "@/lib/types";
 import { SegmentedControl } from "@plexui/ui/components/SegmentedControl";
 import { Select } from "@plexui/ui/components/Select";
+import { Badge } from "@plexui/ui/components/Badge";
 import { DateRangePicker } from "@plexui/ui/components/DateRangePicker";
 import { ANALYTICS_INTERVAL_OPTIONS } from "@/lib/constants/filter-options";
 
@@ -196,17 +197,13 @@ function InquiryAnalyticsContent() {
                 className="cursor-pointer rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4 transition-colors hover:border-[var(--color-primary-soft-border)] hover:bg-[var(--color-nav-hover-bg)]"
               >
                 <div className="flex items-center justify-between">
-                  <h4 className="text-sm font-medium text-[var(--color-text)]">{query.name}</h4>
+                  <h4 className="heading-xs text-[var(--color-text)]">{query.name}</h4>
                   <span className="text-xs text-[var(--color-text-tertiary)]">{query.createdAt}</span>
                 </div>
-                <p className="mt-1 text-xs text-[var(--color-text-secondary)]">{query.description}</p>
+                <p className="mt-1 text-sm text-[var(--color-text-secondary)]">{query.description}</p>
                 <div className="mt-2 flex gap-2">
-                  <span className="rounded-md bg-[var(--color-surface-secondary)] px-2 py-0.5 text-xs text-[var(--color-text-tertiary)]">
-                    {query.interval}
-                  </span>
-                  <span className="rounded-md bg-[var(--color-surface-secondary)] px-2 py-0.5 text-xs text-[var(--color-text-tertiary)]">
-                    {query.dateRange}
-                  </span>
+                  <Badge color="secondary" variant="soft" size="sm">{query.interval}</Badge>
+                  <Badge color="secondary" variant="soft" size="sm">{query.dateRange}</Badge>
                 </div>
               </div>
             ))}

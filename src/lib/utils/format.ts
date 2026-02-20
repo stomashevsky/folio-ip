@@ -61,8 +61,8 @@ export function getStatusColor(status: string): string {
     no_matches: "success",
     match: "danger",
     ready: "secondary",
-    open: "secondary",
-    in_review: "secondary",
+    open: "info",
+    in_review: "discovery",
     escalated: "danger",
     resolved: "success",
     active: "success",
@@ -79,7 +79,7 @@ export function getStatusColor(status: string): string {
 export function getPriorityColor(priority: string): string {
   const map: Record<string, string> = {
     critical: "danger",
-    high: "danger",
+    high: "warning",
     medium: "secondary",
     low: "success",
   };
