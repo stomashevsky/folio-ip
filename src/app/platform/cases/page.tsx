@@ -67,7 +67,7 @@ const columns: ColumnDef<Case, unknown>[] = [
     cell: ({ row }) => {
       const p = row.original.priority;
       const color = p === "critical" || p === "high" ? "danger" : p === "medium" ? "warning" : "secondary";
-      return <Badge color={color} size="sm">{p}</Badge>;
+      return <Badge color={color} size="sm">{p.charAt(0).toUpperCase() + p.slice(1)}</Badge>;
     },
   },
   {

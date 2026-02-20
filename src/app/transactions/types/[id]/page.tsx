@@ -88,6 +88,7 @@ export default function TransactionTypeDetailPage() {
                   value={txType.riskLevel}
                   onChange={() => {}}
                   size="sm"
+                  pill={false}
                 />
               </div>
             </Field>

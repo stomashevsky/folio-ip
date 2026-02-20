@@ -146,7 +146,7 @@ const columns: ColumnDef<CaseTemplate, unknown>[] = [
           : p === "medium"
             ? "warning"
             : "secondary";
-      return <Badge color={color} size="sm">{p}</Badge>;
+      return <Badge color={color} size="sm">{p.charAt(0).toUpperCase() + p.slice(1)}</Badge>;
     },
   },
   {

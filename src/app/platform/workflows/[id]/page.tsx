@@ -304,6 +304,7 @@ function WorkflowDetailContent() {
                     if (opt) patch({ triggerEvent: opt.value as WorkflowTriggerType });
                   }}
                   block
+                  pill={false}
                   size="sm"
                 />
               </div>

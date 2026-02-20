@@ -86,6 +86,7 @@ export default function GraphConfigurationPage() {
           <Field label="Node sizing" description="How node size is determined in the visualization">
             <Select
               block
+              pill={false}
               options={NODE_SIZE_OPTIONS}
               value={nodeSizeMode}
               onChange={(opt) => setNodeSizeMode(opt.value)}
@@ -137,6 +138,7 @@ export default function GraphConfigurationPage() {
           <Field label="Edge style" description="Visual style for connection lines between nodes">
             <Select
               block
+              pill={false}
               options={EDGE_STYLE_OPTIONS}
               value={edgeStyle}
               onChange={(opt) => setEdgeStyle(opt.value)}
@@ -177,6 +179,7 @@ export default function GraphConfigurationPage() {
           <Field label="Layout algorithm" description="Algorithm used to arrange nodes in the graph visualization">
             <Select
               block
+              pill={false}
               options={LAYOUT_OPTIONS}
               value={layoutAlgorithm}
               onChange={(opt) => setLayoutAlgorithm(opt.value)}
@@ -211,6 +214,7 @@ export default function GraphConfigurationPage() {
           <Field label="Color scheme" description="How nodes are colored in the visualization">
             <Select
               block
+              pill={false}
               options={COLOR_SCHEME_OPTIONS}
               value={colorScheme}
               onChange={(opt) => setColorScheme(opt.value)}

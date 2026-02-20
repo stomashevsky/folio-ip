@@ -281,7 +281,7 @@ export default function WorkflowsPage() {
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
                     <span className="text-sm font-medium text-[var(--color-text)]">{mod.name}</span>
-                    <Badge color={mod.status === "published" ? "success" : "secondary"} size="sm">{mod.status}</Badge>
+                    <Badge color={mod.status === "published" ? "success" : "secondary"} size="sm">{mod.status.charAt(0).toUpperCase() + mod.status.slice(1)}</Badge>
                   </div>
                   <p className="mt-1 text-2xs text-[var(--color-text-secondary)]">{mod.description}</p>
                   <div className="mt-2 flex items-center gap-3 text-2xs text-[var(--color-text-tertiary)]">

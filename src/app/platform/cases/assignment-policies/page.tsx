@@ -122,7 +122,7 @@ const columns: ColumnDef<AssignmentPolicy, unknown>[] = [
     size: 140,
     cell: ({ row }) => (
       <Badge color="secondary" size="sm">
-        {row.original.strategy.replace(/_/g, " ")}
+        {row.original.strategy.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}
       </Badge>
     ),
   },
@@ -148,7 +148,7 @@ const columns: ColumnDef<AssignmentPolicy, unknown>[] = [
           : p === "medium"
             ? "warning"
             : "secondary";
-      return <Badge color={color} size="sm">{p}</Badge>;
+      return <Badge color={color} size="sm">{p.charAt(0).toUpperCase() + p.slice(1)}</Badge>;
     },
   },
   {

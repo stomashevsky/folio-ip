@@ -84,7 +84,7 @@ export default function CaseTemplateDetailPage() {
             <Field label="Priority">
               <div className="py-1">
                 <Badge color={PRIORITY_COLORS[template.priority] ?? "secondary"} variant="soft" size="sm">
-                  {template.priority}
+                  {template.priority.charAt(0).toUpperCase() + template.priority.slice(1)}
                 </Badge>
               </div>
             </Field>

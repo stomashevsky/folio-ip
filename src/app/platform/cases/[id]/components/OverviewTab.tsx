@@ -169,7 +169,7 @@ export function OverviewTab({
                       color={PRIORITY_COLORS[rc.priority] ?? "secondary"}
                       size="sm"
                     >
-                      {rc.priority}
+                      {rc.priority.charAt(0).toUpperCase() + rc.priority.slice(1)}
                     </Badge>
                   </div>
                 </Link>

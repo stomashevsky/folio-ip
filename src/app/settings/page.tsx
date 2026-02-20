@@ -90,6 +90,7 @@ export default function YourProfilePage() {
               value={timezone}
               onChange={(opt) => setTimezone(opt.value)}
               block
+              pill={false}
               variant="outline"
             />
           </Field>
@@ -102,6 +103,7 @@ export default function YourProfilePage() {
               value={language}
               onChange={(opt) => setLanguage(opt.value)}
               block
+              pill={false}
               variant="outline"
             />
           </Field>

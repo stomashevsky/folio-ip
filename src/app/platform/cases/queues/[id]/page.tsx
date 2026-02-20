@@ -117,6 +117,7 @@ export default function QueueDetailPage() {
                   onChange={() => {}}
                   size="sm"
                   variant="outline"
+                  pill={false}
                 />
               </div>
             </Field>
@@ -167,7 +168,7 @@ export default function QueueDetailPage() {
                       </td>
                       <td className="px-4 py-3"><StatusBadge status={c.status} /></td>
                       <td className="px-4 py-3">
-                        <Badge color={PRIORITY_COLORS[c.priority] ?? "secondary"} size="sm">{c.priority}</Badge>
+                        <Badge color={PRIORITY_COLORS[c.priority] ?? "secondary"} size="sm">{c.priority.charAt(0).toUpperCase() + c.priority.slice(1)}</Badge>
                       </td>
                       <td className="px-4 py-3 text-sm text-[var(--color-text-secondary)]">{c.assignee ?? "Unassigned"}</td>
                       <td className="px-4 py-3 text-sm text-[var(--color-text-secondary)]">{formatDateTime(c.createdAt)}</td>
