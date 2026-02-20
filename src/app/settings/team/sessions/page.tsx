@@ -2,11 +2,12 @@
 
 import { useState, useMemo } from "react";
 import { TopBar } from "@/components/layout/TopBar";
-import { DataTable, TableSearch } from "@/components/shared";
+import { DataTable, TableSearch, ColumnSettings } from "@/components/shared";
+import type { ColumnConfig } from "@/components/shared/ColumnSettings";
 import { dateTimeCell, statusCell } from "@/lib/utils/columnHelpers";
 import { Button } from "@plexui/ui/components/Button";
 import { Select } from "@plexui/ui/components/Select";
-import type { ColumnDef } from "@tanstack/react-table";
+import type { ColumnDef, VisibilityState } from "@tanstack/react-table";
 
 interface Session {
   id: string;
@@ -139,6 +140,26 @@ const STATUS_OPTIONS = [
   { value: "revoked", label: "Revoked" },
 ];
 
+const COLUMN_CONFIG: ColumnConfig[] = [
+  { id: "userName", label: "User" },
+  { id: "email", label: "Email" },
+  { id: "ipAddress", label: "IP Address" },
+  { id: "location", label: "Location" },
+  { id: "status", label: "Status" },
+  { id: "startedAt", label: "Started at" },
+  { id: "lastActiveAt", label: "Last active" },
+];
+
+const DEFAULT_VISIBILITY: VisibilityState = {
+  userName: true,
+  email: true,
+  ipAddress: true,
+  location: true,
+  status: true,
+  startedAt: true,
+  lastActiveAt: true,
+};
+
 const columns: ColumnDef<Session, unknown>[] = [
   {
     accessorKey: "userName",
@@ -201,6 +222,13 @@ const columns: ColumnDef<Session, unknown>[] = [
 export default function TeamSessionsPage() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string[]>([]);
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(DEFAULT_VISIBILITY);
+
+  const hasActiveFilters = statusFilter.length > 0;
+
+  function clearAllFilters() {
+    setStatusFilter([]);
+  }
 
   const filteredData = useMemo(() => {
     let result = mockSessions;
@@ -227,9 +255,16 @@ export default function TeamSessionsPage() {
       <TopBar
         title="Sessions"
         actions={
-          <Button color="danger" variant="outline" size="md" pill={false}>
-            Revoke All
-          </Button>
+          <div className="flex items-center gap-2">
+            <ColumnSettings
+              columns={COLUMN_CONFIG}
+              visibility={columnVisibility}
+              onVisibilityChange={setColumnVisibility}
+            />
+            <Button color="danger" variant="outline" size="sm" pill>
+              Revoke All
+            </Button>
+          </div>
         }
         toolbar={
           <>
@@ -254,6 +289,12 @@ export default function TeamSessionsPage() {
                 size="sm"
               />
             </div>
+
+            {hasActiveFilters && (
+              <Button color="secondary" variant="soft" size="sm" pill onClick={clearAllFilters}>
+                Clear filters
+              </Button>
+            )}
           </>
         }
       />
@@ -265,6 +306,8 @@ export default function TeamSessionsPage() {
           globalFilter={search}
           pageSize={50}
           initialSorting={[{ id: "lastActiveAt", desc: true }]}
+          columnVisibility={columnVisibility}
+          onColumnVisibilityChange={setColumnVisibility}
         />
       </div>
     </div>

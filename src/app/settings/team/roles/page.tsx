@@ -2,12 +2,13 @@
 
 import { useState, useMemo } from "react";
 import { TopBar } from "@/components/layout/TopBar";
-import { DataTable, TableSearch } from "@/components/shared";
+import { DataTable, TableSearch, ColumnSettings } from "@/components/shared";
+import type { ColumnConfig } from "@/components/shared/ColumnSettings";
 import { dateTimeCell } from "@/lib/utils/columnHelpers";
 import { Plus } from "@plexui/ui/components/Icon";
 import { Button } from "@plexui/ui/components/Button";
 import { Select } from "@plexui/ui/components/Select";
-import type { ColumnDef } from "@tanstack/react-table";
+import type { ColumnDef, VisibilityState } from "@tanstack/react-table";
 
 interface Role {
   id: string;
@@ -85,6 +86,24 @@ const mockRoles: Role[] = [
   },
 ];
 
+const COLUMN_CONFIG: ColumnConfig[] = [
+  { id: "name", label: "Name" },
+  { id: "description", label: "Description" },
+  { id: "membersCount", label: "Members" },
+  { id: "permissions", label: "Permissions" },
+  { id: "createdAt", label: "Created at" },
+  { id: "updatedAt", label: "Updated at" },
+];
+
+const DEFAULT_VISIBILITY: VisibilityState = {
+  name: true,
+  description: true,
+  membersCount: true,
+  permissions: true,
+  createdAt: true,
+  updatedAt: true,
+};
+
 const columns: ColumnDef<Role, unknown>[] = [
   {
     accessorKey: "name",
@@ -143,6 +162,13 @@ const columns: ColumnDef<Role, unknown>[] = [
 export default function TeamRolesPage() {
   const [search, setSearch] = useState("");
   const [membersFilter, setMembersFilter] = useState<string[]>([]);
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(DEFAULT_VISIBILITY);
+
+  const hasActiveFilters = membersFilter.length > 0;
+
+  function clearAllFilters() {
+    setMembersFilter([]);
+  }
 
   const filteredData = useMemo(() => {
     let result = mockRoles;
@@ -170,10 +196,17 @@ export default function TeamRolesPage() {
       <TopBar
         title="Roles"
         actions={
-          <Button color="primary" size="md" pill={false}>
-            <Plus />
-            <span className="hidden md:inline">Create Role</span>
-          </Button>
+          <div className="flex items-center gap-2">
+            <ColumnSettings
+              columns={COLUMN_CONFIG}
+              visibility={columnVisibility}
+              onVisibilityChange={setColumnVisibility}
+            />
+            <Button color="primary" size="sm" pill>
+              <Plus />
+              <span className="hidden md:inline">Create Role</span>
+            </Button>
+          </div>
         }
         toolbar={
           <>
@@ -197,6 +230,12 @@ export default function TeamRolesPage() {
                 size="sm"
               />
             </div>
+
+            {hasActiveFilters && (
+              <Button color="secondary" variant="soft" size="sm" pill onClick={clearAllFilters}>
+                Clear filters
+              </Button>
+            )}
           </>
         }
       />
@@ -208,6 +247,8 @@ export default function TeamRolesPage() {
           globalFilter={search}
           pageSize={50}
           initialSorting={[{ id: "name", desc: false }]}
+          columnVisibility={columnVisibility}
+          onColumnVisibilityChange={setColumnVisibility}
         />
       </div>
     </div>

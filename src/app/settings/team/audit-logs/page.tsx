@@ -2,10 +2,12 @@
 
 import { useState, useMemo } from "react";
 import { TopBar } from "@/components/layout/TopBar";
-import { DataTable, TableSearch } from "@/components/shared";
+import { DataTable, TableSearch, ColumnSettings } from "@/components/shared";
+import type { ColumnConfig } from "@/components/shared/ColumnSettings";
 import { idCell, dateTimeCell } from "@/lib/utils/columnHelpers";
 import { Select } from "@plexui/ui/components/Select";
-import type { ColumnDef } from "@tanstack/react-table";
+import { Button } from "@plexui/ui/components/Button";
+import type { ColumnDef, VisibilityState } from "@tanstack/react-table";
 
 interface AuditLog {
   id: string;
@@ -194,6 +196,26 @@ const RESOURCE_TYPE_OPTIONS = [
   { value: "API Key", label: "API Key" },
 ];
 
+const COLUMN_CONFIG: ColumnConfig[] = [
+  { id: "action", label: "Action" },
+  { id: "actor", label: "Actor" },
+  { id: "actorEmail", label: "Email" },
+  { id: "resourceType", label: "Resource Type" },
+  { id: "resourceId", label: "Resource ID" },
+  { id: "ipAddress", label: "IP Address" },
+  { id: "createdAt", label: "Timestamp" },
+];
+
+const DEFAULT_VISIBILITY: VisibilityState = {
+  action: true,
+  actor: true,
+  actorEmail: true,
+  resourceType: true,
+  resourceId: true,
+  ipAddress: true,
+  createdAt: true,
+};
+
 const columns: ColumnDef<AuditLog, unknown>[] = [
   {
     accessorKey: "action",
@@ -261,6 +283,14 @@ export default function AuditLogsPage() {
   const [search, setSearch] = useState("");
   const [actionFilter, setActionFilter] = useState<string[]>([]);
   const [resourceTypeFilter, setResourceTypeFilter] = useState<string[]>([]);
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(DEFAULT_VISIBILITY);
+
+  const hasActiveFilters = actionFilter.length > 0 || resourceTypeFilter.length > 0;
+
+  function clearAllFilters() {
+    setActionFilter([]);
+    setResourceTypeFilter([]);
+  }
 
   const filteredData = useMemo(() => {
     let result = mockAuditLogs;
@@ -293,6 +323,13 @@ export default function AuditLogsPage() {
     <div className="flex h-full flex-col overflow-hidden">
       <TopBar
         title="Audit Logs"
+        actions={
+          <ColumnSettings
+            columns={COLUMN_CONFIG}
+            visibility={columnVisibility}
+            onVisibilityChange={setColumnVisibility}
+          />
+        }
         toolbar={
           <>
             <TableSearch
@@ -334,6 +371,12 @@ export default function AuditLogsPage() {
                 size="sm"
               />
             </div>
+
+            {hasActiveFilters && (
+              <Button color="secondary" variant="soft" size="sm" pill onClick={clearAllFilters}>
+                Clear filters
+              </Button>
+            )}
           </>
         }
       />
@@ -345,6 +388,8 @@ export default function AuditLogsPage() {
           globalFilter={search}
           pageSize={50}
           initialSorting={[{ id: "createdAt", desc: true }]}
+          columnVisibility={columnVisibility}
+          onColumnVisibilityChange={setColumnVisibility}
         />
       </div>
     </div>

@@ -8,6 +8,7 @@ import { dateTimeCell } from "@/lib/utils/columnHelpers";
 import type { ColumnDef, VisibilityState } from "@tanstack/react-table";
 import { Button } from "@plexui/ui/components/Button";
 import { Plus } from "@plexui/ui/components/Icon";
+import { Select } from "@plexui/ui/components/Select";
 
 interface CaseQueue {
   id: string;
@@ -65,6 +66,14 @@ const MOCK_QUEUES: CaseQueue[] = [
     slaHours: 4,
     createdAt: "2025-02-01T12:45:00Z",
   },
+];
+
+const SLA_OPTIONS = [
+  { value: "4", label: "4 hours" },
+  { value: "6", label: "6 hours" },
+  { value: "12", label: "12 hours" },
+  { value: "24", label: "24 hours" },
+  { value: "48", label: "48 hours" },
 ];
 
 const COLUMN_CONFIG: ColumnConfig[] = [
@@ -144,19 +153,29 @@ const columns: ColumnDef<CaseQueue, unknown>[] = [
 
 export default function CaseQueuesPage() {
   const [search, setSearch] = useState("");
+  const [slaFilter, setSlaFilter] = useState<string[]>([]);
   const [columnVisibility, setColumnVisibility] =
     useState<VisibilityState>(DEFAULT_VISIBILITY);
 
-  const filteredData = useMemo(() => {
-    if (!search) return MOCK_QUEUES;
+  const hasActiveFilters = slaFilter.length > 0;
 
-    const lowerSearch = search.toLowerCase();
-    return MOCK_QUEUES.filter(
-      (q) =>
-        q.name.toLowerCase().includes(lowerSearch) ||
-        q.description.toLowerCase().includes(lowerSearch)
-    );
-  }, [search]);
+  function clearAllFilters() {
+    setSlaFilter([]);
+  }
+
+  const filteredData = useMemo(() => {
+    return MOCK_QUEUES.filter((q) => {
+      if (slaFilter.length > 0 && !slaFilter.includes(q.slaHours.toString())) return false;
+      if (search) {
+        const lowerSearch = search.toLowerCase();
+        return (
+          q.name.toLowerCase().includes(lowerSearch) ||
+          q.description.toLowerCase().includes(lowerSearch)
+        );
+      }
+      return true;
+    });
+  }, [search, slaFilter]);
 
   return (
     <div className="flex h-full flex-col overflow-hidden">
@@ -169,18 +188,46 @@ export default function CaseQueuesPage() {
               visibility={columnVisibility}
               onVisibilityChange={setColumnVisibility}
             />
-            <Button color="primary" size="md" pill={false}>
+            <Button color="primary" size="sm" pill>
               <Plus />
               <span className="hidden md:inline">Create Queue</span>
             </Button>
           </div>
         }
         toolbar={
-          <TableSearch
-            value={search}
-            onChange={setSearch}
-            placeholder="Search queues..."
-          />
+          <>
+            <TableSearch
+              value={search}
+              onChange={setSearch}
+              placeholder="Search queues..."
+            />
+            <div className="w-36">
+              <Select
+                multiple
+                clearable
+                block
+                pill
+                listMinWidth={160}
+                options={SLA_OPTIONS}
+                value={slaFilter}
+                onChange={(opts) => setSlaFilter(opts.map((o) => o.value))}
+                placeholder="SLA"
+                variant="outline"
+                size="sm"
+              />
+            </div>
+            {hasActiveFilters && (
+              <Button
+                color="secondary"
+                variant="soft"
+                size="sm"
+                pill
+                onClick={clearAllFilters}
+              >
+                Clear filters
+              </Button>
+            )}
+          </>
         }
       />
 

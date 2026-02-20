@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { TopBar } from "@/components/layout/TopBar";
-import { TableSearch } from "@/components/shared";
+import { TableSearch, InlineEmpty } from "@/components/shared";
 import { Badge } from "@plexui/ui/components/Badge";
 import { Button } from "@plexui/ui/components/Button";
 import { Select } from "@plexui/ui/components/Select";
@@ -122,16 +122,27 @@ const getStatusLabel = (status: string) => {
   }
 };
 
+const STATUS_OPTIONS = [
+  { value: "connected", label: "Connected" },
+  { value: "disconnected", label: "Disconnected" },
+  { value: "error", label: "Error" },
+];
+
 export default function IntegrationsPage() {
   const [search, setSearch] = useState("");
   const [categoryFilter, setCategoryFilter] = useState<string[]>([]);
+  const [statusFilter, setStatusFilter] = useState<string[]>([]);
+
+  const hasActiveFilters = categoryFilter.length > 0 || statusFilter.length > 0;
 
   const filteredData = useMemo(() => {
     return mockIntegrations.filter((integration) => {
       if (categoryFilter.length > 0 && !categoryFilter.includes(integration.category)) {
         return false;
       }
-
+      if (statusFilter.length > 0 && !statusFilter.includes(integration.status)) {
+        return false;
+      }
       if (search) {
         const searchLower = search.toLowerCase();
         return (
@@ -139,10 +150,14 @@ export default function IntegrationsPage() {
           integration.description.toLowerCase().includes(searchLower)
         );
       }
-
       return true;
     });
-  }, [search, categoryFilter]);
+  }, [search, categoryFilter, statusFilter]);
+
+  function clearAllFilters() {
+    setCategoryFilter([]);
+    setStatusFilter([]);
+  }
 
   return (
     <div className="flex h-full flex-col overflow-auto">
@@ -155,7 +170,7 @@ export default function IntegrationsPage() {
               onChange={setSearch}
               placeholder="Search integrations..."
             />
-            <div className="w-48">
+            <div className="w-44">
               <Select
                 multiple
                 clearable
@@ -170,6 +185,26 @@ export default function IntegrationsPage() {
                 size="sm"
               />
             </div>
+            <div className="w-40">
+              <Select
+                multiple
+                clearable
+                block
+                pill
+                listMinWidth={180}
+                options={STATUS_OPTIONS}
+                value={statusFilter}
+                onChange={(opts) => setStatusFilter(opts.map((o) => o.value))}
+                placeholder="Status"
+                variant="outline"
+                size="sm"
+              />
+            </div>
+            {hasActiveFilters && (
+              <Button color="secondary" variant="soft" size="sm" pill onClick={clearAllFilters}>
+                Clear filters
+              </Button>
+            )}
             <Button color="info" size="sm" pill>
               <Plus className="h-4 w-4" />
               Add Integration
@@ -179,6 +214,9 @@ export default function IntegrationsPage() {
       />
 
       <div className="flex-1 overflow-auto px-4 py-8 md:px-6">
+        {filteredData.length === 0 ? (
+          <InlineEmpty>{`No integrations match your filters.`}</InlineEmpty>
+        ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {filteredData.map((integration) => (
             <div
@@ -213,6 +251,7 @@ export default function IntegrationsPage() {
             </div>
           ))}
         </div>
+        )}
       </div>
     </div>
   );
