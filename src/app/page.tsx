@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { DateTime } from "luxon";
 import { ButtonLink } from "@plexui/ui/components/Button";
-import { TopBar } from "@/components/layout/TopBar";
+import { TopBar, TOPBAR_CONTROL_SIZE, TOPBAR_ACTION_PILL } from "@/components/layout/TopBar";
 import { MetricCard, ChartCard, DataTable } from "@/components/shared";
 import { InquiriesTrendChart } from "@/components/charts/InquiriesTrendChart";
 import { StatusDonutChart } from "@/components/charts/StatusDonutChart";
@@ -169,8 +169,8 @@ export default function DashboardHome() {
             value={dateRange}
             onChange={handleRangeChange}
             shortcuts={DASHBOARD_DATE_SHORTCUTS}
-            size="md"
-            pill={false}
+            size={TOPBAR_CONTROL_SIZE}
+            pill={TOPBAR_ACTION_PILL}
             max={DateTime.local().endOf("day")}
             triggerDateFormat="MM/dd/yy"
           />

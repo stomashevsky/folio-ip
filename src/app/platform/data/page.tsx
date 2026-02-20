@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { TopBar } from "@/components/layout/TopBar";
+import { TopBar, TOPBAR_CONTROL_SIZE, TOPBAR_TOOLBAR_PILL } from "@/components/layout/TopBar";
+import { TABLE_PAGE_WRAPPER, TABLE_PAGE_CONTENT } from "@/lib/constants/page-layout";
 import { DataTable, TableSearch, SummaryCard } from "@/components/shared";
 import { ColumnSettings, type ColumnConfig } from "@/components/shared/ColumnSettings";
 import { dateTimeCell } from "@/lib/utils/columnHelpers";
@@ -148,7 +149,7 @@ export default function DataPage() {
   }
 
   return (
-    <div className="flex h-full flex-col overflow-hidden">
+    <div className={TABLE_PAGE_WRAPPER}>
       <TopBar
         title="Data"
         actions={
@@ -161,41 +162,41 @@ export default function DataPage() {
         toolbar={
           <>
             <TableSearch value={search} onChange={setSearch} placeholder="Search activity..." />
-            <div className="w-36">
-              <Select
-                multiple
-                clearable
-                block
-                pill
-                listMinWidth={160}
-                options={ACTION_OPTIONS}
-                value={actionFilter}
-                onChange={(opts) => setActionFilter(opts.map((o) => o.value))}
-                placeholder="Action"
-                variant="outline"
-                size="sm"
-              />
-            </div>
-            <div className="w-36">
-              <Select
-                multiple
-                clearable
-                block
-                pill
-                listMinWidth={180}
-                options={STATUS_OPTIONS}
-                value={statusFilter}
-                onChange={(opts) => setStatusFilter(opts.map((o) => o.value))}
-                placeholder="Status"
-                variant="outline"
-                size="sm"
-              />
-            </div>
-            {hasActiveFilters && (
-              <Button color="secondary" variant="soft" size="sm" pill onClick={clearAllFilters}>
-                Clear filters
-              </Button>
-            )}
+             <div className="w-36">
+               <Select
+                 multiple
+                 clearable
+                 block
+                 pill={TOPBAR_TOOLBAR_PILL}
+                 listMinWidth={160}
+                 options={ACTION_OPTIONS}
+                 value={actionFilter}
+                 onChange={(opts) => setActionFilter(opts.map((o) => o.value))}
+                 placeholder="Action"
+                 variant="outline"
+                 size={TOPBAR_CONTROL_SIZE}
+               />
+             </div>
+             <div className="w-36">
+               <Select
+                 multiple
+                 clearable
+                 block
+                 pill={TOPBAR_TOOLBAR_PILL}
+                 listMinWidth={180}
+                 options={STATUS_OPTIONS}
+                 value={statusFilter}
+                 onChange={(opts) => setStatusFilter(opts.map((o) => o.value))}
+                 placeholder="Status"
+                 variant="outline"
+                 size={TOPBAR_CONTROL_SIZE}
+               />
+             </div>
+             {hasActiveFilters && (
+               <Button color="secondary" variant="soft" size={TOPBAR_CONTROL_SIZE} pill={TOPBAR_TOOLBAR_PILL} onClick={clearAllFilters}>
+                 Clear filters
+               </Button>
+             )}
           </>
         }
       />
@@ -218,7 +219,7 @@ export default function DataPage() {
           </div>
         </div>
 
-        <div className="flex min-h-0 flex-1 flex-col px-4 pt-2 md:px-6">
+        <div className={TABLE_PAGE_CONTENT}>
           <DataTable
             data={filteredData}
             columns={columns}

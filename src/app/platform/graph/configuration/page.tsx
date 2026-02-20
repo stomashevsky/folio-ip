@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { TopBar } from "@/components/layout/TopBar";
+import { TopBar, TOPBAR_CONTROL_SIZE, TOPBAR_ACTION_PILL } from "@/components/layout/TopBar";
 import { SectionHeading } from "@/components/shared";
 import { Input } from "@plexui/ui/components/Input";
 import { Switch } from "@plexui/ui/components/Switch";
@@ -58,17 +58,17 @@ export default function GraphConfigurationPage() {
     <div className="flex h-full flex-col overflow-auto">
       <TopBar
         title="Graph Configuration"
-        actions={
-          <div className="flex items-center gap-2">
-            <Badge color="success" variant="soft" size="sm">Saved</Badge>
-            <Button color="secondary" variant="outline" size="sm" pill onClick={() => {}}>
-              Reset Defaults
-            </Button>
-            <Button color="primary" size="sm" pill onClick={() => {}}>
-              Save Changes
-            </Button>
-          </div>
-        }
+         actions={
+           <div className="flex items-center gap-2">
+             <Badge color="success" variant="soft" size="sm">Saved</Badge>
+             <Button color="secondary" variant="outline" size={TOPBAR_CONTROL_SIZE} pill={TOPBAR_ACTION_PILL} onClick={() => {}}>
+               Reset Defaults
+             </Button>
+             <Button color="primary" size={TOPBAR_CONTROL_SIZE} pill={TOPBAR_ACTION_PILL} onClick={() => {}}>
+               Save Changes
+             </Button>
+           </div>
+         }
       />
       <div className="mx-auto w-full max-w-2xl px-4 py-8 md:px-6">
         <SectionHeading size="xs">Node Settings</SectionHeading>

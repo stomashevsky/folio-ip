@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { TopBar } from "@/components/layout/TopBar";
+import { TopBar, TOPBAR_CONTROL_SIZE, TOPBAR_TOOLBAR_PILL } from "@/components/layout/TopBar";
+import { TABLE_PAGE_WRAPPER, TABLE_PAGE_CONTENT } from "@/lib/constants/page-layout";
 import { DataTable, TableSearch } from "@/components/shared";
 import { ColumnSettings, type ColumnConfig } from "@/components/shared/ColumnSettings";
 import { useTemplateStore } from "@/lib/stores/template-store";
@@ -102,7 +103,7 @@ export default function WorkflowRunsPage() {
   }
 
   return (
-    <div className="flex h-full flex-col overflow-hidden">
+    <div className={TABLE_PAGE_WRAPPER}>
       <TopBar
         title="Workflow Runs"
         actions={
@@ -120,38 +121,38 @@ export default function WorkflowRunsPage() {
               placeholder="Search runs..."
             />
 
-            <div className="w-36">
-              <Select
-                multiple
-                clearable
-                block
-                pill
-                listMinWidth={180}
-                options={STATUS_OPTIONS}
-                value={statusFilter}
-                onChange={(opts) => setStatusFilter(opts.map((o) => o.value))}
-                placeholder="Status"
-                variant="outline"
-                size="sm"
-              />
-            </div>
+             <div className="w-36">
+               <Select
+                 multiple
+                 clearable
+                 block
+                 pill={TOPBAR_TOOLBAR_PILL}
+                 listMinWidth={180}
+                 options={STATUS_OPTIONS}
+                 value={statusFilter}
+                 onChange={(opts) => setStatusFilter(opts.map((o) => o.value))}
+                 placeholder="Status"
+                 variant="outline"
+                 size={TOPBAR_CONTROL_SIZE}
+               />
+             </div>
 
-            {hasActiveFilters && (
-              <Button
-                color="secondary"
-                variant="soft"
-                size="sm"
-                pill
-                onClick={clearAllFilters}
-              >
-                Clear filters
-              </Button>
-            )}
+             {hasActiveFilters && (
+               <Button
+                 color="secondary"
+                 variant="soft"
+                 size={TOPBAR_CONTROL_SIZE}
+                 pill={TOPBAR_TOOLBAR_PILL}
+                 onClick={clearAllFilters}
+               >
+                 Clear filters
+               </Button>
+             )}
           </>
         }
       />
 
-      <div className="flex min-h-0 flex-1 flex-col px-4 pt-4 md:px-6">
+      <div className={TABLE_PAGE_CONTENT}>
         <DataTable
           data={filteredData}
           columns={columns}

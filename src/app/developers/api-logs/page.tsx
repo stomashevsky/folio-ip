@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { TopBar } from "@/components/layout/TopBar";
+import { TopBar, TOPBAR_CONTROL_SIZE, TOPBAR_TOOLBAR_PILL } from "@/components/layout/TopBar";
+import { TABLE_PAGE_WRAPPER, TABLE_PAGE_CONTENT } from "@/lib/constants/page-layout";
 import { DataTable, TableSearch } from "@/components/shared";
 import { ColumnSettings, type ColumnConfig } from "@/components/shared/ColumnSettings";
 import { idCell, dateTimeCell } from "@/lib/utils/columnHelpers";
@@ -302,7 +303,7 @@ export default function ApiLogsPage() {
   }
 
   return (
-    <div className="flex h-full flex-col overflow-hidden">
+    <div className={TABLE_PAGE_WRAPPER}>
       <TopBar
         title="API Logs"
         actions={
@@ -325,14 +326,14 @@ export default function ApiLogsPage() {
                 multiple
                 clearable
                 block
-                pill
+                pill={TOPBAR_TOOLBAR_PILL}
                 listMinWidth={180}
                 options={METHOD_OPTIONS}
                 value={methodFilter}
                 onChange={(opts) => setMethodFilter(opts.map((o) => o.value))}
                 placeholder="Method"
                 variant="outline"
-                size="sm"
+                size={TOPBAR_CONTROL_SIZE}
               />
             </div>
 
@@ -341,14 +342,14 @@ export default function ApiLogsPage() {
                 multiple
                 clearable
                 block
-                pill
+                pill={TOPBAR_TOOLBAR_PILL}
                 listMinWidth={220}
                 options={STATUS_CODE_OPTIONS}
                 value={statusCodeFilter}
                 onChange={(opts) => setStatusCodeFilter(opts.map((o) => o.value))}
                 placeholder="Status Code"
                 variant="outline"
-                size="sm"
+                size={TOPBAR_CONTROL_SIZE}
               />
             </div>
 
@@ -356,8 +357,8 @@ export default function ApiLogsPage() {
               <Button
                 color="secondary"
                 variant="soft"
-                size="sm"
-                pill
+                size={TOPBAR_CONTROL_SIZE}
+                pill={TOPBAR_TOOLBAR_PILL}
                 onClick={clearAllFilters}
               >
                 Clear filters
@@ -367,7 +368,7 @@ export default function ApiLogsPage() {
         }
       />
 
-      <div className="flex min-h-0 flex-1 flex-col px-4 pt-2 md:px-6">
+      <div className={TABLE_PAGE_CONTENT}>
         <DataTable
           data={filteredData}
           columns={columns}

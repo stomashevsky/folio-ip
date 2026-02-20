@@ -1,4 +1,4 @@
-import { TopBar } from "@/components/layout/TopBar";
+import { TopBar, TOPBAR_CONTROL_SIZE, TOPBAR_ACTION_PILL } from "@/components/layout/TopBar";
 import { getStatusColor } from "@/lib/utils/format";
 import type { TemplateStatus } from "@/lib/types";
 import { Badge } from "@plexui/ui/components/Badge";
@@ -71,8 +71,8 @@ export function TemplateDetailTopBar({
                 <Button
                   color="secondary"
                   variant="soft"
-                  size="sm"
-                  pill={false}
+                  size={TOPBAR_CONTROL_SIZE}
+                  pill={TOPBAR_ACTION_PILL}
                 >
                   <DotsHorizontal />
                 </Button>
@@ -94,7 +94,7 @@ export function TemplateDetailTopBar({
               </Menu.Content>
             </Menu>
           )}
-          <Button color="primary" size="sm" pill={false} onClick={onSave}>
+          <Button color="primary" size={TOPBAR_CONTROL_SIZE} pill={TOPBAR_ACTION_PILL} onClick={onSave}>
             Save
           </Button>
         </div>

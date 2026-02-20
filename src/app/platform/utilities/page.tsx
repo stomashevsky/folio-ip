@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { TopBar } from "@/components/layout/TopBar";
+import { TopBar, TOPBAR_CONTROL_SIZE, TOPBAR_TOOLBAR_PILL } from "@/components/layout/TopBar";
 import { TableSearch, InlineEmpty } from "@/components/shared";
 import { Button } from "@plexui/ui/components/Button";
 import { Badge } from "@plexui/ui/components/Badge";
@@ -166,41 +166,41 @@ export default function UtilitiesPage() {
         toolbar={
           <>
             <TableSearch value={search} onChange={setSearch} placeholder="Search utilities..." />
-            <div className="w-40">
-              <Select
-                multiple
-                clearable
-                block
-                pill
-                listMinWidth={180}
-                options={CATEGORY_OPTIONS}
-                value={categoryFilter}
-                onChange={(opts) => setCategoryFilter(opts.map((o) => o.value))}
-                placeholder="Category"
-                variant="outline"
-                size="sm"
-              />
-            </div>
-            <div className="w-36">
-              <Select
-                multiple
-                clearable
-                block
-                pill
-                listMinWidth={160}
-                options={STATUS_OPTIONS}
-                value={statusFilter}
-                onChange={(opts) => setStatusFilter(opts.map((o) => o.value))}
-                placeholder="Status"
-                variant="outline"
-                size="sm"
-              />
-            </div>
-            {hasActiveFilters && (
-              <Button color="secondary" variant="soft" size="sm" pill onClick={clearAllFilters}>
-                Clear filters
-              </Button>
-            )}
+             <div className="w-40">
+               <Select
+                 multiple
+                 clearable
+                 block
+                 pill={TOPBAR_TOOLBAR_PILL}
+                 listMinWidth={180}
+                 options={CATEGORY_OPTIONS}
+                 value={categoryFilter}
+                 onChange={(opts) => setCategoryFilter(opts.map((o) => o.value))}
+                 placeholder="Category"
+                 variant="outline"
+                 size={TOPBAR_CONTROL_SIZE}
+               />
+             </div>
+             <div className="w-36">
+               <Select
+                 multiple
+                 clearable
+                 block
+                 pill={TOPBAR_TOOLBAR_PILL}
+                 listMinWidth={160}
+                 options={STATUS_OPTIONS}
+                 value={statusFilter}
+                 onChange={(opts) => setStatusFilter(opts.map((o) => o.value))}
+                 placeholder="Status"
+                 variant="outline"
+                 size={TOPBAR_CONTROL_SIZE}
+               />
+             </div>
+             {hasActiveFilters && (
+               <Button color="secondary" variant="soft" size={TOPBAR_CONTROL_SIZE} pill={TOPBAR_TOOLBAR_PILL} onClick={clearAllFilters}>
+                 Clear filters
+               </Button>
+             )}
           </>
         }
       />

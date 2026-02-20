@@ -27,6 +27,7 @@
 | `date-shortcuts.ts` | `DASHBOARD_DATE_SHORTCUTS`, `LIST_PAGE_DATE_SHORTCUTS` | Dashboard, list pages |
 | `nav-config.ts` | `globalSections`, `getActiveGlobalSection()`, `isRouteActive()`, `isSectionActive()` | AppSidebar, Navbar, MobileSidebarContent, SidebarSwitch |
 | `mock-user.ts` | `MOCK_USER` (name, email, org, avatarColor) | Navbar, sidebar, settings pages |
+| `page-layout.ts` | `TABLE_PAGE_WRAPPER`, `TABLE_PAGE_CONTENT` | All table/list pages |
 
 ### Shared components (`src/components/shared/`)
 
@@ -269,13 +270,69 @@ SidebarProvider (collapsible="none")
 
 ### Table Page Pattern
 ```tsx
-<div className="flex h-full flex-col overflow-hidden">
-  <TopBar title="Inquiries" actions={...} toolbar={...} />
-  <div className="flex min-h-0 flex-1 flex-col px-4 pt-2 md:px-6">
+import { TopBar, TOPBAR_CONTROL_SIZE, TOPBAR_TOOLBAR_PILL, TOPBAR_ACTION_PILL } from "@/components/layout/TopBar";
+import { TABLE_PAGE_WRAPPER, TABLE_PAGE_CONTENT } from "@/lib/constants/page-layout";
+
+<div className={TABLE_PAGE_WRAPPER}>
+  <TopBar
+    title="Inquiries"
+    actions={
+      <div className="flex items-center gap-2">
+        <ColumnSettings columns={...} visibility={...} onVisibilityChange={...} />
+        <Button color="primary" size={TOPBAR_CONTROL_SIZE} pill={TOPBAR_ACTION_PILL}>
+          <Plus /> Create Inquiry
+        </Button>
+      </div>
+    }
+    toolbar={
+      <>
+        <TableSearch value={search} onChange={setSearch} placeholder="Search..." />
+        <div className="w-36">
+          <Select ... size={TOPBAR_CONTROL_SIZE} pill={TOPBAR_TOOLBAR_PILL} variant="outline" />
+        </div>
+        {hasActiveFilters && (
+          <Button color="secondary" variant="soft" size={TOPBAR_CONTROL_SIZE} pill={TOPBAR_TOOLBAR_PILL} onClick={clearAllFilters}>
+            Clear filters
+          </Button>
+        )}
+      </>
+    }
+  />
+  <div className={TABLE_PAGE_CONTENT}>
     <DataTable data={data} columns={columns} ... />
   </div>
 </div>
 ```
+
+### TopBar Control Placement Rules
+
+**MANDATORY — every table/list page MUST follow these rules:**
+
+1. **`actions` area** (right side of title row) — ColumnSettings button, then CTA buttons (Create X, Export)
+   - `size={TOPBAR_CONTROL_SIZE}`, `pill={TOPBAR_ACTION_PILL}`
+   - ColumnSettings ALWAYS comes first (leftmost), CTA buttons after
+   - Wrap in `<div className="flex items-center gap-2">` when multiple controls
+
+2. **`toolbar` area** (filter row below title) — TableSearch, Select filters, DateRangePicker, Clear Filters
+   - `size={TOPBAR_CONTROL_SIZE}`, `pill={TOPBAR_TOOLBAR_PILL}`
+   - Use fragment `<>...</>` wrapper (TopBar already provides flex + gap)
+   - NEVER wrap toolbar in an extra `<div className="flex items-center gap-2">` (redundant)
+
+3. **NEVER place in wrong area:**
+   - ColumnSettings in `toolbar` ✗ → always in `actions`
+   - CTA buttons (Create X) in `toolbar` ✗ → always in `actions`
+   - Filters in `actions` ✗ → always in `toolbar`
+
+4. **Page content layout classes** — ALWAYS use shared constants:
+   - `TABLE_PAGE_WRAPPER` for outer div (from `@/lib/constants/page-layout`)
+   - `TABLE_PAGE_CONTENT` for content area below TopBar (from `@/lib/constants/page-layout`)
+   - NEVER hardcode padding/layout classes on these divs
+
+5. **TopBar control sizes and pill** — ALWAYS use shared constants:
+   - `TOPBAR_CONTROL_SIZE` for all controls in TopBar (from `@/components/layout/TopBar`)
+   - `TOPBAR_TOOLBAR_PILL` for toolbar controls (from `@/components/layout/TopBar`)
+   - `TOPBAR_ACTION_PILL` for action buttons (from `@/components/layout/TopBar`)
+   - NEVER hardcode `size="sm"`, `size="md"`, `pill`, or `pill={false}` on TopBar controls
 
 ### Settings Form Pattern
 ```tsx

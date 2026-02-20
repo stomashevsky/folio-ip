@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { TopBar } from "@/components/layout/TopBar";
+import { TopBar, TOPBAR_CONTROL_SIZE, TOPBAR_TOOLBAR_PILL } from "@/components/layout/TopBar";
+import { TABLE_PAGE_WRAPPER, TABLE_PAGE_CONTENT } from "@/lib/constants/page-layout";
 import { DataTable, TableSearch } from "@/components/shared";
 import { ColumnSettings, type ColumnConfig } from "@/components/shared/ColumnSettings";
 import type { ColumnDef, VisibilityState } from "@tanstack/react-table";
@@ -208,7 +209,7 @@ export default function ApiRateLimitsPage() {
   }
 
   return (
-    <div className="flex h-full flex-col overflow-hidden">
+    <div className={TABLE_PAGE_WRAPPER}>
       <TopBar
         title="API Rate Limits"
         actions={
@@ -231,14 +232,14 @@ export default function ApiRateLimitsPage() {
                 multiple
                 clearable
                 block
-                pill
+                pill={TOPBAR_TOOLBAR_PILL}
                 listMinWidth={180}
                 options={STATUS_OPTIONS}
                 value={statusFilter}
                 onChange={(opts) => setStatusFilter(opts.map((o) => o.value))}
                 placeholder="Status"
                 variant="outline"
-                size="sm"
+                size={TOPBAR_CONTROL_SIZE}
               />
             </div>
 
@@ -246,8 +247,8 @@ export default function ApiRateLimitsPage() {
               <Button
                 color="secondary"
                 variant="soft"
-                size="sm"
-                pill
+                size={TOPBAR_CONTROL_SIZE}
+                pill={TOPBAR_TOOLBAR_PILL}
                 onClick={clearAllFilters}
               >
                 Clear filters
@@ -257,7 +258,7 @@ export default function ApiRateLimitsPage() {
         }
       />
 
-      <div className="flex min-h-0 flex-1 flex-col px-4 pt-2 md:px-6">
+      <div className={TABLE_PAGE_CONTENT}>
         <DataTable
           data={filteredData}
           columns={columns}

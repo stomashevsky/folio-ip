@@ -3,7 +3,7 @@
 import { Suspense, useRef, useState } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 
-import { TopBar } from "@/components/layout/TopBar";
+import { TopBar, TOPBAR_CONTROL_SIZE, TOPBAR_ACTION_PILL } from "@/components/layout/TopBar";
 import { NotFoundPage, SectionHeading, CountrySelectorModal, ConfirmLeaveModal } from "@/components/shared";
 import { useTemplateForm } from "@/lib/hooks/useTemplateForm";
 import { COUNTRY_LABEL_MAP } from "@/lib/constants/countries";
@@ -210,11 +210,11 @@ function VerificationTemplateDetailContent() {
           <div className="flex items-center gap-2">
             {!isNew && (
               <Menu>
-                <Menu.Trigger>
-                   <Button color="secondary" variant="soft" size="md" pill={false} className="[--button-ring-color:transparent]">
-                     <DotsHorizontal />
-                   </Button>
-                </Menu.Trigger>
+                 <Menu.Trigger>
+                    <Button color="secondary" variant="soft" size={TOPBAR_CONTROL_SIZE} pill={TOPBAR_ACTION_PILL} className="[--button-ring-color:transparent]">
+                      <DotsHorizontal />
+                    </Button>
+                 </Menu.Trigger>
                 <Menu.Content minWidth="auto">
                   {canPublish && (
                     <Menu.Item onSelect={() => save({ ...form, status: "active", lastPublishedAt: new Date().toISOString() })}>Publish</Menu.Item>
@@ -227,7 +227,7 @@ function VerificationTemplateDetailContent() {
                 </Menu.Content>
               </Menu>
             )}
-            <Button color="primary" size="md" pill={false} onClick={() => save()} loading={saveState === "saving"} disabled={!isDirty || saveState !== "idle"}>{saveState === "saved" ? "Saved!" : "Save"}</Button>
+            <Button color="primary" size={TOPBAR_CONTROL_SIZE} pill={TOPBAR_ACTION_PILL} onClick={() => save()} loading={saveState === "saving"} disabled={!isDirty || saveState !== "idle"}>{saveState === "saved" ? "Saved!" : "Save"}</Button>
           </div>
         }
       />

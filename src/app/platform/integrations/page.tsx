@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { TopBar } from "@/components/layout/TopBar";
+import { TopBar, TOPBAR_CONTROL_SIZE, TOPBAR_TOOLBAR_PILL, TOPBAR_ACTION_PILL } from "@/components/layout/TopBar";
+import { TABLE_PAGE_WRAPPER, TABLE_PAGE_CONTENT } from "@/lib/constants/page-layout";
 import { TableSearch, InlineEmpty } from "@/components/shared";
 import { Badge } from "@plexui/ui/components/Badge";
 import { Button } from "@plexui/ui/components/Button";
@@ -160,9 +161,15 @@ export default function IntegrationsPage() {
   }
 
   return (
-    <div className="flex h-full flex-col overflow-auto">
+    <div className={TABLE_PAGE_WRAPPER}>
       <TopBar
         title="Integrations"
+        actions={
+          <Button color="primary" size={TOPBAR_CONTROL_SIZE} pill={TOPBAR_ACTION_PILL}>
+            <Plus className="h-4 w-4" />
+            Add Integration
+          </Button>
+        }
         toolbar={
           <>
             <TableSearch
@@ -170,50 +177,46 @@ export default function IntegrationsPage() {
               onChange={setSearch}
               placeholder="Search integrations..."
             />
-            <div className="w-44">
-              <Select
-                multiple
-                clearable
-                block
-                pill
-                listMinWidth={200}
-                options={CATEGORY_OPTIONS}
-                value={categoryFilter}
-                onChange={(opts) => setCategoryFilter(opts.map((o) => o.value))}
-                placeholder="Category"
-                variant="outline"
-                size="sm"
-              />
-            </div>
-            <div className="w-40">
-              <Select
-                multiple
-                clearable
-                block
-                pill
-                listMinWidth={180}
-                options={STATUS_OPTIONS}
-                value={statusFilter}
-                onChange={(opts) => setStatusFilter(opts.map((o) => o.value))}
-                placeholder="Status"
-                variant="outline"
-                size="sm"
-              />
-            </div>
-            {hasActiveFilters && (
-              <Button color="secondary" variant="soft" size="sm" pill onClick={clearAllFilters}>
-                Clear filters
-              </Button>
-            )}
-            <Button color="info" size="sm" pill>
-              <Plus className="h-4 w-4" />
-              Add Integration
-            </Button>
+             <div className="w-44">
+               <Select
+                 multiple
+                 clearable
+                 block
+                 pill={TOPBAR_TOOLBAR_PILL}
+                 listMinWidth={200}
+                 options={CATEGORY_OPTIONS}
+                 value={categoryFilter}
+                 onChange={(opts) => setCategoryFilter(opts.map((o) => o.value))}
+                 placeholder="Category"
+                 variant="outline"
+                 size={TOPBAR_CONTROL_SIZE}
+               />
+             </div>
+             <div className="w-40">
+               <Select
+                 multiple
+                 clearable
+                 block
+                 pill={TOPBAR_TOOLBAR_PILL}
+                 listMinWidth={180}
+                 options={STATUS_OPTIONS}
+                 value={statusFilter}
+                 onChange={(opts) => setStatusFilter(opts.map((o) => o.value))}
+                 placeholder="Status"
+                 variant="outline"
+                 size={TOPBAR_CONTROL_SIZE}
+               />
+             </div>
+             {hasActiveFilters && (
+               <Button color="secondary" variant="soft" size={TOPBAR_CONTROL_SIZE} pill={TOPBAR_TOOLBAR_PILL} onClick={clearAllFilters}>
+                 Clear filters
+               </Button>
+             )}
           </>
         }
       />
 
-      <div className="flex-1 overflow-auto px-4 py-8 md:px-6">
+      <div className={TABLE_PAGE_CONTENT}>
         {filteredData.length === 0 ? (
           <InlineEmpty>{`No integrations match your filters.`}</InlineEmpty>
         ) : (

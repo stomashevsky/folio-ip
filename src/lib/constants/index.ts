@@ -121,3 +121,4 @@ export { REPORT_TYPE_LABELS } from "./report-type-labels";
 export { STATUS_COLORS } from "./status-colors";
 export { VERIFICATION_TYPE_LABELS } from "./verification-type-labels";
 export { BREAKPOINT_MD } from "./breakpoints";
+export { TABLE_PAGE_WRAPPER, TABLE_PAGE_CONTENT } from "./page-layout";

@@ -1,5 +1,13 @@
 import { ChevronRightLg, ChevronRightSm } from "@plexui/ui/components/Icon";
 import Link from "next/link";
+import type { ControlSize } from "@plexui/ui/types";
+
+export const TOPBAR_CONTROL_SIZE: ControlSize = "sm";
+
+/** Toolbar controls (Select filters, DateRangePicker, Clear Filters, TableSearch) use pill shape */
+export const TOPBAR_TOOLBAR_PILL = true;
+/** Action buttons (Create X, Export, Save, etc.) use squared shape */
+export const TOPBAR_ACTION_PILL = false;
 
 export interface BreadcrumbItem {
   label: string;

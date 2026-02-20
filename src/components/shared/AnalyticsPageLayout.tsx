@@ -2,7 +2,7 @@
 
 import React, { useState, useMemo, useCallback, type ReactNode } from "react";
 import { DateTime } from "luxon";
-import { TopBar } from "@/components/layout/TopBar";
+import { TopBar, TOPBAR_CONTROL_SIZE, TOPBAR_ACTION_PILL } from "@/components/layout/TopBar";
 import { ChartCard, MetricCard } from "@/components/shared";
 import { SimpleBarChart } from "@/components/charts/SimpleBarChart";
 import { DASHBOARD_DATE_SHORTCUTS, type DateRange } from "@/lib/constants/date-shortcuts";
@@ -72,8 +72,8 @@ export function AnalyticsPageLayout({
             value={dateRange}
             onChange={handleRangeChange}
             shortcuts={DASHBOARD_DATE_SHORTCUTS}
-            size="md"
-            pill={false}
+            size={TOPBAR_CONTROL_SIZE}
+            pill={TOPBAR_ACTION_PILL}
             max={DateTime.local().endOf("day")}
             triggerDateFormat="MM/dd/yy"
           />

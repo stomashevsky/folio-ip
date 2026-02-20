@@ -3,7 +3,7 @@
 import React, { Suspense, useState, useMemo, useCallback } from "react";
 import { useTabParam } from "@/lib/hooks/useTabParam";
 import { DateTime } from "luxon";
-import { TopBar } from "@/components/layout/TopBar";
+import { TopBar, TOPBAR_CONTROL_SIZE, TOPBAR_TOOLBAR_PILL } from "@/components/layout/TopBar";
 import { ChartCard, MetricCard } from "@/components/shared";
 import { SimpleBarChart } from "@/components/charts/SimpleBarChart";
 import { RatesLineChart } from "@/components/charts/RatesLineChart";
@@ -106,8 +106,8 @@ function InquiryAnalyticsContent() {
               aria-label="Analytics views"
               value={activeTab}
               onChange={(v) => setActiveTab(v as Tab)}
-              size="sm"
-              pill={false}
+              size={TOPBAR_CONTROL_SIZE}
+              pill={TOPBAR_TOOLBAR_PILL}
             >
               <SegmentedControl.Tab value="Overview">Overview</SegmentedControl.Tab>
               <SegmentedControl.Tab value="Funnel">Conversion Funnel</SegmentedControl.Tab>
@@ -116,8 +116,8 @@ function InquiryAnalyticsContent() {
               value={dateRange}
               onChange={handleRangeChange}
               shortcuts={DASHBOARD_DATE_SHORTCUTS}
-              size="sm"
-              pill={false}
+              size={TOPBAR_CONTROL_SIZE}
+              pill={TOPBAR_TOOLBAR_PILL}
               max={DateTime.local().endOf("day")}
               triggerDateFormat="MM/dd/yy"
             />

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { TopBar } from "@/components/layout/TopBar";
+import { TopBar, TOPBAR_CONTROL_SIZE, TOPBAR_ACTION_PILL } from "@/components/layout/TopBar";
 import {
   ConfirmDeleteModal,
   Modal,
@@ -154,7 +154,7 @@ export default function WebhooksPage() {
       <TopBar
         title="Webhooks"
         actions={
-          <Button color="primary" pill={false} size="md" onClick={openAdd}>
+          <Button color="primary" pill={TOPBAR_ACTION_PILL} size={TOPBAR_CONTROL_SIZE} onClick={openAdd}>
             <Plus />
             Add endpoint
           </Button>

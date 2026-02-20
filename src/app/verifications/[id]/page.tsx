@@ -10,7 +10,7 @@ import { DotsHorizontal, Plus, Search } from "@plexui/ui/components/Icon";
 import { Menu } from "@plexui/ui/components/Menu";
 import { Input } from "@plexui/ui/components/Input";
 import { Select } from "@plexui/ui/components/Select";
-import { TopBar } from "@/components/layout/TopBar";
+import { TopBar, TOPBAR_CONTROL_SIZE, TOPBAR_ACTION_PILL } from "@/components/layout/TopBar";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import {
   NotFoundPage,
@@ -107,7 +107,7 @@ function VerificationDetailContent() {
           <div className="flex items-center gap-2">
           <Menu>
             <Menu.Trigger>
-              <Button color="secondary" variant="soft" size="md" pill={false}>
+              <Button color="secondary" variant="soft" size={TOPBAR_CONTROL_SIZE} pill={TOPBAR_ACTION_PILL}>
                 <DotsHorizontal />
               </Button>
             </Menu.Trigger>

@@ -7,6 +7,7 @@ import { Switch } from "@plexui/ui/components/Switch";
 import { Input } from "@plexui/ui/components/Input";
 import { Button } from "@plexui/ui/components/Button";
 import { SettingsSlider, Search } from "@plexui/ui/components/Icon";
+import { TOPBAR_CONTROL_SIZE, TOPBAR_ACTION_PILL } from "@/components/layout/TopBar";
 import type { ControlSize } from "@plexui/ui/types";
 
 export interface ColumnConfig {
@@ -25,7 +26,7 @@ export function ColumnSettings({
   columns,
   visibility,
   onVisibilityChange,
-  size = "md",
+  size = TOPBAR_CONTROL_SIZE,
 }: ColumnSettingsProps) {
   const [search, setSearch] = useState("");
 
@@ -50,7 +51,7 @@ export function ColumnSettings({
           color="secondary"
           variant="outline"
           size={size}
-          pill={false}
+          pill={TOPBAR_ACTION_PILL}
         >
           <SettingsSlider />
           <span className="hidden md:inline">Columns</span>

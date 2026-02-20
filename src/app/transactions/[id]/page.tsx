@@ -1,6 +1,6 @@
 "use client";
 
-import { TopBar } from "@/components/layout/TopBar";
+import { TopBar, TOPBAR_CONTROL_SIZE, TOPBAR_ACTION_PILL } from "@/components/layout/TopBar";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import { NotFoundPage, TagEditModal, InfoRow, DetailPageSidebar } from "@/components/shared";
 import { mockTransactions } from "@/lib/data";
@@ -55,7 +55,7 @@ function TransactionDetailContent() {
           <div className="flex items-center gap-2">
             <Menu>
               <Menu.Trigger>
-                <Button color="secondary" variant="soft" size="md" pill={false}>
+                <Button color="secondary" variant="soft" size={TOPBAR_CONTROL_SIZE} pill={TOPBAR_ACTION_PILL}>
                   <DotsHorizontal />
                 </Button>
               </Menu.Trigger>
@@ -67,7 +67,7 @@ function TransactionDetailContent() {
                 <Menu.Item onSelect={() => {}} className="text-[var(--color-text-danger-ghost)]">Delete</Menu.Item>
               </Menu.Content>
             </Menu>
-            <Button color="primary" size="md" pill={false}>Review</Button>
+            <Button color="primary" size={TOPBAR_CONTROL_SIZE} pill={TOPBAR_ACTION_PILL}>Review</Button>
           </div>
         }
       />

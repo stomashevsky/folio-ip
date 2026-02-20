@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { TopBar } from "@/components/layout/TopBar";
+import { TopBar, TOPBAR_CONTROL_SIZE, TOPBAR_TOOLBAR_PILL, TOPBAR_ACTION_PILL } from "@/components/layout/TopBar";
+import { TABLE_PAGE_WRAPPER, TABLE_PAGE_CONTENT } from "@/lib/constants/page-layout";
 import { DataTable, TableSearch } from "@/components/shared";
 import { ColumnSettings, type ColumnConfig } from "@/components/shared/ColumnSettings";
 import { dateTimeCell } from "@/lib/utils/columnHelpers";
@@ -192,28 +193,29 @@ export default function UtilityTagsPage() {
   }, [search, createdByFilter]);
 
   return (
-    <div className="flex h-full flex-col overflow-hidden">
+    <div className={TABLE_PAGE_WRAPPER}>
       <TopBar
         title="Tags"
         actions={
-          <ColumnSettings
-            columns={COLUMN_CONFIG}
-            visibility={columnVisibility}
-            onVisibilityChange={setColumnVisibility}
-          />
-        }
-        toolbar={
-          <>
+          <div className="flex items-center gap-2">
+            <ColumnSettings
+              columns={COLUMN_CONFIG}
+              visibility={columnVisibility}
+              onVisibilityChange={setColumnVisibility}
+            />
             <Button
               color="primary"
-              size="md"
-              pill={false}
+              size={TOPBAR_CONTROL_SIZE}
+              pill={TOPBAR_ACTION_PILL}
               onClick={() => {}}
             >
               <Plus />
               <span className="hidden md:inline">Create Tag</span>
             </Button>
-
+          </div>
+        }
+        toolbar={
+          <>
             <TableSearch
               value={search}
               onChange={setSearch}
@@ -224,21 +226,21 @@ export default function UtilityTagsPage() {
                 multiple
                 clearable
                 block
-                pill
+                pill={TOPBAR_TOOLBAR_PILL}
                 listMinWidth={200}
                 options={CREATED_BY_OPTIONS}
                 value={createdByFilter}
                 onChange={(opts) => setCreatedByFilter(opts.map((o) => o.value))}
                 placeholder="Created By"
                 variant="outline"
-                size="sm"
+                size={TOPBAR_CONTROL_SIZE}
               />
             </div>
           </>
         }
       />
 
-      <div className="flex min-h-0 flex-1 flex-col px-4 pt-2 md:px-6">
+      <div className={TABLE_PAGE_CONTENT}>
         <DataTable
           data={filteredData}
           columns={columns}

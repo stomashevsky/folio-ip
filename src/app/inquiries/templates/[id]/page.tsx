@@ -3,7 +3,7 @@
 import { Suspense, useRef, useState } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 
-import { TopBar } from "@/components/layout/TopBar";
+import { TopBar, TOPBAR_CONTROL_SIZE, TOPBAR_ACTION_PILL } from "@/components/layout/TopBar";
 import { NotFoundPage, ConfirmLeaveModal } from "@/components/shared";
 import { FlowEditor, type FlowEditorPanel } from "@/components/flow/FlowEditor";
 import { SegmentedControl } from "@plexui/ui/components/SegmentedControl";
@@ -189,8 +189,8 @@ function InquiryTemplateDetailContent() {
               <Button
                 color="secondary"
                 variant="soft"
-                size="md"
-                pill={false}
+                size={TOPBAR_CONTROL_SIZE}
+                pill={TOPBAR_ACTION_PILL}
                 disabled={!codeHistoryState.canUndo}
                 onClick={() => codeHistoryActions?.undo()}
                 className="[--button-ring-color:transparent]"
@@ -200,8 +200,8 @@ function InquiryTemplateDetailContent() {
               <Button
                 color="secondary"
                 variant="soft"
-                size="md"
-                pill={false}
+                size={TOPBAR_CONTROL_SIZE}
+                pill={TOPBAR_ACTION_PILL}
                 disabled={!codeHistoryState.canRedo}
                 onClick={() => codeHistoryActions?.redo()}
                 className="[--button-ring-color:transparent]"
@@ -211,7 +211,7 @@ function InquiryTemplateDetailContent() {
               {!isNew && (
                 <Menu>
                   <Menu.Trigger>
-                    <Button color="secondary" variant="soft" size="md" pill={false} className="[--button-ring-color:transparent]">
+                    <Button color="secondary" variant="soft" size={TOPBAR_CONTROL_SIZE} pill={TOPBAR_ACTION_PILL} className="[--button-ring-color:transparent]">
                       <DotsHorizontal />
                     </Button>
                   </Menu.Trigger>
@@ -233,8 +233,8 @@ function InquiryTemplateDetailContent() {
               )}
               <Button
                 color="primary"
-                size="md"
-                pill={false}
+                size={TOPBAR_CONTROL_SIZE}
+                pill={TOPBAR_ACTION_PILL}
                 onClick={() => save()}
                 loading={saveState === "saving"}
                 disabled={!isDirty || saveState !== "idle"}

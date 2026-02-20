@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { TopBar } from "@/components/layout/TopBar";
+import { TopBar, TOPBAR_CONTROL_SIZE, TOPBAR_TOOLBAR_PILL, TOPBAR_ACTION_PILL } from "@/components/layout/TopBar";
+import { TABLE_PAGE_WRAPPER, TABLE_PAGE_CONTENT } from "@/lib/constants/page-layout";
 import { DataTable, TableSearch } from "@/components/shared";
 import { ColumnSettings, type ColumnConfig } from "@/components/shared/ColumnSettings";
 import { mockReports } from "@/lib/data";
@@ -177,7 +178,7 @@ export default function ReportsPage() {
   }
 
   return (
-    <div className="flex h-full flex-col overflow-hidden">
+    <div className={TABLE_PAGE_WRAPPER}>
       <TopBar
         title="Reports"
         actions={
@@ -190,13 +191,13 @@ export default function ReportsPage() {
             <Button
               color="secondary"
               variant="outline"
-              size="md"
-              pill={false}
+              size={TOPBAR_CONTROL_SIZE}
+              pill={TOPBAR_ACTION_PILL}
             >
               <Download />
               <span className="hidden md:inline">Export</span>
             </Button>
-            <Button color="primary" size="md" pill={false}>
+            <Button color="primary" size={TOPBAR_CONTROL_SIZE} pill={TOPBAR_ACTION_PILL}>
               <Plus />
               <span className="hidden md:inline">Create Report</span>
             </Button>
@@ -216,14 +217,14 @@ export default function ReportsPage() {
                 multiple
                 clearable
                 block
-                pill
+                pill={TOPBAR_TOOLBAR_PILL}
                 listMinWidth={180}
                 options={STATUS_OPTIONS}
                 value={statusFilter}
                 onChange={(opts) => setStatusFilter(opts.map((o) => o.value))}
                 placeholder="Status"
                 variant="outline"
-                size="sm"
+                size={TOPBAR_CONTROL_SIZE}
               />
             </div>
 
@@ -233,14 +234,14 @@ export default function ReportsPage() {
                 multiple
                 clearable
                 block
-                pill
+                pill={TOPBAR_TOOLBAR_PILL}
                 listMinWidth={260}
                 options={TYPE_OPTIONS}
                 value={typeFilter}
                 onChange={(opts) => setTypeFilter(opts.map((o) => o.value))}
                 placeholder="Type"
                 variant="outline"
-                size="sm"
+                size={TOPBAR_CONTROL_SIZE}
               />
             </div>
 
@@ -252,8 +253,8 @@ export default function ReportsPage() {
               shortcuts={LIST_PAGE_DATE_SHORTCUTS}
               placeholder="Created at"
               variant="outline"
-              size="sm"
-              pill
+              size={TOPBAR_CONTROL_SIZE}
+              pill={TOPBAR_TOOLBAR_PILL}
             />
 
             {/* ── Dynamic filters for toggled columns ── */}
@@ -265,8 +266,8 @@ export default function ReportsPage() {
                 shortcuts={LIST_PAGE_DATE_SHORTCUTS}
                 placeholder="Completed at"
                 variant="outline"
-                size="sm"
-                pill
+                size={TOPBAR_CONTROL_SIZE}
+                pill={TOPBAR_TOOLBAR_PILL}
               />
             )}
 
@@ -276,14 +277,14 @@ export default function ReportsPage() {
                   multiple
                   clearable
                   block
-                  pill
+                  pill={TOPBAR_TOOLBAR_PILL}
                   listMinWidth={160}
                   options={CREATED_BY_OPTIONS}
                   value={createdByFilter}
                   onChange={(opts) => setCreatedByFilter(opts.map((o) => o.value))}
                   placeholder="Created by"
                   variant="outline"
-                  size="sm"
+                  size={TOPBAR_CONTROL_SIZE}
                 />
               </div>
             )}
@@ -293,8 +294,8 @@ export default function ReportsPage() {
               <Button
                 color="secondary"
                 variant="soft"
-                size="sm"
-                pill
+                size={TOPBAR_CONTROL_SIZE}
+                pill={TOPBAR_TOOLBAR_PILL}
                 onClick={clearAllFilters}
               >
                 Clear filters
@@ -304,7 +305,7 @@ export default function ReportsPage() {
         }
       />
 
-      <div className="flex min-h-0 flex-1 flex-col px-4 pt-4 md:px-6">
+      <div className={TABLE_PAGE_CONTENT}>
         <DataTable
           data={filteredData}
           columns={columns}

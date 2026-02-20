@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { TopBar } from "@/components/layout/TopBar";
+import { TopBar, TOPBAR_CONTROL_SIZE, TOPBAR_TOOLBAR_PILL } from "@/components/layout/TopBar";
+import { TABLE_PAGE_WRAPPER, TABLE_PAGE_CONTENT } from "@/lib/constants/page-layout";
 import { DataTable, TableSearch } from "@/components/shared";
 import { ColumnSettings, type ColumnConfig } from "@/components/shared/ColumnSettings";
 import { idCell, dateTimeCell } from "@/lib/utils/columnHelpers";
@@ -264,7 +265,7 @@ export default function EventsPage() {
   }
 
   return (
-    <div className="flex h-full flex-col overflow-hidden">
+    <div className={TABLE_PAGE_WRAPPER}>
       <TopBar
         title="Events"
         actions={
@@ -287,14 +288,14 @@ export default function EventsPage() {
                 multiple
                 clearable
                 block
-                pill
+                pill={TOPBAR_TOOLBAR_PILL}
                 listMinWidth={200}
                 options={RESOURCE_TYPE_OPTIONS}
                 value={resourceTypeFilter}
                 onChange={(opts) => setResourceTypeFilter(opts.map((o) => o.value))}
                 placeholder="Resource Type"
                 variant="outline"
-                size="sm"
+                size={TOPBAR_CONTROL_SIZE}
               />
             </div>
 
@@ -303,14 +304,14 @@ export default function EventsPage() {
                 multiple
                 clearable
                 block
-                pill
+                pill={TOPBAR_TOOLBAR_PILL}
                 listMinWidth={180}
                 options={ACTOR_TYPE_OPTIONS}
                 value={actorTypeFilter}
                 onChange={(opts) => setActorTypeFilter(opts.map((o) => o.value))}
                 placeholder="Actor Type"
                 variant="outline"
-                size="sm"
+                size={TOPBAR_CONTROL_SIZE}
               />
             </div>
 
@@ -318,8 +319,8 @@ export default function EventsPage() {
               <Button
                 color="secondary"
                 variant="soft"
-                size="sm"
-                pill
+                size={TOPBAR_CONTROL_SIZE}
+                pill={TOPBAR_TOOLBAR_PILL}
                 onClick={clearAllFilters}
               >
                 Clear filters
@@ -329,7 +330,7 @@ export default function EventsPage() {
         }
       />
 
-      <div className="flex min-h-0 flex-1 flex-col px-4 pt-2 md:px-6">
+      <div className={TABLE_PAGE_CONTENT}>
         <DataTable
           data={filteredData}
           columns={columns}

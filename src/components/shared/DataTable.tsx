@@ -25,6 +25,7 @@ import {
   Sort,
   Search,
 } from "@plexui/ui/components/Icon";
+import { TOPBAR_CONTROL_SIZE, TOPBAR_TOOLBAR_PILL } from "@/components/layout/TopBar";
 
 const PAGE_SIZE_OPTIONS = [
   { value: "10", label: "10" },
@@ -55,8 +56,8 @@ export function TableSearch({
         onChange={(e) => onChange(e.target.value)}
         onClear={value ? () => onChange("") : undefined}
         startAdornment={<Search style={{ width: 16, height: 16 }} />}
-        size="sm"
-        pill
+        size={TOPBAR_CONTROL_SIZE}
+        pill={TOPBAR_TOOLBAR_PILL}
       />
     </div>
   );
@@ -146,7 +147,7 @@ export function DataTable<T>({
                   <th
                     key={header.id}
                     style={header.getSize() !== 150 ? { minWidth: header.getSize(), width: header.getSize() } : undefined}
-                    className="py-1.5 pr-2 text-left text-xs font-semibold uppercase tracking-[0.5px] text-[var(--color-text)]"
+                    className="whitespace-nowrap py-1.5 pr-2 text-left text-xs font-semibold uppercase tracking-[0.5px] text-[var(--color-text)]"
                   >
                     {header.isPlaceholder ? null : (
                       <div

@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { TopBar } from "@/components/layout/TopBar";
+import { TopBar, TOPBAR_CONTROL_SIZE, TOPBAR_TOOLBAR_PILL } from "@/components/layout/TopBar";
+import { TABLE_PAGE_WRAPPER, TABLE_PAGE_CONTENT } from "@/lib/constants/page-layout";
 import { DataTable, TableSearch, ColumnSettings } from "@/components/shared";
 import type { ColumnConfig } from "@/components/shared/ColumnSettings";
 import { dateTimeCell } from "@/lib/utils/columnHelpers";
@@ -209,7 +210,7 @@ export default function TransactionTypesPage() {
   }, [search, riskFilter]);
 
   return (
-    <div className="flex h-full flex-col overflow-hidden">
+    <div className={TABLE_PAGE_WRAPPER}>
       <TopBar
         title="Transaction Types"
         actions={
@@ -229,17 +230,17 @@ export default function TransactionTypesPage() {
               placeholder="Search types..."
             />
             <div className="w-36">
-              <Select multiple clearable block pill listMinWidth={180} options={RISK_LEVEL_OPTIONS} value={riskFilter} onChange={(opts) => setRiskFilter(opts.map((o) => o.value))} placeholder="Risk Level" variant="outline" size="sm" />
+              <Select multiple clearable block pill={TOPBAR_TOOLBAR_PILL} listMinWidth={180} options={RISK_LEVEL_OPTIONS} value={riskFilter} onChange={(opts) => setRiskFilter(opts.map((o) => o.value))} placeholder="Risk Level" variant="outline" size={TOPBAR_CONTROL_SIZE} />
             </div>
             {hasActiveFilters && (
-              <Button color="secondary" variant="soft" size="sm" pill onClick={clearAllFilters}>
+              <Button color="secondary" variant="soft" size={TOPBAR_CONTROL_SIZE} pill={TOPBAR_TOOLBAR_PILL} onClick={clearAllFilters}>
                 Clear filters
               </Button>
             )}
             <Button
               color="primary"
-              size="sm"
-              pill
+              size={TOPBAR_CONTROL_SIZE}
+              pill={TOPBAR_TOOLBAR_PILL}
             >
               <Plus />
               <span className="hidden md:inline">Create Type</span>
@@ -248,7 +249,7 @@ export default function TransactionTypesPage() {
         }
       />
 
-      <div className="flex min-h-0 flex-1 flex-col px-4 pt-4 md:px-6">
+      <div className={TABLE_PAGE_CONTENT}>
         <DataTable
           data={filteredData}
           columns={columns}
