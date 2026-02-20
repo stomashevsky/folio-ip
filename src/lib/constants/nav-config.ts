@@ -15,7 +15,6 @@ export type NavGroup = {
 export type GlobalSectionId =
   | "identity"
   | "platform"
-  | "developers"
   | "settings";
 
 export type GlobalSection = {
@@ -127,31 +126,7 @@ const platformSidebarGroups: NavGroup[] = [
 ];
 
 // ---------------------------------------------------------------------------
-// Developers section
-// ---------------------------------------------------------------------------
-
-const developersSidebarGroups: NavGroup[] = [
-  {
-    label: "API",
-    items: [
-      { title: "API Keys", href: "/developers/api-keys" },
-      { title: "API Logs", href: "/developers/api-logs" },
-      { title: "Analytics", href: "/developers/api-analytics" },
-      { title: "Rate Limits", href: "/developers/api-rate-limits" },
-    ],
-  },
-  {
-    label: "Webhooks & Events",
-    items: [
-      { title: "Webhooks", href: "/developers/webhooks" },
-      { title: "Webhook Events", href: "/developers/webhook-events" },
-      { title: "Events", href: "/developers/events" },
-    ],
-  },
-];
-
-// ---------------------------------------------------------------------------
-// Settings section (maps to Persona's "Admin")
+// Settings section (merged with Developers)
 // ---------------------------------------------------------------------------
 
 const settingsSidebarGroups: NavGroup[] = [
@@ -173,6 +148,23 @@ const settingsSidebarGroups: NavGroup[] = [
       { title: "Billing", href: "/settings/billing" },
       { title: "Domain Manager", href: "/settings/domain-manager" },
       { title: "SMTP Test", href: "/settings/smtp-test" },
+    ],
+  },
+  {
+    label: "API",
+    items: [
+      { title: "API Keys", href: "/settings/api-keys" },
+      { title: "API Logs", href: "/settings/api-logs" },
+      { title: "Analytics", href: "/settings/api-analytics" },
+      { title: "Rate Limits", href: "/settings/api-rate-limits" },
+    ],
+  },
+  {
+    label: "Webhooks & Events",
+    items: [
+      { title: "Webhooks", href: "/settings/webhooks" },
+      { title: "Webhook Events", href: "/settings/webhook-events" },
+      { title: "Events", href: "/settings/events" },
     ],
   },
   {
@@ -213,13 +205,6 @@ export const globalSections: GlobalSection[] = [
     href: "/platform/cases",
     sidebarGroups: platformSidebarGroups,
     prefixes: ["/platform"],
-  },
-  {
-    id: "developers",
-    label: "Developers",
-    href: "/developers/api-keys",
-    sidebarGroups: developersSidebarGroups,
-    prefixes: ["/developers"],
   },
   {
     id: "settings",

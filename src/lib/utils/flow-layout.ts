@@ -3,7 +3,7 @@ import { Position, type Edge, type Node } from "@xyflow/react";
 
 const elk = new ELK();
 
-const NODE_WIDTH = 200;
+const NODE_WIDTH = 250;
 const NODE_HEIGHT = 44;
 
 const DEFAULT_LAYOUT_OPTIONS: Record<string, string> = {

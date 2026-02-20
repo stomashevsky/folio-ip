@@ -34,7 +34,7 @@ export function VerificationNode({ data }: NodeProps<VerificationFlowNode>) {
   const showRetryBadge = typeof data.maxRetries === "number" && Number.isFinite(data.maxRetries);
 
   return (
-    <div className="flex h-11 w-[200px] items-center gap-2.5 rounded-xl border border-[var(--color-border-secondary-soft-alt)] bg-[var(--color-background-secondary-soft)] px-3.5">
+    <div className="flex h-11 w-[250px] items-center gap-2.5 rounded-xl border border-[var(--color-border-secondary-soft-alt)] bg-[var(--color-background-secondary-soft)] px-3.5">
       <Handle type="target" position={Position.Top} id="target" />
       <span className="min-w-0 flex-1 truncate text-sm font-medium text-[var(--color-text-secondary-soft)]">{config.label}</span>
       {showRetryBadge && (

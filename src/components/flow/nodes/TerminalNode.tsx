@@ -47,7 +47,7 @@ export function TerminalNode({ data }: NodeProps<TerminalFlowNode>) {
 
   return (
     <div
-      className="flex h-11 w-[200px] items-center gap-2.5 rounded-xl border px-3.5"
+      className="flex h-11 w-[250px] items-center gap-2.5 rounded-xl border px-3.5"
       style={{ background: config.bg, borderColor: config.border }}
     >
       <Handle type="target" position={Position.Top} id="target" />

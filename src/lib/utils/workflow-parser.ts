@@ -66,11 +66,16 @@ function parseRoute(value: unknown, path: string): WorkflowFlowRoute {
   if (!isRecord(value)) {
     throw new Error(`${path} must be an object`);
   }
-  return {
+  const route: WorkflowFlowRoute = {
     label: parseRequiredString(value.label, `${path}.label`),
     when: parseRequiredString(value.when, `${path}.when`),
     goto: parseRequiredString(value.goto, `${path}.goto`),
   };
+  const color = parseOptionalString(value.color, `${path}.color`);
+  if (color === "success" || color === "danger" || color === "caution" || color === "primary") {
+    route.color = color;
+  }
+  return route;
 }
 
 function parseActionStep(stepId: string, raw: Record<string, unknown>): WorkflowFlowActionStep {

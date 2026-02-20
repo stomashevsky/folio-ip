@@ -3,7 +3,7 @@
 import { useState, useMemo } from "react";
 import { TopBar, TOPBAR_CONTROL_SIZE, TOPBAR_TOOLBAR_PILL, TOPBAR_ACTION_PILL } from "@/components/layout/TopBar";
 import { TABLE_PAGE_WRAPPER, TABLE_PAGE_CONTENT } from "@/lib/constants/page-layout";
-import { DataTable, TableSearch } from "@/components/shared";
+import { DataTable, TableSearch, SavedViewsControl } from "@/components/shared";
 import { ColumnSettings, type ColumnConfig } from "@/components/shared/ColumnSettings";
 import { mockReports } from "@/lib/data";
 import { idCell, dateTimeCell, statusCell } from "@/lib/utils/columnHelpers";
@@ -147,7 +147,6 @@ export default function ReportsPage() {
   const [completedRange, setCompletedRange] = useState<DateRange | null>(null);
   const [columnVisibility, setColumnVisibility] =
     useState<VisibilityState>(DEFAULT_VISIBILITY);
-
   const hasActiveFilters =
     statusFilter.length > 0 ||
     typeFilter.length > 0 ||
@@ -183,6 +182,27 @@ export default function ReportsPage() {
         title="Reports"
         actions={
           <div className="flex items-center gap-2">
+            <SavedViewsControl
+              entityType="reports"
+              currentState={{
+                filters: {
+                  status: statusFilter,
+                  type: typeFilter,
+                  createdBy: createdByFilter,
+                },
+                columnVisibility,
+              }}
+              onLoadView={(state) => {
+                setStatusFilter(state.filters.status ?? []);
+                setTypeFilter(state.filters.type ?? []);
+                setCreatedByFilter(state.filters.createdBy ?? []);
+                setColumnVisibility(state.columnVisibility);
+              }}
+              onClearView={() => {
+                clearAllFilters();
+                setColumnVisibility(DEFAULT_VISIBILITY);
+              }}
+            />
             <ColumnSettings
               columns={COLUMN_CONFIG}
               visibility={columnVisibility}

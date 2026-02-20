@@ -36,7 +36,7 @@ const steps: SetupStep[] = [
   {
     title: "Integrate the API",
     description: "Connect your application using API keys",
-    href: "/developers/api-keys",
+    href: "/settings/api-keys",
   },
   {
     title: "Set up continuous monitoring",

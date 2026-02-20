@@ -3,7 +3,7 @@
 import { useState, useMemo } from "react";
 import { TopBar, TOPBAR_CONTROL_SIZE, TOPBAR_TOOLBAR_PILL, TOPBAR_ACTION_PILL } from "@/components/layout/TopBar";
 import { TABLE_PAGE_WRAPPER, TABLE_PAGE_CONTENT } from "@/lib/constants/page-layout";
-import { DataTable, TableSearch } from "@/components/shared";
+import { DataTable, TableSearch, SavedViewsControl } from "@/components/shared";
 import { ColumnSettings, type ColumnConfig } from "@/components/shared/ColumnSettings";
 import { mockAccounts } from "@/lib/data";
 import { idCell, dateTimeCell, statusCell } from "@/lib/utils/columnHelpers";
@@ -127,7 +127,6 @@ export default function AccountsPage() {
   const [updatedRange, setUpdatedRange] = useState<DateRange | null>(null);
   const [columnVisibility, setColumnVisibility] =
     useState<VisibilityState>(DEFAULT_VISIBILITY);
-
   const hasActiveFilters =
     statusFilter.length > 0 ||
     !!dateRange ||
@@ -157,6 +156,21 @@ export default function AccountsPage() {
         title="Accounts"
         actions={
           <div className="flex items-center gap-2">
+            <SavedViewsControl
+              entityType="accounts"
+              currentState={{
+                filters: { status: statusFilter },
+                columnVisibility,
+              }}
+              onLoadView={(state) => {
+                setStatusFilter(state.filters.status ?? []);
+                setColumnVisibility(state.columnVisibility);
+              }}
+              onClearView={() => {
+                clearAllFilters();
+                setColumnVisibility(DEFAULT_VISIBILITY);
+              }}
+            />
             <ColumnSettings
               columns={COLUMN_CONFIG}
               visibility={columnVisibility}

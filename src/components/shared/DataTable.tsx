@@ -10,9 +10,11 @@ import {
   type ColumnDef,
   type SortingState,
   type VisibilityState,
+  type RowSelectionState,
 } from "@tanstack/react-table";
 import { useState, useMemo } from "react";
 import { useIsMobile } from "@/lib/hooks/useIsMobile";
+import { Checkbox } from "@plexui/ui/components/Checkbox";
 
 import { Button } from "@plexui/ui/components/Button";
 import { Input } from "@plexui/ui/components/Input";
@@ -82,6 +84,14 @@ interface DataTableProps<T> {
   mobileColumnVisibility?: VisibilityState;
   /** Text shown when the table is empty (default: "No results found.") */
   emptyMessage?: string;
+  /** Enable row selection checkboxes */
+  enableRowSelection?: boolean;
+  /** Controlled selection state */
+  rowSelection?: RowSelectionState;
+  /** Callback when selection changes */
+  onRowSelectionChange?: (selection: RowSelectionState) => void;
+  /** Function to get a unique ID for each row */
+  getRowId?: (row: T) => string;
 }
 
 export function DataTable<T>({
@@ -95,24 +105,50 @@ export function DataTable<T>({
   onColumnVisibilityChange,
   mobileColumnVisibility,
   emptyMessage = "No results found.",
+  enableRowSelection = false,
+  rowSelection,
+  onRowSelectionChange,
+  getRowId,
 }: DataTableProps<T>) {
   const [sorting, setSorting] = useState<SortingState>(initialSorting);
   const isMobile = useIsMobile();
 
-  // Merge desktop visibility with mobile overrides
   const mergedVisibility = useMemo(() => {
     if (!isMobile || !mobileColumnVisibility) return columnVisibility;
     return { ...columnVisibility, ...mobileColumnVisibility };
   }, [isMobile, mobileColumnVisibility, columnVisibility]);
 
+  const allColumns = useMemo(() => {
+    if (!enableRowSelection) return columns;
+    const selectColumn: ColumnDef<T, unknown> = {
+      id: "_select",
+      size: 40,
+      enableSorting: false,
+      header: ({ table: t }) => (
+        <Checkbox
+          checked={t.getIsAllPageRowsSelected()}
+          onCheckedChange={(checked) => t.toggleAllPageRowsSelected(!!checked)}
+        />
+      ),
+      cell: ({ row }) => (
+        <Checkbox
+          checked={row.getIsSelected()}
+          onCheckedChange={(checked) => row.toggleSelected(!!checked)}
+        />
+      ),
+    };
+    return [selectColumn, ...columns];
+  }, [enableRowSelection, columns]);
+
   // eslint-disable-next-line react-hooks/incompatible-library -- TanStack Table API is intentionally non-memoizable
   const table = useReactTable({
     data,
-    columns,
+    columns: allColumns,
     state: {
       sorting,
       globalFilter: externalFilter,
       ...(mergedVisibility !== undefined && { columnVisibility: mergedVisibility }),
+      ...(rowSelection !== undefined && { rowSelection }),
     },
     onSortingChange: setSorting,
     ...(onColumnVisibilityChange && {
@@ -124,6 +160,17 @@ export function DataTable<T>({
         onColumnVisibilityChange(next);
       },
     }),
+    enableRowSelection,
+    ...(onRowSelectionChange && {
+      onRowSelectionChange: (updater) => {
+        const next =
+          typeof updater === "function"
+            ? updater(rowSelection ?? {})
+            : updater;
+        onRowSelectionChange(next);
+      },
+    }),
+    ...(getRowId && { getRowId: (row: T) => getRowId(row) }),
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
@@ -194,7 +241,7 @@ export function DataTable<T>({
               table.getRowModel().rows.map((row) => (
                 <tr
                   key={row.id}
-                  className={`border-t border-[var(--color-border)] transition-colors hover:bg-[var(--color-surface-secondary)] ${
+                  className={`h-11 border-t border-[var(--color-border)] transition-colors hover:bg-[var(--color-surface-secondary)] ${
                     onRowClick ? "cursor-pointer" : ""
                   }`}
                   onClick={() => onRowClick?.(row.original)}
@@ -203,7 +250,8 @@ export function DataTable<T>({
                     <td
                       key={cell.id}
                       style={cell.column.getSize() !== 150 ? { minWidth: cell.column.getSize(), width: cell.column.getSize() } : undefined}
-                      className="truncate py-2 pr-2 align-middle text-sm text-[var(--color-text)]"
+                      className="truncate py-0 pr-2 align-middle text-sm text-[var(--color-text)]"
+                      {...(cell.column.id === "_select" && { onClick: (e: React.MouseEvent) => e.stopPropagation() })}
                     >
                       {flexRender(
                         cell.column.columnDef.cell,

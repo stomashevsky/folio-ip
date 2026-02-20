@@ -11,7 +11,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
 import { globalSections, getActiveGlobalSection } from "@/lib/constants/nav-config";
 import { MOCK_USER } from "@/lib/constants/mock-user";
-import { SandboxBadge } from "@/components/shared/SandboxBadge";
+
 
 function ThemeSwitcher() {
   const { theme, setTheme } = useTheme();
@@ -50,7 +50,6 @@ export function Navbar() {
           <Avatar name={MOCK_USER.organization} size={25} color="primary" variant="solid" />
           <span>{MOCK_USER.organization}</span>
         </Link>
-        <SandboxBadge />
       </div>
 
       {/* Center: Global section tabs (desktop) */}
@@ -73,9 +72,9 @@ export function Navbar() {
         })}
       </nav>
 
-      {/* Right: Avatar (desktop) | Menu button (mobile) */}
-      <div className="flex items-center justify-end">
-         <div className="hidden md:block">
+      {/* Right: Copilot + Avatar (desktop) | Menu button (mobile) */}
+      <div className="flex items-center justify-end gap-1">
+         <div className="hidden md:flex md:items-center md:gap-1">
            <Menu>
              <Menu.Trigger asChild>
                <Button color="secondary" variant="ghost" size="sm" uniform pill={false} aria-label="User menu">

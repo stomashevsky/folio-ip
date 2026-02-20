@@ -33,3 +33,7 @@ export { TemplateDetailTopBar } from "./TemplateDetailTopBar";
 export { ComingSoonPage } from "./ComingSoonPage";
 export { CommandPalette } from "./CommandPalette";
 export { SandboxBadge } from "./SandboxBadge";
+export { SavedViewsControl } from "./SavedViewsControl";
+export { BulkActionBar } from "./BulkActionBar";
+export { CopilotButton } from "./CopilotPanel";
+export { NotificationDropdown } from "./NotificationDropdown";

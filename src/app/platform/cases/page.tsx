@@ -4,7 +4,7 @@ import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { TopBar, TOPBAR_CONTROL_SIZE, TOPBAR_TOOLBAR_PILL, TOPBAR_ACTION_PILL } from "@/components/layout/TopBar";
 import { TABLE_PAGE_WRAPPER, TABLE_PAGE_CONTENT } from "@/lib/constants/page-layout";
-import { DataTable, TableSearch } from "@/components/shared";
+import { DataTable, TableSearch, SavedViewsControl } from "@/components/shared";
 import { ColumnSettings, type ColumnConfig } from "@/components/shared/ColumnSettings";
 import { idCell, dateTimeCell, statusCell } from "@/lib/utils/columnHelpers";
 import { useTemplateStore } from "@/lib/stores/template-store";
@@ -134,7 +134,6 @@ export default function CasesPage() {
   const [queueFilter, setQueueFilter] = useState<string[]>([]);
   const [columnVisibility, setColumnVisibility] =
     useState<VisibilityState>(DEFAULT_VISIBILITY);
-
   const hasActiveFilters = statusFilter.length > 0 || priorityFilter.length > 0 || queueFilter.length > 0;
 
   const filteredData = useMemo(() => {
@@ -179,6 +178,27 @@ export default function CasesPage() {
         title="Cases"
         actions={
           <div className="flex items-center gap-2">
+            <SavedViewsControl
+              entityType="cases"
+              currentState={{
+                filters: {
+                  status: statusFilter,
+                  priority: priorityFilter,
+                  queue: queueFilter,
+                },
+                columnVisibility,
+              }}
+              onLoadView={(state) => {
+                setStatusFilter(state.filters.status ?? []);
+                setPriorityFilter(state.filters.priority ?? []);
+                setQueueFilter(state.filters.queue ?? []);
+                setColumnVisibility(state.columnVisibility);
+              }}
+              onClearView={() => {
+                clearAllFilters();
+                setColumnVisibility(DEFAULT_VISIBILITY);
+              }}
+            />
             <ColumnSettings
               columns={COLUMN_CONFIG}
               visibility={columnVisibility}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useCallback } from "react";
+import { useMemo, useState, useCallback, useEffect } from "react";
 import {
   ReactFlow,
   Background,
@@ -8,6 +8,9 @@ import {
   Controls,
   MiniMap,
   ReactFlowProvider,
+  useNodesState,
+  useEdgesState,
+  useReactFlow,
   type Node,
   type Edge,
   type NodeMouseHandler,
@@ -54,12 +57,12 @@ interface GraphEntity {
 }
 
 const NODE_STYLES: Record<string, { background: string; border: string; color: string }> = {
-  account: { background: "var(--color-primary-soft-bg)", border: "var(--color-primary-soft-border)", color: "var(--color-primary-soft-text)" },
-  inquiry: { background: "var(--color-discovery-soft-bg)", border: "var(--color-discovery-soft-border)", color: "var(--color-discovery-soft-text)" },
-  verification: { background: "var(--color-success-soft-bg)", border: "var(--color-success-soft-border)", color: "var(--color-success-soft-text)" },
-  device: { background: "var(--color-warning-soft-bg)", border: "var(--color-warning-soft-border)", color: "var(--color-warning-soft-text)" },
-  ip_address: { background: "var(--color-caution-soft-bg)", border: "var(--color-caution-soft-border)", color: "var(--color-caution-soft-text)" },
-  email: { background: "var(--color-info-soft-bg)", border: "var(--color-info-soft-border)", color: "var(--color-info-soft-text)" },
+  account: { background: "#dbeafe", border: "#3b82f6", color: "#1e40af" },
+  inquiry: { background: "#ede9fe", border: "#8b5cf6", color: "#5b21b6" },
+  verification: { background: "#dcfce7", border: "#22c55e", color: "#166534" },
+  device: { background: "#fef9c3", border: "#eab308", color: "#854d0e" },
+  ip_address: { background: "#ffedd5", border: "#f97316", color: "#9a3412" },
+  email: { background: "#e0f2fe", border: "#06b6d4", color: "#155e75" },
 };
 
 type BadgeColor = "info" | "discovery" | "success" | "warning" | "caution" | "secondary" | "danger";
@@ -133,6 +136,13 @@ const MOCK_CONNECTIONS: GraphConnection[] = [
   { id: "conn_024", sourceType: "inquiry", sourceId: "inq_104", targetType: "inquiry", targetId: "inq_105", relationship: "similar_document", strength: 0.91, riskLevel: "high", clusterId: "fraud_ring_1", createdAt: "2025-02-19T22:04:00Z" },
   { id: "conn_025", sourceType: "email", sourceId: "eml_402", targetType: "account", targetId: "act_004", relationship: "same_email", strength: 0.98, riskLevel: "high", clusterId: "fraud_ring_1", createdAt: "2025-02-19T22:03:00Z" },
   { id: "conn_026", sourceType: "email", sourceId: "eml_402", targetType: "account", targetId: "act_006", relationship: "same_email", strength: 0.97, riskLevel: "high", clusterId: "fraud_ring_1", createdAt: "2025-02-19T22:02:00Z" },
+  { id: "conn_031", sourceType: "inquiry", sourceId: "inq_104", targetType: "verification", targetId: "ver_205", relationship: "submitted", strength: 0.93, riskLevel: "high", clusterId: "fraud_ring_1", createdAt: "2025-02-19T22:01:00Z" },
+  { id: "conn_032", sourceType: "inquiry", sourceId: "inq_105", targetType: "verification", targetId: "ver_206", relationship: "submitted", strength: 0.90, riskLevel: "high", clusterId: "fraud_ring_1", createdAt: "2025-02-19T22:00:00Z" },
+  { id: "conn_033", sourceType: "verification", sourceId: "ver_205", targetType: "verification", targetId: "ver_206", relationship: "similar_document", strength: 0.88, riskLevel: "high", clusterId: "fraud_ring_1", createdAt: "2025-02-19T21:59:00Z" },
+  { id: "conn_034", sourceType: "account", sourceId: "act_006", targetType: "inquiry", targetId: "inq_107", relationship: "owns", strength: 0.92, riskLevel: "high", clusterId: "fraud_ring_1", createdAt: "2025-02-19T21:58:00Z" },
+  { id: "conn_035", sourceType: "inquiry", sourceId: "inq_105", targetType: "inquiry", targetId: "inq_107", relationship: "similar_document", strength: 0.86, riskLevel: "high", clusterId: "fraud_ring_1", createdAt: "2025-02-19T21:57:00Z" },
+  { id: "conn_036", sourceType: "account", sourceId: "act_007", targetType: "inquiry", targetId: "inq_108", relationship: "owns", strength: 0.91, riskLevel: "high", clusterId: "fraud_ring_1", createdAt: "2025-02-19T21:56:00Z" },
+  { id: "conn_037", sourceType: "device", sourceId: "dev_303", targetType: "account", targetId: "act_005", relationship: "same_device", strength: 0.88, riskLevel: "high", clusterId: "fraud_ring_1", createdAt: "2025-02-19T21:55:00Z" },
 
   { id: "conn_027", sourceType: "account", sourceId: "act_003", targetType: "account", targetId: "act_007", relationship: "linked_to", strength: 0.55, riskLevel: "medium", createdAt: "2025-02-20T10:00:00Z" },
 
@@ -269,7 +279,6 @@ function buildGraph(
       source: `${conn.sourceType}:${conn.sourceId}`,
       target: `${conn.targetType}:${conn.targetId}`,
       type: layout.edgeType,
-      label: conn.relationship,
       animated: conn.strength > 0.85 || !!isFraud,
       style: {
         stroke: isFraud
@@ -279,13 +288,6 @@ function buildGraph(
         opacity: isDimmed ? 0.1 : 1,
         transition: "opacity 200ms",
       },
-      labelStyle: {
-        fontSize: 10,
-        fill: isFraud ? "var(--color-text-danger-ghost)" : "var(--color-text-secondary)",
-      },
-      labelBgStyle: { fill: "var(--color-surface)", opacity: 1 },
-      labelBgPadding: [4, 6] as [number, number],
-      labelBgBorderRadius: 4,
     };
   });
 
@@ -350,6 +352,97 @@ const BG_VARIANT_MAP: Record<string, BackgroundVariant> = {
   cross: BackgroundVariant.Cross,
 };
 
+const MINIMAP_COLORS: Record<string, string> = {
+  account: "#3b82f6",
+  inquiry: "#8b5cf6",
+  verification: "#22c55e",
+  device: "#eab308",
+  ip_address: "#f97316",
+  email: "#06b6d4",
+};
+
+function miniMapNodeColor(node: Node) {
+  return MINIMAP_COLORS[String(node.data?.entityType ?? "")] ?? "#e5e7eb";
+}
+
+interface GraphCanvasProps {
+  initialNodes: Node[];
+  initialEdges: Edge[];
+  snapToGrid: boolean;
+  snapGrid: [number, number];
+  bgGap: number;
+  bgVariant: BackgroundVariant;
+  showMiniMap: boolean;
+  fitViewKey: number;
+  onNodeClick: NodeMouseHandler;
+  onPaneClick: () => void;
+}
+
+function GraphCanvas({
+  initialNodes,
+  initialEdges,
+  snapToGrid,
+  snapGrid,
+  bgGap,
+  bgVariant,
+  showMiniMap,
+  fitViewKey,
+  onNodeClick,
+  onPaneClick,
+}: GraphCanvasProps) {
+  const [rfNodes, setRfNodes, onNodesChange] = useNodesState(initialNodes);
+  const [rfEdges, setRfEdges, onEdgesChange] = useEdgesState(initialEdges);
+  const { fitView } = useReactFlow();
+
+  useEffect(() => { setRfNodes(initialNodes); }, [initialNodes, setRfNodes]);
+  useEffect(() => { setRfEdges(initialEdges); }, [initialEdges, setRfEdges]);
+
+  useEffect(() => {
+    if (fitViewKey > 0) {
+      setTimeout(() => fitView({ padding: 0.15, duration: 300 }), 50);
+    }
+  }, [fitViewKey, fitView]);
+
+  return (
+    <ReactFlow
+      nodes={rfNodes}
+      edges={rfEdges}
+      onNodesChange={onNodesChange}
+      onEdgesChange={onEdgesChange}
+      fitView
+      fitViewOptions={{ padding: 0.15 }}
+      proOptions={{ hideAttribution: true }}
+      minZoom={0.2}
+      maxZoom={2.5}
+      zoomOnScroll={false}
+      zoomOnPinch
+      zoomOnDoubleClick
+      preventScrolling={false}
+      snapToGrid={snapToGrid}
+      snapGrid={snapGrid}
+      onNodeClick={onNodeClick}
+      onPaneClick={onPaneClick}
+      nodesDraggable={false}
+      nodesConnectable={false}
+    >
+      <Background gap={bgGap} size={1} color="var(--color-border)" variant={bgVariant} />
+      <Controls showInteractive={false} position="bottom-right" />
+      {showMiniMap && (
+        <MiniMap
+          position="bottom-left"
+          pannable={true}
+          zoomable={true}
+          inversePan={false}
+          nodeColor={miniMapNodeColor}
+          nodeBorderRadius={8}
+          maskColor="rgba(0,0,0,0.08)"
+          style={{ background: "var(--color-surface)", border: "1px solid var(--color-border)", width: 200, height: 140 }}
+        />
+      )}
+    </ReactFlow>
+  );
+}
+
 export default function GraphPage() {
   const [search, setSearch] = useState("");
   const [selectedNode, setSelectedNode] = useState<string | null>(null);
@@ -361,15 +454,17 @@ export default function GraphPage() {
   const [activeTab, setActiveTab] = useState("explorer");
 
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [fitViewKey, setFitViewKey] = useState(0);
   const [showSettings, setShowSettings] = useState(false);
-  const [edgeType, setEdgeType] = useState("smoothstep");
+  const showSettingsPanel = false;
+  const [edgeType, setEdgeType] = useState("default");
   const [bgVariant, setBgVariant] = useState("dots");
   const [bgGap, setBgGap] = useState(16);
   const [snapToGrid, setSnapToGrid] = useState(false);
-  const [showMiniMap, setShowMiniMap] = useState(false);
-  const [clusterSpacing, setClusterSpacing] = useState(700);
-  const [nodeRadiusBase, setNodeRadiusBase] = useState(160);
-  const [nodeRadiusMult, setNodeRadiusMult] = useState(20);
+  const [showMiniMap, setShowMiniMap] = useState(true);
+  const [clusterSpacing, setClusterSpacing] = useState(1000);
+  const [nodeRadiusBase, setNodeRadiusBase] = useState(80);
+  const [nodeRadiusMult, setNodeRadiusMult] = useState(30);
 
   const layoutConfig = useMemo<GraphLayoutConfig>(
     () => ({ clusterSpacing, nodeRadiusBase, nodeRadiusMult, edgeType }),
@@ -575,7 +670,7 @@ export default function GraphPage() {
             <Tabs.Tab value="query">Query</Tabs.Tab>
             <Tabs.Tab value="clusters" badge={{ content: clusters.length, pill: true }}>Clusters</Tabs.Tab>
           </Tabs>
-          <p className="mt-2 text-xs text-[var(--color-text-tertiary)]">
+          <p className="mt-2 text-sm text-[var(--color-text-secondary)]">
             Visualize connections between accounts, inquiries, verifications, and devices. Click on a node to see its details and connections.
           </p>
         </div>
@@ -583,54 +678,43 @@ export default function GraphPage() {
         <div className="min-h-0 flex-1 px-4 py-6 md:px-6">
           {activeTab === "explorer" && (
             <div
-              className={
+              className={`graph-explorer-container ${
                 isFullscreen
                   ? "fixed inset-0 z-50 bg-[var(--color-surface)]"
                   : "relative overflow-hidden rounded-xl border border-[var(--color-border)]"
-              }
+              }`}
               style={isFullscreen ? undefined : { height: "calc(100vh - 280px)", minHeight: 500 }}
             >
               <ReactFlowProvider>
-                <ReactFlow
-                  nodes={nodes}
-                  edges={allEdges}
-                  fitView
-                  fitViewOptions={{ padding: 0.15 }}
-                  proOptions={{ hideAttribution: true }}
-                  minZoom={0.2}
-                  maxZoom={2.5}
+                <GraphCanvas
+                  initialNodes={nodes}
+                  initialEdges={allEdges}
                   snapToGrid={snapToGrid}
                   snapGrid={[bgGap, bgGap]}
+                  bgGap={bgGap}
+                  bgVariant={BG_VARIANT_MAP[bgVariant] ?? BackgroundVariant.Dots}
+                  showMiniMap={showMiniMap}
+                  fitViewKey={fitViewKey}
                   onNodeClick={handleNodeClick}
                   onPaneClick={() => setSelectedNode(null)}
-                  nodesDraggable
-                >
-                  <Background gap={bgGap} size={1} color="var(--color-border)" variant={BG_VARIANT_MAP[bgVariant] ?? BackgroundVariant.Dots} />
-                  <Controls showInteractive={false} position="bottom-right" />
-                  {showMiniMap && (
-                    <MiniMap
-                      position="bottom-left"
-                      pannable
-                      zoomable
-                      style={{ background: "var(--color-surface)", border: "1px solid var(--color-border)" }}
-                    />
-                  )}
-                </ReactFlow>
+                />
               </ReactFlowProvider>
 
               <div className="absolute left-3 top-3 z-10">
                 <div className="flex gap-1.5">
+                  {showSettingsPanel && (
+                    <button
+                      type="button"
+                      className="flex h-8 w-8 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] shadow-100 transition-colors hover:bg-[var(--color-nav-hover-bg)]"
+                      onClick={() => setShowSettings((v) => !v)}
+                    >
+                      <SettingsCog style={{ width: 16, height: 16 }} />
+                    </button>
+                  )}
                   <button
                     type="button"
                     className="flex h-8 w-8 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] shadow-100 transition-colors hover:bg-[var(--color-nav-hover-bg)]"
-                    onClick={() => setShowSettings((v) => !v)}
-                  >
-                    <SettingsCog style={{ width: 16, height: 16 }} />
-                  </button>
-                  <button
-                    type="button"
-                    className="flex h-8 w-8 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] shadow-100 transition-colors hover:bg-[var(--color-nav-hover-bg)]"
-                    onClick={() => setIsFullscreen((v) => !v)}
+                    onClick={() => { setIsFullscreen((v) => !v); setFitViewKey((k) => k + 1); }}
                   >
                     {isFullscreen
                       ? <CollapseLg style={{ width: 16, height: 16 }} />
@@ -639,7 +723,7 @@ export default function GraphPage() {
                   </button>
                 </div>
 
-                {showSettings && (
+                {showSettingsPanel && showSettings && (
                   <div className="mt-2 w-64 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4 shadow-200">
                     <p className="text-xs font-medium text-[var(--color-text)]">Graph Settings</p>
 

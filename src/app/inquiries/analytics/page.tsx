@@ -26,7 +26,7 @@ import { Select } from "@plexui/ui/components/Select";
 import { DateRangePicker } from "@plexui/ui/components/DateRangePicker";
 import { ANALYTICS_INTERVAL_OPTIONS } from "@/lib/constants/filter-options";
 
-const tabs = ["Overview", "Funnel"] as const;
+const tabs = ["Overview", "Funnel", "Saved Queries"] as const;
 type Tab = (typeof tabs)[number];
 
 const INTERVAL_OPTIONS = ANALYTICS_INTERVAL_OPTIONS;
@@ -111,6 +111,7 @@ function InquiryAnalyticsContent() {
             >
               <SegmentedControl.Tab value="Overview">Overview</SegmentedControl.Tab>
               <SegmentedControl.Tab value="Funnel">Conversion Funnel</SegmentedControl.Tab>
+              <SegmentedControl.Tab value="Saved Queries">Saved Queries</SegmentedControl.Tab>
             </SegmentedControl>
             <DateRangePicker
               value={dateRange}
@@ -178,6 +179,38 @@ function InquiryAnalyticsContent() {
               </ChartCard>
             </div>
           </>
+        )}
+
+        {activeTab === "Saved Queries" && (
+          <div className="space-y-4">
+            <p className="text-sm text-[var(--color-text-secondary)]">
+              Save and reuse custom analytics queries with specific date ranges, intervals, and metric selections.
+            </p>
+            {[
+              { name: "Weekly approval trend", description: "Approval rates by week for last 90 days", interval: "Weekly", dateRange: "Last 90 days", createdAt: "2025-02-10" },
+              { name: "Monthly volume comparison", description: "Inquiry volume comparison month over month", interval: "Monthly", dateRange: "Last 12 months", createdAt: "2025-01-20" },
+              { name: "Daily funnel (last 7 days)", description: "Conversion funnel for the past week", interval: "Daily", dateRange: "Last 7 days", createdAt: "2025-02-18" },
+            ].map((query) => (
+              <div
+                key={query.name}
+                className="cursor-pointer rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4 transition-colors hover:border-[var(--color-primary-soft-border)] hover:bg-[var(--color-nav-hover-bg)]"
+              >
+                <div className="flex items-center justify-between">
+                  <h4 className="text-sm font-medium text-[var(--color-text)]">{query.name}</h4>
+                  <span className="text-2xs text-[var(--color-text-tertiary)]">{query.createdAt}</span>
+                </div>
+                <p className="mt-1 text-xs text-[var(--color-text-secondary)]">{query.description}</p>
+                <div className="mt-2 flex gap-2">
+                  <span className="rounded-md bg-[var(--color-surface-secondary)] px-2 py-0.5 text-2xs text-[var(--color-text-tertiary)]">
+                    {query.interval}
+                  </span>
+                  <span className="rounded-md bg-[var(--color-surface-secondary)] px-2 py-0.5 text-2xs text-[var(--color-text-tertiary)]">
+                    {query.dateRange}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
         )}
 
         {activeTab === "Funnel" && (

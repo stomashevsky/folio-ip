@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Badge } from "@plexui/ui/components/Badge";
 import { SectionHeading, KeyValueTable } from "@/components/shared";
 import { StatusBadge } from "@/components/shared/StatusBadge";
+import { mockCases } from "@/lib/data";
 import type { Case } from "@/lib/types";
 
 const PRIORITY_COLORS: Record<string, "danger" | "warning" | "secondary"> = {
@@ -25,7 +26,17 @@ function getSlaProgress(caseItem: Case) {
   return { percent, hoursElapsed, totalHours: 48 };
 }
 
-export function OverviewTab({ caseItem }: { caseItem: Case }) {
+export function OverviewTab({
+  caseItem,
+  inquiriesCount: _inquiriesCount,
+  verificationsCount,
+  reportsCount,
+}: {
+  caseItem: Case;
+  inquiriesCount: number;
+  verificationsCount: number;
+  reportsCount: number;
+}) {
   const sla = getSlaProgress(caseItem);
   const slaColor =
     sla.percent > 80
@@ -81,42 +92,92 @@ export function OverviewTab({ caseItem }: { caseItem: Case }) {
         />
       </div>
 
-      {(caseItem.accountId || caseItem.inquiryId) && (
-        <div>
-          <SectionHeading>Linked entities</SectionHeading>
-          <div className="grid gap-3 md:grid-cols-2">
-            {caseItem.accountId && (
-              <Link
-                href={`/accounts/${caseItem.accountId}`}
-                className="block rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4 transition-colors hover:bg-[var(--color-nav-hover-bg)]"
-              >
-                <p className="text-xs font-medium uppercase tracking-wide text-[var(--color-text-tertiary)]">
-                  Account
-                </p>
-                <p className="mt-1 text-sm font-medium text-[var(--color-text)]">
-                  {caseItem.accountName ?? caseItem.accountId}
-                </p>
-                <p className="mt-0.5 truncate font-mono text-xs text-[var(--color-primary-solid-bg)]">
-                  {caseItem.accountId}
-                </p>
-              </Link>
-            )}
-            {caseItem.inquiryId && (
-              <Link
-                href={`/inquiries/${caseItem.inquiryId}`}
-                className="block rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4 transition-colors hover:bg-[var(--color-nav-hover-bg)]"
-              >
-                <p className="text-xs font-medium uppercase tracking-wide text-[var(--color-text-tertiary)]">
-                  Inquiry
-                </p>
-                <p className="mt-1 truncate font-mono text-sm text-[var(--color-primary-solid-bg)]">
-                  {caseItem.inquiryId}
-                </p>
-              </Link>
-            )}
+      <div>
+        <SectionHeading>Linked entities</SectionHeading>
+        <div className="grid gap-3 md:grid-cols-2">
+          {caseItem.accountId && (
+            <Link
+              href={`/accounts/${caseItem.accountId}`}
+              className="block rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4 transition-colors hover:bg-[var(--color-nav-hover-bg)]"
+            >
+              <p className="text-xs font-medium uppercase tracking-wide text-[var(--color-text-tertiary)]">
+                Account
+              </p>
+              <p className="mt-1 text-sm font-medium text-[var(--color-text)]">
+                {caseItem.accountName ?? caseItem.accountId}
+              </p>
+              <p className="mt-0.5 truncate font-mono text-xs text-[var(--color-primary-solid-bg)]">
+                {caseItem.accountId}
+              </p>
+            </Link>
+          )}
+          {caseItem.inquiryId && (
+            <Link
+              href={`/inquiries/${caseItem.inquiryId}`}
+              className="block rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4 transition-colors hover:bg-[var(--color-nav-hover-bg)]"
+            >
+              <p className="text-xs font-medium uppercase tracking-wide text-[var(--color-text-tertiary)]">
+                Inquiry
+              </p>
+              <p className="mt-1 truncate font-mono text-sm text-[var(--color-primary-solid-bg)]">
+                {caseItem.inquiryId}
+              </p>
+            </Link>
+          )}
+          <div className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4">
+            <p className="text-xs font-medium uppercase tracking-wide text-[var(--color-text-tertiary)]">
+              Verifications
+            </p>
+            <p className="mt-1 text-sm text-[var(--color-text-secondary)]">
+              {verificationsCount} linked {verificationsCount === 1 ? "verification" : "verifications"}
+            </p>
+          </div>
+          <div className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4">
+            <p className="text-xs font-medium uppercase tracking-wide text-[var(--color-text-tertiary)]">
+              Reports
+            </p>
+            <p className="mt-1 text-sm text-[var(--color-text-secondary)]">
+              {reportsCount} linked {reportsCount === 1 ? "report" : "reports"}
+            </p>
           </div>
         </div>
-      )}
+      </div>
+
+      {caseItem.accountId && (() => {
+        const relatedCases = mockCases.filter(
+          (c) => c.accountId === caseItem.accountId && c.id !== caseItem.id,
+        );
+        return relatedCases.length > 0 ? (
+          <div>
+            <SectionHeading badge={relatedCases.length}>Related cases</SectionHeading>
+            <div className="grid gap-3 md:grid-cols-2">
+              {relatedCases.map((rc) => (
+                <Link
+                  key={rc.id}
+                  href={`/platform/cases/${rc.id}`}
+                  className="block rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4 transition-colors hover:bg-[var(--color-nav-hover-bg)]"
+                >
+                  <p className="text-sm font-medium text-[var(--color-text)]">
+                    {rc.title}
+                  </p>
+                  <p className="mt-0.5 truncate font-mono text-xs text-[var(--color-text-tertiary)]">
+                    {rc.id}
+                  </p>
+                  <div className="mt-2 flex gap-1.5">
+                    <StatusBadge status={rc.status} />
+                    <Badge
+                      color={PRIORITY_COLORS[rc.priority] ?? "secondary"}
+                      size="sm"
+                    >
+                      {rc.priority}
+                    </Badge>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        ) : null;
+      })()}
 
       <div>
         <SectionHeading>SLA</SectionHeading>

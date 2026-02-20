@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import { useRouter } from "next/navigation";
 import { TopBar, TOPBAR_CONTROL_SIZE, TOPBAR_TOOLBAR_PILL, TOPBAR_ACTION_PILL } from "@/components/layout/TopBar";
 import { TABLE_PAGE_WRAPPER, TABLE_PAGE_CONTENT } from "@/lib/constants/page-layout";
 import { DataTable, TableSearch, ColumnSettings } from "@/components/shared";
@@ -161,6 +162,7 @@ const columns: ColumnDef<Role, unknown>[] = [
 ];
 
 export default function TeamRolesPage() {
+  const router = useRouter();
   const [search, setSearch] = useState("");
   const [membersFilter, setMembersFilter] = useState<string[]>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(DEFAULT_VISIBILITY);
@@ -250,6 +252,7 @@ export default function TeamRolesPage() {
           initialSorting={[{ id: "name", desc: false }]}
           columnVisibility={columnVisibility}
           onColumnVisibilityChange={setColumnVisibility}
+          onRowClick={(row) => router.push(`/settings/team/roles/${row.id}`)}
         />
       </div>
     </div>

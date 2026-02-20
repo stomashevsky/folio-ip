@@ -16,13 +16,27 @@ import {
   TagEditModal,
   DetailPageSidebar,
 } from "@/components/shared";
-import { mockCases, getEventsForCase } from "@/lib/data";
+import {
+  mockCases,
+  mockInquiries,
+  mockVerifications,
+  mockReports,
+  getEventsForCase,
+} from "@/lib/data";
 import { formatDateTime } from "@/lib/utils/format";
 import { getAllKnownTags } from "@/lib/utils/tags";
 import { useTabParam } from "@/lib/hooks/useTabParam";
-import { OverviewTab, CommentsTab, ActivityTab } from "./components";
+import {
+  OverviewTab,
+  InquiriesTab,
+  VerificationsTab,
+  ReportsTab,
+  DocumentsTab,
+  CommentsTab,
+  ActivityTab,
+} from "./components";
 
-const tabs = ["Overview", "Comments", "Activity"] as const;
+const tabs = ["Overview", "Inquiries", "Verifications", "Reports", "Documents", "Comments", "Activity"] as const;
 type Tab = (typeof tabs)[number];
 
 const PRIORITY_COLORS: Record<string, "danger" | "warning" | "secondary"> = {
@@ -60,6 +74,23 @@ function CaseDetailContent() {
   }
 
   const events = getEventsForCase(caseItem.id);
+
+  // Compute linked entities through account
+  const caseInquiries = caseItem.accountId
+    ? mockInquiries.filter((i) => i.accountId === caseItem.accountId)
+    : [];
+  const caseVerifications = caseItem.accountId
+    ? mockVerifications.filter((v) =>
+        caseInquiries.some((i) => i.id === v.inquiryId),
+      )
+    : [];
+  const caseReports = caseItem.accountId
+    ? mockReports.filter((r) => r.accountId === caseItem.accountId)
+    : [];
+  const _totalMatches = caseReports.reduce(
+    (sum, r) => sum + (r.matchCount ?? 0),
+    0,
+  );
 
   return (
     <div className="flex h-full flex-col">
@@ -99,13 +130,36 @@ function CaseDetailContent() {
               size="lg"
             >
               <Tabs.Tab value="Overview">Overview</Tabs.Tab>
+              <Tabs.Tab value="Inquiries" badge={caseInquiries.length ? { content: caseInquiries.length, pill: true } : undefined}>Inquiries</Tabs.Tab>
+              <Tabs.Tab value="Verifications" badge={caseVerifications.length ? { content: caseVerifications.length, pill: true } : undefined}>Verifications</Tabs.Tab>
+              <Tabs.Tab value="Reports" badge={caseReports.length ? { content: caseReports.length, pill: true } : undefined}>Reports</Tabs.Tab>
+              <Tabs.Tab value="Documents">Documents</Tabs.Tab>
               <Tabs.Tab value="Comments">Comments</Tabs.Tab>
               <Tabs.Tab value="Activity" badge={events.length ? { content: events.length, pill: true } : undefined}>Activity</Tabs.Tab>
             </Tabs>
           </div>
 
           <div className="flex-1 overflow-auto px-4 py-6 md:px-6">
-            {activeTab === "Overview" && <OverviewTab caseItem={caseItem} />}
+            {activeTab === "Overview" && (
+              <OverviewTab
+                caseItem={caseItem}
+                inquiriesCount={caseInquiries.length}
+                verificationsCount={caseVerifications.length}
+                reportsCount={caseReports.length}
+              />
+            )}
+            {activeTab === "Inquiries" && (
+              <InquiriesTab inquiries={caseInquiries} />
+            )}
+            {activeTab === "Verifications" && (
+              <VerificationsTab verifications={caseVerifications} />
+            )}
+            {activeTab === "Reports" && (
+              <ReportsTab reports={caseReports} />
+            )}
+            {activeTab === "Documents" && (
+              <DocumentsTab verifications={caseVerifications} />
+            )}
             {activeTab === "Comments" && <CommentsTab />}
             {activeTab === "Activity" && <ActivityTab events={events} />}
           </div>

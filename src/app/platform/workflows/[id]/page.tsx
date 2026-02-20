@@ -225,19 +225,6 @@ function WorkflowDetailContent() {
               >
                 <Redo />
               </Button>
-              <Button
-                color="secondary"
-                variant="outline"
-                size={TOPBAR_CONTROL_SIZE}
-                pill={TOPBAR_ACTION_PILL}
-                onClick={() => {
-                  setShowSimulateMsg(true);
-                  setTimeout(() => setShowSimulateMsg(false), 3000);
-                }}
-              >
-                <PlayCircle />
-                <span className="hidden md:inline">Simulate</span>
-              </Button>
               {!isNew && (
                 <Menu>
                   <Menu.Trigger>
@@ -261,6 +248,19 @@ function WorkflowDetailContent() {
                   </Menu.Content>
                 </Menu>
               )}
+              <Button
+                color="secondary"
+                variant="outline"
+                size={TOPBAR_CONTROL_SIZE}
+                pill={TOPBAR_ACTION_PILL}
+                onClick={() => {
+                  setShowSimulateMsg(true);
+                  setTimeout(() => setShowSimulateMsg(false), 3000);
+                }}
+              >
+                <PlayCircle />
+                <span className="hidden md:inline">Simulate</span>
+              </Button>
               <Button
                 color="primary"
                 size={TOPBAR_CONTROL_SIZE}
