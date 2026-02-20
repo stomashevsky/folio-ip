@@ -21,8 +21,8 @@ const LABEL_SCHEME: Record<string, { bg: string; text: string }> = {
     text: "var(--color-text-caution-outline)",
   },
   primary: {
-    bg: "var(--color-surface)",
-    text: "var(--color-text-primary-outline)",
+    bg: "var(--color-background-secondary-soft)",
+    text: "var(--color-text-secondary)",
   },
 };
 

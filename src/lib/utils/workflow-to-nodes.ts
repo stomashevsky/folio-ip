@@ -33,44 +33,105 @@ function buildEdge(
   };
 }
 
-function collectTerminalStepIds(flow: WorkflowFlowDefinition): Set<string> {
-  const allNextTargets = new Set<string>();
-  const allStepIds = new Set(Object.keys(flow.steps));
+function buildParallelParentMap(flow: WorkflowFlowDefinition): Map<string, string> {
+  const map = new Map<string, string>();
 
-  for (const step of Object.values(flow.steps)) {
-    if (step.next) allNextTargets.add(step.next);
+  function walkBranch(stepId: string, parallelId: string) {
+    if (map.has(stepId)) return;
+    map.set(stepId, parallelId);
+    const step = flow.steps[stepId];
+    if (!step) return;
+    if (step.next) walkBranch(step.next, parallelId);
     if (step.type === "conditional") {
-      for (const route of step.routes) allNextTargets.add(route.goto);
-      if (step.else) allNextTargets.add(step.else);
+      for (const route of step.routes) walkBranch(route.goto, parallelId);
+      if (step.else) walkBranch(step.else, parallelId);
     }
     if (step.type === "parallel") {
-      for (const b of step.branches) allNextTargets.add(b);
+      for (const b of step.branches) walkBranch(b, stepId);
+    }
+  }
+
+  for (const [stepId, step] of Object.entries(flow.steps)) {
+    if (step.type === "parallel") {
+      for (const b of step.branches) walkBranch(b, stepId);
+    }
+  }
+
+  return map;
+}
+
+function collectTerminalStepIds(flow: WorkflowFlowDefinition): Set<string> {
+  const parallelParentMap = buildParallelParentMap(flow);
+  const insideJoinedParallel = new Set<string>();
+  for (const [stepId, parallelId] of parallelParentMap) {
+    const parallel = flow.steps[parallelId];
+    if (parallel.type === "parallel" && parallel.next) {
+      insideJoinedParallel.add(stepId);
     }
   }
 
   const terminals = new Set<string>();
-  for (const stepId of allStepIds) {
-    const step = flow.steps[stepId];
+  for (const [stepId, step] of Object.entries(flow.steps)) {
+    if (insideJoinedParallel.has(stepId)) continue;
+
     if (!step.next && step.type !== "conditional" && step.type !== "parallel") {
       terminals.add(stepId);
     }
     if (step.type === "conditional" && !step.next) {
       for (const route of step.routes) {
+        if (insideJoinedParallel.has(route.goto)) continue;
         const target = flow.steps[route.goto];
         if (target && !target.next && target.type !== "conditional" && target.type !== "parallel") {
           terminals.add(route.goto);
         }
       }
       if (step.else) {
-        const elseTarget = flow.steps[step.else];
-        if (elseTarget && !elseTarget.next && elseTarget.type !== "conditional" && elseTarget.type !== "parallel") {
-          terminals.add(step.else);
+        if (!insideJoinedParallel.has(step.else)) {
+          const elseTarget = flow.steps[step.else];
+          if (elseTarget && !elseTarget.next && elseTarget.type !== "conditional" && elseTarget.type !== "parallel") {
+            terminals.add(step.else);
+          }
         }
       }
     }
   }
 
   return terminals;
+}
+
+function collectBranchLeaves(
+  branchEntries: string[],
+  steps: Record<string, WorkflowFlowStep>,
+): string[] {
+  const leaves: string[] = [];
+  const visited = new Set<string>();
+
+  function walk(stepId: string) {
+    if (visited.has(stepId)) return;
+    visited.add(stepId);
+
+    const step = steps[stepId];
+    if (!step) return;
+
+    const outgoing: string[] = [];
+    if (step.next) outgoing.push(step.next);
+    if (step.type === "conditional") {
+      for (const route of step.routes) outgoing.push(route.goto);
+      if (step.else) outgoing.push(step.else);
+    }
+    if (step.type === "parallel") {
+      for (const b of step.branches) outgoing.push(b);
+    }
+
+    if (outgoing.length === 0) {
+      leaves.push(stepId);
+    } else {
+      for (const id of outgoing) walk(id);
+    }
+  }
+
+  for (const id of branchEntries) walk(id);
+  return leaves;
 }
 
 export function workflowFlowToElements(flow: WorkflowFlowDefinition): { nodes: Node[]; edges: Edge[] } {
@@ -96,6 +157,53 @@ export function workflowFlowToElements(flow: WorkflowFlowDefinition): { nodes: N
   for (const [stepId, step] of Object.entries(flow.steps)) {
     nodes.push(createStepNode(stepId, step));
     addStepEdges(edges, stepId, step);
+  }
+
+  const parallelParentMap = buildParallelParentMap(flow);
+
+  for (const [stepId, step] of Object.entries(flow.steps)) {
+    if (step.type === "parallel" && step.next) {
+      const leaves = collectBranchLeaves(step.branches, flow.steps);
+      for (const leafId of leaves) {
+        edges.push(buildEdge(`edge__${leafId}__join__${step.next}`, leafId, step.next, undefined, "default", "primary", 1));
+      }
+    }
+  }
+
+  const ELSE_HANDLES = ["default", "right", "left"];
+  for (const [stepId, step] of Object.entries(flow.steps)) {
+    if (step.type !== "conditional" || step.else) continue;
+    const parallelId = parallelParentMap.get(stepId);
+    if (parallelId) {
+      const parallel = flow.steps[parallelId];
+      if (parallel.type === "parallel" && parallel.next) {
+        const elseHandle = ELSE_HANDLES[step.routes.length] ?? "left";
+        edges.push(
+          buildEdge(
+            `edge__${stepId}__implicit_else__${parallel.next}`,
+            stepId,
+            parallel.next,
+            "Else",
+            elseHandle,
+            "primary",
+            5,
+          ),
+        );
+      }
+    } else if (flow.output !== undefined) {
+      const elseHandle = ELSE_HANDLES[step.routes.length] ?? "left";
+      edges.push(
+        buildEdge(
+          `edge__${stepId}__implicit_else__${outputId}`,
+          stepId,
+          outputId,
+          "Else",
+          elseHandle,
+          "primary",
+          5,
+        ),
+      );
+    }
   }
 
   if (flow.output !== undefined) {
@@ -182,9 +290,9 @@ function addStepEdges(edges: Edge[], stepId: string, step: WorkflowFlowStep): vo
           `edge__${stepId}__route_${i}__${route.goto}`,
           stepId,
           route.goto,
-          `${i + 1}  ${route.label}`,
+          route.label,
           handle,
-          "primary",
+          route.color ?? "primary",
           10,
         ),
       );
@@ -196,9 +304,9 @@ function addStepEdges(edges: Edge[], stepId: string, step: WorkflowFlowStep): vo
           `edge__${stepId}__else__${step.else}`,
           stepId,
           step.else,
-          `${step.routes.length + 1}  Else`,
+          "Else",
           elseHandle,
-          "caution",
+          "primary",
           5,
         ),
       );
@@ -224,9 +332,6 @@ function addStepEdges(edges: Edge[], stepId: string, step: WorkflowFlowStep): vo
           10,
         ),
       );
-    }
-    if (step.next) {
-      edges.push(buildEdge(`edge__${stepId}__next__${step.next}`, stepId, step.next, undefined, "default", "primary", 1));
     }
   }
 }

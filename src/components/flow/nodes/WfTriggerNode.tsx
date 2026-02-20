@@ -12,12 +12,9 @@ type WfTriggerFlowNode = Node<WfTriggerData, "wf_trigger">;
 
 export function WfTriggerNode({ data }: NodeProps<WfTriggerFlowNode>) {
   return (
-    <div className="flex h-11 w-[220px] items-center gap-2.5 rounded-xl border border-[var(--color-border-primary-surface)] bg-[var(--color-background-primary-soft)] px-3.5">
-      <PlayCircle className="h-4 w-4 shrink-0 text-[var(--color-text-primary-soft)]" />
-      <div className="min-w-0 flex-1">
-        <span className="block truncate text-sm font-medium text-[var(--color-text-primary-soft)]">{data.label}</span>
-        <span className="block truncate text-2xs text-[var(--color-text-primary-soft)] opacity-70">Trigger</span>
-      </div>
+    <div className="flex h-11 w-[250px] items-center gap-2.5 rounded-xl border border-transparent bg-[var(--color-background-secondary-soft)] px-3.5">
+      <PlayCircle className="h-4 w-4 shrink-0 text-[var(--color-text-secondary-soft)]" />
+      <span className="min-w-0 flex-1 truncate text-sm font-medium text-[var(--color-text-secondary-soft)]">{data.label}</span>
       <Handle type="source" position={Position.Bottom} id="default" />
     </div>
   );

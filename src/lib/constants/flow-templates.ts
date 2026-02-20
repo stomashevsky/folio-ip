@@ -699,6 +699,7 @@ steps:
     label: "Low risk score?"
     routes:
       - label: "Low Risk"
+        color: success
         when: "trigger.risk_score < 30"
         goto: approve_action
     else: notify_partner
@@ -737,6 +738,7 @@ steps:
     label: "Max retries exceeded?"
     routes:
       - label: "Retries Exceeded"
+        color: danger
         when: "trigger.retry_count >= 3"
         goto: escalate
     else: create_review_case
@@ -757,7 +759,7 @@ steps:
 
   wait_resolution:
     type: wait
-    label: "Wait for Case resolved"
+    label: "Wait for Resolution"
     wait_for: object
     target_object: create_review_case
     events:
@@ -771,9 +773,11 @@ steps:
     label: "Case Resolution"
     routes:
       - label: "Approved"
+        color: success
         when: "case.resolution == approved"
         goto: approve_action
       - label: "Declined"
+        color: danger
         when: "case.resolution == declined"
         goto: decline_action
 
@@ -790,49 +794,48 @@ steps:
 output: {}`,
 
   "wfl_y4z5a6b7c8d9e0f1g2h3i4j5": `trigger:
-  event: inquiry.completed
+  event: account.created
+  where:
+    country: "in high_risk_countries"
 
-start: run_watchlist
+start: run_pep
 
 steps:
-  run_watchlist:
-    type: action
-    action: run_report
-    label: "Run Watchlist Report"
-    next: run_pep
-
   run_pep:
     type: action
     action: run_report
-    label: "Run PEP Report"
+    label: "Run PEP Screening"
     next: check_matches
 
   check_matches:
     type: conditional
-    label: "Any matches found?"
+    label: "PEP match found?"
     routes:
-      - label: "Matches Found"
-        when: "report.total_matches > 0"
+      - label: "Match Found"
+        color: danger
+        when: "report.pep_matches > 0"
         goto: tag_match
-    else: approve_action
+    else: tag_clear
 
   tag_match:
     type: action
     action: tag_object
-    label: "Tag as AML Match"
+    label: "Tag PEP Match"
     config:
-      tag: "AML_MATCH"
-    next: review_action
+      tag: "PEP_MATCH"
+    next: create_case
 
-  review_action:
+  create_case:
     type: action
-    action: review_inquiry
-    label: "Send to Manual Review"
+    action: create_case
+    label: "Create Compliance Case"
 
-  approve_action:
+  tag_clear:
     type: action
-    action: approve_inquiry
-    label: "Approve Inquiry"
+    action: tag_object
+    label: "Tag as Cleared"
+    config:
+      tag: "PEP_CLEAR"
 
 output: {}`,
 
@@ -844,10 +847,11 @@ start: tag_signals
 steps:
   tag_signals:
     type: parallel
-    label: "Tag on Inquiry signals"
+    label: "Tag Inquiry Signals"
     branches:
       - check_tor
       - check_selfie
+      - check_behavior
     next: run_reports
 
   check_tor:
@@ -855,13 +859,14 @@ steps:
     label: "Using Tor?"
     routes:
       - label: "Tor Detected"
+        color: danger
         when: "trigger.tor_detected == true"
         goto: tag_tor
 
   tag_tor:
     type: action
     action: tag_object
-    label: "(tag) TOR DETECTED"
+    label: Tag "Tor Detected"
     config:
       tag: "TOR DETECTED"
 
@@ -869,36 +874,100 @@ steps:
     type: conditional
     label: "High-risk selfie?"
     routes:
-      - label: "High Risk"
+      - label: "High selfie risk"
+        color: danger
         when: "trigger.selfie_risk == high"
         goto: tag_selfie
 
   tag_selfie:
     type: action
     action: tag_object
-    label: "(tag) HIGH RISK SELFIE"
+    label: Tag "Selfie Risk"
     config:
       tag: "HIGH RISK SELFIE"
 
+  check_behavior:
+    type: conditional
+    label: "Behavior threat?"
+    routes:
+      - label: "High behavior threat"
+        color: danger
+        when: "trigger.behavior_threat == high"
+        goto: tag_behavior
+
+  tag_behavior:
+    type: action
+    action: tag_object
+    label: Tag "Behavior Threat"
+    config:
+      tag: "HIGH BEHAVIOR THREAT"
+
   run_reports:
+    type: parallel
+    label: "Run Reports"
+    branches:
+      - run_watchlist
+      - run_pep
+    next: inquiry_decisioning
+
+  run_watchlist:
     type: action
     action: run_report
     label: "Run Watchlist Report"
-    next: review_decision
+    next: watchlist_match
 
-  review_decision:
+  watchlist_match:
     type: conditional
     label: "Match found?"
     routes:
-      - label: "Match Found"
-        when: "report.matches > 0"
+      - label: "Watchlist match"
+        color: danger
+        when: "report.watchlist_matches > 0"
+        goto: tag_watchlist_match
+
+  tag_watchlist_match:
+    type: action
+    action: tag_object
+    label: Tag "Watchlist Match"
+    config:
+      tag: "WATCHLIST MATCH"
+
+  run_pep:
+    type: action
+    action: run_report
+    label: "Run PEP Report"
+    next: pep_match
+
+  pep_match:
+    type: conditional
+    label: "Match found?"
+    routes:
+      - label: "PEP match"
+        color: danger
+        when: "report.pep_matches > 0"
+        goto: tag_pep_match
+
+  tag_pep_match:
+    type: action
+    action: tag_object
+    label: Tag "PEP Match"
+    config:
+      tag: "PEP MATCH"
+
+  inquiry_decisioning:
+    type: conditional
+    label: "Inquiry Decisioning"
+    routes:
+      - label: "Needs Review"
+        color: danger
+        when: "inquiry.status == needs_review"
         goto: mark_review
-    else: approve_action
+    else: approve_else
 
   mark_review:
     type: action
     action: review_inquiry
-    label: "Mark for Review"
+    label: "Mark Inquiry for Review"
     next: create_case
 
   create_case:
@@ -914,18 +983,18 @@ steps:
     target_object: create_case
     events:
       - case.resolved
-    timeout_seconds: 2592000
-    error_on_expiration: false
     next: case_decision
 
   case_decision:
     type: conditional
-    label: "Case Resolution"
+    label: "Conditional Step"
     routes:
-      - label: "Approved"
+      - label: "Case Approved"
+        color: success
         when: "case.resolution == approved"
         goto: approve_action
-      - label: "Declined"
+      - label: "Case Declined"
+        color: danger
         when: "case.resolution == declined"
         goto: decline_action
 
@@ -939,85 +1008,117 @@ steps:
     action: decline_inquiry
     label: "Decline Inquiry"
 
+  approve_else:
+    type: action
+    action: approve_inquiry
+    label: "Approve Inquiry"
+
 output: {}`,
 
   "wfl_w8x9y0z1a2b3c4d5e6f7g8h9": `trigger:
-  event: report.ready
+  event: inquiry.failed
 
-start: check_report
-
-steps:
-  check_report:
-    type: conditional
-    label: "Report has matches?"
-    routes:
-      - label: "Has Matches"
-        when: "report.match_count > 0"
-        goto: send_alert
-    else: log_clean
-
-  send_alert:
-    type: action
-    action: send_slack
-    label: "Alert Compliance Team"
-    config:
-      channel: "#compliance-alerts"
-    next: tag_report
-
-  tag_report:
-    type: action
-    action: tag_object
-    label: "Tag Report"
-    config:
-      tag: "REQUIRES_REVIEW"
-
-  log_clean:
-    type: action
-    action: tag_object
-    label: "Mark as Clean"
-    config:
-      tag: "CLEAN"
-
-output: {}`,
-
-  "wfl_i0j1k2l3m4n5o6p7q8r9s0t1": `trigger:
-  event: account.created
-
-start: check_jurisdiction
+start: inquiry_decisioning
 
 steps:
-  check_jurisdiction:
+  inquiry_decisioning:
     type: conditional
-    label: "High-risk jurisdiction?"
+    label: "Inquiry Decisioning"
     routes:
-      - label: "High Risk"
-        when: "account.country in [RU, IR, KP, CU]"
-        goto: enhanced_check
-    else: standard_check
+      - label: "Needs Review"
+        color: danger
+        when: "inquiry.status == needs_review"
+        goto: mark_review
+    else: approve_else
 
-  enhanced_check:
+  mark_review:
     type: action
-    action: run_report
-    label: "Run Enhanced Due Diligence"
+    action: review_inquiry
+    label: "Mark Inquiry for Review"
     next: create_case
 
   create_case:
     type: action
     action: create_case
-    label: "Create Compliance Case"
+    label: "Create Case"
+    next: wait_resolution
 
-  standard_check:
+  wait_resolution:
+    type: wait
+    label: "Wait for Case resolved"
+    wait_for: object
+    target_object: create_case
+    events:
+      - case.resolved
+    next: case_decision
+
+  case_decision:
+    type: conditional
+    label: "Conditional Step"
+    routes:
+      - label: "Case Approved"
+        color: success
+        when: "case.resolution == approved"
+        goto: approve_action
+      - label: "Case Declined"
+        color: danger
+        when: "case.resolution == declined"
+        goto: decline_action
+
+  approve_action:
     type: action
-    action: run_report
-    label: "Run Standard Check"
-    next: auto_approve
+    action: approve_inquiry
+    label: "Approve Inquiry"
 
-  auto_approve:
+  decline_action:
+    type: action
+    action: decline_inquiry
+    label: "Decline Inquiry"
+
+  approve_else:
+    type: action
+    action: approve_inquiry
+    label: "Approve Inquiry"
+
+output: {}`,
+
+  "wfl_i0j1k2l3m4n5o6p7q8r9s0t1": `trigger:
+  event: verification.failed
+  where:
+    type: "document"
+
+start: check_retries
+
+steps:
+  check_retries:
+    type: conditional
+    label: "Retries remaining?"
+    routes:
+      - label: "Can Retry"
+        color: success
+        when: "trigger.retry_count < 3"
+        goto: send_retry_link
+    else: escalate
+
+  send_retry_link:
+    type: action
+    action: send_email
+    label: "Send Retry Link"
+    config:
+      template: "document_retry"
+
+  escalate:
     type: action
     action: tag_object
-    label: "Tag as Onboarded"
+    label: "Tag as Failed"
     config:
-      tag: "ONBOARDED"
+      tag: "DOCUMENT_CHECK_FAILED"
+    next: review_action
+
+  review_action:
+    type: action
+    action: review_inquiry
+    label: "Mark for Manual Review"
 
 output: {}`,
 };
@@ -1033,6 +1134,7 @@ steps:
     label: "Risk Level?"
     routes:
       - label: "High Risk"
+        color: danger
         when: "trigger.risk_score > 70"
         goto: decline_action
     else: approve_action
