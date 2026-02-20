@@ -148,6 +148,13 @@ export const CASE_PRIORITY_OPTIONS = [
   { value: "critical", label: "Critical" },
 ];
 
+export const CASE_QUEUE_OPTIONS = [
+  { value: "Fraud Review", label: "Fraud Review" },
+  { value: "AML Compliance", label: "AML Compliance" },
+  { value: "Document Verification", label: "Document Verification" },
+  { value: "General", label: "General" },
+];
+
 // Template filter options
 
 export const TEMPLATE_STATUS_OPTIONS = [

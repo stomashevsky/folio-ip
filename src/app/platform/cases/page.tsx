@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import { useRouter } from "next/navigation";
 import { TopBar, TOPBAR_CONTROL_SIZE, TOPBAR_TOOLBAR_PILL, TOPBAR_ACTION_PILL } from "@/components/layout/TopBar";
 import { TABLE_PAGE_WRAPPER, TABLE_PAGE_CONTENT } from "@/lib/constants/page-layout";
 import { DataTable, TableSearch } from "@/components/shared";
@@ -16,6 +17,7 @@ import { Plus } from "@plexui/ui/components/Icon";
 import {
   CASE_STATUS_OPTIONS,
   CASE_PRIORITY_OPTIONS,
+  CASE_QUEUE_OPTIONS,
 } from "@/lib/constants/filter-options";
 import {
   CASE_COLUMN_CONFIG,
@@ -122,16 +124,18 @@ const columns: ColumnDef<Case, unknown>[] = [
 // ─── Page ───
 
 export default function CasesPage() {
+  const router = useRouter();
   const { cases: caseStore } = useTemplateStore();
   const allCases = caseStore.getAll();
 
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string[]>([]);
   const [priorityFilter, setPriorityFilter] = useState<string[]>([]);
+  const [queueFilter, setQueueFilter] = useState<string[]>([]);
   const [columnVisibility, setColumnVisibility] =
     useState<VisibilityState>(DEFAULT_VISIBILITY);
 
-  const hasActiveFilters = statusFilter.length > 0 || priorityFilter.length > 0;
+  const hasActiveFilters = statusFilter.length > 0 || priorityFilter.length > 0 || queueFilter.length > 0;
 
   const filteredData = useMemo(() => {
     let result = allCases;
@@ -142,6 +146,10 @@ export default function CasesPage() {
 
     if (priorityFilter.length > 0) {
       result = result.filter((c) => priorityFilter.includes(c.priority));
+    }
+
+    if (queueFilter.length > 0) {
+      result = result.filter((c) => c.queue != null && queueFilter.includes(c.queue));
     }
 
     if (search) {
@@ -157,11 +165,12 @@ export default function CasesPage() {
     }
 
     return result;
-  }, [allCases, statusFilter, priorityFilter, search]);
+  }, [allCases, statusFilter, priorityFilter, queueFilter, search]);
 
   function clearAllFilters() {
     setStatusFilter([]);
     setPriorityFilter([]);
+    setQueueFilter([]);
   }
 
   return (
@@ -223,6 +232,23 @@ export default function CasesPage() {
                />
             </div>
 
+            {/* ── Queue filter ── */}
+            <div className="w-36">
+               <Select
+                 multiple
+                 clearable
+                 block
+                 pill={TOPBAR_TOOLBAR_PILL}
+                 listMinWidth={200}
+                 options={CASE_QUEUE_OPTIONS}
+                 value={queueFilter}
+                 onChange={(opts) => setQueueFilter(opts.map((o) => o.value))}
+                 placeholder="Queue"
+                 variant="outline"
+                 size={TOPBAR_CONTROL_SIZE}
+               />
+            </div>
+
             {/* ── Clear all filters ── */}
              {hasActiveFilters && (
                <Button
@@ -248,6 +274,7 @@ export default function CasesPage() {
           initialSorting={[{ id: "createdAt", desc: true }]}
           columnVisibility={columnVisibility}
           onColumnVisibilityChange={setColumnVisibility}
+          onRowClick={(row) => router.push(`/platform/cases/${row.id}`)}
           mobileColumnVisibility={{
             id: true,
             queue: false,
