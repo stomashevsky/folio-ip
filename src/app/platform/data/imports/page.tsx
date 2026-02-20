@@ -265,24 +265,25 @@ export default function DataImportsPage() {
       <TopBar
         title="Imports"
         actions={
-          <ColumnSettings
-            columns={COLUMN_CONFIG}
-            visibility={columnVisibility}
-            onVisibilityChange={setColumnVisibility}
-          />
+          <div className="flex items-center gap-2">
+            <ColumnSettings
+              columns={COLUMN_CONFIG}
+              visibility={columnVisibility}
+              onVisibilityChange={setColumnVisibility}
+            />
+            <Button
+              color="primary"
+              size={TOPBAR_CONTROL_SIZE}
+              pill={TOPBAR_ACTION_PILL}
+              onClick={() => {}}
+            >
+              <Plus />
+              <span className="hidden md:inline">New Import</span>
+            </Button>
+          </div>
         }
         toolbar={
           <>
-             <Button
-               color="primary"
-               size={TOPBAR_CONTROL_SIZE}
-               pill={TOPBAR_ACTION_PILL}
-               onClick={() => {}}
-             >
-               <Plus />
-               <span className="hidden md:inline">New Import</span>
-             </Button>
-
             <TableSearch
               value={search}
               onChange={setSearch}
