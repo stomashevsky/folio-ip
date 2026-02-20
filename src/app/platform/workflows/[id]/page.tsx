@@ -3,7 +3,7 @@
 import { Suspense, useRef, useState } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 
-import { TopBar, TOPBAR_CONTROL_SIZE, TOPBAR_ACTION_PILL } from "@/components/layout/TopBar";
+import { TopBar, TOPBAR_CONTROL_SIZE, TOPBAR_ACTION_PILL, TOPBAR_TOOLBAR_PILL } from "@/components/layout/TopBar";
 import { NotFoundPage, ConfirmLeaveModal } from "@/components/shared";
 import { FlowEditor, type FlowEditorPanel } from "@/components/flow/FlowEditor";
 import { SegmentedControl } from "@plexui/ui/components/SegmentedControl";
@@ -176,10 +176,10 @@ function WorkflowDetailContent() {
             {title}
             {!isNew && (
               <>
-                <Badge color={getStatusColor(form.status) as "warning" | "success" | "secondary"} size="sm">
-                  {form.status}
+                <Badge color={getStatusColor(form.status) as "warning" | "success" | "secondary"} size="sm" pill>
+                  {form.status.charAt(0).toUpperCase() + form.status.slice(1)}
                 </Badge>
-                <Badge color={form.lastPublishedAt ? "info" : "secondary"} variant="outline" size="sm">
+                <Badge color={form.lastPublishedAt ? "info" : "secondary"} variant="outline" size="sm" pill>
                   {form.lastPublishedAt ? "Version: Published" : "Version: Draft"}
                 </Badge>
               </>
@@ -195,8 +195,8 @@ function WorkflowDetailContent() {
               aria-label="Editor panel"
               value={editorPanel}
               onChange={(v) => setEditorPanel(v as FlowEditorPanel)}
-              size="sm"
-              pill={false}
+              size={TOPBAR_CONTROL_SIZE}
+              pill={TOPBAR_TOOLBAR_PILL}
             >
               <SegmentedControl.Tab value="chat">{FLOW_CHAT_EMPTY_STATE_TITLE}</SegmentedControl.Tab>
               <SegmentedControl.Tab value="code">Code</SegmentedControl.Tab>

@@ -10,7 +10,8 @@ import { Modal, ModalHeader, ModalBody, ModalFooter } from "./Modal";
 import { Button } from "@plexui/ui/components/Button";
 import { Input } from "@plexui/ui/components/Input";
 import { Menu } from "@plexui/ui/components/Menu";
-import { ChevronDownSm, CloseBold } from "@plexui/ui/components/Icon";
+import { SelectControl } from "@plexui/ui/components/SelectControl";
+import { CloseBold } from "@plexui/ui/components/Icon";
 
 interface SavedViewsControlProps {
   entityType: string;
@@ -70,15 +71,15 @@ export function SavedViewsControl({
     <>
       <Menu>
         <Menu.Trigger>
-          <Button
-            color="secondary"
-            variant={activeView ? "soft" : "outline"}
+          <SelectControl
+            selected={!!activeView}
+            variant="outline"
             size={TOPBAR_CONTROL_SIZE}
             pill={TOPBAR_ACTION_PILL}
+            block={false}
           >
             {activeView ? activeView.name : "Views"}
-            <ChevronDownSm />
-          </Button>
+          </SelectControl>
         </Menu.Trigger>
         <Menu.Content align="end" minWidth={220}>
           {views.length > 0 && (
