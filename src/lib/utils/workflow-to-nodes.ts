@@ -161,11 +161,11 @@ export function workflowFlowToElements(flow: WorkflowFlowDefinition): { nodes: N
 
   const parallelParentMap = buildParallelParentMap(flow);
 
-  for (const [stepId, step] of Object.entries(flow.steps)) {
-    if (step.type === "parallel" && step.next) {
-      const leaves = collectBranchLeaves(step.branches, flow.steps);
+  for (const [, parallelStep] of Object.entries(flow.steps)) {
+    if (parallelStep.type === "parallel" && parallelStep.next) {
+      const leaves = collectBranchLeaves(parallelStep.branches, flow.steps);
       for (const leafId of leaves) {
-        edges.push(buildEdge(`edge__${leafId}__join__${step.next}`, leafId, step.next, undefined, "default", "primary", 1));
+        edges.push(buildEdge(`edge__${leafId}__join__${parallelStep.next}`, leafId, parallelStep.next, undefined, "default", "primary", 1));
       }
     }
   }
