@@ -7,6 +7,8 @@ import { ColumnSettings, type ColumnConfig } from "@/components/shared/ColumnSet
 import { dateTimeCell } from "@/lib/utils/columnHelpers";
 import type { ColumnDef, VisibilityState } from "@tanstack/react-table";
 import { Badge } from "@plexui/ui/components/Badge";
+import { Select } from "@plexui/ui/components/Select";
+import { Button } from "@plexui/ui/components/Button";
 
 interface AccountType {
   id: string;
@@ -17,6 +19,11 @@ interface AccountType {
   autoApprove: boolean;
   createdAt: string;
 }
+
+const APPROVAL_OPTIONS = [
+  { value: "auto", label: "Auto" },
+  { value: "manual", label: "Manual" },
+];
 
 const mockAccountTypes: AccountType[] = [
   {
@@ -148,18 +155,32 @@ const columns: ColumnDef<AccountType, unknown>[] = [
 
 export default function AccountTypesPage() {
   const [search, setSearch] = useState("");
+  const [approvalFilter, setApprovalFilter] = useState<string[]>([]);
   const [columnVisibility, setColumnVisibility] =
     useState<VisibilityState>(DEFAULT_VISIBILITY);
 
+  const hasActiveFilters = approvalFilter.length > 0;
+
+  function clearAllFilters() {
+    setApprovalFilter([]);
+  }
+
   const filteredData = useMemo(() => {
-    if (!search) return mockAccountTypes;
-    const searchLower = search.toLowerCase();
-    return mockAccountTypes.filter(
-      (item) =>
-        item.name.toLowerCase().includes(searchLower) ||
-        item.description.toLowerCase().includes(searchLower)
-    );
-  }, [search]);
+    return mockAccountTypes.filter((item) => {
+      if (approvalFilter.length > 0) {
+        const val = item.autoApprove ? "auto" : "manual";
+        if (!approvalFilter.includes(val)) return false;
+      }
+      if (search) {
+        const searchLower = search.toLowerCase();
+        return (
+          item.name.toLowerCase().includes(searchLower) ||
+          item.description.toLowerCase().includes(searchLower)
+        );
+      }
+      return true;
+    });
+  }, [search, approvalFilter]);
 
   return (
     <div className="flex h-full flex-col overflow-hidden">
@@ -173,11 +194,39 @@ export default function AccountTypesPage() {
           />
         }
         toolbar={
-          <TableSearch
-            value={search}
-            onChange={setSearch}
-            placeholder="Search account types..."
-          />
+          <>
+            <TableSearch
+              value={search}
+              onChange={setSearch}
+              placeholder="Search account types..."
+            />
+            <div className="w-36">
+              <Select
+                multiple
+                clearable
+                block
+                pill
+                listMinWidth={180}
+                options={APPROVAL_OPTIONS}
+                value={approvalFilter}
+                onChange={(opts) => setApprovalFilter(opts.map((o) => o.value))}
+                placeholder="Approval"
+                variant="outline"
+                size="sm"
+              />
+            </div>
+            {hasActiveFilters && (
+              <Button
+                color="secondary"
+                variant="soft"
+                size="sm"
+                pill
+                onClick={clearAllFilters}
+              >
+                Clear filters
+              </Button>
+            )}
+          </>
         }
       />
 

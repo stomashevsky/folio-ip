@@ -9,6 +9,7 @@ import type { ColumnDef, VisibilityState } from "@tanstack/react-table";
 import { Badge } from "@plexui/ui/components/Badge";
 import { Button } from "@plexui/ui/components/Button";
 import { Plus } from "@plexui/ui/components/Icon";
+import { Select } from "@plexui/ui/components/Select";
 
 interface GraphTemplate {
   id: string;
@@ -19,6 +20,11 @@ interface GraphTemplate {
   isDefault: boolean;
   createdAt: string;
 }
+
+const TYPE_OPTIONS = [
+  { value: "default", label: "Default" },
+  { value: "custom", label: "Custom" },
+];
 
 const mockTemplates: GraphTemplate[] = [
   {
@@ -146,11 +152,22 @@ const columns: ColumnDef<GraphTemplate, unknown>[] = [
 
 export default function GraphTemplatesPage() {
   const [search, setSearch] = useState("");
+  const [typeFilter, setTypeFilter] = useState<string[]>([]);
   const [columnVisibility, setColumnVisibility] =
     useState<VisibilityState>(DEFAULT_VISIBILITY);
 
+  const hasActiveFilters = typeFilter.length > 0;
+
+  function clearAllFilters() {
+    setTypeFilter([]);
+  }
+
   const filteredData = useMemo(() => {
     return mockTemplates.filter((template) => {
+      if (typeFilter.length > 0) {
+        const val = template.isDefault ? "default" : "custom";
+        if (!typeFilter.includes(val)) return false;
+      }
       if (search) {
         const searchLower = search.toLowerCase();
         return (
@@ -160,7 +177,7 @@ export default function GraphTemplatesPage() {
       }
       return true;
     });
-  }, [search]);
+  }, [search, typeFilter]);
 
   return (
     <div className="flex h-full flex-col overflow-hidden">
@@ -180,6 +197,14 @@ export default function GraphTemplatesPage() {
               onChange={setSearch}
               placeholder="Search templates..."
             />
+            <div className="w-36">
+              <Select multiple clearable block pill listMinWidth={180} options={TYPE_OPTIONS} value={typeFilter} onChange={(opts) => setTypeFilter(opts.map((o) => o.value))} placeholder="Type" variant="outline" size="sm" />
+            </div>
+            {hasActiveFilters && (
+              <Button color="secondary" variant="soft" size="sm" pill onClick={clearAllFilters}>
+                Clear filters
+              </Button>
+            )}
             <Button color="info" size="sm" pill>
               <Plus className="h-4 w-4" />
               Create Template

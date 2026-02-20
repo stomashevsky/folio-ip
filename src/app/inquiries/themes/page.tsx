@@ -7,6 +7,8 @@ import { ColumnSettings, type ColumnConfig } from "@/components/shared/ColumnSet
 import { dateTimeCell } from "@/lib/utils/columnHelpers";
 import type { ColumnDef, VisibilityState } from "@tanstack/react-table";
 import { Badge } from "@plexui/ui/components/Badge";
+import { Select } from "@plexui/ui/components/Select";
+import { Button } from "@plexui/ui/components/Button";
 
 interface Theme {
   id: string;
@@ -18,6 +20,11 @@ interface Theme {
   usedBy: number;
   updatedAt: string;
 }
+
+const STATUS_OPTIONS = [
+  { value: "active", label: "Active" },
+  { value: "draft", label: "Draft" },
+];
 
 const mockThemes: Theme[] = [
   {
@@ -156,18 +163,30 @@ const columns: ColumnDef<Theme, unknown>[] = [
 
 export default function InquiryThemesPage() {
   const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string[]>([]);
   const [columnVisibility, setColumnVisibility] =
     useState<VisibilityState>(DEFAULT_VISIBILITY);
 
+  const hasActiveFilters = statusFilter.length > 0;
+
+  function clearAllFilters() {
+    setStatusFilter([]);
+  }
+
   const filteredData = useMemo(() => {
-    if (!search) return mockThemes;
-    const searchLower = search.toLowerCase();
-    return mockThemes.filter(
-      (item) =>
-        item.name.toLowerCase().includes(searchLower) ||
-        item.description.toLowerCase().includes(searchLower)
-    );
-  }, [search]);
+    return mockThemes.filter((item) => {
+      if (statusFilter.length > 0 && !statusFilter.includes(item.status))
+        return false;
+      if (search) {
+        const searchLower = search.toLowerCase();
+        return (
+          item.name.toLowerCase().includes(searchLower) ||
+          item.description.toLowerCase().includes(searchLower)
+        );
+      }
+      return true;
+    });
+  }, [search, statusFilter]);
 
   return (
     <div className="flex h-full flex-col overflow-hidden">
@@ -181,11 +200,39 @@ export default function InquiryThemesPage() {
           />
         }
         toolbar={
-          <TableSearch
-            value={search}
-            onChange={setSearch}
-            placeholder="Search themes..."
-          />
+          <>
+            <TableSearch
+              value={search}
+              onChange={setSearch}
+              placeholder="Search themes..."
+            />
+            <div className="w-36">
+              <Select
+                multiple
+                clearable
+                block
+                pill
+                listMinWidth={180}
+                options={STATUS_OPTIONS}
+                value={statusFilter}
+                onChange={(opts) => setStatusFilter(opts.map((o) => o.value))}
+                placeholder="Status"
+                variant="outline"
+                size="sm"
+              />
+            </div>
+            {hasActiveFilters && (
+              <Button
+                color="secondary"
+                variant="soft"
+                size="sm"
+                pill
+                onClick={clearAllFilters}
+              >
+                Clear filters
+              </Button>
+            )}
+          </>
         }
       />
 

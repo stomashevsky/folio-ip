@@ -1,8 +1,14 @@
 "use client";
 
+import { useState, useMemo } from "react";
 import { TopBar } from "@/components/layout/TopBar";
-import { SummaryCard } from "@/components/shared";
+import { DataTable, TableSearch, SummaryCard } from "@/components/shared";
+import { ColumnSettings, type ColumnConfig } from "@/components/shared/ColumnSettings";
+import { dateTimeCell } from "@/lib/utils/columnHelpers";
+import type { ColumnDef, VisibilityState } from "@tanstack/react-table";
 import { Badge } from "@plexui/ui/components/Badge";
+import { Select } from "@plexui/ui/components/Select";
+import { Button } from "@plexui/ui/components/Button";
 
 interface ActivityRecord {
   id: string;
@@ -15,191 +21,214 @@ interface ActivityRecord {
 }
 
 const mockActivity: ActivityRecord[] = [
+  { id: "act_001", action: "import", type: "CSV Upload", recordCount: 15234, status: "completed", createdAt: "2025-02-20T14:30:00Z", createdBy: "John Smith" },
+  { id: "act_002", action: "export", type: "Report Export", recordCount: 8456, status: "completed", createdAt: "2025-02-20T13:45:00Z", createdBy: "Sarah Johnson" },
+  { id: "act_003", action: "import", type: "JSON Batch", recordCount: 3200, status: "processing", createdAt: "2025-02-20T13:15:00Z", createdBy: "Mike Chen" },
+  { id: "act_004", action: "export", type: "Compliance Report", recordCount: 12500, status: "completed", createdAt: "2025-02-20T12:30:00Z", createdBy: "Emma Davis" },
+  { id: "act_005", action: "import", type: "XLSX Import", recordCount: 5678, status: "failed", createdAt: "2025-02-20T11:45:00Z", createdBy: "Alex Rodriguez" },
+  { id: "act_006", action: "export", type: "Analytics Export", recordCount: 9234, status: "completed", createdAt: "2025-02-20T11:00:00Z", createdBy: "Lisa Wong" },
+  { id: "act_007", action: "import", type: "API Sync", recordCount: 2100, status: "completed", createdAt: "2025-02-20T10:15:00Z", createdBy: "James Miller" },
+  { id: "act_008", action: "export", type: "Audit Trail", recordCount: 18900, status: "processing", createdAt: "2025-02-20T09:30:00Z", createdBy: "Patricia Brown" },
+  { id: "act_009", action: "import", type: "Watchlist Sync", recordCount: 890, status: "completed", createdAt: "2025-02-19T16:00:00Z", createdBy: "David Kim" },
+  { id: "act_010", action: "export", type: "Account Summary", recordCount: 6700, status: "completed", createdAt: "2025-02-19T14:20:00Z", createdBy: "Rachel Green" },
+];
+
+const ACTION_OPTIONS = [
+  { value: "import", label: "Import" },
+  { value: "export", label: "Export" },
+];
+
+const STATUS_OPTIONS = [
+  { value: "completed", label: "Completed" },
+  { value: "processing", label: "Processing" },
+  { value: "failed", label: "Failed" },
+];
+
+const COLUMN_CONFIG: ColumnConfig[] = [
+  { id: "action", label: "Action" },
+  { id: "type", label: "Type" },
+  { id: "recordCount", label: "Records" },
+  { id: "status", label: "Status" },
+  { id: "createdBy", label: "Created By" },
+  { id: "createdAt", label: "Date" },
+];
+
+const DEFAULT_VISIBILITY: VisibilityState = {
+  action: true,
+  type: true,
+  recordCount: true,
+  status: true,
+  createdBy: true,
+  createdAt: true,
+};
+
+const statusColorMap: Record<string, "success" | "warning" | "danger"> = {
+  completed: "success",
+  processing: "warning",
+  failed: "danger",
+};
+
+const columns: ColumnDef<ActivityRecord, unknown>[] = [
   {
-    id: "act_001",
-    action: "import",
-    type: "CSV Upload",
-    recordCount: 15234,
-    status: "completed",
-    createdAt: "2025-02-20T14:30:00Z",
-    createdBy: "John Smith",
+    accessorKey: "action",
+    header: "Action",
+    size: 100,
+    cell: ({ row }) => (
+      <Badge color={row.original.action === "import" ? "info" : "secondary"} variant="soft" size="sm">
+        {row.original.action === "import" ? "Import" : "Export"}
+      </Badge>
+    ),
   },
   {
-    id: "act_002",
-    action: "export",
-    type: "Report Export",
-    recordCount: 8456,
-    status: "completed",
-    createdAt: "2025-02-20T13:45:00Z",
-    createdBy: "Sarah Johnson",
+    accessorKey: "type",
+    header: "Type",
+    size: 180,
+    cell: ({ row }) => <span className="font-medium">{row.original.type}</span>,
   },
   {
-    id: "act_003",
-    action: "import",
-    type: "JSON Batch",
-    recordCount: 3200,
-    status: "processing",
-    createdAt: "2025-02-20T13:15:00Z",
-    createdBy: "Mike Chen",
+    accessorKey: "recordCount",
+    header: "Records",
+    size: 120,
+    cell: ({ row }) => (
+      <span className="text-[var(--color-text-secondary)]">{row.original.recordCount.toLocaleString()}</span>
+    ),
   },
   {
-    id: "act_004",
-    action: "export",
-    type: "Compliance Report",
-    recordCount: 12500,
-    status: "completed",
-    createdAt: "2025-02-20T12:30:00Z",
-    createdBy: "Emma Davis",
+    accessorKey: "status",
+    header: "Status",
+    size: 120,
+    cell: ({ row }) => (
+      <Badge color={statusColorMap[row.original.status]} variant="soft" size="sm">
+        {row.original.status.charAt(0).toUpperCase() + row.original.status.slice(1)}
+      </Badge>
+    ),
   },
   {
-    id: "act_005",
-    action: "import",
-    type: "XLSX Import",
-    recordCount: 5678,
-    status: "failed",
-    createdAt: "2025-02-20T11:45:00Z",
-    createdBy: "Alex Rodriguez",
+    accessorKey: "createdBy",
+    header: "Created By",
+    size: 140,
+    cell: ({ row }) => (
+      <span className="text-[var(--color-text-secondary)]">{row.original.createdBy}</span>
+    ),
   },
   {
-    id: "act_006",
-    action: "export",
-    type: "Analytics Export",
-    recordCount: 9234,
-    status: "completed",
-    createdAt: "2025-02-20T11:00:00Z",
-    createdBy: "Lisa Wong",
-  },
-  {
-    id: "act_007",
-    action: "import",
-    type: "API Sync",
-    recordCount: 2100,
-    status: "completed",
-    createdAt: "2025-02-20T10:15:00Z",
-    createdBy: "James Miller",
-  },
-  {
-    id: "act_008",
-    action: "export",
-    type: "Audit Trail",
-    recordCount: 18900,
-    status: "processing",
-    createdAt: "2025-02-20T09:30:00Z",
-    createdBy: "Patricia Brown",
+    accessorKey: "createdAt",
+    header: "Date",
+    size: 180,
+    cell: dateTimeCell<ActivityRecord>((r) => r.createdAt),
   },
 ];
 
-function formatDateTime(isoString: string): string {
-  const date = new Date(isoString);
-  return date.toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-}
-
-function getStatusColor(status: string): "success" | "warning" | "danger" | "secondary" {
-  switch (status) {
-    case "completed":
-      return "success";
-    case "processing":
-      return "warning";
-    case "failed":
-      return "danger";
-    default:
-      return "secondary";
-  }
-}
-
 export default function DataPage() {
+  const [search, setSearch] = useState("");
+  const [actionFilter, setActionFilter] = useState<string[]>([]);
+  const [statusFilter, setStatusFilter] = useState<string[]>([]);
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(DEFAULT_VISIBILITY);
+
+  const hasActiveFilters = actionFilter.length > 0 || statusFilter.length > 0;
+
+  const filteredData = useMemo(() => {
+    return mockActivity.filter((item) => {
+      if (actionFilter.length > 0 && !actionFilter.includes(item.action)) return false;
+      if (statusFilter.length > 0 && !statusFilter.includes(item.status)) return false;
+      if (search) {
+        const s = search.toLowerCase();
+        return (
+          item.type.toLowerCase().includes(s) ||
+          item.createdBy.toLowerCase().includes(s)
+        );
+      }
+      return true;
+    });
+  }, [search, actionFilter, statusFilter]);
+
+  function clearAllFilters() {
+    setActionFilter([]);
+    setStatusFilter([]);
+  }
+
   return (
     <div className="flex h-full flex-col overflow-hidden">
-      <TopBar title="Data" />
+      <TopBar
+        title="Data"
+        actions={
+          <ColumnSettings
+            columns={COLUMN_CONFIG}
+            visibility={columnVisibility}
+            onVisibilityChange={setColumnVisibility}
+          />
+        }
+        toolbar={
+          <>
+            <TableSearch value={search} onChange={setSearch} placeholder="Search activity..." />
+            <div className="w-36">
+              <Select
+                multiple
+                clearable
+                block
+                pill
+                listMinWidth={160}
+                options={ACTION_OPTIONS}
+                value={actionFilter}
+                onChange={(opts) => setActionFilter(opts.map((o) => o.value))}
+                placeholder="Action"
+                variant="outline"
+                size="sm"
+              />
+            </div>
+            <div className="w-36">
+              <Select
+                multiple
+                clearable
+                block
+                pill
+                listMinWidth={180}
+                options={STATUS_OPTIONS}
+                value={statusFilter}
+                onChange={(opts) => setStatusFilter(opts.map((o) => o.value))}
+                placeholder="Status"
+                variant="outline"
+                size="sm"
+              />
+            </div>
+            {hasActiveFilters && (
+              <Button color="secondary" variant="soft" size="sm" pill onClick={clearAllFilters}>
+                Clear filters
+              </Button>
+            )}
+          </>
+        }
+      />
 
-      <div className="flex-1 overflow-auto px-4 py-6 md:px-6">
-        <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <SummaryCard label="Total Records">
-            <div className="heading-lg">847,293</div>
-          </SummaryCard>
-          <SummaryCard label="Imports">
-            <div className="heading-lg">34</div>
-          </SummaryCard>
-          <SummaryCard label="Exports">
-            <div className="heading-lg">12</div>
-          </SummaryCard>
-          <SummaryCard label="Storage Used">
-            <div className="heading-lg">2.4 GB</div>
-          </SummaryCard>
+      <div className="flex min-h-0 flex-1 flex-col">
+        <div className="shrink-0 px-4 pt-4 pb-2 md:px-6">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <SummaryCard label="Total Records">
+              <div className="heading-lg">847,293</div>
+            </SummaryCard>
+            <SummaryCard label="Imports">
+              <div className="heading-lg">34</div>
+            </SummaryCard>
+            <SummaryCard label="Exports">
+              <div className="heading-lg">12</div>
+            </SummaryCard>
+            <SummaryCard label="Storage Used">
+              <div className="heading-lg">2.4 GB</div>
+            </SummaryCard>
+          </div>
         </div>
 
-        <div>
-          <h2 className="heading-md mb-4">Recent Activity</h2>
-          <div className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] overflow-hidden">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-[var(--color-border)]">
-                  <th className="px-4 py-3 text-left font-semibold text-[var(--color-text-secondary)]">
-                    Action
-                  </th>
-                  <th className="px-4 py-3 text-left font-semibold text-[var(--color-text-secondary)]">
-                    Type
-                  </th>
-                  <th className="px-4 py-3 text-left font-semibold text-[var(--color-text-secondary)]">
-                    Records
-                  </th>
-                  <th className="px-4 py-3 text-left font-semibold text-[var(--color-text-secondary)]">
-                    Status
-                  </th>
-                  <th className="px-4 py-3 text-left font-semibold text-[var(--color-text-secondary)]">
-                    Created By
-                  </th>
-                  <th className="px-4 py-3 text-left font-semibold text-[var(--color-text-secondary)]">
-                    Date
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {mockActivity.map((record) => (
-                  <tr
-                    key={record.id}
-                    className="border-b border-[var(--color-border)] last:border-b-0 hover:bg-[var(--color-surface)] transition-colors"
-                  >
-                    <td className="px-4 py-3">
-                      <Badge
-                        color={record.action === "import" ? "info" : "secondary"}
-                        variant="soft"
-                        size="sm"
-                      >
-                        {record.action === "import" ? "Import" : "Export"}
-                      </Badge>
-                    </td>
-                    <td className="px-4 py-3 font-medium">{record.type}</td>
-                    <td className="px-4 py-3 text-[var(--color-text-secondary)]">
-                      {record.recordCount.toLocaleString()}
-                    </td>
-                    <td className="px-4 py-3">
-                      <Badge
-                        color={getStatusColor(record.status)}
-                        variant="soft"
-                        size="sm"
-                      >
-                        {record.status.charAt(0).toUpperCase() +
-                          record.status.slice(1)}
-                      </Badge>
-                    </td>
-                    <td className="px-4 py-3 text-[var(--color-text-secondary)]">
-                      {record.createdBy}
-                    </td>
-                    <td className="px-4 py-3 text-[var(--color-text-secondary)]">
-                      {formatDateTime(record.createdAt)}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+        <div className="flex min-h-0 flex-1 flex-col px-4 pt-2 md:px-6">
+          <DataTable
+            data={filteredData}
+            columns={columns}
+            globalFilter={search}
+            pageSize={50}
+            initialSorting={[{ id: "createdAt", desc: true }]}
+            columnVisibility={columnVisibility}
+            onColumnVisibilityChange={setColumnVisibility}
+            mobileColumnVisibility={{ createdBy: false, recordCount: false }}
+          />
         </div>
       </div>
     </div>

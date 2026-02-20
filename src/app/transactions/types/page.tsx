@@ -8,6 +8,7 @@ import { dateTimeCell } from "@/lib/utils/columnHelpers";
 import { Button } from "@plexui/ui/components/Button";
 import { Badge } from "@plexui/ui/components/Badge";
 import { Plus } from "@plexui/ui/components/Icon";
+import { Select } from "@plexui/ui/components/Select";
 import type { ColumnDef, VisibilityState } from "@tanstack/react-table";
 
 interface TransactionTypeConfig {
@@ -20,6 +21,12 @@ interface TransactionTypeConfig {
   createdAt: string;
   updatedAt: string;
 }
+
+const RISK_LEVEL_OPTIONS = [
+  { value: "low", label: "Low" },
+  { value: "medium", label: "Medium" },
+  { value: "high", label: "High" },
+];
 
 const mockTransactionTypes: TransactionTypeConfig[] = [
   {
@@ -177,11 +184,19 @@ const columns: ColumnDef<TransactionTypeConfig, unknown>[] = [
 
 export default function TransactionTypesPage() {
   const [search, setSearch] = useState("");
+  const [riskFilter, setRiskFilter] = useState<string[]>([]);
   const [columnVisibility, setColumnVisibility] =
     useState<VisibilityState>(DEFAULT_VISIBILITY);
 
+  const hasActiveFilters = riskFilter.length > 0;
+
+  function clearAllFilters() {
+    setRiskFilter([]);
+  }
+
   const filteredData = useMemo(() => {
     return mockTransactionTypes.filter((type) => {
+      if (riskFilter.length > 0 && !riskFilter.includes(type.riskLevel)) return false;
       if (search) {
         const searchLower = search.toLowerCase();
         return (
@@ -191,7 +206,7 @@ export default function TransactionTypesPage() {
       }
       return true;
     });
-  }, [search]);
+  }, [search, riskFilter]);
 
   return (
     <div className="flex h-full flex-col overflow-hidden">
@@ -213,6 +228,14 @@ export default function TransactionTypesPage() {
               onChange={setSearch}
               placeholder="Search types..."
             />
+            <div className="w-36">
+              <Select multiple clearable block pill listMinWidth={180} options={RISK_LEVEL_OPTIONS} value={riskFilter} onChange={(opts) => setRiskFilter(opts.map((o) => o.value))} placeholder="Risk Level" variant="outline" size="sm" />
+            </div>
+            {hasActiveFilters && (
+              <Button color="secondary" variant="soft" size="sm" pill onClick={clearAllFilters}>
+                Clear filters
+              </Button>
+            )}
             <Button
               color="primary"
               size="sm"
