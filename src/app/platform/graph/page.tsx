@@ -982,6 +982,7 @@ export default function GraphPage() {
                   <Button
                     color="primary"
                     size="md"
+                    pill={false}
                     onClick={handleRunQuery}
                     disabled={!queryText.trim()}
                   >
