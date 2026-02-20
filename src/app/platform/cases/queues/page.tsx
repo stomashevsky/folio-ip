@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import { useRouter } from "next/navigation";
 import { TopBar, TOPBAR_CONTROL_SIZE, TOPBAR_TOOLBAR_PILL, TOPBAR_ACTION_PILL } from "@/components/layout/TopBar";
 import { TABLE_PAGE_WRAPPER, TABLE_PAGE_CONTENT } from "@/lib/constants/page-layout";
 import { DataTable, TableSearch } from "@/components/shared";
@@ -153,6 +154,7 @@ const columns: ColumnDef<CaseQueue, unknown>[] = [
 ];
 
 export default function CaseQueuesPage() {
+  const router = useRouter();
   const [search, setSearch] = useState("");
   const [slaFilter, setSlaFilter] = useState<string[]>([]);
   const [columnVisibility, setColumnVisibility] =
@@ -241,6 +243,7 @@ export default function CaseQueuesPage() {
           initialSorting={[{ id: "createdAt", desc: true }]}
           columnVisibility={columnVisibility}
           onColumnVisibilityChange={setColumnVisibility}
+          onRowClick={(row) => router.push(`/platform/cases/queues/${row.id}`)}
           mobileColumnVisibility={{
             description: false,
             assignedTo: false,
