@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { TopBar, TOPBAR_CONTROL_SIZE, TOPBAR_TOOLBAR_PILL } from "@/components/layout/TopBar";
+import { useRouter } from "next/navigation";
+import { TopBar, TOPBAR_CONTROL_SIZE, TOPBAR_TOOLBAR_PILL, TOPBAR_ACTION_PILL } from "@/components/layout/TopBar";
 import { TABLE_PAGE_WRAPPER, TABLE_PAGE_CONTENT } from "@/lib/constants/page-layout";
 import { DataTable, TableSearch } from "@/components/shared";
 import { ColumnSettings, type ColumnConfig } from "@/components/shared/ColumnSettings";
@@ -152,6 +153,7 @@ const columns: ColumnDef<GraphTemplate, unknown>[] = [
 ];
 
 export default function GraphTemplatesPage() {
+  const router = useRouter();
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState<string[]>([]);
   const [columnVisibility, setColumnVisibility] =
@@ -185,11 +187,17 @@ export default function GraphTemplatesPage() {
       <TopBar
         title="Graph Templates"
         actions={
-          <ColumnSettings
-            columns={COLUMN_CONFIG}
-            visibility={columnVisibility}
-            onVisibilityChange={setColumnVisibility}
-          />
+          <div className="flex items-center gap-2">
+            <ColumnSettings
+              columns={COLUMN_CONFIG}
+              visibility={columnVisibility}
+              onVisibilityChange={setColumnVisibility}
+            />
+            <Button color="primary" size={TOPBAR_CONTROL_SIZE} pill={TOPBAR_ACTION_PILL}>
+              <Plus />
+              <span className="hidden md:inline">Create Template</span>
+            </Button>
+          </div>
         }
         toolbar={
           <>
@@ -206,10 +214,6 @@ export default function GraphTemplatesPage() {
                  Clear filters
                </Button>
              )}
-             <Button color="info" size={TOPBAR_CONTROL_SIZE} pill={TOPBAR_TOOLBAR_PILL}>
-               <Plus className="h-4 w-4" />
-               Create Template
-             </Button>
           </>
         }
       />
@@ -223,6 +227,7 @@ export default function GraphTemplatesPage() {
           initialSorting={[{ id: "createdAt", desc: true }]}
           columnVisibility={columnVisibility}
           onColumnVisibilityChange={setColumnVisibility}
+          onRowClick={(row) => router.push(`/platform/graph/templates/${row.id}`)}
         />
       </div>
     </div>
