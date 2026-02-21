@@ -22,7 +22,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Folio — Identity Platform",
-  description: "KYC/Identity Platform",
+  description: "Identity Platform",
 };
 
 export default function RootLayout({
