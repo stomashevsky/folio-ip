@@ -13,6 +13,15 @@ export const CHART_COLORS = {
   neutral: "var(--color-chart-neutral)",
 } as const;
 
+export const CHART_LEGEND = {
+  fontSize: 13,
+  iconSize: 8,
+  /** row-gap  column-gap */
+  gap: "10px 24px",
+  paddingBottom: 16,
+  color: "var(--color-text-secondary)",
+} as const;
+
 export const TYPE_CHART_PALETTE = [
   "#0073e6",
   "#30a46c",

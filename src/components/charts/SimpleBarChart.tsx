@@ -11,6 +11,7 @@ import {
 } from "recharts";
 import type { TimeSeriesPoint } from "@/lib/types";
 import { CHART_COLORS } from "@/lib/constants/chart-colors";
+import { ChartTooltipContent } from "./ChartTooltipContent";
 
 interface SimpleBarChartProps {
   data: TimeSeriesPoint[];
@@ -45,25 +46,7 @@ export function SimpleBarChart({ data, label = "Inquiries" }: SimpleBarChartProp
           axisLine={false}
         />
         <Tooltip
-          contentStyle={{
-            backgroundColor: "var(--color-surface-elevated)",
-            border: "1px solid var(--color-border)",
-            borderRadius: "8px",
-            fontSize: "13px",
-            color: "var(--color-text)",
-          }}
-          itemStyle={{ color: "var(--color-text)" }}
-          labelStyle={{ color: "var(--color-text)" }}
-          labelFormatter={(label: string) => {
-            const d = new Date(label);
-            return d.toLocaleDateString("en-US", {
-              weekday: "short",
-              month: "short",
-              day: "numeric",
-              year: "numeric",
-            });
-          }}
-          formatter={(value: number) => [value, label]}
+          content={<ChartTooltipContent />}
           cursor={{ fill: "var(--color-surface-secondary)" }}
         />
         <Bar

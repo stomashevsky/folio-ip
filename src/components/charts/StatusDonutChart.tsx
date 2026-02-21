@@ -2,6 +2,7 @@
 
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 import type { StatusDistribution } from "@/lib/types";
+import { ChartTooltipContent } from "./ChartTooltipContent";
 
 interface StatusDonutChartProps {
   data: StatusDistribution[];
@@ -9,6 +10,16 @@ interface StatusDonutChartProps {
 
 export function StatusDonutChart({ data }: StatusDonutChartProps) {
   const total = data.reduce((sum, d) => sum + d.count, 0);
+
+  const formatValue = (value: number, entry?: Record<string, unknown>) => {
+    const pct =
+      entry && typeof entry.percentage === "number"
+        ? entry.percentage.toFixed(1)
+        : total > 0
+          ? ((value / total) * 100).toFixed(1)
+          : "0";
+    return `${value.toLocaleString()} (${pct}%)`;
+  };
 
   return (
     <div className="flex items-center gap-8">
@@ -29,17 +40,7 @@ export function StatusDonutChart({ data }: StatusDonutChartProps) {
             ))}
           </Pie>
           <Tooltip
-            contentStyle={{
-              backgroundColor: "var(--color-surface-elevated)",
-              border: "1px solid var(--color-border)",
-              borderRadius: "8px",
-              fontSize: "13px",
-              color: "var(--color-text)",
-            }}
-            formatter={(value: number, name: string) => {
-              const pct = total > 0 ? ((value / total) * 100).toFixed(1) : "0";
-              return [`${value.toLocaleString()} (${pct}%)`, name];
-            }}
+            content={<ChartTooltipContent hideLabel valueFormatter={formatValue} />}
           />
         </PieChart>
       </ResponsiveContainer>

@@ -12,6 +12,8 @@ import {
 } from "recharts";
 import type { FunnelTimeSeriesPoint } from "@/lib/types";
 import { FUNNEL_STEPS } from "@/lib/data/mock-analytics";
+import { ChartLegend } from "./ChartLegend";
+import { ChartTooltipContent } from "./ChartTooltipContent";
 
 interface FunnelTrendChartProps {
   data: FunnelTimeSeriesPoint[];
@@ -50,37 +52,22 @@ export function FunnelTrendChart({ data }: FunnelTrendChartProps) {
           axisLine={false}
         />
         <Tooltip
-          contentStyle={{
-            backgroundColor: "var(--color-surface-elevated)",
-            border: "1px solid var(--color-border)",
-            borderRadius: "8px",
-            fontSize: "13px",
-            color: "var(--color-text)",
-          }}
-          itemStyle={{ color: "var(--color-text)" }}
-          labelStyle={{ color: "var(--color-text)" }}
-          labelFormatter={(label: string) => {
-            const d = new Date(label);
-            return d.toLocaleDateString("en-US", {
-              weekday: "short",
-              month: "short",
-              day: "numeric",
-              year: "numeric",
-            });
-          }}
-          formatter={(value: number, name: string) => [
-            `${value}%`,
-            visibleSteps.find((s) => s.key === name)?.name ?? name,
-          ]}
+          content={
+            <ChartTooltipContent
+              valueFormatter={(v) => `${v}%`}
+              nameFormatter={(key) => visibleSteps.find((s) => s.key === key)?.name ?? key}
+            />
+          }
         />
         <Legend
           verticalAlign="top"
           align="right"
-          iconType="circle"
-          iconSize={8}
-          wrapperStyle={{ fontSize: "12px", paddingBottom: "8px" }}
-          formatter={(value: string) =>
-            visibleSteps.find((s) => s.key === value)?.name ?? value
+          content={
+            <ChartLegend
+              formatter={(key) =>
+                visibleSteps.find((s) => s.key === key)?.name ?? key
+              }
+            />
           }
         />
         {visibleSteps.map((step) => (

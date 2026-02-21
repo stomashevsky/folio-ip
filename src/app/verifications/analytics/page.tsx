@@ -40,6 +40,9 @@ const tabs = ["Volume", "Checks"] as const;
 type Tab = (typeof tabs)[number];
 
 const ALL_TYPE_KEYS = Object.keys(VERIFICATION_TYPE_ANALYTICS_CONFIG);
+const VERIFICATION_LABEL_MAP = Object.fromEntries(
+  Object.entries(VERIFICATION_TYPE_ANALYTICS_CONFIG).map(([k, v]) => [k, v.label]),
+);
 
 const defaultRange: DateRange = DASHBOARD_DATE_SHORTCUTS[1].getDateRange();
 
@@ -232,6 +235,11 @@ function VerificationsAnalyticsContent() {
         }
       />
       <div className="px-4 pb-6 pt-6 md:px-6">
+        <p className="text-sm -mt-1 mb-5 text-[var(--color-text-tertiary)]">
+          {activeTab === "Volume"
+            ? "Creation volume, processing throughput, and pass rates by verification type."
+            : "Pass/fail rates, check outcomes, and average processing times by verification type."}
+        </p>
         {activeTab === "Volume" && (
           <>
             <div className="mb-6 flex flex-wrap items-center gap-3">
@@ -321,7 +329,7 @@ function VerificationsAnalyticsContent() {
 
             <div className="mt-3">
               <ChartCard title="Volume by Type" description="Stacked verification volume over time">
-                <StackedTypeBarChart data={volumeChartData} typeKeys={activeTypeKeys} />
+                <StackedTypeBarChart data={volumeChartData} typeKeys={activeTypeKeys} labelMap={VERIFICATION_LABEL_MAP} />
               </ChartCard>
             </div>
           </>
@@ -428,7 +436,7 @@ function VerificationsAnalyticsContent() {
 
             <div className="mt-3">
               <ChartCard title="Pass Rates by Type" description="Pass rate comparison over time">
-                <TypeRatesLineChart data={checkChartData} typeKeys={activeTypeKeys} />
+                <TypeRatesLineChart data={checkChartData} typeKeys={activeTypeKeys} labelMap={VERIFICATION_LABEL_MAP} />
               </ChartCard>
             </div>
           </>

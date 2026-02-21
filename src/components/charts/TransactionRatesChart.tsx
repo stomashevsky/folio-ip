@@ -12,6 +12,8 @@ import {
 } from "recharts";
 import type { TransactionRatePoint } from "@/lib/types";
 import { CHART_COLORS } from "@/lib/constants/chart-colors";
+import { ChartLegend } from "./ChartLegend";
+import { ChartTooltipContent } from "./ChartTooltipContent";
 
 interface TransactionRatesChartProps {
   data: TransactionRatePoint[];
@@ -46,33 +48,8 @@ export function TransactionRatesChart({ data }: TransactionRatesChartProps) {
           tickLine={false}
           axisLine={false}
         />
-        <Tooltip
-          contentStyle={{
-            backgroundColor: "var(--color-surface-elevated)",
-            border: "1px solid var(--color-border)",
-            borderRadius: "8px",
-            fontSize: "13px",
-            color: "var(--color-text)",
-          }}
-          labelStyle={{ color: "var(--color-text)" }}
-          labelFormatter={(label: string) => {
-            const d = new Date(label);
-            return d.toLocaleDateString("en-US", {
-              weekday: "short",
-              month: "short",
-              day: "numeric",
-              year: "numeric",
-            });
-          }}
-          formatter={(value: number) => [`${value}%`]}
-        />
-        <Legend
-          verticalAlign="top"
-          align="right"
-          iconType="circle"
-          iconSize={8}
-          wrapperStyle={{ fontSize: "13px", color: "var(--color-text-secondary)" }}
-        />
+        <Tooltip content={<ChartTooltipContent valueFormatter={(v) => `${v}%`} />} />
+        <Legend verticalAlign="top" align="right" content={<ChartLegend />} />
         <Line
           type="monotone"
           dataKey="approvalRate"

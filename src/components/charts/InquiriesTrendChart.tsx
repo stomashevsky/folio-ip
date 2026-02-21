@@ -11,6 +11,7 @@ import {
 } from "recharts";
 import type { TimeSeriesPoint } from "@/lib/types";
 import { CHART_COLORS } from "@/lib/constants/chart-colors";
+import { ChartTooltipContent } from "./ChartTooltipContent";
 
 interface InquiriesTrendChartProps {
   data: TimeSeriesPoint[];
@@ -49,24 +50,7 @@ export function InquiriesTrendChart({ data }: InquiriesTrendChartProps) {
           tickLine={false}
           axisLine={false}
         />
-        <Tooltip
-          contentStyle={{
-            backgroundColor: "var(--color-surface-elevated)",
-            border: "1px solid var(--color-border)",
-            borderRadius: "8px",
-            fontSize: "13px",
-            color: "var(--color-text)",
-          }}
-          labelFormatter={(label: string) => {
-            const d = new Date(label);
-            return d.toLocaleDateString("en-US", {
-              weekday: "short",
-              month: "short",
-              day: "numeric",
-              year: "numeric",
-            });
-          }}
-        />
+        <Tooltip content={<ChartTooltipContent />} />
         <Area
           type="linear"
           dataKey="value"

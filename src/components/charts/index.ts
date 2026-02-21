@@ -1,3 +1,5 @@
+export { ChartLegend } from "./ChartLegend";
+export { ChartTooltipContent } from "./ChartTooltipContent";
 export { FunnelChart } from "./FunnelChart";
 export type { FunnelMode } from "./FunnelChart";
 export { FunnelSankey } from "./FunnelSankey";
@@ -7,7 +9,9 @@ export { InquiriesTrendChart } from "./InquiriesTrendChart";
 export { RatesLineChart } from "./RatesLineChart";
 export { ReportRatesChart } from "./ReportRatesChart";
 export { SimpleBarChart } from "./SimpleBarChart";
+export { StackedTypeBarChart } from "./StackedTypeBarChart";
 export { StatusDonutChart } from "./StatusDonutChart";
 export { TransactionRatesChart } from "./TransactionRatesChart";
+export { TypeRatesLineChart } from "./TypeRatesLineChart";
 export { CaseRatesChart } from "./CaseRatesChart";
 export { VerificationRatesChart } from "./VerificationRatesChart";

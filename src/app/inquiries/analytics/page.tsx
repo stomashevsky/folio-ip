@@ -4,29 +4,31 @@ import { Suspense, useState, useMemo, useCallback } from "react";
 import { useTabParam } from "@/lib/hooks/useTabParam";
 import { DateTime } from "luxon";
 import { TopBar, TOPBAR_CONTROL_SIZE, TOPBAR_TOOLBAR_PILL, TOPBAR_ACTION_PILL } from "@/components/layout/TopBar";
-import { ChartCard, MetricCard, SavedViewsControl } from "@/components/shared";
-import { SimpleBarChart } from "@/components/charts/SimpleBarChart";
-import { RatesLineChart } from "@/components/charts/RatesLineChart";
+import { ChartCard, MetricCard, SavedViewsControl, SectionHeading } from "@/components/shared";
+import { StackedTypeBarChart } from "@/components/charts/StackedTypeBarChart";
+import { TypeRatesLineChart } from "@/components/charts/TypeRatesLineChart";
 import { FunnelSankey, type SankeyMetric } from "@/components/charts/FunnelSankey";
 import { FunnelTrendChart } from "@/components/charts/FunnelTrendChart";
+import { VolumeComparisonTable } from "./components/VolumeComparisonTable";
 import {
-  deriveHighlights,
-  generateTimeSeries,
-  generateRateTimeSeries,
+  INQUIRY_TYPE_ANALYTICS_CONFIG,
+  generateInquiryStackedVolumeTimeSeries,
+  generateInquiryMultiTypeRateTimeSeries,
+  deriveInquiryTypeRows,
+  deriveInquiryTypeAggregateHighlights,
   generateFunnelSteps,
   generateFunnelTimeSeries,
   deriveFunnelHighlights,
   generateSankeyFunnel,
 } from "@/lib/data";
-import { aggregateVolume, aggregateRates, aggregateFunnelRates } from "@/lib/utils/analytics";
+import type { TypedTimeSeriesPoint } from "@/lib/data";
+import { aggregateTypedVolume, aggregateTypedRates, aggregateFunnelRates } from "@/lib/utils/analytics";
 import { DASHBOARD_DATE_SHORTCUTS, type DateRange } from "@/lib/constants/date-shortcuts";
 import type { AnalyticsInterval } from "@/lib/types";
 import {
-  INQUIRY_TEMPLATE_OPTIONS,
+  INQUIRY_TYPE_ANALYTICS_OPTIONS,
   ANALYTICS_COUNTRY_OPTIONS,
   ANALYTICS_PLATFORM_OPTIONS,
-  ANALYTICS_DEVICE_OPTIONS,
-  ANALYTICS_TAG_OPTIONS,
   ANALYTICS_INTERVAL_OPTIONS,
   ANALYTICS_FUNNEL_TEMPLATE_OPTIONS,
   ANALYTICS_FUNNEL_METRIC_OPTIONS,
@@ -43,12 +45,17 @@ import { Tooltip } from "@plexui/ui/components/Tooltip";
 const tabs = ["Overview", "Conversion Funnel"] as const;
 type Tab = (typeof tabs)[number];
 
+const ALL_TYPE_KEYS = Object.keys(INQUIRY_TYPE_ANALYTICS_CONFIG);
+const INQUIRY_LABEL_MAP = Object.fromEntries(
+  Object.entries(INQUIRY_TYPE_ANALYTICS_CONFIG).map(([k, v]) => [k, v.label]),
+);
+
 const SANKEY_METRIC_DESCRIPTIONS: Record<SankeyMetric, string> = {
   counts: "Absolute inquiry counts at each verification step",
   rates: "Percentage of total created inquiries reaching each step",
 };
 
-const defaultRange: DateRange = DASHBOARD_DATE_SHORTCUTS[1].getDateRange(); // Last 30 days
+const defaultRange: DateRange = DASHBOARD_DATE_SHORTCUTS[1].getDateRange();
 
 export default function InquiryAnalyticsPage() {
   return (
@@ -64,87 +71,98 @@ function InquiryAnalyticsContent() {
   const [interval, setInterval] = useState<AnalyticsInterval>("daily");
   const [funnelMetric, setFunnelMetric] = useState<SankeyMetric>("counts");
 
-  const [templateFilter, setTemplateFilter] = useState("");
+  const [typeFilter, setTypeFilter] = useState<string[]>([]);
   const [countryFilter, setCountryFilter] = useState<string[]>([]);
   const [platformFilter, setPlatformFilter] = useState<string[]>([]);
-  const [deviceFilter, setDeviceFilter] = useState<string[]>([]);
-  const [tagFilter, setTagFilter] = useState<string[]>([]);
   const [groupByAccounts, setGroupByAccounts] = useState(false);
   const [funnelTemplateFilter, setFunnelTemplateFilter] = useState("");
   const [funnelMetricFilter, setFunnelMetricFilter] = useState("");
   const [funnelTemplateVersion, setFunnelTemplateVersion] = useState("");
 
-  const handleRangeChange = useCallback(
-    (next: DateRange | null) => {
-      setDateRange(next);
-    },
-    [],
-  );
+  const handleRangeChange = useCallback((next: DateRange | null) => { setDateRange(next); }, []);
 
   function clearAllFilters() {
-    setTemplateFilter("");
+    setTypeFilter([]);
     setCountryFilter([]);
     setPlatformFilter([]);
-    setDeviceFilter([]);
-    setTagFilter([]);
+    setGroupByAccounts(false);
     setFunnelTemplateFilter("");
     setFunnelMetricFilter("");
     setFunnelTemplateVersion("");
-    setGroupByAccounts(false);
     setDateRange(defaultRange);
     setInterval("daily");
   }
 
   const currentViewState = useMemo(() => ({
     filters: {
-      template: templateFilter ? [templateFilter] : [] as string[],
+      type: typeFilter,
       country: countryFilter,
       platform: platformFilter,
-      device: deviceFilter,
-      tag: tagFilter,
       interval: [interval],
     },
     columnVisibility: {},
-  }), [templateFilter, countryFilter, platformFilter, deviceFilter, tagFilter, interval]);
+  }), [typeFilter, countryFilter, platformFilter, interval]);
 
   const days = useMemo(() => {
     if (!dateRange) return 30;
     return Math.max(1, Math.round(dateRange[1].diff(dateRange[0], "days").days) + 1);
   }, [dateRange]);
 
+  const activeTypeKeys = useMemo(
+    () => (typeFilter.length > 0 ? typeFilter : ALL_TYPE_KEYS),
+    [typeFilter],
+  );
+
   const filterScale = useMemo(() => {
     let scale = 1;
-    if (templateFilter) scale *= 0.5;
     if (countryFilter.length > 0) scale *= countryFilter.length / ANALYTICS_COUNTRY_OPTIONS.length;
     if (platformFilter.length > 0) scale *= platformFilter.length / ANALYTICS_PLATFORM_OPTIONS.length;
-    if (deviceFilter.length > 0) scale *= deviceFilter.length / ANALYTICS_DEVICE_OPTIONS.length;
-    if (tagFilter.length > 0) scale *= 0.3 + 0.7 * (tagFilter.length / ANALYTICS_TAG_OPTIONS.length);
     if (groupByAccounts) scale *= 0.82;
     return scale;
-  }, [templateFilter, countryFilter, platformFilter, deviceFilter, tagFilter, groupByAccounts]);
+  }, [countryFilter, platformFilter, groupByAccounts]);
 
-  const rawHighlights = useMemo(() => deriveHighlights(days), [days]);
-  const highlights = useMemo(() => {
-    if (filterScale === 1) return rawHighlights;
-    return rawHighlights.map((m) => {
+  const overviewHighlights = useMemo(() => {
+    if (activeTab !== "Overview") return [];
+    const raw = deriveInquiryTypeAggregateHighlights(days, activeTypeKeys);
+    if (filterScale === 1) return raw;
+    return raw.map((m) => {
       if (m.label === "Total Inquiries") {
-        const raw = Number(m.value.replace(/,/g, ""));
-        return { ...m, value: Math.round(raw * filterScale).toLocaleString() };
+        const num = Number(m.value.replace(/,/g, ""));
+        return { ...m, value: Math.round(num * filterScale).toLocaleString() };
       }
       return m;
     });
-  }, [rawHighlights, filterScale]);
+  }, [activeTab, days, activeTypeKeys, filterScale]);
 
-  const volumeData = useMemo(() => {
-    const raw = aggregateVolume(generateTimeSeries(days), interval);
+  const overviewTableRows = useMemo(() => {
+    if (activeTab !== "Overview") return [];
+    const raw = deriveInquiryTypeRows(days, activeTypeKeys);
     if (filterScale === 1) return raw;
-    return raw.map((p) => ({ ...p, value: Math.round(p.value * filterScale) }));
-  }, [days, interval, filterScale]);
+    return raw.map((r) => ({ ...r, created: Math.round(r.created * filterScale) }));
+  }, [activeTab, days, activeTypeKeys, filterScale]);
 
-  const ratesData = useMemo(
-    () => aggregateRates(generateRateTimeSeries(days), interval),
-    [days, interval],
-  );
+  const volumeChartData = useMemo(() => {
+    if (activeTab !== "Overview") return [];
+    const raw = generateInquiryStackedVolumeTimeSeries(days, activeTypeKeys);
+    const aggregated = aggregateTypedVolume(raw, interval, activeTypeKeys);
+    if (filterScale === 1) return aggregated;
+    return aggregated.map((point) => {
+      const scaled: TypedTimeSeriesPoint = { date: point.date };
+      for (const key of activeTypeKeys) {
+        scaled[key] = Math.round((point[key] as number) * filterScale);
+      }
+      return scaled;
+    });
+  }, [activeTab, days, activeTypeKeys, interval, filterScale]);
+
+  const ratesChartData = useMemo(() => {
+    if (activeTab !== "Overview") return [];
+    return aggregateTypedRates(
+      generateInquiryMultiTypeRateTimeSeries(days, activeTypeKeys),
+      interval,
+      activeTypeKeys,
+    );
+  }, [activeTab, days, activeTypeKeys, interval]);
 
   const funnelFilterScale = useMemo(() => {
     let scale = 1;
@@ -199,11 +217,9 @@ function InquiryAnalyticsContent() {
               entityType="inquiry-analytics"
               currentState={currentViewState}
               onLoadView={(state) => {
-                setTemplateFilter(state.filters.template?.[0] ?? "");
+                setTypeFilter(state.filters.type ?? []);
                 setCountryFilter(state.filters.country ?? []);
                 setPlatformFilter(state.filters.platform ?? []);
-                setDeviceFilter(state.filters.device ?? []);
-                setTagFilter(state.filters.tag ?? []);
                 if (state.filters.interval?.[0]) setInterval(state.filters.interval[0] as AnalyticsInterval);
               }}
               onClearView={clearAllFilters}
@@ -232,6 +248,12 @@ function InquiryAnalyticsContent() {
         }
       />
       <div className="px-4 pb-6 pt-6 md:px-6">
+        <p className="text-sm -mt-1 mb-5 text-[var(--color-text-tertiary)]">
+          {activeTab === "Overview"
+            ? "Creation volume, completion throughput, and approval rates by inquiry template."
+            : "Step-by-step conversion funnel for inquiry verification flow."}
+        </p>
+
         {activeTab === "Overview" && (
           <>
             <div className="mb-6 flex flex-wrap items-center gap-3">
@@ -243,16 +265,17 @@ function InquiryAnalyticsContent() {
                 max={DateTime.local().endOf("day")}
                 triggerDateFormat="MM/dd/yy"
               />
-              <div className="w-52">
+              <div className="w-56">
                 <Select
-                  options={INQUIRY_TEMPLATE_OPTIONS}
-                  value={templateFilter}
-                  onChange={(opt) => setTemplateFilter(opt?.value ?? "")}
+                  options={INQUIRY_TYPE_ANALYTICS_OPTIONS}
+                  value={typeFilter}
+                  onChange={(opts) => setTypeFilter(opts.map((o) => o.value))}
+                  multiple
                   clearable
                   placeholder="All templates"
                   size="sm"
                   variant="outline"
-                  listMinWidth={240}
+                  listMinWidth={260}
                 />
               </div>
               <div className="w-40">
@@ -281,32 +304,6 @@ function InquiryAnalyticsContent() {
                   listMinWidth={180}
                 />
               </div>
-              <div className="w-36">
-                <Select
-                  options={ANALYTICS_DEVICE_OPTIONS}
-                  value={deviceFilter}
-                  onChange={(opts) => setDeviceFilter(opts.map((o) => o.value))}
-                  multiple
-                  clearable
-                  placeholder="All groups"
-                  size="sm"
-                  variant="outline"
-                  listMinWidth={160}
-                />
-              </div>
-              <div className="w-36">
-                <Select
-                  options={ANALYTICS_TAG_OPTIONS}
-                  value={tagFilter}
-                  onChange={(opts) => setTagFilter(opts.map((o) => o.value))}
-                  multiple
-                  clearable
-                  placeholder="Add Filter"
-                  size="sm"
-                  variant="outline"
-                  listMinWidth={160}
-                />
-              </div>
               <div className="flex items-center gap-2">
                 <Switch
                   checked={groupByAccounts}
@@ -320,9 +317,9 @@ function InquiryAnalyticsContent() {
             </div>
 
             <div>
-              <h3 className="heading-sm text-[var(--color-text)] mb-3">Highlights</h3>
-              <div className="grid grid-cols-3 gap-3 xl:grid-cols-6">
-                {highlights.map((metric) => (
+              <SectionHeading>Highlights</SectionHeading>
+              <div className="grid grid-cols-3 gap-3">
+                {overviewHighlights.map((metric) => (
                   <MetricCard
                     key={metric.label}
                     label={metric.label}
@@ -335,6 +332,11 @@ function InquiryAnalyticsContent() {
                   />
                 ))}
               </div>
+            </div>
+
+            <div className="mt-6">
+              <SectionHeading>By Template</SectionHeading>
+              <VolumeComparisonTable rows={overviewTableRows} typeKeys={activeTypeKeys} />
             </div>
 
             <div className="mt-6 flex items-center">
@@ -354,18 +356,12 @@ function InquiryAnalyticsContent() {
             </div>
 
             <div className="mt-3 space-y-4">
-              <ChartCard
-                title="Inquiry Volume"
-                description="Number of verifications created"
-              >
-                <SimpleBarChart data={volumeData} />
+              <ChartCard title="Volume by Template" description="Stacked inquiry volume over time">
+                <StackedTypeBarChart data={volumeChartData} typeKeys={activeTypeKeys} labelMap={INQUIRY_LABEL_MAP} />
               </ChartCard>
 
-              <ChartCard
-                title="Approval & Completion Rates"
-                description="Percentage trends over time"
-              >
-                <RatesLineChart data={ratesData} />
+              <ChartCard title="Approval Rates by Template" description="Approval rate comparison over time">
+                <TypeRatesLineChart data={ratesChartData} typeKeys={activeTypeKeys} labelMap={INQUIRY_LABEL_MAP} />
               </ChartCard>
             </div>
           </>

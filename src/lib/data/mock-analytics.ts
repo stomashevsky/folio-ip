@@ -704,6 +704,206 @@ export function deriveReportHighlights(days: number): HighlightMetric[] {
   ];
 }
 
+// ─── Per-Type Report Analytics ───
+
+export const REPORT_TYPE_ANALYTICS_CONFIG: Record<string, { label: string; baseVolume: number; baseMatchRate: number; baseReadyRate: number }> = {
+  watchlist: { label: "Watchlist", baseVolume: 14, baseMatchRate: 10, baseReadyRate: 96 },
+  pep: { label: "PEP", baseVolume: 7, baseMatchRate: 15, baseReadyRate: 94 },
+  adverse_media: { label: "Adverse Media", baseVolume: 5, baseMatchRate: 8, baseReadyRate: 97 },
+};
+
+export interface ReportTypeRow {
+  typeKey: string;
+  label: string;
+  created: number;
+  readyRate: number;
+  matchRate: number;
+  createdTrend: number;
+  matchRateTrend: number;
+}
+
+export interface ReportTypeScreeningRow {
+  typeKey: string;
+  label: string;
+  matchRate: number;
+  noMatchRate: number;
+  avgProcessing: number;
+  matchRateTrend: number;
+  noMatchRateTrend: number;
+}
+
+export function generateReportTypeTimeSeries(days: number, typeKey: string): TimeSeriesPoint[] {
+  const config = REPORT_TYPE_ANALYTICS_CONFIG[typeKey];
+  if (!config) return [];
+  const seed = typeKeyToSeed(typeKey);
+  const endDate = new Date("2026-02-10");
+  const baseVolume = config.baseVolume;
+
+  let walk = 0;
+  return Array.from({ length: days }, (_, i) => {
+    const date = new Date(endDate);
+    date.setDate(date.getDate() - (days - 1 - i));
+    const dayOfWeek = date.getDay();
+
+    const trend = baseVolume * 0.7 + (i / days) * baseVolume * 0.5;
+    const weekendFactor = dayOfWeek === 0 || dayOfWeek === 6 ? 0.55 : 1.0;
+    walk += (seededRandom(i * 13 + seed + days * 3) - 0.5) * baseVolume * 0.2;
+    walk = walk * 0.88;
+    const noise = (seededRandom(i * 19 + seed + days * 6) - 0.5) * baseVolume * 0.3;
+    const spike = seededRandom(i * 43 + seed + days * 11) > 0.95 ? baseVolume * 0.4 : 0;
+    const value = Math.round((trend + walk + noise + spike) * weekendFactor);
+
+    return {
+      date: date.toISOString().split("T")[0],
+      value: Math.max(1, value),
+    };
+  });
+}
+
+export function generateReportTypeRateTimeSeries(days: number, typeKey: string): ReportRatePoint[] {
+  const config = REPORT_TYPE_ANALYTICS_CONFIG[typeKey];
+  if (!config) return [];
+  const seed = typeKeyToSeed(typeKey);
+  const endDate = new Date("2026-02-10");
+
+  return Array.from({ length: days }, (_, i) => {
+    const date = new Date(endDate);
+    date.setDate(date.getDate() - (days - 1 - i));
+
+    const matchNoise = (seededRandom(i * 37 + seed + 1500) - 0.5) * 10;
+    const matchRate = Math.max(1, Math.min(40, config.baseMatchRate + matchNoise));
+
+    const readyNoise = (seededRandom(i * 41 + seed + 1700) - 0.5) * 6;
+    const readyRate = Math.max(75, Math.min(100, config.baseReadyRate + readyNoise));
+
+    return {
+      date: date.toISOString().split("T")[0],
+      matchRate: Math.round(matchRate * 10) / 10,
+      readyRate: Math.round(readyRate * 10) / 10,
+    };
+  });
+}
+
+export function generateReportStackedVolumeTimeSeries(days: number, typeKeys: string[]): TypedTimeSeriesPoint[] {
+  const seriesMap = new Map<string, TimeSeriesPoint[]>();
+  for (const key of typeKeys) {
+    seriesMap.set(key, generateReportTypeTimeSeries(days, key));
+  }
+
+  const endDate = new Date("2026-02-10");
+  return Array.from({ length: days }, (_, i) => {
+    const date = new Date(endDate);
+    date.setDate(date.getDate() - (days - 1 - i));
+    const dateStr = date.toISOString().split("T")[0];
+
+    const point: TypedTimeSeriesPoint = { date: dateStr };
+    for (const key of typeKeys) {
+      const series = seriesMap.get(key)!;
+      point[key] = series[i]?.value ?? 0;
+    }
+    return point;
+  });
+}
+
+export function generateReportMultiTypeRateTimeSeries(days: number, typeKeys: string[]): TypedTimeSeriesPoint[] {
+  const seriesMap = new Map<string, ReportRatePoint[]>();
+  for (const key of typeKeys) {
+    seriesMap.set(key, generateReportTypeRateTimeSeries(days, key));
+  }
+
+  const endDate = new Date("2026-02-10");
+  return Array.from({ length: days }, (_, i) => {
+    const date = new Date(endDate);
+    date.setDate(date.getDate() - (days - 1 - i));
+    const dateStr = date.toISOString().split("T")[0];
+
+    const point: TypedTimeSeriesPoint = { date: dateStr };
+    for (const key of typeKeys) {
+      const series = seriesMap.get(key)!;
+      point[key] = series[i]?.matchRate ?? 0;
+    }
+    return point;
+  });
+}
+
+export function deriveReportTypeRows(days: number, typeKeys: string[]): ReportTypeRow[] {
+  return typeKeys.map((typeKey) => {
+    const config = REPORT_TYPE_ANALYTICS_CONFIG[typeKey];
+    if (!config) return null;
+    const seed = typeKeyToSeed(typeKey);
+
+    const total = Math.round(config.baseVolume * days * (0.8 + seededRandom(seed + days * 2) * 0.4));
+    const readyRate = config.baseReadyRate + (seededRandom(seed + days * 4) - 0.5) * 4;
+    const matchRate = config.baseMatchRate + (seededRandom(seed + days * 6) - 0.5) * 6;
+
+    const t = (s: number, scale: number) => Math.round(((seededRandom(seed + days * s) - 0.4) * scale) * 10) / 10;
+
+    return {
+      typeKey,
+      label: config.label,
+      created: total,
+      readyRate: Math.round(readyRate * 10) / 10,
+      matchRate: Math.round(matchRate * 10) / 10,
+      createdTrend: t(11, 15),
+      matchRateTrend: t(13, 5),
+    };
+  }).filter(Boolean) as ReportTypeRow[];
+}
+
+export function deriveReportTypeScreeningRows(days: number, typeKeys: string[]): ReportTypeScreeningRow[] {
+  return typeKeys.map((typeKey) => {
+    const config = REPORT_TYPE_ANALYTICS_CONFIG[typeKey];
+    if (!config) return null;
+    const seed = typeKeyToSeed(typeKey);
+
+    const matchRate = config.baseMatchRate + (seededRandom(seed + days * 6) - 0.5) * 6;
+    const noMatchRate = 100 - matchRate;
+    const avgProcessing = 3 + Math.round(seededRandom(seed + days * 14) * 8);
+
+    const t = (s: number, scale: number) => Math.round(((seededRandom(seed + days * s) - 0.4) * scale) * 10) / 10;
+
+    return {
+      typeKey,
+      label: config.label,
+      matchRate: Math.round(matchRate * 10) / 10,
+      noMatchRate: Math.round(noMatchRate * 10) / 10,
+      avgProcessing,
+      matchRateTrend: t(13, 5),
+      noMatchRateTrend: t(17, 4),
+    };
+  }).filter(Boolean) as ReportTypeScreeningRow[];
+}
+
+export function deriveReportTypeAggregateHighlights(days: number, typeKeys: string[]): HighlightMetric[] {
+  const rows = deriveReportTypeRows(days, typeKeys);
+  const totalCreated = rows.reduce((sum, r) => sum + r.created, 0);
+  const avgReadyRate = rows.length > 0 ? rows.reduce((sum, r) => sum + r.readyRate, 0) / rows.length : 0;
+  const avgMatchRate = rows.length > 0 ? rows.reduce((sum, r) => sum + r.matchRate, 0) / rows.length : 0;
+
+  const t = (seed: number, scale = 10) => Math.round(((seededRandom(days * seed + 400) - 0.4) * scale) * 10) / 10;
+
+  return [
+    { label: "Total Reports", value: totalCreated.toLocaleString(), tooltip: "All reports run in this period", trend: t(71, 12) },
+    { label: "Avg Ready Rate", value: `${Math.round(avgReadyRate * 10) / 10}%`, tooltip: "Average ready rate across all types", trend: t(73, 4) },
+    { label: "Avg Match Rate", value: `${Math.round(avgMatchRate * 10) / 10}%`, tooltip: "Average match rate across all types", trend: t(77, 5), invertTrend: true },
+  ];
+}
+
+export function deriveReportTypeScreeningAggregateHighlights(days: number, typeKeys: string[]): HighlightMetric[] {
+  const rows = deriveReportTypeScreeningRows(days, typeKeys);
+  const avgMatchRate = rows.length > 0 ? rows.reduce((sum, r) => sum + r.matchRate, 0) / rows.length : 0;
+  const avgNoMatchRate = rows.length > 0 ? rows.reduce((sum, r) => sum + r.noMatchRate, 0) / rows.length : 0;
+  const avgProcessing = rows.length > 0 ? rows.reduce((sum, r) => sum + r.avgProcessing, 0) / rows.length : 0;
+
+  const t = (seed: number, scale = 10) => Math.round(((seededRandom(days * seed + 500) - 0.4) * scale) * 10) / 10;
+
+  return [
+    { label: "Avg Match Rate", value: `${Math.round(avgMatchRate * 10) / 10}%`, tooltip: "Average match rate across all types", trend: t(81, 5), invertTrend: true },
+    { label: "Avg No Match Rate", value: `${Math.round(avgNoMatchRate * 10) / 10}%`, tooltip: "Average no-match rate across all types", trend: t(83, 4) },
+    { label: "Avg Processing", value: `${Math.round(avgProcessing)}s`, tooltip: "Average processing time across all types", trend: t(87, 8), invertTrend: true },
+  ];
+}
+
 // ─── Transaction Analytics ───
 
 export function generateTransactionTimeSeries(
@@ -778,6 +978,208 @@ export function deriveTransactionHighlights(days: number): HighlightMetric[] {
   ];
 }
 
+// ─── Per-Type Transaction Analytics ───
+
+export const TRANSACTION_TYPE_ANALYTICS_CONFIG: Record<string, { label: string; baseVolume: number; baseApprovalRate: number; baseNeedsReviewRate: number }> = {
+  payment: { label: "Payment", baseVolume: 15, baseApprovalRate: 90, baseNeedsReviewRate: 6 },
+  withdrawal: { label: "Withdrawal", baseVolume: 8, baseApprovalRate: 85, baseNeedsReviewRate: 10 },
+  transfer: { label: "Transfer", baseVolume: 7, baseApprovalRate: 88, baseNeedsReviewRate: 8 },
+  deposit: { label: "Deposit", baseVolume: 5, baseApprovalRate: 93, baseNeedsReviewRate: 4 },
+  refund: { label: "Refund", baseVolume: 3, baseApprovalRate: 91, baseNeedsReviewRate: 5 },
+};
+
+export interface TransactionTypeRow {
+  typeKey: string;
+  label: string;
+  created: number;
+  approvalRate: number;
+  needsReviewRate: number;
+  createdTrend: number;
+  approvalRateTrend: number;
+}
+
+export interface TransactionTypeRiskRow {
+  typeKey: string;
+  label: string;
+  approvalRate: number;
+  needsReviewRate: number;
+  avgProcessing: number;
+  approvalRateTrend: number;
+  needsReviewRateTrend: number;
+}
+
+export function generateTransactionTypeTimeSeries(days: number, typeKey: string): TimeSeriesPoint[] {
+  const config = TRANSACTION_TYPE_ANALYTICS_CONFIG[typeKey];
+  if (!config) return [];
+  const seed = typeKeyToSeed(typeKey);
+  const endDate = new Date("2026-02-10");
+  const baseVolume = config.baseVolume;
+
+  let walk = 0;
+  return Array.from({ length: days }, (_, i) => {
+    const date = new Date(endDate);
+    date.setDate(date.getDate() - (days - 1 - i));
+    const dayOfWeek = date.getDay();
+
+    const trend = baseVolume * 0.7 + (i / days) * baseVolume * 0.5;
+    const weekendFactor = dayOfWeek === 0 || dayOfWeek === 6 ? 0.6 : 1.0;
+    walk += (seededRandom(i * 14 + seed + days * 4) - 0.5) * baseVolume * 0.2;
+    walk = walk * 0.91;
+    const noise = (seededRandom(i * 21 + seed + days * 8) - 0.5) * baseVolume * 0.3;
+    const spike = seededRandom(i * 39 + seed + days * 12) > 0.94 ? baseVolume * 0.4 : 0;
+    const value = Math.round((trend + walk + noise + spike) * weekendFactor);
+
+    return {
+      date: date.toISOString().split("T")[0],
+      value: Math.max(1, value),
+    };
+  });
+}
+
+export function generateTransactionTypeRateTimeSeries(days: number, typeKey: string): TransactionRatePoint[] {
+  const config = TRANSACTION_TYPE_ANALYTICS_CONFIG[typeKey];
+  if (!config) return [];
+  const seed = typeKeyToSeed(typeKey);
+  const endDate = new Date("2026-02-10");
+
+  return Array.from({ length: days }, (_, i) => {
+    const date = new Date(endDate);
+    date.setDate(date.getDate() - (days - 1 - i));
+
+    const approvalNoise = (seededRandom(i * 33 + seed + 1900) - 0.5) * 10;
+    const approvalRate = Math.max(60, Math.min(100, config.baseApprovalRate + approvalNoise));
+
+    const needsReviewNoise = (seededRandom(i * 39 + seed + 2100) - 0.5) * 6;
+    const needsReviewRate = Math.max(1, Math.min(25, config.baseNeedsReviewRate + needsReviewNoise));
+
+    return {
+      date: date.toISOString().split("T")[0],
+      approvalRate: Math.round(approvalRate * 10) / 10,
+      needsReviewRate: Math.round(needsReviewRate * 10) / 10,
+    };
+  });
+}
+
+export function generateTransactionStackedVolumeTimeSeries(days: number, typeKeys: string[]): TypedTimeSeriesPoint[] {
+  const seriesMap = new Map<string, TimeSeriesPoint[]>();
+  for (const key of typeKeys) {
+    seriesMap.set(key, generateTransactionTypeTimeSeries(days, key));
+  }
+
+  const endDate = new Date("2026-02-10");
+  return Array.from({ length: days }, (_, i) => {
+    const date = new Date(endDate);
+    date.setDate(date.getDate() - (days - 1 - i));
+    const dateStr = date.toISOString().split("T")[0];
+
+    const point: TypedTimeSeriesPoint = { date: dateStr };
+    for (const key of typeKeys) {
+      const series = seriesMap.get(key)!;
+      point[key] = series[i]?.value ?? 0;
+    }
+    return point;
+  });
+}
+
+export function generateTransactionMultiTypeRateTimeSeries(days: number, typeKeys: string[]): TypedTimeSeriesPoint[] {
+  const seriesMap = new Map<string, TransactionRatePoint[]>();
+  for (const key of typeKeys) {
+    seriesMap.set(key, generateTransactionTypeRateTimeSeries(days, key));
+  }
+
+  const endDate = new Date("2026-02-10");
+  return Array.from({ length: days }, (_, i) => {
+    const date = new Date(endDate);
+    date.setDate(date.getDate() - (days - 1 - i));
+    const dateStr = date.toISOString().split("T")[0];
+
+    const point: TypedTimeSeriesPoint = { date: dateStr };
+    for (const key of typeKeys) {
+      const series = seriesMap.get(key)!;
+      point[key] = series[i]?.approvalRate ?? 0;
+    }
+    return point;
+  });
+}
+
+export function deriveTransactionTypeRows(days: number, typeKeys: string[]): TransactionTypeRow[] {
+  return typeKeys.map((typeKey) => {
+    const config = TRANSACTION_TYPE_ANALYTICS_CONFIG[typeKey];
+    if (!config) return null;
+    const seed = typeKeyToSeed(typeKey);
+
+    const total = Math.round(config.baseVolume * days * (0.85 + seededRandom(seed + days * 2) * 0.3));
+    const approvalRate = config.baseApprovalRate + (seededRandom(seed + days * 4) - 0.5) * 6;
+    const needsReviewRate = config.baseNeedsReviewRate + (seededRandom(seed + days * 6) - 0.5) * 4;
+
+    const t = (s: number, scale: number) => Math.round(((seededRandom(seed + days * s) - 0.4) * scale) * 10) / 10;
+
+    return {
+      typeKey,
+      label: config.label,
+      created: total,
+      approvalRate: Math.round(approvalRate * 10) / 10,
+      needsReviewRate: Math.round(needsReviewRate * 10) / 10,
+      createdTrend: t(11, 15),
+      approvalRateTrend: t(13, 5),
+    };
+  }).filter(Boolean) as TransactionTypeRow[];
+}
+
+export function deriveTransactionTypeRiskRows(days: number, typeKeys: string[]): TransactionTypeRiskRow[] {
+  return typeKeys.map((typeKey) => {
+    const config = TRANSACTION_TYPE_ANALYTICS_CONFIG[typeKey];
+    if (!config) return null;
+    const seed = typeKeyToSeed(typeKey);
+
+    const approvalRate = config.baseApprovalRate + (seededRandom(seed + days * 6) - 0.5) * 6;
+    const needsReviewRate = config.baseNeedsReviewRate + (seededRandom(seed + days * 8) - 0.5) * 4;
+    const avgProcessing = 1.2 + Math.round(seededRandom(seed + days * 14) * 25) / 10;
+
+    const t = (s: number, scale: number) => Math.round(((seededRandom(seed + days * s) - 0.4) * scale) * 10) / 10;
+
+    return {
+      typeKey,
+      label: config.label,
+      approvalRate: Math.round(approvalRate * 10) / 10,
+      needsReviewRate: Math.round(needsReviewRate * 10) / 10,
+      avgProcessing: Math.round(avgProcessing * 10) / 10,
+      approvalRateTrend: t(13, 5),
+      needsReviewRateTrend: t(17, 4),
+    };
+  }).filter(Boolean) as TransactionTypeRiskRow[];
+}
+
+export function deriveTransactionTypeAggregateHighlights(days: number, typeKeys: string[]): HighlightMetric[] {
+  const rows = deriveTransactionTypeRows(days, typeKeys);
+  const totalCreated = rows.reduce((sum, r) => sum + r.created, 0);
+  const avgApprovalRate = rows.length > 0 ? rows.reduce((sum, r) => sum + r.approvalRate, 0) / rows.length : 0;
+  const avgNeedsReviewRate = rows.length > 0 ? rows.reduce((sum, r) => sum + r.needsReviewRate, 0) / rows.length : 0;
+
+  const t = (seed: number, scale = 10) => Math.round(((seededRandom(days * seed + 600) - 0.4) * scale) * 10) / 10;
+
+  return [
+    { label: "Total Transactions", value: totalCreated.toLocaleString(), tooltip: "All transactions monitored in this period", trend: t(101, 12) },
+    { label: "Avg Approval Rate", value: `${Math.round(avgApprovalRate * 10) / 10}%`, tooltip: "Average approval rate across all types", trend: t(103, 4) },
+    { label: "Avg Needs Review", value: `${Math.round(avgNeedsReviewRate * 10) / 10}%`, tooltip: "Average needs-review rate across all types", trend: t(107, 5), invertTrend: true },
+  ];
+}
+
+export function deriveTransactionTypeRiskAggregateHighlights(days: number, typeKeys: string[]): HighlightMetric[] {
+  const rows = deriveTransactionTypeRiskRows(days, typeKeys);
+  const avgApprovalRate = rows.length > 0 ? rows.reduce((sum, r) => sum + r.approvalRate, 0) / rows.length : 0;
+  const avgNeedsReviewRate = rows.length > 0 ? rows.reduce((sum, r) => sum + r.needsReviewRate, 0) / rows.length : 0;
+  const avgProcessing = rows.length > 0 ? rows.reduce((sum, r) => sum + r.avgProcessing, 0) / rows.length : 0;
+
+  const t = (seed: number, scale = 10) => Math.round(((seededRandom(days * seed + 700) - 0.4) * scale) * 10) / 10;
+
+  return [
+    { label: "Avg Approval Rate", value: `${Math.round(avgApprovalRate * 10) / 10}%`, tooltip: "Average approval rate across all types", trend: t(111, 5) },
+    { label: "Avg Needs Review", value: `${Math.round(avgNeedsReviewRate * 10) / 10}%`, tooltip: "Average needs-review rate across all types", trend: t(113, 4), invertTrend: true },
+    { label: "Avg Processing", value: `${avgProcessing.toFixed(1)}s`, tooltip: "Average processing time across all types", trend: t(117, 8), invertTrend: true },
+  ];
+}
+
 // ─── Case Analytics ───
 
 export function generateCaseTimeSeries(
@@ -849,5 +1251,159 @@ export function deriveCaseHighlights(days: number): HighlightMetric[] {
     { label: "Escalated", value: escalatedCount.toLocaleString(), tooltip: "Cases escalated for review", trend: t(149, 8), invertTrend: true },
     { label: "Avg Resolution", value: `${avgResolutionDays.toFixed(1)}d`, tooltip: "Average time to resolve a case", trend: t(151, 10), invertTrend: true },
     { label: "SLA Compliance", value: `${Math.round(slaRate * 10) / 10}%`, tooltip: "% of cases resolved within SLA", trend: t(157, 5) },
+  ];
+}
+
+// ─── Per-Type Inquiry Analytics ───
+
+export const INQUIRY_TYPE_ANALYTICS_CONFIG: Record<string, { label: string; baseVolume: number; baseCompletionRate: number; baseApprovalRate: number }> = {
+  kyc_aml_govid_selfie: { label: "KYC + AML: GovID + Selfie", baseVolume: 45, baseCompletionRate: 88, baseApprovalRate: 82 },
+  kyc_govid_only: { label: "KYC: GovID Only", baseVolume: 25, baseCompletionRate: 92, baseApprovalRate: 87 },
+  aml_screening: { label: "AML Screening", baseVolume: 15, baseCompletionRate: 96, baseApprovalRate: 91 },
+  basic_identity: { label: "Basic Identity", baseVolume: 20, baseCompletionRate: 94, baseApprovalRate: 89 },
+  enhanced_due_diligence: { label: "Enhanced Due Diligence", baseVolume: 8, baseCompletionRate: 78, baseApprovalRate: 72 },
+  document_only: { label: "Document Only", baseVolume: 10, baseCompletionRate: 85, baseApprovalRate: 80 },
+};
+
+export interface InquiryTypeRow {
+  typeKey: string;
+  label: string;
+  created: number;
+  completionRate: number;
+  approvalRate: number;
+  createdTrend: number;
+  approvalRateTrend: number;
+}
+
+export function generateInquiryTypeTimeSeries(days: number, typeKey: string): TimeSeriesPoint[] {
+  const config = INQUIRY_TYPE_ANALYTICS_CONFIG[typeKey];
+  if (!config) return [];
+  const seed = typeKeyToSeed(typeKey);
+  const endDate = new Date("2026-02-10");
+  const baseVolume = config.baseVolume;
+
+  let walk = 0;
+  return Array.from({ length: days }, (_, i) => {
+    const date = new Date(endDate);
+    date.setDate(date.getDate() - (days - 1 - i));
+    const dayOfWeek = date.getDay();
+
+    const trend = baseVolume * 0.7 + (i / days) * baseVolume * 0.5;
+    const weekendFactor = dayOfWeek === 0 || dayOfWeek === 6 ? 0.65 : 1.0;
+    walk += (seededRandom(i * 11 + seed + days * 1800) - 0.5) * baseVolume * 0.2;
+    walk = walk * 0.9;
+    const noise = (seededRandom(i * 17 + seed + days * 1810) - 0.5) * baseVolume * 0.3;
+    const spike = seededRandom(i * 37 + seed + days * 1820) > 0.94 ? baseVolume * 0.4 : 0;
+    const value = Math.round((trend + walk + noise + spike) * weekendFactor);
+
+    return {
+      date: date.toISOString().split("T")[0],
+      value: Math.max(1, value),
+    };
+  });
+}
+
+export function generateInquiryTypeRateTimeSeries(days: number, typeKey: string): RateTimeSeriesPoint[] {
+  const config = INQUIRY_TYPE_ANALYTICS_CONFIG[typeKey];
+  if (!config) return [];
+  const seed = typeKeyToSeed(typeKey);
+  const endDate = new Date("2026-02-10");
+
+  return Array.from({ length: days }, (_, i) => {
+    const date = new Date(endDate);
+    date.setDate(date.getDate() - (days - 1 - i));
+
+    const completionNoise = (seededRandom(i * 29 + seed + 1830) - 0.5) * 10;
+    const completionRate = Math.max(50, Math.min(100, config.baseCompletionRate + completionNoise));
+
+    const approvalNoise = (seededRandom(i * 31 + seed + 1850) - 0.5) * 10;
+    const approvalRate = Math.max(40, Math.min(100, config.baseApprovalRate + approvalNoise));
+
+    return {
+      date: date.toISOString().split("T")[0],
+      completionRate: Math.round(completionRate * 10) / 10,
+      approvalRate: Math.round(approvalRate * 10) / 10,
+    };
+  });
+}
+
+export function generateInquiryStackedVolumeTimeSeries(days: number, typeKeys: string[]): TypedTimeSeriesPoint[] {
+  const seriesMap = new Map<string, TimeSeriesPoint[]>();
+  for (const key of typeKeys) {
+    seriesMap.set(key, generateInquiryTypeTimeSeries(days, key));
+  }
+
+  const endDate = new Date("2026-02-10");
+  return Array.from({ length: days }, (_, i) => {
+    const date = new Date(endDate);
+    date.setDate(date.getDate() - (days - 1 - i));
+    const dateStr = date.toISOString().split("T")[0];
+
+    const point: TypedTimeSeriesPoint = { date: dateStr };
+    for (const key of typeKeys) {
+      const series = seriesMap.get(key)!;
+      point[key] = series[i]?.value ?? 0;
+    }
+    return point;
+  });
+}
+
+export function generateInquiryMultiTypeRateTimeSeries(days: number, typeKeys: string[]): TypedTimeSeriesPoint[] {
+  const seriesMap = new Map<string, RateTimeSeriesPoint[]>();
+  for (const key of typeKeys) {
+    seriesMap.set(key, generateInquiryTypeRateTimeSeries(days, key));
+  }
+
+  const endDate = new Date("2026-02-10");
+  return Array.from({ length: days }, (_, i) => {
+    const date = new Date(endDate);
+    date.setDate(date.getDate() - (days - 1 - i));
+    const dateStr = date.toISOString().split("T")[0];
+
+    const point: TypedTimeSeriesPoint = { date: dateStr };
+    for (const key of typeKeys) {
+      const series = seriesMap.get(key)!;
+      point[key] = series[i]?.approvalRate ?? 0;
+    }
+    return point;
+  });
+}
+
+export function deriveInquiryTypeRows(days: number, typeKeys: string[]): InquiryTypeRow[] {
+  return typeKeys.map((typeKey) => {
+    const config = INQUIRY_TYPE_ANALYTICS_CONFIG[typeKey];
+    if (!config) return null;
+    const seed = typeKeyToSeed(typeKey);
+
+    const total = Math.round(config.baseVolume * days * (0.85 + seededRandom(seed + days * 1860) * 0.3));
+    const completionRate = config.baseCompletionRate + (seededRandom(seed + days * 1870) - 0.5) * 4;
+    const approvalRate = config.baseApprovalRate + (seededRandom(seed + days * 1880) - 0.5) * 6;
+
+    const t = (s: number, scale: number) => Math.round(((seededRandom(seed + days * s) - 0.4) * scale) * 10) / 10;
+
+    return {
+      typeKey,
+      label: config.label,
+      created: total,
+      completionRate: Math.round(completionRate * 10) / 10,
+      approvalRate: Math.round(approvalRate * 10) / 10,
+      createdTrend: t(1891, 15),
+      approvalRateTrend: t(1897, 5),
+    };
+  }).filter(Boolean) as InquiryTypeRow[];
+}
+
+export function deriveInquiryTypeAggregateHighlights(days: number, typeKeys: string[]): HighlightMetric[] {
+  const rows = deriveInquiryTypeRows(days, typeKeys);
+  const totalCreated = rows.reduce((sum, r) => sum + r.created, 0);
+  const avgCompletionRate = rows.length > 0 ? rows.reduce((sum, r) => sum + r.completionRate, 0) / rows.length : 0;
+  const avgApprovalRate = rows.length > 0 ? rows.reduce((sum, r) => sum + r.approvalRate, 0) / rows.length : 0;
+
+  const t = (seed: number, scale = 10) => Math.round(((seededRandom(days * seed + 1900) - 0.4) * scale) * 10) / 10;
+
+  return [
+    { label: "Total Inquiries", value: totalCreated.toLocaleString(), tooltip: "All inquiries created in this period", trend: t(191, 12) },
+    { label: "Avg Completion Rate", value: `${Math.round(avgCompletionRate * 10) / 10}%`, tooltip: "Average completion rate across all templates", trend: t(193, 4) },
+    { label: "Avg Approval Rate", value: `${Math.round(avgApprovalRate * 10) / 10}%`, tooltip: "Average approval rate across all templates", trend: t(197, 5) },
   ];
 }

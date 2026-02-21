@@ -18,6 +18,15 @@ export const INQUIRY_TEMPLATE_OPTIONS = [
   { value: "KYC: GovID Only", label: "KYC: GovID Only" },
 ];
 
+export const INQUIRY_TYPE_ANALYTICS_OPTIONS = [
+  { value: "kyc_aml_govid_selfie", label: "KYC + AML: GovID + Selfie" },
+  { value: "kyc_govid_only", label: "KYC: GovID Only" },
+  { value: "aml_screening", label: "AML Screening" },
+  { value: "basic_identity", label: "Basic Identity" },
+  { value: "enhanced_due_diligence", label: "Enhanced Due Diligence" },
+  { value: "document_only", label: "Document Only" },
+];
+
 // TAG_OPTIONS is dynamic (derived from mock data), so it's not included here
 // It's generated in the page component using: Array.from(new Set(...)).map(...)
 
@@ -62,6 +71,12 @@ export const REPORT_CREATED_BY_OPTIONS = [
   { value: "workflow", label: "Workflow" },
   { value: "manual", label: "Manual" },
   { value: "api", label: "API" },
+];
+
+export const REPORT_TYPE_ANALYTICS_OPTIONS = [
+  { value: "watchlist", label: "Watchlist" },
+  { value: "pep", label: "PEP" },
+  { value: "adverse_media", label: "Adverse Media" },
 ];
 
 // Account filter options
