@@ -5,33 +5,50 @@ import type {
 } from "@/lib/types";
 
 const GOV_ID_CHECKS = [
-  { name: "ID Document Authenticity", category: "fraud" as const, required: true, enabled: true },
-  { name: "ID Not Expired", category: "validity" as const, required: true, enabled: true },
-  { name: "Barcode Detection", category: "validity" as const, required: false, enabled: true },
-  { name: "ID Tampering Detection", category: "fraud" as const, required: true, enabled: true },
-  { name: "Face Clarity", category: "biometrics" as const, required: false, enabled: true },
-  { name: "Country Supported", category: "validity" as const, required: true, enabled: true },
+  { name: "Allowed country", category: "validity" as const, required: true, enabled: true },
+  { name: "Allowed ID type", category: "validity" as const, required: true, enabled: true },
+  { name: "Barcode", category: "validity" as const, required: false, enabled: true },
+  { name: "Barcode inconsistency", category: "fraud" as const, required: false, enabled: true },
+  { name: "Color", category: "validity" as const, required: false, enabled: true },
+  { name: "Compromised submission", category: "fraud" as const, required: true, enabled: true },
+  { name: "Electronic replica", category: "fraud" as const, required: true, enabled: true },
+  { name: "Expiration", category: "validity" as const, required: true, enabled: true },
+  { name: "Extracted properties", category: "validity" as const, required: false, enabled: true },
+  { name: "Extraction inconsistency", category: "fraud" as const, required: false, enabled: true },
+  { name: "Fabrication", category: "fraud" as const, required: true, enabled: true },
+  { name: "Government ID", category: "validity" as const, required: true, enabled: true },
+  { name: "ID image tampering", category: "fraud" as const, required: true, enabled: true },
+  { name: "ID number format inconsistency", category: "fraud" as const, required: false, enabled: true },
+  { name: "MRZ detected", category: "validity" as const, required: false, enabled: true },
+  { name: "MRZ inconsistency", category: "fraud" as const, required: false, enabled: true },
+  { name: "Portrait", category: "biometrics" as const, required: false, enabled: true },
+  { name: "Portrait clarity", category: "biometrics" as const, required: false, enabled: true },
+  { name: "Processable submission", category: "validity" as const, required: true, enabled: true },
+  { name: "Valid dates", category: "validity" as const, required: false, enabled: true },
 ];
 
 const SELFIE_CHECKS = [
-  { name: "Liveness Detection", category: "biometrics" as const, required: true, enabled: true },
-  { name: "Face Match to ID", category: "biometrics" as const, required: true, enabled: true },
-  { name: "Face Clarity", category: "biometrics" as const, required: false, enabled: true },
-  { name: "Glasses Detection", category: "biometrics" as const, required: false, enabled: false },
+  { name: "Center present", category: "biometrics" as const, required: false, enabled: true },
+  { name: "Face comparison", category: "biometrics" as const, required: true, enabled: true },
+  { name: "Liveness", category: "biometrics" as const, required: true, enabled: true },
+  { name: "Pose repeat", category: "biometrics" as const, required: false, enabled: true },
+  { name: "Selfie ID comparison", category: "biometrics" as const, required: false, enabled: true },
+  { name: "Selfie pose", category: "biometrics" as const, required: false, enabled: true },
+  { name: "Selfie suspicious", category: "fraud" as const, required: false, enabled: true },
 ];
 
 const DATABASE_CHECKS = [
-  { name: "Name Match", category: "validity" as const, required: true, enabled: true },
-  { name: "Date of Birth Match", category: "validity" as const, required: true, enabled: true },
-  { name: "Address Match", category: "validity" as const, required: false, enabled: true },
-  { name: "SSN/TIN Match", category: "validity" as const, required: false, enabled: false },
+  { name: "Database name match", category: "validity" as const, required: true, enabled: true },
+  { name: "Database date of birth match", category: "validity" as const, required: true, enabled: true },
+  { name: "Database address match", category: "validity" as const, required: false, enabled: true },
+  { name: "Database SSN match", category: "validity" as const, required: false, enabled: false },
 ];
 
 const DOCUMENT_CHECKS = [
-  { name: "Document Readable", category: "validity" as const, required: true, enabled: true },
-  { name: "Document Not Expired", category: "validity" as const, required: true, enabled: true },
-  { name: "Document Tampering", category: "fraud" as const, required: true, enabled: true },
-  { name: "Name Matches ID", category: "validity" as const, required: false, enabled: true },
+  { name: "Document extraction", category: "validity" as const, required: true, enabled: true },
+  { name: "Document tampering", category: "fraud" as const, required: true, enabled: true },
+  { name: "Document type detection", category: "validity" as const, required: false, enabled: true },
+  { name: "Document valid", category: "validity" as const, required: true, enabled: true },
 ];
 
 const WATCHLIST_SOURCES = [
@@ -490,6 +507,7 @@ export const mockInquiryTemplates: InquiryTemplate[] = [
 export const mockVerificationTemplates: VerificationTemplate[] = [
   {
     id: "vtmpl_cK7R1GJBMKc2r6fgvnooNTixWLJq",
+    versionId: "vtmplv_aB1cD2eF3gH4iJ5kL6",
     name: "Government ID",
     type: "government_id",
     status: "active",
@@ -499,12 +517,18 @@ export const mockVerificationTemplates: VerificationTemplate[] = [
     checks: GOV_ID_CHECKS,
     settings: {
       allowedCountries: ["US", "CA", "GB"],
+      countrySettings: {
+        US: { allowedIdTypes: ["pp", "dl", "id"], ageRange: { min: 18 } },
+        CA: { allowedIdTypes: ["pp", "dl"], ageRange: { min: 18 } },
+        GB: { allowedIdTypes: ["pp", "dl"], ageRange: { min: 16 } },
+      },
       maxRetries: 3,
       captureMethod: "auto",
     },
   },
   {
     id: "vtmpl_9xPnQkWr2fT4mBhY7cDvEaJ3LsNz",
+    versionId: "vtmplv_mN7oP8qR9sT0uV1wX",
     name: "Selfie",
     type: "selfie",
     status: "active",
@@ -520,21 +544,37 @@ export const mockVerificationTemplates: VerificationTemplate[] = [
   },
   {
     id: "vtmpl_3dFgH8jKlMn5oPqRsTuVwXyZ1a2B",
+    versionId: "vtmplv_2yZ3aB4cD5eF6gH7i",
     name: "Government ID: Enhanced",
     type: "government_id",
     status: "active",
     lastPublishedAt: "2026-01-28T09:45:00.000Z",
     createdAt: "2025-08-22T11:00:00.000Z",
     updatedAt: "2026-01-28T09:45:00.000Z",
-    checks: [...GOV_ID_CHECKS, { name: "Hologram Presence", category: "fraud", required: false, enabled: true }],
+    checks: [
+      ...GOV_ID_CHECKS,
+      { name: "Account comparison", category: "validity" as const, required: false, enabled: true },
+      { name: "Double side", category: "validity" as const, required: false, enabled: true },
+      { name: "Inconsistent repeat", category: "fraud" as const, required: false, enabled: true },
+    ],
     settings: {
       allowedCountries: ["US", "CA", "GB", "DE", "FR", "ES", "IT"],
+      countrySettings: {
+        US: { allowedIdTypes: ["pp", "dl", "id", "rp"], ageRange: { min: 18 } },
+        CA: { allowedIdTypes: ["pp", "dl", "id"], ageRange: { min: 18 } },
+        GB: { allowedIdTypes: ["pp", "dl", "rp"], ageRange: { min: 16, max: 99 } },
+        DE: { allowedIdTypes: ["pp", "dl", "id", "rp"] },
+        FR: { allowedIdTypes: ["pp", "dl", "id", "rp"] },
+        ES: { allowedIdTypes: ["pp", "dl", "id"] },
+        IT: { allowedIdTypes: ["pp", "dl", "id"] },
+      },
       maxRetries: 1,
       captureMethod: "manual",
     },
   },
   {
     id: "vtmpl_7cEfGhIjKlMn3oPqRsTuVwXyZ5a6B",
+    versionId: "vtmplv_jK8lM9nO0pQ1rS2tU",
     name: "Database Verification",
     type: "database",
     status: "active",
@@ -550,6 +590,7 @@ export const mockVerificationTemplates: VerificationTemplate[] = [
   },
   {
     id: "vtmpl_BcDeFgHiJkLm4NoPqRsTuVw8XyZa",
+    versionId: "vtmplv_3vW4xY5zA6bC7dE8f",
     name: "Document Upload",
     type: "document",
     status: "active",
@@ -565,6 +606,7 @@ export const mockVerificationTemplates: VerificationTemplate[] = [
   },
   {
     id: "vtmpl_QrStUvWxYz1a2B3cDeFgHiJk4LmNo",
+    versionId: "vtmplv_gH9iJ0kL1mN2oP3qR",
     name: "Selfie: Liveness Check",
     type: "selfie",
     status: "active",
@@ -572,9 +614,9 @@ export const mockVerificationTemplates: VerificationTemplate[] = [
     createdAt: "2025-10-20T16:00:00.000Z",
     updatedAt: "2026-02-01T12:00:00.000Z",
     checks: [
-      SELFIE_CHECKS[0],
-      { name: "Head Movement Challenge", category: "biometrics", required: true, enabled: true },
-      { name: "Face Match to ID", category: "biometrics", required: false, enabled: true },
+      { name: "Liveness", category: "biometrics" as const, required: true, enabled: true },
+      { name: "Pose repeat", category: "biometrics" as const, required: true, enabled: true },
+      { name: "Face comparison", category: "biometrics" as const, required: false, enabled: true },
     ],
     settings: {
       allowedCountries: ["US", "CA", "MX", "BR"],
@@ -590,10 +632,11 @@ export const mockVerificationTemplates: VerificationTemplate[] = [
     createdAt: "2026-01-25T10:15:00.000Z",
     updatedAt: "2026-02-08T14:45:00.000Z",
     checks: [
-      GOV_ID_CHECKS[0],
-      GOV_ID_CHECKS[1],
-      GOV_ID_CHECKS[3],
-      { name: "Passport MRZ Validation", category: "validity", required: true, enabled: true },
+      { name: "Government ID", category: "validity" as const, required: true, enabled: true },
+      { name: "Expiration", category: "validity" as const, required: true, enabled: true },
+      { name: "ID image tampering", category: "fraud" as const, required: true, enabled: true },
+      { name: "MRZ detected", category: "validity" as const, required: true, enabled: true },
+      { name: "MRZ inconsistency", category: "fraud" as const, required: true, enabled: true },
     ],
     settings: {
       allowedCountries: ["US", "GB", "DE", "JP", "SG"],
@@ -609,9 +652,9 @@ export const mockVerificationTemplates: VerificationTemplate[] = [
     createdAt: "2026-02-01T09:00:00.000Z",
     updatedAt: "2026-02-09T11:30:00.000Z",
     checks: [
-      DOCUMENT_CHECKS[0],
-      { name: "Address Line Extraction", category: "validity", required: true, enabled: true },
-      { name: "Issue Date Window", category: "validity", required: false, enabled: true },
+      { name: "Document extraction", category: "validity" as const, required: true, enabled: true },
+      { name: "Document name comparison", category: "validity" as const, required: true, enabled: true },
+      { name: "Document valid", category: "validity" as const, required: false, enabled: true },
     ],
     settings: {
       allowedCountries: ["US", "CA", "GB", "AU"],
@@ -621,13 +664,17 @@ export const mockVerificationTemplates: VerificationTemplate[] = [
   },
   {
     id: "vtmpl_WxYzAbCdEfGh8IjKlMnOpQr9StUvW",
+    versionId: "vtmplv_4sT5uV6wX7yZ8aB9c",
     name: "Legacy Selfie (v1)",
     type: "selfie",
     status: "archived",
     lastPublishedAt: "2025-03-20T08:00:00.000Z",
     createdAt: "2024-10-15T09:00:00.000Z",
     updatedAt: "2025-06-15T10:30:00.000Z",
-    checks: [SELFIE_CHECKS[0], SELFIE_CHECKS[2]],
+    checks: [
+      { name: "Liveness", category: "biometrics" as const, required: true, enabled: true },
+      { name: "Selfie pose", category: "biometrics" as const, required: false, enabled: true },
+    ],
     settings: {
       allowedCountries: ["US"],
       maxRetries: 5,
@@ -636,6 +683,7 @@ export const mockVerificationTemplates: VerificationTemplate[] = [
   },
   {
     id: "vtmpl_LmNoPqRsTuVw2XyZaBcDeFgHiJk3L",
+    versionId: "vtmplv_dE0fG1hI2jK3lM4nO",
     name: "Database: Phone Verification",
     type: "database",
     status: "active",
@@ -643,9 +691,8 @@ export const mockVerificationTemplates: VerificationTemplate[] = [
     createdAt: "2025-11-05T13:00:00.000Z",
     updatedAt: "2026-02-03T15:00:00.000Z",
     checks: [
-      DATABASE_CHECKS[0],
-      { name: "Phone Ownership Match", category: "validity", required: true, enabled: true },
-      { name: "Carrier Risk Score", category: "fraud", required: false, enabled: true },
+      { name: "Database name match", category: "validity" as const, required: true, enabled: true },
+      { name: "Database phone match", category: "validity" as const, required: true, enabled: true },
     ],
     settings: {
       allowedCountries: ["US", "CA"],

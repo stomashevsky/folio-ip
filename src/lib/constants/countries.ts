@@ -205,3 +205,374 @@ export const COUNTRY_OPTIONS: { value: string; label: string }[] = [
 export const COUNTRY_LABEL_MAP: Record<string, string> = Object.fromEntries(
   COUNTRY_OPTIONS.map((c) => [c.value, c.label]),
 );
+
+/** Convert ISO 3166-1 alpha-2 code to flag emoji */
+export function countryFlag(code: string): string {
+  return code
+    .toUpperCase()
+    .replace(/./g, (ch) => String.fromCodePoint(ch.charCodeAt(0) + 127397));
+}
+
+export type IdDocType =
+  | "cct" | "cid" | "dl" | "foid" | "hic" | "id" | "ipp" | "keyp"
+  | "ltpass" | "munid" | "myn" | "nbi" | "nric" | "ofw" | "pan"
+  | "pid" | "pp" | "ppc" | "pr" | "rp" | "sss" | "td" | "tribalid"
+  | "umid" | "vid" | "visa" | "wp";
+
+export const ALL_ID_DOC_TYPES: IdDocType[] = [
+  "cct", "cid", "dl", "foid", "hic", "id", "ipp", "keyp",
+  "ltpass", "munid", "myn", "nbi", "nric", "ofw", "pan",
+  "pid", "pp", "ppc", "pr", "rp", "sss", "td", "tribalid",
+  "umid", "vid", "visa", "wp",
+];
+
+export const ID_DOC_TYPE_LABELS: Record<IdDocType, string> = {
+  cct: "Certificate of Citizenship",
+  cid: "Consular ID",
+  dl: "Driver License",
+  foid: "Foreigner ID",
+  hic: "Health Insurance Card",
+  id: "National ID",
+  ipp: "Internal Passport",
+  keyp: "Keypass ID",
+  ltpass: "Long Term Pass",
+  munid: "Municipal ID",
+  myn: "MyNumber Card",
+  nbi: "NBI Clearance",
+  nric: "National Residency ID",
+  ofw: "OFW Card",
+  pan: "PAN Card",
+  pid: "Postal ID",
+  pp: "Passport",
+  ppc: "Passport Card",
+  pr: "Permanent Residence",
+  rp: "Residence Permit",
+  sss: "SSS Card",
+  td: "Travel Document",
+  tribalid: "Tribal ID",
+  umid: "UMID",
+  vid: "Voter ID",
+  visa: "Visa",
+  wp: "Work Permit",
+};
+
+export const ID_DOC_TYPE_SHORT: Record<IdDocType, string> = {
+  cct: "CCT", cid: "CID", dl: "DL", foid: "FOID", hic: "HIC", id: "ID",
+  ipp: "IPP", keyp: "KEY", ltpass: "LTP", munid: "MUN", myn: "MYN",
+  nbi: "NBI", nric: "NRIC", ofw: "OFW", pan: "PAN", pid: "PID",
+  pp: "PP", ppc: "PPC", pr: "PR", rp: "RP", sss: "SSS", td: "TD",
+  tribalid: "TRIB", umid: "UMID", vid: "VID", visa: "VISA", wp: "WP",
+};
+
+export const ID_DOC_TYPE_COLORS: Record<IdDocType, string> = {
+  pp: "info", dl: "discovery", id: "warning", rp: "success",
+  pr: "success", ppc: "info", visa: "caution", wp: "secondary",
+  td: "info", vid: "danger", munid: "secondary", cct: "caution",
+  cid: "secondary", foid: "warning", hic: "discovery", ipp: "info",
+  keyp: "caution", ltpass: "discovery", myn: "warning", nbi: "danger",
+  nric: "discovery", ofw: "danger", pan: "warning", pid: "secondary",
+  sss: "danger", tribalid: "caution", umid: "danger",
+};
+
+/* ─── Regions ─── */
+
+export type Region = "North America" | "Latin America" | "Europe" | "Asia Pacific" | "Middle East" | "Africa";
+
+export const REGION_OPTIONS: { value: Region; label: string }[] = [
+  { value: "North America", label: "North America" },
+  { value: "Latin America", label: "Latin America" },
+  { value: "Europe", label: "Europe" },
+  { value: "Asia Pacific", label: "Asia Pacific" },
+  { value: "Middle East", label: "Middle East" },
+  { value: "Africa", label: "Africa" },
+];
+
+export const COUNTRY_REGIONS: Record<string, Region> = {
+  // North America
+  US: "North America", CA: "North America",
+  // Latin America
+  AG: "Latin America", AR: "Latin America", BS: "Latin America", BB: "Latin America",
+  BZ: "Latin America", BO: "Latin America", BR: "Latin America", CL: "Latin America",
+  CO: "Latin America", CR: "Latin America", CU: "Latin America", DM: "Latin America",
+  DO: "Latin America", EC: "Latin America", SV: "Latin America", GD: "Latin America",
+  GT: "Latin America", GY: "Latin America", HT: "Latin America", HN: "Latin America",
+  JM: "Latin America", MX: "Latin America", NI: "Latin America", PA: "Latin America",
+  PY: "Latin America", PE: "Latin America", KN: "Latin America", LC: "Latin America",
+  VC: "Latin America", SR: "Latin America", TT: "Latin America", UY: "Latin America",
+  VE: "Latin America", PR: "Latin America",
+  // Europe
+  AL: "Europe", AD: "Europe", AT: "Europe", BY: "Europe", BE: "Europe",
+  BA: "Europe", BG: "Europe", HR: "Europe", CY: "Europe", CZ: "Europe",
+  DK: "Europe", EE: "Europe", FI: "Europe", FR: "Europe", GE: "Europe",
+  DE: "Europe", GR: "Europe", HU: "Europe", IS: "Europe", IE: "Europe",
+  IT: "Europe", XK: "Europe", LV: "Europe", LI: "Europe", LT: "Europe",
+  LU: "Europe", MT: "Europe", MD: "Europe", MC: "Europe", ME: "Europe",
+  NL: "Europe", MK: "Europe", NO: "Europe", PL: "Europe", PT: "Europe",
+  RO: "Europe", RU: "Europe", SM: "Europe", RS: "Europe", SK: "Europe",
+  SI: "Europe", ES: "Europe", SE: "Europe", CH: "Europe", UA: "Europe",
+  GB: "Europe", VA: "Europe",
+  // Asia Pacific (includes Oceania)
+  AF: "Asia Pacific", AM: "Asia Pacific", AZ: "Asia Pacific", BD: "Asia Pacific",
+  BT: "Asia Pacific", BN: "Asia Pacific", KH: "Asia Pacific", CN: "Asia Pacific",
+  HK: "Asia Pacific", IN: "Asia Pacific", ID: "Asia Pacific", JP: "Asia Pacific",
+  KZ: "Asia Pacific", KG: "Asia Pacific", LA: "Asia Pacific", MO: "Asia Pacific",
+  MY: "Asia Pacific", MV: "Asia Pacific", MN: "Asia Pacific", MM: "Asia Pacific",
+  NP: "Asia Pacific", KP: "Asia Pacific", KR: "Asia Pacific", PK: "Asia Pacific",
+  PH: "Asia Pacific", SG: "Asia Pacific", LK: "Asia Pacific", TW: "Asia Pacific",
+  TJ: "Asia Pacific", TH: "Asia Pacific", TL: "Asia Pacific", TM: "Asia Pacific",
+  UZ: "Asia Pacific", VN: "Asia Pacific",
+  AU: "Asia Pacific", FJ: "Asia Pacific", KI: "Asia Pacific", MH: "Asia Pacific",
+  FM: "Asia Pacific", NR: "Asia Pacific", NZ: "Asia Pacific", PW: "Asia Pacific",
+  PG: "Asia Pacific", WS: "Asia Pacific", SB: "Asia Pacific", TO: "Asia Pacific",
+  TV: "Asia Pacific", VU: "Asia Pacific",
+  // Middle East
+  BH: "Middle East", IR: "Middle East", IQ: "Middle East", IL: "Middle East",
+  JO: "Middle East", KW: "Middle East", LB: "Middle East", OM: "Middle East",
+  PS: "Middle East", QA: "Middle East", SA: "Middle East", SY: "Middle East",
+  AE: "Middle East", YE: "Middle East", TR: "Middle East",
+  // Africa
+  DZ: "Africa", AO: "Africa", BJ: "Africa", BW: "Africa", BF: "Africa",
+  BI: "Africa", CV: "Africa", CM: "Africa", CF: "Africa", TD: "Africa",
+  KM: "Africa", CG: "Africa", CD: "Africa", CI: "Africa", DJ: "Africa",
+  EG: "Africa", GQ: "Africa", ER: "Africa", SZ: "Africa", ET: "Africa",
+  GA: "Africa", GM: "Africa", GH: "Africa", GN: "Africa", GW: "Africa",
+  KE: "Africa", LS: "Africa", LR: "Africa", LY: "Africa", MG: "Africa",
+  MW: "Africa", ML: "Africa", MR: "Africa", MU: "Africa", MA: "Africa",
+  MZ: "Africa", NA: "Africa", NE: "Africa", NG: "Africa", RW: "Africa",
+  ST: "Africa", SN: "Africa", SC: "Africa", SL: "Africa", SO: "Africa",
+  ZA: "Africa", SS: "Africa", SD: "Africa", TZ: "Africa", TG: "Africa",
+  TN: "Africa", UG: "Africa", ZM: "Africa", ZW: "Africa",
+};
+
+/* ─── Country Settings (per-country config for verification templates) ─── */
+
+export type RequiredSides = "front_only" | "back_only" | "front_and_back";
+
+export interface IdTypeConfig {
+  requiredSides?: RequiredSides;
+  requireExpiry?: boolean;
+  requireMrz?: boolean;
+}
+
+export interface CountrySettings {
+  /** Which ID types are accepted for this country. undefined = all available */
+  allowedIdTypes?: IdDocType[];
+  idTypeConfig?: Partial<Record<IdDocType, IdTypeConfig>>;
+  /** Age range restrictions */
+  ageRange?: { min?: number; max?: number };
+}
+
+/** Accepted document types per country */
+export const COUNTRY_ID_TYPES: Record<string, IdDocType[]> = {
+  // North America
+  US: ["pp", "dl", "id", "rp", "ppc", "td", "munid", "vid", "pr", "visa"],
+  CA: ["pp", "dl", "id", "rp", "hic", "tribalid", "pr", "visa"],
+  // Latin America
+  MX: ["pp", "dl", "id", "vid"],
+  BR: ["pp", "dl", "id", "rp", "vid"],
+  AR: ["pp", "dl", "id", "vid"],
+  CL: ["pp", "dl", "id"],
+  CO: ["pp", "dl", "id", "foid"],
+  PE: ["pp", "dl", "id"],
+  EC: ["pp", "dl", "id"],
+  VE: ["pp", "dl", "id"],
+  UY: ["pp", "dl", "id"],
+  PY: ["pp", "dl", "id"],
+  BO: ["pp", "dl", "id"],
+  CR: ["pp", "dl", "id"],
+  PA: ["pp", "dl", "id"],
+  GT: ["pp", "dl", "id"],
+  HN: ["pp", "dl", "id"],
+  SV: ["pp", "dl", "id"],
+  NI: ["pp", "dl", "id"],
+  DO: ["pp", "dl", "id"],
+  CU: ["pp", "id"],
+  JM: ["pp", "dl"],
+  TT: ["pp", "dl", "id"],
+  BS: ["pp", "dl"],
+  BB: ["pp", "dl"],
+  HT: ["pp", "id"],
+  BZ: ["pp", "dl"],
+  GY: ["pp", "dl", "id"],
+  SR: ["pp", "dl", "id"],
+  AG: ["pp"],
+  DM: ["pp"],
+  GD: ["pp"],
+  KN: ["pp"],
+  LC: ["pp"],
+  VC: ["pp"],
+  PR: ["pp", "dl", "id"],
+  // Europe
+  GB: ["pp", "dl", "rp", "pr", "visa"],
+  DE: ["pp", "dl", "id", "rp", "pr", "visa"],
+  FR: ["pp", "dl", "id", "rp", "pr", "visa"],
+  ES: ["pp", "dl", "id", "rp", "pr"],
+  IT: ["pp", "dl", "id", "rp", "pr"],
+  NL: ["pp", "dl", "id", "rp", "pr"],
+  BE: ["pp", "dl", "id", "rp", "pr"],
+  SE: ["pp", "dl", "id", "rp", "pr"],
+  NO: ["pp", "dl", "rp", "pr"],
+  DK: ["pp", "dl", "rp", "pr"],
+  FI: ["pp", "dl", "id", "rp", "pr"],
+  CH: ["pp", "dl", "id", "rp", "pr"],
+  AT: ["pp", "dl", "id", "rp", "pr"],
+  PL: ["pp", "dl", "id", "rp", "pr"],
+  PT: ["pp", "dl", "id", "rp", "pr"],
+  CZ: ["pp", "dl", "id", "rp", "pr"],
+  IE: ["pp", "dl", "rp", "pr"],
+  GR: ["pp", "dl", "id", "rp", "pr"],
+  RO: ["pp", "dl", "id"],
+  HU: ["pp", "dl", "id", "rp"],
+  BG: ["pp", "dl", "id"],
+  HR: ["pp", "dl", "id"],
+  SK: ["pp", "dl", "id"],
+  SI: ["pp", "dl", "id"],
+  LT: ["pp", "dl", "id"],
+  LV: ["pp", "dl", "id"],
+  EE: ["pp", "dl", "id"],
+  CY: ["pp", "dl", "id"],
+  MT: ["pp", "dl", "id"],
+  LU: ["pp", "dl", "id"],
+  IS: ["pp", "dl"],
+  AL: ["pp", "dl", "id"],
+  BA: ["pp", "dl", "id"],
+  RS: ["pp", "dl", "id"],
+  ME: ["pp", "dl", "id"],
+  MK: ["pp", "dl", "id"],
+  XK: ["pp", "dl", "id"],
+  MD: ["pp", "dl", "id"],
+  UA: ["pp", "dl", "id"],
+  BY: ["pp", "dl", "id"],
+  RU: ["pp", "dl", "id", "ipp"],
+  GE: ["pp", "dl", "id"],
+  AD: ["pp", "id"],
+  LI: ["pp", "dl", "id"],
+  MC: ["pp", "id"],
+  SM: ["pp", "id"],
+  VA: ["pp"],
+  // Asia Pacific
+  JP: ["pp", "dl", "rp", "myn", "visa"],
+  KR: ["pp", "dl", "id", "rp", "pr", "visa"],
+  CN: ["pp", "dl", "id"],
+  IN: ["pp", "dl", "id", "pan", "vid"],
+  SG: ["pp", "id", "rp", "nric", "ltpass", "wp", "visa"],
+  HK: ["pp", "id", "rp", "wp"],
+  TW: ["pp", "dl", "id"],
+  MY: ["pp", "dl", "id", "wp"],
+  TH: ["pp", "dl", "id"],
+  PH: ["pp", "dl", "id", "nbi", "ofw", "pid", "sss", "umid", "vid"],
+  ID: ["pp", "dl", "id"],
+  VN: ["pp", "dl", "id"],
+  BD: ["pp", "dl", "id"],
+  PK: ["pp", "dl", "id"],
+  LK: ["pp", "dl", "id"],
+  NP: ["pp", "id"],
+  MM: ["pp", "id"],
+  KH: ["pp", "dl", "id"],
+  LA: ["pp", "id"],
+  BN: ["pp", "dl", "id"],
+  MN: ["pp", "dl", "id"],
+  KZ: ["pp", "dl", "id"],
+  UZ: ["pp", "dl", "id"],
+  KG: ["pp", "dl", "id"],
+  TJ: ["pp", "dl", "id"],
+  TM: ["pp", "dl", "id"],
+  AF: ["pp", "id"],
+  MV: ["pp", "id"],
+  BT: ["pp", "id"],
+  KP: ["pp"],
+  MO: ["pp", "id"],
+  AM: ["pp", "dl", "id"],
+  AZ: ["pp", "dl", "id"],
+  TL: ["pp", "id"],
+  AU: ["pp", "dl", "rp", "keyp", "visa"],
+  NZ: ["pp", "dl", "rp", "visa"],
+  FJ: ["pp", "dl"],
+  PG: ["pp", "dl"],
+  SB: ["pp"],
+  VU: ["pp"],
+  WS: ["pp"],
+  TO: ["pp"],
+  KI: ["pp"],
+  MH: ["pp"],
+  FM: ["pp"],
+  PW: ["pp"],
+  NR: ["pp"],
+  TV: ["pp"],
+  // Middle East
+  AE: ["pp", "id", "rp", "visa", "wp"],
+  SA: ["pp", "id", "rp", "visa", "wp"],
+  IL: ["pp", "dl", "id"],
+  TR: ["pp", "dl", "id"],
+  JO: ["pp", "dl", "id"],
+  LB: ["pp", "dl", "id"],
+  IQ: ["pp", "id"],
+  IR: ["pp", "dl", "id"],
+  KW: ["pp", "id", "wp"],
+  BH: ["pp", "id", "wp"],
+  QA: ["pp", "id", "wp"],
+  OM: ["pp", "id", "wp"],
+  YE: ["pp", "id"],
+  SY: ["pp", "id"],
+  PS: ["pp", "id"],
+  // Africa
+  EG: ["pp", "dl", "id"],
+  ZA: ["pp", "dl", "id"],
+  NG: ["pp", "dl", "id", "vid"],
+  KE: ["pp", "id"],
+  GH: ["pp", "dl", "id", "vid"],
+  MA: ["pp", "dl", "id"],
+  TN: ["pp", "dl", "id"],
+  DZ: ["pp", "dl", "id"],
+  ET: ["pp", "id"],
+  TZ: ["pp", "dl", "id"],
+  UG: ["pp", "dl", "id"],
+  RW: ["pp", "dl", "id"],
+  MZ: ["pp", "dl", "id"],
+  AO: ["pp", "id"],
+  CM: ["pp", "dl", "id"],
+  CI: ["pp", "dl", "id"],
+  SN: ["pp", "dl", "id"],
+  ML: ["pp", "id"],
+  BF: ["pp", "id"],
+  NE: ["pp", "id"],
+  TD: ["pp", "id"],
+  MG: ["pp", "id"],
+  CD: ["pp", "id"],
+  CG: ["pp", "id"],
+  GA: ["pp", "id"],
+  BJ: ["pp", "id"],
+  TG: ["pp", "id"],
+  SL: ["pp", "id"],
+  LR: ["pp", "id"],
+  GN: ["pp", "id"],
+  GW: ["pp", "id"],
+  GM: ["pp", "id"],
+  CF: ["pp", "id"],
+  GQ: ["pp", "id"],
+  ER: ["pp", "id"],
+  DJ: ["pp", "id"],
+  KM: ["pp", "id"],
+  SC: ["pp", "id"],
+  MU: ["pp", "dl", "id"],
+  MW: ["pp", "id"],
+  ZM: ["pp", "dl", "id"],
+  ZW: ["pp", "dl", "id"],
+  BW: ["pp", "dl", "id"],
+  NA: ["pp", "dl", "id"],
+  LS: ["pp", "id"],
+  SZ: ["pp", "id"],
+  SO: ["pp", "id"],
+  SD: ["pp", "id"],
+  SS: ["pp", "id"],
+  LY: ["pp", "id"],
+  MR: ["pp", "id"],
+  ST: ["pp", "id"],
+  CV: ["pp", "id"],
+  BI: ["pp", "id"],
+};
+
+/** Get ID types for a country, with fallback to passport-only */
+export function getCountryIdTypes(code: string): IdDocType[] {
+  return COUNTRY_ID_TYPES[code] ?? ["pp"];
+}

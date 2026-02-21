@@ -177,15 +177,19 @@ export interface InquiryTemplate {
   };
 }
 
+export type CheckLifecycle = "ga" | "beta" | "sunset";
+
 export interface VerificationCheckConfig {
   name: string;
   category: CheckCategory;
   required: boolean;
   enabled: boolean;
+  lifecycle?: CheckLifecycle;
 }
 
 export interface VerificationTemplate {
   id: string; // vtmpl_...
+  versionId?: string; // vtmplv_...
   name: string;
   type: VerificationType;
   status: TemplateStatus;
@@ -195,6 +199,7 @@ export interface VerificationTemplate {
   checks: VerificationCheckConfig[];
   settings: {
     allowedCountries: string[];
+    countrySettings?: Record<string, import("@/lib/constants/countries").CountrySettings>;
     maxRetries: number;
     captureMethod: "auto" | "manual" | "both";
   };
