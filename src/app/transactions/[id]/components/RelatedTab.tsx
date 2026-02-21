@@ -80,7 +80,7 @@ export function RelatedTab({ transaction }: { transaction: Transaction }) {
                     <td className="px-4 py-3">
                       <Link
                         href={`/transactions/${txn.id}`}
-                        className="truncate font-mono text-sm text-[var(--color-primary-solid-bg)] hover:underline"
+                        className="truncate font-mono text-sm text-[var(--color-background-primary-solid)] hover:underline"
                       >
                         {txn.id}
                       </Link>

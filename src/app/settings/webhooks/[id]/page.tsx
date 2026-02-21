@@ -351,7 +351,7 @@ export default function WebhookDetailPage() {
             <p className="text-xs text-[var(--color-text-tertiary)]">
               Failed
             </p>
-            <p className="heading-md mt-1 tabular-nums text-[var(--color-danger-solid-bg)]">
+            <p className="heading-md mt-1 tabular-nums text-[var(--color-background-danger-solid)]">
               {webhook.failedDeliveries.toLocaleString()}
             </p>
           </div>
@@ -398,7 +398,8 @@ export default function WebhookDetailPage() {
           <div className="mt-4 space-y-6">
             {Object.entries(EVENT_GROUPS).map(([group, events]) => {
               const allSelected = events.every((e) => selectedEvents.has(e));
-              const _someSelected =
+              // eslint-disable-next-line @typescript-eslint/no-unused-vars
+              const someSelected =
                 !allSelected && events.some((e) => selectedEvents.has(e));
               return (
                 <div key={group}>

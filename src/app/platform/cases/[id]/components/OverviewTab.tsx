@@ -24,7 +24,8 @@ function getSlaProgress(caseItem: Case) {
 
 export function OverviewTab({
   caseItem,
-  inquiriesCount: _inquiriesCount,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  inquiriesCount,
   verificationsCount,
   reportsCount,
 }: {
@@ -36,10 +37,10 @@ export function OverviewTab({
   const sla = getSlaProgress(caseItem);
   const slaColor =
     sla.percent > 80
-      ? "var(--color-danger-solid-bg)"
+      ? "var(--color-background-danger-solid)"
       : sla.percent > 50
-        ? "var(--color-warning-solid-bg)"
-        : "var(--color-success-solid-bg)";
+        ? "var(--color-background-warning-solid)"
+        : "var(--color-background-success-solid)";
 
   return (
     <div className="space-y-6">
@@ -121,7 +122,7 @@ export function OverviewTab({
                     value: (
                       <Link
                         href={`/inquiries/${caseItem.inquiryId}`}
-                        className="truncate font-mono text-sm text-[var(--color-primary-solid-bg)] hover:underline"
+                        className="truncate font-mono text-sm text-[var(--color-background-primary-solid)] hover:underline"
                       >
                         {caseItem.inquiryId}
                       </Link>
@@ -169,7 +170,7 @@ export function OverviewTab({
                   {relatedCases.map((rc) => (
                     <tr key={rc.id} className="border-b border-[var(--color-border)] hover:bg-[var(--color-surface-secondary)]">
                       <td className="px-4 py-3">
-                        <Link href={`/platform/cases/${rc.id}`} className="text-sm font-medium text-[var(--color-text)] hover:text-[var(--color-primary-solid-bg)] hover:underline">
+                        <Link href={`/platform/cases/${rc.id}`} className="text-sm font-medium text-[var(--color-text)] hover:text-[var(--color-background-primary-solid)] hover:underline">
                           {rc.title}
                         </Link>
                         <p className="truncate font-mono text-xs text-[var(--color-text-tertiary)]">{rc.id}</p>
@@ -210,7 +211,7 @@ export function OverviewTab({
             />
           </div>
           {sla.percent > 80 && (
-            <p className="mt-2 text-xs text-[var(--color-danger-soft-text)]">
+            <p className="mt-2 text-xs text-[var(--color-text-danger-soft)]">
               SLA deadline approaching
             </p>
           )}

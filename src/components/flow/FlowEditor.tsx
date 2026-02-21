@@ -367,7 +367,7 @@ export function FlowEditor({
                 />
               </div>
               {rawParsed.errors.length > 0 && (
-                <div className="shrink-0 border-t border-[var(--color-border)] bg-[var(--color-danger-soft-bg)]">
+                <div className="shrink-0 border-t border-[var(--color-border)] bg-[var(--color-background-danger-soft)]">
                   <div className="flex items-start gap-2 px-3 py-2">
                     <ExclamationMarkCircle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[var(--color-text-danger-ghost)]" />
                     <div className="text-xs text-[var(--color-text-danger-ghost)]">

@@ -92,7 +92,7 @@ export function ReportsTable({
                 <td className="max-w-[180px] px-4 py-3">
                   <Link
                     href={`/reports/${r.id}`}
-                    className="block truncate font-mono text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-primary-solid-bg)] hover:underline"
+                    className="block truncate font-mono text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-background-primary-solid)] hover:underline"
                     title={r.id}
                   >
                     {r.id}

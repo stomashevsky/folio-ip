@@ -295,7 +295,7 @@ function VerificationDetailContent() {
                 >
                   <Link
                     href={`/accounts/${inquiry.accountId}`}
-                    className="text-[var(--color-primary-solid-bg)] hover:underline"
+                    className="text-[var(--color-background-primary-solid)] hover:underline"
                   >
                     {inquiry.accountId}
                   </Link>
@@ -308,14 +308,14 @@ function VerificationDetailContent() {
               >
                 <Link
                   href={`/inquiries/${verification.inquiryId}`}
-                  className="text-[var(--color-primary-solid-bg)] hover:underline"
+                  className="text-[var(--color-background-primary-solid)] hover:underline"
                 >
                   {verification.inquiryId}
                 </Link>
               </InfoRow>
               {inquiry && (
                 <InfoRow label="Template">
-                  <span className="text-[var(--color-primary-solid-bg)]">
+                  <span className="text-[var(--color-background-primary-solid)]">
                     {inquiry.templateName}
                   </span>
                 </InfoRow>

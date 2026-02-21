@@ -65,7 +65,7 @@ export function InquiriesTab({ inquiries }: { inquiries: Inquiry[] }) {
               <td className="max-w-[180px] px-4 py-3">
                 <Link
                   href={`/inquiries/${inquiry.id}`}
-                  className="block truncate font-mono text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-primary-solid-bg)] hover:underline"
+                  className="block truncate font-mono text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-background-primary-solid)] hover:underline"
                   title={inquiry.id}
                 >
                   {inquiry.id}

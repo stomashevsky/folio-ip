@@ -140,6 +140,8 @@ function InquiryAnalyticsContent() {
                     value={metric.value}
                     description={metric.description}
                     tooltip={metric.tooltip}
+                    trend={metric.trend != null ? { value: metric.trend } : undefined}
+                    invertTrend={metric.invertTrend}
                     variant="compact"
                   />
                 ))}
@@ -194,7 +196,7 @@ function InquiryAnalyticsContent() {
             ].map((query) => (
               <div
                 key={query.name}
-                className="cursor-pointer rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4 transition-colors hover:border-[var(--color-primary-soft-border)] hover:bg-[var(--color-nav-hover-bg)]"
+                className="cursor-pointer rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4 transition-colors hover:border-[var(--color-border-primary-surface)] hover:bg-[var(--color-nav-hover-bg)]"
               >
                 <div className="flex items-center justify-between">
                   <h4 className="heading-xs text-[var(--color-text)]">{query.name}</h4>
@@ -223,6 +225,8 @@ function InquiryAnalyticsContent() {
                     value={metric.value}
                     description={metric.description}
                     tooltip={metric.tooltip}
+                    trend={metric.trend != null ? { value: metric.trend } : undefined}
+                    invertTrend={metric.invertTrend}
                     variant="compact"
                   />
                 ))}

@@ -83,7 +83,8 @@ function CaseDetailContent() {
   const caseReports = caseItem.accountId
     ? mockReports.filter((r) => r.accountId === caseItem.accountId)
     : [];
-  const _totalMatches = caseReports.reduce(
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const totalMatches = caseReports.reduce(
     (sum, r) => sum + (r.matchCount ?? 0),
     0,
   );
@@ -189,7 +190,7 @@ function CaseDetailContent() {
                 <InfoRow label="Account ID" copyValue={caseItem.accountId} mono>
                   <Link
                     href={`/accounts/${caseItem.accountId}`}
-                    className="text-[var(--color-primary-solid-bg)] hover:underline"
+                    className="text-[var(--color-background-primary-solid)] hover:underline"
                   >
                     {caseItem.accountId}
                   </Link>
@@ -199,7 +200,7 @@ function CaseDetailContent() {
                 <InfoRow label="Inquiry ID" copyValue={caseItem.inquiryId} mono>
                   <Link
                     href={`/inquiries/${caseItem.inquiryId}`}
-                    className="text-[var(--color-primary-solid-bg)] hover:underline"
+                    className="text-[var(--color-background-primary-solid)] hover:underline"
                   >
                     {caseItem.inquiryId}
                   </Link>

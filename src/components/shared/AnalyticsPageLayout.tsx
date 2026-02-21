@@ -17,6 +17,8 @@ interface Highlight {
   value: string | number;
   description?: string;
   tooltip?: string;
+  trend?: number;
+  invertTrend?: boolean;
 }
 
 interface AnalyticsPageLayoutProps {
@@ -90,6 +92,8 @@ export function AnalyticsPageLayout({
                 value={metric.value}
                 description={metric.description}
                 tooltip={metric.tooltip}
+                trend={metric.trend != null ? { value: metric.trend } : undefined}
+                invertTrend={metric.invertTrend}
                 variant="compact"
               />
             ))}

@@ -60,7 +60,7 @@ Alert, Avatar, AvatarGroup, Badge, Button, ButtonLink, Checkbox, CodeBlock, Copy
 ## Project Structure
 
 ```
-folio-app/
+folio-ip/
 ├── reference/                # Reference documentation
 │   ├── persona/              # Persona data model, dashboard sections
 │   ├── design/               # UI patterns, design tokens

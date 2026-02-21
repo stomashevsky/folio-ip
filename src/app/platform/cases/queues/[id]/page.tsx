@@ -157,7 +157,7 @@ export default function QueueDetailPage() {
                   {queueCases.map((c) => (
                     <tr key={c.id} className="border-b border-[var(--color-border)] hover:bg-[var(--color-surface-secondary)]">
                       <td className="px-4 py-3">
-                        <Link href={`/platform/cases/${c.id}`} className="text-sm font-medium text-[var(--color-text)] hover:text-[var(--color-primary-solid-bg)] hover:underline">
+                        <Link href={`/platform/cases/${c.id}`} className="text-sm font-medium text-[var(--color-text)] hover:text-[var(--color-background-primary-solid)] hover:underline">
                           {c.title}
                         </Link>
                       </td>

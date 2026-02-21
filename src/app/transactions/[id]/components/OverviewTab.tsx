@@ -48,7 +48,7 @@ export function OverviewTab({ transaction }: { transaction: Transaction }) {
                 <div className="flex items-center gap-2">
                   <div className="h-2 w-24 overflow-hidden rounded-full bg-[var(--color-border)]">
                     <div
-                      className="h-full rounded-full bg-[var(--color-danger-solid-bg)]"
+                      className="h-full rounded-full bg-[var(--color-background-danger-solid)]"
                       style={{ width: `${transaction.riskScore}%` }}
                     />
                   </div>

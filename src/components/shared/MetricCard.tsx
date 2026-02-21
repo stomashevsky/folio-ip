@@ -1,7 +1,6 @@
 "use client";
 
-import { ArrowUpSm, ArrowDownSm, InfoCircle } from "@plexui/ui/components/Icon";
-import { Badge } from "@plexui/ui/components/Badge";
+import { InfoCircle } from "@plexui/ui/components/Icon";
 import { Tooltip } from "@plexui/ui/components/Tooltip";
 
 interface MetricCardProps {
@@ -11,20 +10,42 @@ interface MetricCardProps {
     value: number;
     label?: string;
   };
+  /** When true, a positive trend is bad (red) and negative is good (green). Use for metrics like "Avg Completion Time", "Error Rate", "Pending Review". */
+  invertTrend?: boolean;
   tooltip?: string;
   description?: string;
   variant?: "default" | "compact";
+}
+
+function trendStyle(value: number, invert: boolean): React.CSSProperties {
+  if (value === 0) return { color: "var(--color-text-tertiary)" };
+  const isGood = invert ? value < 0 : value > 0;
+  return { color: isGood ? "var(--color-text-success-soft)" : "var(--color-text-danger-soft)" };
+}
+
+function formatTrend(value: number): string {
+  if (value === 0) return "0%";
+  const sign = value > 0 ? "+" : "";
+  return `${sign}${value.toFixed(1)}%`;
 }
 
 export function MetricCard({
   label,
   value,
   trend,
+  invertTrend = false,
   tooltip,
   description,
   variant = "default",
 }: MetricCardProps) {
-  const isPositive = trend && trend.value >= 0;
+  const trendEl = trend != null && (
+    <span
+      className={`${variant === "compact" ? "text-xs" : "text-sm"} font-semibold`}
+      style={trendStyle(trend.value, invertTrend)}
+    >
+      {formatTrend(trend.value)}
+    </span>
+  );
 
   if (variant === "compact") {
     return (
@@ -37,7 +58,10 @@ export function MetricCard({
             </Tooltip>
           )}
         </div>
-        <p className="mt-1.5 heading-md text-[var(--color-text)]">{value}</p>
+        <div className="mt-1.5 flex items-baseline gap-1.5">
+          <p className="heading-md text-[var(--color-text)]">{value}</p>
+          {trendEl}
+        </div>
         {description && (
           <p className="mt-0.5 text-xs text-[var(--color-text-tertiary)]">{description}</p>
         )}
@@ -47,24 +71,12 @@ export function MetricCard({
 
   return (
     <div className="flex flex-col justify-between rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5">
-      {/* Top row: label + trend badge */}
-      <div className="flex items-start justify-between gap-3">
-        <p className="text-sm text-[var(--color-text-secondary)]">{label}</p>
-         {trend && (
-           <Badge color="secondary" variant="outline" pill size="sm">
-             {isPositive ? (
-               <ArrowUpSm className="h-3.5 w-3.5" />
-             ) : (
-               <ArrowDownSm className="h-3.5 w-3.5" />
-             )}
-            {trend.value >= 0 ? "+" : ""}
-            {trend.value.toFixed(1)}%
-          </Badge>
-        )}
-      </div>
+      <p className="text-sm text-[var(--color-text-secondary)]">{label}</p>
 
-      {/* Value */}
-      <p className="mt-3 heading-xl text-[var(--color-text)]">{value}</p>
+      <div className="mt-3 flex items-baseline gap-2">
+        <p className="heading-xl text-[var(--color-text)]">{value}</p>
+        {trendEl}
+      </div>
 
       {/* Bottom row: description + trend label */}
       {(description || trend?.label) && (

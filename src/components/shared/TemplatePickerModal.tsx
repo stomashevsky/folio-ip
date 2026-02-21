@@ -46,7 +46,7 @@ export function TemplatePickerModal({
               type="button"
               aria-label={`Select ${preset.name} template`}
               onClick={() => handleSelect(preset.id)}
-              className="cursor-pointer rounded-lg border border-[var(--color-border)] px-4 py-3 text-left transition-colors hover:bg-[var(--color-nav-hover-bg)] focus-visible:outline-2 focus-visible:outline-[var(--color-primary-solid-bg)]"
+              className="cursor-pointer rounded-lg border border-[var(--color-border)] px-4 py-3 text-left transition-colors hover:bg-[var(--color-nav-hover-bg)] focus-visible:outline-2 focus-visible:outline-[var(--color-background-primary-solid)]"
             >
               <p className="heading-xs text-[var(--color-text)]">
                 {preset.name}

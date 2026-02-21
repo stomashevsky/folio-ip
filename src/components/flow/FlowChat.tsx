@@ -241,7 +241,7 @@ export function FlowChat({ currentYaml, onApplyYaml }: FlowChatProps) {
 
     return (
       <div className={className}>
-        <div className="flex items-center gap-1.5 rounded-md bg-[var(--color-danger-soft-bg)] px-2 py-1.5">
+        <div className="flex items-center gap-1.5 rounded-md bg-[var(--color-background-danger-soft)] px-2 py-1.5">
           <ExclamationMarkCircle className="h-3 w-3 shrink-0 text-[var(--color-text-danger-ghost)]" />
           <span className="text-xs text-[var(--color-text-danger-ghost)]">{error}</span>
         </div>
@@ -391,7 +391,7 @@ export function FlowChat({ currentYaml, onApplyYaml }: FlowChatProps) {
                     isUser
                       ? "bg-[var(--color-surface-secondary)] pl-3 pr-2 text-[var(--color-text)]"
                       : isErrorMessage
-                        ? "bg-[var(--color-danger-soft-bg)] px-3 text-[var(--color-danger-soft-text)]"
+                        ? "bg-[var(--color-background-danger-soft)] px-3 text-[var(--color-text-danger-soft)]"
                         : "bg-transparent px-0 text-[var(--color-text)]"
                   }`}
                   style={{

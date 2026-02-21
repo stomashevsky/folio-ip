@@ -85,7 +85,7 @@ export default function GettingStartedPage() {
           </div>
           <div className="h-2 rounded-full bg-[var(--color-border)]">
             <div
-              className="h-2 rounded-full bg-[var(--color-primary-solid-bg)] transition-all duration-300"
+              className="h-2 rounded-full bg-[var(--color-background-primary-solid)] transition-all duration-300"
               style={{
                 width: `${(completedSteps.size / steps.length) * 100}%`,
               }}
@@ -111,7 +111,7 @@ export default function GettingStartedPage() {
                       style={{
                         width: 24,
                         height: 24,
-                        color: "var(--color-success-solid-bg)",
+                        color: "var(--color-background-success-solid)",
                       }}
                     />
                   ) : (

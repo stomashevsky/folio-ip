@@ -193,11 +193,13 @@ export default function DashboardHome() {
             label="Avg Completion Time"
             value={formatDuration(metrics.avgCompletionTime)}
             trend={{ value: metrics.completionTimeTrend, label: currentTrendLabel }}
+            invertTrend
           />
           <MetricCard
             label="Pending Review"
             value={formatNumber(metrics.pendingReview)}
             trend={{ value: metrics.pendingReviewTrend, label: currentTrendLabel }}
+            invertTrend
           />
         </div>
 

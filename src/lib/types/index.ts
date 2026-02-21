@@ -406,6 +406,8 @@ export interface HighlightMetric {
   value: string;
   description?: string;
   tooltip?: string;
+  trend?: number;
+  invertTrend?: boolean;
 }
 
 // ─── Table & UI Types ───

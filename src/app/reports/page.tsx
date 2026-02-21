@@ -115,7 +115,7 @@ const columns: ColumnDef<Report, unknown>[] = [
       <span
         className={
           row.original.matchCount > 0
-            ? "font-medium text-[var(--color-danger-soft-text)]"
+            ? "font-medium text-[var(--color-text-danger-soft)]"
             : "text-[var(--color-text-secondary)]"
         }
       >

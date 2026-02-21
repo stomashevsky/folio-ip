@@ -58,10 +58,10 @@ const MOCK_NOTIFICATIONS: Notification[] = [
 ];
 
 const TYPE_COLORS: Record<Notification["type"], string> = {
-  inquiry: "var(--color-primary-solid-bg)",
-  verification: "var(--color-warning-solid-bg)",
-  report: "var(--color-danger-solid-bg)",
-  case: "var(--color-info-solid-bg)",
+  inquiry: "var(--color-background-primary-solid)",
+  verification: "var(--color-background-warning-solid)",
+  report: "var(--color-background-danger-solid)",
+  case: "var(--color-background-info-solid)",
   system: "var(--color-text-tertiary)",
 };
 
@@ -94,7 +94,7 @@ export function NotificationDropdown() {
             <Bell style={{ width: 18, height: 18 }} />
           </Button>
           {unreadCount > 0 && (
-            <span className="pointer-events-none absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-[var(--color-danger-solid-bg)] px-1 text-[10px] font-bold text-[var(--color-text-inverse)]">
+            <span className="pointer-events-none absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-[var(--color-background-danger-solid)] px-1 text-[10px] font-bold text-[var(--color-text-inverse)]">
               {unreadCount}
             </span>
           )}

@@ -287,7 +287,7 @@ function buildGraph(
         color: style.color,
         borderWidth: isFraudRing ? "2.5px" : "1.5px",
         borderStyle: "solid",
-        borderColor: isFraudRing ? "var(--color-danger-solid-bg)" : style.border,
+        borderColor: isFraudRing ? "var(--color-background-danger-solid)" : style.border,
         borderRadius: "10px",
         padding: "10px 14px",
         fontSize: "12px",
@@ -296,7 +296,7 @@ function buildGraph(
         textAlign: "center" as const,
         lineHeight: "1.5",
         opacity: isDimmed ? 0.15 : 1,
-        boxShadow: isFraudRing && isHighlighted ? "0 0 12px var(--color-danger-solid-bg)" : undefined,
+        boxShadow: isFraudRing && isHighlighted ? "0 0 12px var(--color-background-danger-solid)" : undefined,
         transition: "opacity 200ms, box-shadow 200ms",
       },
     };
@@ -316,7 +316,7 @@ function buildGraph(
       animated: conn.strength > 0.85 || !!isFraud,
       style: {
         stroke: isFraud
-          ? "var(--color-danger-solid-bg)"
+          ? "var(--color-background-danger-solid)"
           : "var(--color-text-tertiary)",
         strokeWidth: Math.max(1, conn.strength * 2.5),
         opacity: isDimmed ? 0.1 : 1,
@@ -695,6 +695,7 @@ export default function GraphPage() {
               label="Fraud Rings"
               value={fraudRings.length.toString()}
               trend={{ value: fraudRings.length }}
+              invertTrend
             />
           </div>
         </div>
@@ -996,7 +997,7 @@ export default function GraphPage() {
                     <button
                       key={sq.label}
                       type="button"
-                      className="rounded-lg border border-[var(--color-border)] p-3 text-left transition-colors hover:border-[var(--color-primary-soft-border)] hover:bg-[var(--color-primary-soft-bg)]"
+                      className="rounded-lg border border-[var(--color-border)] p-3 text-left transition-colors hover:border-[var(--color-border-primary-surface)] hover:bg-[var(--color-background-primary-soft)]"
                       onClick={() => {
                         setQueryText(sq.query);
                       }}
@@ -1070,10 +1071,10 @@ export default function GraphPage() {
                     type="button"
                     className={`rounded-lg border p-4 text-left transition-all ${
                       highlightCluster === cluster.id
-                        ? "border-[var(--color-primary-solid-bg)] bg-[var(--color-primary-soft-bg)]"
+                        ? "border-[var(--color-background-primary-solid)] bg-[var(--color-background-primary-soft)]"
                         : cluster.isFraudRing
-                          ? "border-[var(--color-danger-soft-border)] hover:border-[var(--color-danger-solid-bg)]"
-                          : "border-[var(--color-border)] hover:border-[var(--color-primary-soft-border)]"
+                          ? "border-[var(--color-border-danger-surface)] hover:border-[var(--color-background-danger-solid)]"
+                          : "border-[var(--color-border)] hover:border-[var(--color-border-primary-surface)]"
                     }`}
                     onClick={() => {
                       setHighlightCluster((prev) =>

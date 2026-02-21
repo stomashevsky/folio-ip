@@ -163,7 +163,7 @@ function CopilotPanel({ onClose }: { onClose: () => void }) {
               <div
                 className={`max-w-[85%] rounded-xl px-3 py-2 text-sm ${
                   msg.role === "user"
-                    ? "bg-[var(--color-primary-solid-bg)] text-[var(--color-text-inverse)]"
+                    ? "bg-[var(--color-background-primary-solid)] text-[var(--color-text-inverse)]"
                     : "bg-[var(--color-surface-secondary)] text-[var(--color-text)]"
                 }`}
               >

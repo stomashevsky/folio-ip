@@ -47,7 +47,7 @@ KYC/Identity Verification Analytics Dashboard
 ## Project Structure
 
 ```
-folio-app/
+folio-ip/
 ├── reference/           # Reference docs (this folder)
 │   ├── persona/         # Persona data model, dashboard sections
 │   ├── design/          # Design tokens, UI patterns

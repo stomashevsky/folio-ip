@@ -303,13 +303,15 @@ export function deriveHighlights(days: number): HighlightMetric[] {
   const mins = Math.floor(medianSeconds / 60);
   const secs = medianSeconds % 60;
 
+  const t = (seed: number, scale = 10) => Math.round(((seededRandom(days * seed) - 0.4) * scale) * 10) / 10;
+
   return [
-    { label: "Total Inquiries", value: total.toLocaleString(), tooltip: "Verification sessions created in this period" },
-    { label: "Start Rate", value: `${Math.round(startRate * 10) / 10}%`, tooltip: "% of inquiries where user began verification" },
-    { label: "Completion Rate", value: `${Math.round(completionRate * 10) / 10}%`, tooltip: "% of started inquiries that reached a decision" },
-    { label: "Approval Rate", value: `${Math.round(approvalRate * 10) / 10}%`, tooltip: "% of completed inquiries approved" },
-    { label: "Rejection Rate", value: `${Math.round(rejectionRate * 10) / 10}%`, tooltip: "% of completed inquiries declined" },
-    { label: "Median Completion", value: `${mins}m ${secs}s`, tooltip: "Typical time from start to decision" },
+    { label: "Total Inquiries", value: total.toLocaleString(), tooltip: "Verification sessions created in this period", trend: t(31, 15) },
+    { label: "Start Rate", value: `${Math.round(startRate * 10) / 10}%`, tooltip: "% of inquiries where user began verification", trend: t(33, 4) },
+    { label: "Completion Rate", value: `${Math.round(completionRate * 10) / 10}%`, tooltip: "% of started inquiries that reached a decision", trend: t(37, 5) },
+    { label: "Approval Rate", value: `${Math.round(approvalRate * 10) / 10}%`, tooltip: "% of completed inquiries approved", trend: t(41, 4) },
+    { label: "Rejection Rate", value: `${Math.round(rejectionRate * 10) / 10}%`, tooltip: "% of completed inquiries declined", trend: t(43, 4), invertTrend: true },
+    { label: "Median Completion", value: `${mins}m ${secs}s`, tooltip: "Typical time from start to decision", trend: t(47, 12), invertTrend: true },
   ];
 }
 
@@ -397,13 +399,15 @@ export function deriveVerificationHighlights(days: number): HighlightMetric[] {
   const failRate = 4 + seededRandom(days * 10) * 8;
   const avgSeconds = 12 + Math.round(seededRandom(days * 12) * 25);
 
+  const t = (seed: number, scale = 10) => Math.round(((seededRandom(days * seed) - 0.4) * scale) * 10) / 10;
+
   return [
-    { label: "Total Verifications", value: total.toLocaleString(), tooltip: "All verifications processed in this period" },
-    { label: "Government ID", value: govIdCount.toLocaleString(), tooltip: "Government ID verifications" },
-    { label: "Selfie", value: selfieCount.toLocaleString(), tooltip: "Selfie verifications" },
-    { label: "Pass Rate", value: `${Math.round(passRate * 10) / 10}%`, tooltip: "% of verifications that passed" },
-    { label: "Fail Rate", value: `${Math.round(failRate * 10) / 10}%`, tooltip: "% of verifications that failed" },
-    { label: "Avg Processing", value: `${avgSeconds}s`, tooltip: "Average time to process a verification" },
+    { label: "Total Verifications", value: total.toLocaleString(), tooltip: "All verifications processed in this period", trend: t(51, 12) },
+    { label: "Government ID", value: govIdCount.toLocaleString(), tooltip: "Government ID verifications", trend: t(53, 10) },
+    { label: "Selfie", value: selfieCount.toLocaleString(), tooltip: "Selfie verifications", trend: t(57, 10) },
+    { label: "Pass Rate", value: `${Math.round(passRate * 10) / 10}%`, tooltip: "% of verifications that passed", trend: t(59, 5) },
+    { label: "Fail Rate", value: `${Math.round(failRate * 10) / 10}%`, tooltip: "% of verifications that failed", trend: t(61, 4), invertTrend: true },
+    { label: "Avg Processing", value: `${avgSeconds}s`, tooltip: "Average time to process a verification", trend: t(67, 8), invertTrend: true },
   ];
 }
 
@@ -469,13 +473,15 @@ export function deriveReportHighlights(days: number): HighlightMetric[] {
   const noMatchRate = 100 - matchRate;
   const avgSeconds = 3 + Math.round(seededRandom(days * 13) * 8);
 
+  const t = (seed: number, scale = 10) => Math.round(((seededRandom(days * seed) - 0.4) * scale) * 10) / 10;
+
   return [
-    { label: "Total Reports", value: total.toLocaleString(), tooltip: "All screening reports run in this period" },
-    { label: "Watchlist", value: watchlistCount.toLocaleString(), tooltip: "Watchlist screening reports" },
-    { label: "PEP", value: pepCount.toLocaleString(), tooltip: "Politically Exposed Persons screening reports" },
-    { label: "Match Rate", value: `${Math.round(matchRate * 10) / 10}%`, tooltip: "% of reports with at least one match" },
-    { label: "No Match Rate", value: `${Math.round(noMatchRate * 10) / 10}%`, tooltip: "% of reports with no matches" },
-    { label: "Avg Processing", value: `${avgSeconds}s`, tooltip: "Average time to complete a report" },
+    { label: "Total Reports", value: total.toLocaleString(), tooltip: "All screening reports run in this period", trend: t(71, 12) },
+    { label: "Watchlist", value: watchlistCount.toLocaleString(), tooltip: "Watchlist screening reports", trend: t(73, 10) },
+    { label: "PEP", value: pepCount.toLocaleString(), tooltip: "Politically Exposed Persons screening reports", trend: t(79, 10) },
+    { label: "Match Rate", value: `${Math.round(matchRate * 10) / 10}%`, tooltip: "% of reports with at least one match", trend: t(83, 5), invertTrend: true },
+    { label: "No Match Rate", value: `${Math.round(noMatchRate * 10) / 10}%`, tooltip: "% of reports with no matches", trend: t(89, 5) },
+    { label: "Avg Processing", value: `${avgSeconds}s`, tooltip: "Average time to complete a report", trend: t(97, 6), invertTrend: true },
   ];
 }
 
@@ -541,13 +547,15 @@ export function deriveTransactionHighlights(days: number): HighlightMetric[] {
   const needsReviewRate = 5 + seededRandom(days * 10) * 8;
   const avgProcessing = 1.2 + seededRandom(days * 14) * 2.5;
 
+  const t = (seed: number, scale = 10) => Math.round(((seededRandom(days * seed) - 0.4) * scale) * 10) / 10;
+
   return [
-    { label: "Total Transactions", value: total.toLocaleString(), tooltip: "All transactions monitored in this period" },
-    { label: "Total Volume", value: `$${(totalVolume / 1000).toFixed(0)}k`, tooltip: "Combined dollar amount of all transactions" },
-    { label: "Avg Amount", value: `$${avgAmount.toLocaleString()}`, tooltip: "Average transaction amount" },
-    { label: "Approval Rate", value: `${Math.round(approvalRate * 10) / 10}%`, tooltip: "% of transactions approved" },
-    { label: "Needs Review Rate", value: `${Math.round(needsReviewRate * 10) / 10}%`, tooltip: "% of transactions sent for review" },
-    { label: "Avg Processing", value: `${avgProcessing.toFixed(1)}s`, tooltip: "Average time to process a transaction" },
+    { label: "Total Transactions", value: total.toLocaleString(), tooltip: "All transactions monitored in this period", trend: t(101, 12) },
+    { label: "Total Volume", value: `$${(totalVolume / 1000).toFixed(0)}k`, tooltip: "Combined dollar amount of all transactions", trend: t(103, 15) },
+    { label: "Avg Amount", value: `$${avgAmount.toLocaleString()}`, tooltip: "Average transaction amount", trend: t(107, 8) },
+    { label: "Approval Rate", value: `${Math.round(approvalRate * 10) / 10}%`, tooltip: "% of transactions approved", trend: t(109, 4) },
+    { label: "Needs Review Rate", value: `${Math.round(needsReviewRate * 10) / 10}%`, tooltip: "% of transactions sent for review", trend: t(113, 5), invertTrend: true },
+    { label: "Avg Processing", value: `${avgProcessing.toFixed(1)}s`, tooltip: "Average time to process a transaction", trend: t(127, 8), invertTrend: true },
   ];
 }
 
@@ -613,12 +621,14 @@ export function deriveCaseHighlights(days: number): HighlightMetric[] {
   const avgResolutionDays = 1.8 + seededRandom(days * 11) * 1.5;
   const slaRate = 90 + seededRandom(days * 13) * 8;
 
+  const t = (seed: number, scale = 10) => Math.round(((seededRandom(days * seed) - 0.4) * scale) * 10) / 10;
+
   return [
-    { label: "Total Cases", value: total.toLocaleString(), tooltip: "All cases created in this period" },
-    { label: "Open", value: openCount.toLocaleString(), tooltip: "Cases currently open" },
-    { label: "Resolved", value: resolvedCount.toLocaleString(), tooltip: "Cases resolved in this period" },
-    { label: "Escalated", value: escalatedCount.toLocaleString(), tooltip: "Cases escalated for review" },
-    { label: "Avg Resolution", value: `${avgResolutionDays.toFixed(1)}d`, tooltip: "Average time to resolve a case" },
-    { label: "SLA Compliance", value: `${Math.round(slaRate * 10) / 10}%`, tooltip: "% of cases resolved within SLA" },
+    { label: "Total Cases", value: total.toLocaleString(), tooltip: "All cases created in this period", trend: t(131, 12), invertTrend: true },
+    { label: "Open", value: openCount.toLocaleString(), tooltip: "Cases currently open", trend: t(137, 15), invertTrend: true },
+    { label: "Resolved", value: resolvedCount.toLocaleString(), tooltip: "Cases resolved in this period", trend: t(139, 10) },
+    { label: "Escalated", value: escalatedCount.toLocaleString(), tooltip: "Cases escalated for review", trend: t(149, 8), invertTrend: true },
+    { label: "Avg Resolution", value: `${avgResolutionDays.toFixed(1)}d`, tooltip: "Average time to resolve a case", trend: t(151, 10), invertTrend: true },
+    { label: "SLA Compliance", value: `${Math.round(slaRate * 10) / 10}%`, tooltip: "% of cases resolved within SLA", trend: t(157, 5) },
   ];
 }

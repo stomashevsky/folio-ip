@@ -124,7 +124,7 @@ export default function GraphTemplateDetailPage() {
 
         <div className="mt-10">
           <SectionHeading size="xs">Danger Zone</SectionHeading>
-          <div className="mt-4 rounded-lg border border-[var(--color-danger-soft-border)] p-4">
+          <div className="mt-4 rounded-lg border border-[var(--color-border-danger-surface)] p-4">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-[var(--color-text)]">Delete template</p>

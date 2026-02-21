@@ -178,7 +178,7 @@ export function ListMatchesTab({ reports }: { reports: Report[] }) {
                     <div>
                       <Link
                         href={`/reports/${match.reportId}`}
-                        className="block truncate font-mono text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-primary-solid-bg)] hover:underline"
+                        className="block truncate font-mono text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-background-primary-solid)] hover:underline"
                         title={match.reportId}
                       >
                         {match.reportId}

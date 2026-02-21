@@ -114,6 +114,8 @@ function CaseAnalyticsContent() {
                     value={metric.value}
                     description={metric.description}
                     tooltip={metric.tooltip}
+                    trend={metric.trend != null ? { value: metric.trend } : undefined}
+                    invertTrend={metric.invertTrend}
                     variant="compact"
                   />
                 ))}
@@ -166,6 +168,8 @@ function CaseAnalyticsContent() {
                     value={metric.value}
                     description={metric.description}
                     tooltip={metric.tooltip}
+                    trend={metric.trend != null ? { value: metric.trend } : undefined}
+                    invertTrend={metric.invertTrend}
                     variant="compact"
                   />
                 ))}

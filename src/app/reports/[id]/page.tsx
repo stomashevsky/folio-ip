@@ -144,7 +144,7 @@ function ReportDetailContent() {
                 {report.inquiryId ? (
                   <Link
                     href={`/inquiries/${report.inquiryId}`}
-                    className="text-[var(--color-primary-solid-bg)] hover:underline"
+                    className="text-[var(--color-background-primary-solid)] hover:underline"
                   >
                     {report.inquiryId}
                   </Link>
@@ -158,7 +158,7 @@ function ReportDetailContent() {
                 {report.accountId ? (
                   <Link
                     href={`/accounts/${report.accountId}`}
-                    className="text-[var(--color-primary-solid-bg)] hover:underline"
+                    className="text-[var(--color-background-primary-solid)] hover:underline"
                   >
                     {report.accountId}
                   </Link>
@@ -172,7 +172,7 @@ function ReportDetailContent() {
                 <span
                   className={
                     report.matchCount > 0
-                      ? "font-medium text-[var(--color-danger-soft-text)]"
+                      ? "font-medium text-[var(--color-text-danger-soft)]"
                       : "text-[var(--color-text-secondary)]"
                   }
                 >

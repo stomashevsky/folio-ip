@@ -115,7 +115,7 @@ function TransactionDetailContent() {
               <InfoRow label="Account ID" copyValue={transaction.accountId} mono>
                 <Link
                   href={`/accounts/${transaction.accountId}`}
-                  className="text-[var(--color-primary-solid-bg)] hover:underline"
+                  className="text-[var(--color-background-primary-solid)] hover:underline"
                 >
                   {transaction.accountId}
                 </Link>

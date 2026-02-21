@@ -76,7 +76,7 @@ function TransactionAnalyticsContent() {
               <h3 className="heading-sm text-[var(--color-text)] mb-3">Highlights</h3>
               <div className="grid grid-cols-3 gap-3 xl:grid-cols-6">
                 {highlights.map((metric) => (
-                  <MetricCard key={metric.label} label={metric.label} value={metric.value} description={metric.description} tooltip={metric.tooltip} variant="compact" />
+                  <MetricCard key={metric.label} label={metric.label} value={metric.value} description={metric.description} tooltip={metric.tooltip} trend={metric.trend != null ? { value: metric.trend } : undefined} invertTrend={metric.invertTrend} variant="compact" />
                 ))}
               </div>
             </div>
@@ -101,7 +101,7 @@ function TransactionAnalyticsContent() {
               <h3 className="heading-sm text-[var(--color-text)] mb-3">Risk Indicators</h3>
               <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
                 {riskHighlights.map((metric) => (
-                  <MetricCard key={metric.label} label={metric.label} value={metric.value} description={metric.description} tooltip={metric.tooltip} variant="compact" />
+                  <MetricCard key={metric.label} label={metric.label} value={metric.value} description={metric.description} tooltip={metric.tooltip} trend={metric.trend != null ? { value: metric.trend } : undefined} invertTrend={metric.invertTrend} variant="compact" />
                 ))}
               </div>
             </div>

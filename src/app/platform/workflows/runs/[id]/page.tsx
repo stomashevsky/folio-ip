@@ -220,7 +220,7 @@ function RunDetailContent() {
                         {step.durationMs != null && <span>{step.durationMs}ms</span>}
                       </div>
                       {step.error && (
-                        <div className="mt-1 rounded bg-[var(--color-danger-soft-bg)] px-2 py-1 text-xs text-[var(--color-text-danger-soft)]">
+                        <div className="mt-1 rounded bg-[var(--color-background-danger-soft)] px-2 py-1 text-xs text-[var(--color-text-danger-soft)]">
                           {step.error}
                         </div>
                       )}
@@ -244,7 +244,7 @@ function RunDetailContent() {
               <InfoRow label="Workflow" mono>
                 <Link
                   href={`/platform/workflows/${run.workflowId}`}
-                  className="text-[var(--color-primary-solid-bg)] hover:underline"
+                  className="text-[var(--color-background-primary-solid)] hover:underline"
                 >
                   {run.workflowName}
                 </Link>

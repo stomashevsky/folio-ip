@@ -113,7 +113,7 @@ export default function BillingPage() {
               </div>
               <div className="h-2 rounded-full bg-[var(--color-border)]">
                 <div
-                  className="h-2 rounded-full bg-[var(--color-primary-solid-bg)]"
+                  className="h-2 rounded-full bg-[var(--color-background-primary-solid)]"
                   style={{ width: `${(item.used / item.limit) * 100}%` }}
                 />
               </div>

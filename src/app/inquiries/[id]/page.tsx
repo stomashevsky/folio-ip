@@ -171,7 +171,7 @@ function InquiryDetailContent() {
               <InfoRow label="Account ID" copyValue={inquiry.accountId} mono>
                 <Link
                   href={`/accounts/${inquiry.accountId}`}
-                  className="text-[var(--color-primary-solid-bg)] hover:underline"
+                  className="text-[var(--color-background-primary-solid)] hover:underline"
                 >
                   {inquiry.accountId}
                 </Link>
@@ -180,7 +180,7 @@ function InquiryDetailContent() {
                 {formatDateTime(inquiry.createdAt)} UTC
               </InfoRow>
               <InfoRow label="Template">
-                <span className="text-[var(--color-primary-solid-bg)]">
+                <span className="text-[var(--color-background-primary-solid)]">
                   {inquiry.templateName}
                 </span>
               </InfoRow>
