@@ -8,6 +8,7 @@ import type {
   FunnelTimeSeriesPoint,
   AnalyticsInterval,
 } from "@/lib/types";
+import type { TypedTimeSeriesPoint } from "@/lib/data/mock-analytics";
 import { FUNNEL_STEPS } from "@/lib/data/mock-analytics";
 
 /** Group daily volume data into weekly or monthly buckets (summed) */
@@ -210,6 +211,71 @@ export function aggregateCaseRates(
     resolutionRate: Math.round((b.resolutionSum / b.count) * 10) / 10,
     slaComplianceRate: Math.round((b.slaSum / b.count) * 10) / 10,
   }));
+}
+
+/** Group daily typed-volume data into weekly or monthly buckets (summed per type key) */
+export function aggregateTypedVolume(
+  data: TypedTimeSeriesPoint[],
+  interval: AnalyticsInterval,
+  typeKeys: string[],
+): TypedTimeSeriesPoint[] {
+  if (interval === "daily") return data;
+
+  const buckets = new Map<string, TypedTimeSeriesPoint>();
+
+  for (const point of data) {
+    const key = bucketKey(point.date as string, interval);
+    const existing = buckets.get(key);
+    if (existing) {
+      for (const tk of typeKeys) {
+        (existing[tk] as number) = ((existing[tk] as number) || 0) + ((point[tk] as number) || 0);
+      }
+    } else {
+      const entry: TypedTimeSeriesPoint = { date: key };
+      for (const tk of typeKeys) {
+        entry[tk] = (point[tk] as number) || 0;
+      }
+      buckets.set(key, entry);
+    }
+  }
+
+  return Array.from(buckets.values());
+}
+
+/** Group daily typed-rate data into weekly or monthly buckets (averaged per type key) */
+export function aggregateTypedRates(
+  data: TypedTimeSeriesPoint[],
+  interval: AnalyticsInterval,
+  typeKeys: string[],
+): TypedTimeSeriesPoint[] {
+  if (interval === "daily") return data;
+
+  const buckets = new Map<string, { sums: Record<string, number>; count: number }>();
+
+  for (const point of data) {
+    const key = bucketKey(point.date as string, interval);
+    const existing = buckets.get(key);
+    if (existing) {
+      for (const tk of typeKeys) {
+        existing.sums[tk] = (existing.sums[tk] || 0) + ((point[tk] as number) || 0);
+      }
+      existing.count += 1;
+    } else {
+      const sums: Record<string, number> = {};
+      for (const tk of typeKeys) {
+        sums[tk] = (point[tk] as number) || 0;
+      }
+      buckets.set(key, { sums, count: 1 });
+    }
+  }
+
+  return Array.from(buckets.entries()).map(([date, b]) => {
+    const entry: TypedTimeSeriesPoint = { date };
+    for (const tk of typeKeys) {
+      entry[tk] = Math.round((b.sums[tk] / b.count) * 10) / 10;
+    }
+    return entry;
+  });
 }
 
 function bucketKey(dateStr: string, interval: AnalyticsInterval): string {

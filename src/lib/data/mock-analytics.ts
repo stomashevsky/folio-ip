@@ -411,6 +411,225 @@ export function deriveVerificationHighlights(days: number): HighlightMetric[] {
   ];
 }
 
+// ─── Per-Type Verification Analytics ───
+
+function typeKeyToSeed(typeKey: string): number {
+  let hash = 0;
+  for (let i = 0; i < typeKey.length; i++) {
+    hash = ((hash << 5) - hash + typeKey.charCodeAt(i)) | 0;
+  }
+  return Math.abs(hash);
+}
+
+export const VERIFICATION_TYPE_ANALYTICS_CONFIG: Record<string, { label: string; baseVolume: number; basePassRate: number; baseProcessedRate: number }> = {
+  government_id: { label: "Government ID", baseVolume: 35, basePassRate: 82, baseProcessedRate: 94 },
+  selfie: { label: "Selfie", baseVolume: 33, basePassRate: 88, baseProcessedRate: 96 },
+  database: { label: "Database", baseVolume: 12, basePassRate: 91, baseProcessedRate: 98 },
+  document: { label: "Document", baseVolume: 8, basePassRate: 76, baseProcessedRate: 92 },
+  aamva: { label: "AAMVA", baseVolume: 4, basePassRate: 95, baseProcessedRate: 99 },
+  database_phone_carrier: { label: "Phone Carrier", baseVolume: 3, basePassRate: 89, baseProcessedRate: 97 },
+  database_ssn: { label: "Database (SSN)", baseVolume: 2, basePassRate: 93, baseProcessedRate: 99 },
+  email_address: { label: "Email Address", baseVolume: 5, basePassRate: 85, baseProcessedRate: 95 },
+  phone_number: { label: "Phone Number", baseVolume: 4, basePassRate: 87, baseProcessedRate: 96 },
+};
+
+export interface VerificationTypeRow {
+  typeKey: string;
+  label: string;
+  created: number;
+  processedRate: number;
+  passRate: number;
+  createdTrend: number;
+  passRateTrend: number;
+}
+
+export interface VerificationTypeCheckRow {
+  typeKey: string;
+  label: string;
+  passRate: number;
+  failRate: number;
+  avgProcessing: number;
+  passRateTrend: number;
+  failRateTrend: number;
+}
+
+export interface TypedTimeSeriesPoint {
+  date: string;
+  [typeKey: string]: number | string;
+}
+
+export function generateVerificationTypeTimeSeries(days: number, typeKey: string): TimeSeriesPoint[] {
+  const config = VERIFICATION_TYPE_ANALYTICS_CONFIG[typeKey];
+  if (!config) return [];
+  const seed = typeKeyToSeed(typeKey);
+  const endDate = new Date("2026-02-10");
+  const baseVolume = config.baseVolume;
+
+  let walk = 0;
+  return Array.from({ length: days }, (_, i) => {
+    const date = new Date(endDate);
+    date.setDate(date.getDate() - (days - 1 - i));
+    const dayOfWeek = date.getDay();
+
+    const trend = baseVolume * 0.7 + (i / days) * baseVolume * 0.5;
+    const weekendFactor = dayOfWeek === 0 || dayOfWeek === 6 ? 0.65 : 1.0;
+    walk += (seededRandom(i * 11 + seed + days * 2) - 0.5) * baseVolume * 0.2;
+    walk = walk * 0.9;
+    const noise = (seededRandom(i * 17 + seed + days * 5) - 0.5) * baseVolume * 0.3;
+    const spike = seededRandom(i * 37 + seed + days * 9) > 0.94 ? baseVolume * 0.4 : 0;
+    const value = Math.round((trend + walk + noise + spike) * weekendFactor);
+
+    return {
+      date: date.toISOString().split("T")[0],
+      value: Math.max(1, value),
+    };
+  });
+}
+
+export function generateVerificationTypeRateTimeSeries(days: number, typeKey: string): VerificationRatePoint[] {
+  const config = VERIFICATION_TYPE_ANALYTICS_CONFIG[typeKey];
+  if (!config) return [];
+  const seed = typeKeyToSeed(typeKey);
+  const endDate = new Date("2026-02-10");
+
+  return Array.from({ length: days }, (_, i) => {
+    const date = new Date(endDate);
+    date.setDate(date.getDate() - (days - 1 - i));
+
+    const passNoise = (seededRandom(i * 29 + seed + 1100) - 0.5) * 10;
+    const passRate = Math.max(50, Math.min(100, config.basePassRate + passNoise));
+
+    const processedNoise = (seededRandom(i * 31 + seed + 1300) - 0.5) * 6;
+    const processedRate = Math.max(70, Math.min(100, config.baseProcessedRate + processedNoise));
+
+    return {
+      date: date.toISOString().split("T")[0],
+      passRate: Math.round(passRate * 10) / 10,
+      processedRate: Math.round(processedRate * 10) / 10,
+    };
+  });
+}
+
+export function generateStackedVolumeTimeSeries(days: number, typeKeys: string[]): TypedTimeSeriesPoint[] {
+  const seriesMap = new Map<string, TimeSeriesPoint[]>();
+  for (const key of typeKeys) {
+    seriesMap.set(key, generateVerificationTypeTimeSeries(days, key));
+  }
+
+  const endDate = new Date("2026-02-10");
+  return Array.from({ length: days }, (_, i) => {
+    const date = new Date(endDate);
+    date.setDate(date.getDate() - (days - 1 - i));
+    const dateStr = date.toISOString().split("T")[0];
+
+    const point: TypedTimeSeriesPoint = { date: dateStr };
+    for (const key of typeKeys) {
+      const series = seriesMap.get(key)!;
+      point[key] = series[i]?.value ?? 0;
+    }
+    return point;
+  });
+}
+
+export function generateMultiTypeRateTimeSeries(days: number, typeKeys: string[]): TypedTimeSeriesPoint[] {
+  const seriesMap = new Map<string, VerificationRatePoint[]>();
+  for (const key of typeKeys) {
+    seriesMap.set(key, generateVerificationTypeRateTimeSeries(days, key));
+  }
+
+  const endDate = new Date("2026-02-10");
+  return Array.from({ length: days }, (_, i) => {
+    const date = new Date(endDate);
+    date.setDate(date.getDate() - (days - 1 - i));
+    const dateStr = date.toISOString().split("T")[0];
+
+    const point: TypedTimeSeriesPoint = { date: dateStr };
+    for (const key of typeKeys) {
+      const series = seriesMap.get(key)!;
+      point[key] = series[i]?.passRate ?? 0;
+    }
+    return point;
+  });
+}
+
+export function deriveVerificationTypeRows(days: number, typeKeys: string[]): VerificationTypeRow[] {
+  return typeKeys.map((typeKey) => {
+    const config = VERIFICATION_TYPE_ANALYTICS_CONFIG[typeKey];
+    if (!config) return null;
+    const seed = typeKeyToSeed(typeKey);
+
+    const total = Math.round(config.baseVolume * days * (0.85 + seededRandom(seed + days * 2) * 0.3));
+    const processedRate = config.baseProcessedRate + (seededRandom(seed + days * 4) - 0.5) * 4;
+    const passRate = config.basePassRate + (seededRandom(seed + days * 6) - 0.5) * 6;
+
+    const t = (s: number, scale: number) => Math.round(((seededRandom(seed + days * s) - 0.4) * scale) * 10) / 10;
+
+    return {
+      typeKey,
+      label: config.label,
+      created: total,
+      processedRate: Math.round(processedRate * 10) / 10,
+      passRate: Math.round(passRate * 10) / 10,
+      createdTrend: t(11, 15),
+      passRateTrend: t(13, 5),
+    };
+  }).filter(Boolean) as VerificationTypeRow[];
+}
+
+export function deriveVerificationTypeCheckRows(days: number, typeKeys: string[]): VerificationTypeCheckRow[] {
+  return typeKeys.map((typeKey) => {
+    const config = VERIFICATION_TYPE_ANALYTICS_CONFIG[typeKey];
+    if (!config) return null;
+    const seed = typeKeyToSeed(typeKey);
+
+    const passRate = config.basePassRate + (seededRandom(seed + days * 6) - 0.5) * 6;
+    const failRate = 100 - passRate - (config.baseProcessedRate - config.basePassRate);
+    const avgProcessing = 8 + Math.round(seededRandom(seed + days * 14) * 20);
+
+    const t = (s: number, scale: number) => Math.round(((seededRandom(seed + days * s) - 0.4) * scale) * 10) / 10;
+
+    return {
+      typeKey,
+      label: config.label,
+      passRate: Math.round(passRate * 10) / 10,
+      failRate: Math.round(Math.max(0.5, failRate) * 10) / 10,
+      avgProcessing,
+      passRateTrend: t(13, 5),
+      failRateTrend: t(17, 4),
+    };
+  }).filter(Boolean) as VerificationTypeCheckRow[];
+}
+
+export function deriveVerificationTypeAggregateHighlights(days: number, typeKeys: string[]): HighlightMetric[] {
+  const rows = deriveVerificationTypeRows(days, typeKeys);
+  const totalCreated = rows.reduce((sum, r) => sum + r.created, 0);
+  const avgProcessedRate = rows.length > 0 ? rows.reduce((sum, r) => sum + r.processedRate, 0) / rows.length : 0;
+  const avgPassRate = rows.length > 0 ? rows.reduce((sum, r) => sum + r.passRate, 0) / rows.length : 0;
+
+  const t = (seed: number, scale = 10) => Math.round(((seededRandom(days * seed + 200) - 0.4) * scale) * 10) / 10;
+
+  return [
+    { label: "Total Verifications", value: totalCreated.toLocaleString(), tooltip: "All verifications processed in this period", trend: t(51, 12) },
+    { label: "Avg Processed Rate", value: `${Math.round(avgProcessedRate * 10) / 10}%`, tooltip: "Average processed rate across all types", trend: t(53, 4) },
+    { label: "Avg Pass Rate", value: `${Math.round(avgPassRate * 10) / 10}%`, tooltip: "Average pass rate across all types", trend: t(57, 5) },
+  ];
+}
+
+export function deriveVerificationTypeCheckAggregateHighlights(days: number, typeKeys: string[]): HighlightMetric[] {
+  const rows = deriveVerificationTypeCheckRows(days, typeKeys);
+  const avgPassRate = rows.length > 0 ? rows.reduce((sum, r) => sum + r.passRate, 0) / rows.length : 0;
+  const avgFailRate = rows.length > 0 ? rows.reduce((sum, r) => sum + r.failRate, 0) / rows.length : 0;
+  const avgProcessing = rows.length > 0 ? rows.reduce((sum, r) => sum + r.avgProcessing, 0) / rows.length : 0;
+
+  const t = (seed: number, scale = 10) => Math.round(((seededRandom(days * seed + 300) - 0.4) * scale) * 10) / 10;
+
+  return [
+    { label: "Avg Pass Rate", value: `${Math.round(avgPassRate * 10) / 10}%`, tooltip: "Average pass rate across all types", trend: t(61, 5) },
+    { label: "Avg Fail Rate", value: `${Math.round(avgFailRate * 10) / 10}%`, tooltip: "Average fail rate across all types", trend: t(63, 4), invertTrend: true },
+    { label: "Avg Processing", value: `${Math.round(avgProcessing)}s`, tooltip: "Average processing time across all types", trend: t(67, 8), invertTrend: true },
+  ];
+}
+
 // ─── Report Analytics ───
 
 export function generateReportTimeSeries(

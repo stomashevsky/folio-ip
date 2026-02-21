@@ -18,9 +18,9 @@ Extension installed at `~/.dev-browser-extension`, skill at `~/.opencode/skills/
 
 ---
 
-## CRITICAL RULE: Table Border Pattern — border-b on every row, overflow-hidden clips last
+## CRITICAL RULE: Table Border Pattern — border-b on every row, -mb-px on table, overflow-hidden on container
 
-**Every table row (including `<thead><tr>`) gets `border-b border-[var(--color-border)]`.** The last row's border is clipped by `overflow-hidden` on the table's container — NEVER use `-mb-px`, `last:border-0`, or `border-t`. Only `border-b` on rows, only `overflow-hidden` on container.
+**Every table row (including `<thead><tr>`) gets `border-b border-[var(--color-border)]`.** The last row's border is eliminated by `-mb-px` on the `<table>` element: it shifts the table 1px down so the last border extends beyond the container's content area, and `overflow-hidden` clips it. Without `-mb-px`, the last row's `border-b` stacks visually with the container's `border`, creating a double border.
 
 **Pattern:**
 ```tsx
@@ -28,7 +28,7 @@ Extension installed at `~/.dev-browser-extension`, skill at `~/.opencode/skills/
   {/* header/toolbar rows — each gets border-b */}
   <div className="border-b border-[var(--color-border)] ...">Header</div>
   <div className="overflow-hidden">
-    <table className="w-full">
+    <table className="-mb-px w-full">
       <thead>
         <tr className="border-b border-[var(--color-border)]">...</tr>
       </thead>
@@ -41,7 +41,7 @@ Extension installed at `~/.dev-browser-extension`, skill at `~/.opencode/skills/
 </div>
 ```
 
-**NEVER:** `border-t` on `<table>`, `-mb-px` on `<table>`, `last:border-b-0` on rows.
+**NEVER:** `border-t` on `<table>`, `last:border-b-0` on rows.
 
 **Two table types — thead background differs:**
 1. **Inline tables in cards** (inside `<div class="rounded-xl border ...">`) — `<thead><tr>` gets gray background via global CSS rule `thead tr { background: var(--color-surface-secondary) }`. NEVER hardcode `bg-[var(--color-surface-secondary)]` on individual thead rows.

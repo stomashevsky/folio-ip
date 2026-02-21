@@ -22,6 +22,15 @@ export {
   generateVerificationTimeSeries,
   generateVerificationRateTimeSeries,
   deriveVerificationHighlights,
+  VERIFICATION_TYPE_ANALYTICS_CONFIG,
+  generateVerificationTypeTimeSeries,
+  generateVerificationTypeRateTimeSeries,
+  generateStackedVolumeTimeSeries,
+  generateMultiTypeRateTimeSeries,
+  deriveVerificationTypeRows,
+  deriveVerificationTypeCheckRows,
+  deriveVerificationTypeAggregateHighlights,
+  deriveVerificationTypeCheckAggregateHighlights,
   generateReportTimeSeries,
   generateReportRateTimeSeries,
   deriveReportHighlights,
@@ -31,6 +40,11 @@ export {
   generateCaseTimeSeries,
   generateCaseRateTimeSeries,
   deriveCaseHighlights,
+} from "./mock-analytics";
+export type {
+  VerificationTypeRow,
+  VerificationTypeCheckRow,
+  TypedTimeSeriesPoint,
 } from "./mock-analytics";
 export {
   mockInquiryTemplates,
