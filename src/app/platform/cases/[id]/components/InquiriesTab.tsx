@@ -13,7 +13,14 @@ export function InquiriesTab({ inquiries }: { inquiries: Inquiry[] }) {
 
   return (
     <div className="overflow-x-auto rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]">
-      <table className="-mb-px w-full">
+      <table className="-mb-px w-full table-fixed">
+        <colgroup>
+          <col className="w-[24%]" />
+          <col className="w-[12%]" />
+          <col className="w-[14%]" />
+          <col className="w-[26%]" />
+          <col className="w-[24%]" />
+        </colgroup>
         <thead>
           <tr className="border-b border-[var(--color-border)]">
             <th className="px-4 py-2.5 text-left text-xs font-semibold uppercase tracking-[0.5px] text-[var(--color-text-tertiary)]">
@@ -21,6 +28,9 @@ export function InquiriesTab({ inquiries }: { inquiries: Inquiry[] }) {
             </th>
             <th className="px-4 py-2.5 text-left text-xs font-semibold uppercase tracking-[0.5px] text-[var(--color-text-tertiary)]">
               Status
+            </th>
+            <th className="px-4 py-2.5 text-left text-xs font-semibold uppercase tracking-[0.5px] text-[var(--color-text-tertiary)]">
+              Duration
             </th>
             <th className="px-4 py-2.5 text-left text-xs font-semibold uppercase tracking-[0.5px] text-[var(--color-text-tertiary)]">
               <span className="inline-flex items-center gap-1">
@@ -47,20 +57,16 @@ export function InquiriesTab({ inquiries }: { inquiries: Inquiry[] }) {
               key={inquiry.id}
               className="border-b border-[var(--color-border)] hover:bg-[var(--color-surface-secondary)]"
             >
-              <td className="px-4 py-3">
-                <div>
-                  <p className="text-sm font-medium text-[var(--color-text)]">
-                    {inquiry.templateName}
-                  </p>
-                  {inquiry.timeToFinish != null && (
-                    <p className="mt-0.5 text-xs text-[var(--color-text-tertiary)]">
-                      Completed in {formatDuration(inquiry.timeToFinish)}
-                    </p>
-                  )}
-                </div>
+              <td className="px-4 py-3 text-sm font-medium text-[var(--color-text)]">
+                {inquiry.templateName}
               </td>
               <td className="px-4 py-3">
                 <StatusBadge status={inquiry.status} />
+              </td>
+              <td className="px-4 py-3 text-xs text-[var(--color-text-tertiary)]">
+                {inquiry.timeToFinish != null
+                  ? formatDuration(inquiry.timeToFinish)
+                  : "—"}
               </td>
               <td className="max-w-[180px] px-4 py-3">
                 <Link

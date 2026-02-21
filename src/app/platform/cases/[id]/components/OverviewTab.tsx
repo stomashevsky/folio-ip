@@ -90,31 +90,25 @@ export function OverviewTab({
         />
       </div>
 
-      <div>
-        <SectionHeading>Linked entities</SectionHeading>
-        <KeyValueTable
-          labelWidth="w-1/4"
-          rows={[
-            ...(caseItem.accountId
-              ? [
-                  {
-                    label: "Account",
-                    value: (
-                      <Link
-                        href={`/accounts/${caseItem.accountId}`}
-                        className="group"
-                      >
-                        <span className="text-sm font-medium text-[var(--color-text)] group-hover:underline">
-                          {caseItem.accountName ?? caseItem.accountId}
-                        </span>
-                        <p className="truncate font-mono text-xs text-[var(--color-text-tertiary)]">
-                          {caseItem.accountId}
-                        </p>
-                      </Link>
-                    ),
-                  },
-                ]
-              : []),
+       <div>
+         <SectionHeading>Linked entities</SectionHeading>
+         <KeyValueTable
+           rows={[
+             ...(caseItem.accountId
+               ? [
+                   {
+                     label: "Account",
+                     value: (
+                       <Link
+                         href={`/accounts/${caseItem.accountId}`}
+                         className="truncate font-mono text-sm text-[var(--color-background-primary-solid)] hover:underline"
+                       >
+                         {caseItem.accountId}
+                       </Link>
+                     ),
+                   },
+                 ]
+               : []),
             ...(caseItem.inquiryId
               ? [
                   {
@@ -155,38 +149,47 @@ export function OverviewTab({
           (c) => c.accountId === caseItem.accountId && c.id !== caseItem.id,
         );
         return relatedCases.length > 0 ? (
-          <div>
-            <SectionHeading badge={relatedCases.length}>Related cases</SectionHeading>
-            <div className="overflow-x-auto rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]">
-              <table className="-mb-px w-full">
-                <thead>
-                  <tr className="border-b border-[var(--color-border)]">
-                    <th className="px-4 py-2.5 text-left text-xs font-semibold uppercase tracking-[0.5px] text-[var(--color-text-tertiary)]">Title</th>
-                    <th className="px-4 py-2.5 text-left text-xs font-semibold uppercase tracking-[0.5px] text-[var(--color-text-tertiary)]">Status</th>
-                    <th className="px-4 py-2.5 text-left text-xs font-semibold uppercase tracking-[0.5px] text-[var(--color-text-tertiary)]">Priority</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {relatedCases.map((rc) => (
-                    <tr key={rc.id} className="border-b border-[var(--color-border)] hover:bg-[var(--color-surface-secondary)]">
-                      <td className="px-4 py-3">
-                        <Link href={`/platform/cases/${rc.id}`} className="text-sm font-medium text-[var(--color-text)] hover:text-[var(--color-background-primary-solid)] hover:underline">
-                          {rc.title}
-                        </Link>
-                        <p className="truncate font-mono text-xs text-[var(--color-text-tertiary)]">{rc.id}</p>
-                      </td>
-                      <td className="px-4 py-3"><StatusBadge status={rc.status} /></td>
-                      <td className="px-4 py-3">
-                        <Badge color={getPriorityColor(rc.priority) as BadgeProps["color"]} variant="soft" size="sm">
-                          {rc.priority.charAt(0).toUpperCase() + rc.priority.slice(1)}
-                        </Badge>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
+           <div>
+             <SectionHeading badge={relatedCases.length}>Related cases</SectionHeading>
+             <div className="overflow-x-auto rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]">
+               <table className="-mb-px w-full table-fixed">
+                 <colgroup>
+                   <col className="w-[30%]" />
+                   <col className="w-[30%]" />
+                   <col className="w-[20%]" />
+                   <col className="w-[20%]" />
+                 </colgroup>
+                 <thead>
+                   <tr className="border-b border-[var(--color-border)]">
+                     <th className="px-4 py-2.5 text-left text-xs font-semibold uppercase tracking-[0.5px] text-[var(--color-text-tertiary)]">Title</th>
+                     <th className="px-4 py-2.5 text-left text-xs font-semibold uppercase tracking-[0.5px] text-[var(--color-text-tertiary)]">Case ID</th>
+                     <th className="px-4 py-2.5 text-left text-xs font-semibold uppercase tracking-[0.5px] text-[var(--color-text-tertiary)]">Status</th>
+                     <th className="px-4 py-2.5 text-left text-xs font-semibold uppercase tracking-[0.5px] text-[var(--color-text-tertiary)]">Priority</th>
+                   </tr>
+                 </thead>
+                 <tbody>
+                   {relatedCases.map((rc) => (
+                     <tr key={rc.id} className="border-b border-[var(--color-border)] hover:bg-[var(--color-surface-secondary)]">
+                       <td className="px-4 py-3">
+                         <Link href={`/platform/cases/${rc.id}`} className="text-sm font-medium text-[var(--color-text)] hover:text-[var(--color-background-primary-solid)] hover:underline">
+                           {rc.title}
+                         </Link>
+                       </td>
+                       <td className="px-4 py-3">
+                         <p className="truncate font-mono text-xs text-[var(--color-text-tertiary)]">{rc.id}</p>
+                       </td>
+                       <td className="px-4 py-3"><StatusBadge status={rc.status} /></td>
+                       <td className="px-4 py-3">
+                         <Badge color={getPriorityColor(rc.priority) as BadgeProps["color"]} variant="soft" size="sm">
+                           {rc.priority.charAt(0).toUpperCase() + rc.priority.slice(1)}
+                         </Badge>
+                       </td>
+                     </tr>
+                   ))}
+                 </tbody>
+               </table>
+             </div>
+           </div>
         ) : null;
       })()}
 

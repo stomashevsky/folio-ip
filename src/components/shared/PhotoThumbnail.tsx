@@ -29,7 +29,7 @@ export function PhotoThumbnail({
         {label}
       </span>
       {subtitle && (
-        <span className="-mt-0.5 text-xs text-[var(--color-text-tertiary)]">
+        <span className="-mt-0.5 w-full truncate text-left text-xs text-[var(--color-text-tertiary)]">
           {subtitle}
         </span>
       )}

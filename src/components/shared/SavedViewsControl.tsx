@@ -11,7 +11,7 @@ import { Button } from "@plexui/ui/components/Button";
 import { Input } from "@plexui/ui/components/Input";
 import { Menu } from "@plexui/ui/components/Menu";
 import { SelectControl } from "@plexui/ui/components/SelectControl";
-import { CloseBold } from "@plexui/ui/components/Icon";
+import { Trash } from "@plexui/ui/components/Icon";
 
 interface SavedViewsControlProps {
   entityType: string;
@@ -91,13 +91,11 @@ export function SavedViewsControl({
                 >
                   <span className="flex w-full items-center justify-between gap-2">
                     <span className="truncate">{view.name}</span>
-                    <button
-                      type="button"
-                      className="shrink-0 rounded p-0.5 text-[var(--color-text-tertiary)] hover:text-[var(--color-text-danger-ghost)]"
-                      onClick={(e) => handleDelete(e, view.id)}
-                    >
-                      <CloseBold className="h-3.5 w-3.5" />
-                    </button>
+                    <span className="shrink-0" onClick={(e) => handleDelete(e, view.id)}>
+                      <Button color="secondary" variant="ghost" size="3xs" uniform>
+                        <Trash />
+                      </Button>
+                    </span>
                   </span>
                 </Menu.Item>
               ))}
@@ -122,7 +120,7 @@ export function SavedViewsControl({
           <h2 className="heading-sm text-[var(--color-text)]">
             Save current view
           </h2>
-          <p className="mt-1 text-xs text-[var(--color-text-tertiary)]">
+          <p className="mt-1 text-sm text-[var(--color-text-tertiary)]">
             Save the current filters and column settings as a named view.
           </p>
         </ModalHeader>

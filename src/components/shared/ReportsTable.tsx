@@ -21,12 +21,19 @@ export function ReportsTable({
 
   return (
     <div className="overflow-x-auto rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]">
-      <table className="-mb-px w-full">
+      <table className="-mb-px w-full table-fixed">
+        <colgroup>
+          <col className="w-[24%]" />
+          <col className="w-[20%]" />
+          <col className="w-[24%]" />
+          <col className="w-[20%]" />
+          <col className="w-[12%]" />
+        </colgroup>
         <thead>
           <tr className="border-b border-[var(--color-border)]">
             <th className="px-4 py-2.5 text-left text-xs font-semibold uppercase tracking-[0.5px] text-[var(--color-text-tertiary)]">
               <span className="inline-flex items-center gap-1">
-                Primary Input
+                Subject
                 <Tooltip
                   content="The name or identifier used as the primary search input for this report"
                   side="top"
@@ -39,7 +46,7 @@ export function ReportsTable({
               </span>
             </th>
             <th className="px-4 py-2.5 text-left text-xs font-semibold uppercase tracking-[0.5px] text-[var(--color-text-tertiary)]">
-              Status
+              Type
             </th>
             <th className="px-4 py-2.5 text-left text-xs font-semibold uppercase tracking-[0.5px] text-[var(--color-text-tertiary)]">
               <span className="inline-flex items-center gap-1">
@@ -56,7 +63,10 @@ export function ReportsTable({
               </span>
             </th>
             <th className="px-4 py-2.5 text-left text-xs font-semibold uppercase tracking-[0.5px] text-[var(--color-text-tertiary)]">
-              Last updated at
+              Completed
+            </th>
+            <th className="px-4 py-2.5 text-right text-xs font-semibold uppercase tracking-[0.5px] text-[var(--color-text-tertiary)]">
+              Status
             </th>
           </tr>
         </thead>
@@ -73,21 +83,11 @@ export function ReportsTable({
                 key={r.id}
                 className="border-b border-[var(--color-border)] hover:bg-[var(--color-surface-secondary)]"
               >
-                <td className="px-4 py-3">
-                  <div>
-                    <p className="text-sm font-medium text-[var(--color-text)]">
-                      {toTitleCase(r.primaryInput)}
-                    </p>
-                    <p className="mt-0.5 text-xs text-[var(--color-text-tertiary)]">
-                      {typeLabel}
-                    </p>
-                  </div>
+                <td className="px-4 py-3 text-sm font-medium text-[var(--color-text)]">
+                  {toTitleCase(r.primaryInput)}
                 </td>
-                <td className="px-4 py-3">
-                  <StatusBadge
-                    status={r.status}
-                    label={r.status === "no_matches" ? "No Matches" : undefined}
-                  />
+                <td className="px-4 py-3 text-sm text-[var(--color-text-secondary)]">
+                  {typeLabel}
                 </td>
                 <td className="max-w-[180px] px-4 py-3">
                   <Link
@@ -100,6 +100,12 @@ export function ReportsTable({
                 </td>
                 <td className="px-4 py-3 text-sm text-[var(--color-text)]">
                   {r.completedAt ? formatDateTime(r.completedAt) : "—"}
+                </td>
+                <td className="px-4 py-3 text-right">
+                  <StatusBadge
+                    status={r.status}
+                    label={r.status === "no_matches" ? "No Matches" : undefined}
+                  />
                 </td>
               </tr>
             );

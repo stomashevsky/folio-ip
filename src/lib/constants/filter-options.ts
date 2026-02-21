@@ -163,7 +163,63 @@ export const TEMPLATE_STATUS_OPTIONS = [
   { value: "disabled", label: "Disabled" },
 ];
 
-// Analytics options
+// Analytics filter options
+
+export const ANALYTICS_COUNTRY_OPTIONS = [
+  { value: "US", label: "United States" },
+  { value: "GB", label: "United Kingdom" },
+  { value: "CA", label: "Canada" },
+  { value: "DE", label: "Germany" },
+  { value: "FR", label: "France" },
+  { value: "AU", label: "Australia" },
+  { value: "JP", label: "Japan" },
+  { value: "BR", label: "Brazil" },
+  { value: "IN", label: "India" },
+  { value: "MX", label: "Mexico" },
+];
+
+export const ANALYTICS_PLATFORM_OPTIONS = [
+  { value: "web_sdk", label: "Web SDK" },
+  { value: "ios_sdk", label: "iOS SDK" },
+  { value: "android_sdk", label: "Android SDK" },
+  { value: "api", label: "API" },
+];
+
+export const ANALYTICS_DEVICE_OPTIONS = [
+  { value: "desktop", label: "Desktop" },
+  { value: "mobile", label: "Mobile" },
+  { value: "tablet", label: "Tablet" },
+];
+
+export const ANALYTICS_TAG_OPTIONS = [
+  { value: "vip", label: "VIP" },
+  { value: "high-risk", label: "High Risk" },
+  { value: "manual-review", label: "Manual Review" },
+  { value: "expedited", label: "Expedited" },
+  { value: "re-verification", label: "Re-verification" },
+];
+
+export const ANALYTICS_FUNNEL_TEMPLATE_OPTIONS = [
+  { value: "database_name_birthdate_address", label: "Database (name, birthdate, address)" },
+  { value: "gov_id_autoclassification_selfie", label: "Government ID (with autoclassification) and Selfie" },
+  { value: "gov_id_document_proof_address", label: "Government ID and Document Proof of Address" },
+  { value: "gov_id_selfie_document_proof", label: "Government ID, Selfie and Document Proof of Address" },
+];
+
+export const ANALYTICS_FUNNEL_METRIC_OPTIONS = [
+  { value: "overall", label: "Overall" },
+  { value: "per_step", label: "Per Step" },
+];
+
+export const ANALYTICS_TEMPLATE_VERSION_OPTIONS = [
+  { value: "v5", label: "Version 5 — Feb 18, 2026" },
+  { value: "v4", label: "Version 4 — Feb 3, 2026" },
+  { value: "v3", label: "Version 3 — Jan 15, 2026" },
+  { value: "v2", label: "Version 2 — Jan 5, 2026" },
+  { value: "v1", label: "Version 1 — Dec 12, 2025" },
+];
+
+// Analytics interval options
 
 export const ANALYTICS_INTERVAL_OPTIONS = [
   { value: "daily", label: "Daily" },

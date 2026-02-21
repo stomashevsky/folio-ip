@@ -22,6 +22,17 @@ interface ColumnSettingsProps {
   size?: ControlSize;
 }
 
+function ColumnRow({ label, checked, onChange }: { label: string; checked: boolean; onChange: () => void }) {
+  return (
+    <div className="column-settings-row" onClick={onChange}>
+      <span className={checked ? "text-[var(--color-text)]" : "text-[var(--color-text-secondary)]"}>
+        {label}
+      </span>
+      <Switch checked={checked} onCheckedChange={onChange} />
+    </div>
+  );
+}
+
 export function ColumnSettings({
   columns,
   visibility,
@@ -31,7 +42,7 @@ export function ColumnSettings({
   const [search, setSearch] = useState("");
 
   const filtered = columns.filter((col) =>
-    col.label.toLowerCase().includes(search.toLowerCase())
+    col.label.toLowerCase().includes(search.toLowerCase()),
   );
 
   const shown = filtered.filter((col) => visibility[col.id] !== false);
@@ -40,7 +51,7 @@ export function ColumnSettings({
   function toggle(id: string) {
     onVisibilityChange({
       ...visibility,
-      [id]: !visibility[id] ? true : visibility[id] === true ? false : true,
+      [id]: visibility[id] === false,
     });
   }
 
@@ -58,10 +69,9 @@ export function ColumnSettings({
         </Button>
       </Popover.Trigger>
       <Popover.Content align="end" width={280} minWidth={280}>
-        {/* Search — sits above the scrollable list */}
-        <div className="p-[6px]">
+        <div className="column-settings-search">
           <Input
-            placeholder="Search by item..."
+            placeholder="Search columns..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             onClear={search ? () => setSearch("") : undefined}
@@ -70,56 +80,22 @@ export function ColumnSettings({
           />
         </div>
 
-        {/* Options list — matches PlexUI Select .OptionsList padding */}
-        <div className="max-h-[400px] overflow-auto p-[6px]">
-          {/* Shown attributes */}
+        <div className="column-settings-list">
           {shown.length > 0 && (
-            <>
-              <div className="flex items-center px-2 py-1.5 text-sm text-[var(--color-text-secondary)]">
-                Shown attributes
-              </div>
+            <div>
+              <p className="column-settings-group-heading">Shown attributes</p>
               {shown.map((col) => (
-                <div
-                  key={col.id}
-                  className="flex items-center justify-between rounded-md px-2 py-1.5"
-                >
-                  <span className="text-sm text-[var(--color-text)]">
-                    {col.label}
-                  </span>
-                  <Switch
-                    checked={true}
-                    onCheckedChange={() => toggle(col.id)}
-                  />
-                </div>
+                <ColumnRow key={col.id} label={col.label} checked={true} onChange={() => toggle(col.id)} />
               ))}
-            </>
+            </div>
           )}
-
-          {/* Hidden attributes */}
           {hidden.length > 0 && (
-            <>
-              <div
-                className={`flex items-center px-2 py-1.5 text-sm text-[var(--color-text-secondary)] ${
-                  shown.length > 0 ? "mt-1.5" : ""
-                }`}
-              >
-                Hidden attributes
-              </div>
+            <div>
+              <p className="column-settings-group-heading">Hidden attributes</p>
               {hidden.map((col) => (
-                <div
-                  key={col.id}
-                  className="flex items-center justify-between rounded-md px-2 py-1.5"
-                >
-                  <span className="text-sm text-[var(--color-text-secondary)]">
-                    {col.label}
-                  </span>
-                  <Switch
-                    checked={false}
-                    onCheckedChange={() => toggle(col.id)}
-                  />
-                </div>
+                <ColumnRow key={col.id} label={col.label} checked={false} onChange={() => toggle(col.id)} />
               ))}
-            </>
+            </div>
           )}
         </div>
       </Popover.Content>

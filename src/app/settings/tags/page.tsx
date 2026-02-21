@@ -108,7 +108,7 @@ export default function TagsPage() {
             <div className="hidden overflow-x-auto rounded-lg border border-[var(--color-border)] md:block">
               <table className="-mb-px w-full">
                 <thead>
-                  <tr className="border-b border-[var(--color-border)] bg-[var(--color-surface-secondary)]">
+                  <tr className="border-b border-[var(--color-border)]">
                     <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.5px] text-[var(--color-text-tertiary)]">
                       Tag
                     </th>

@@ -191,7 +191,7 @@ export function deriveFunnelHighlights(steps: FunnelStep[]): HighlightMetric[] {
 
   return [
     { label: "Overall Conversion", value: `${overallConversion}%`, tooltip: "Percentage of created inquiries that were approved" },
-    { label: "Biggest Drop-off", value: maxDropoff.name, description: `−${maxDropoff.dropoff}% drop-off`, tooltip: "Funnel step with the highest drop-off rate" },
+    { label: "Biggest Drop-off", value: maxDropoff.name, trend: -maxDropoff.dropoff, tooltip: "Funnel step with the highest drop-off rate" },
     { label: "Total Inquiries", value: first.count.toLocaleString(), tooltip: "Total verification sessions in this period" },
     { label: "Avg Progress", value: `${avgSteps} steps`, tooltip: "Average number of steps completed per inquiry" },
   ];

@@ -90,7 +90,6 @@ export function OverviewTab({ transaction }: { transaction: Transaction }) {
       <div>
         <SectionHeading>Parties</SectionHeading>
         <KeyValueTable
-          labelWidth="w-1/4"
           rows={[
             {
               label: "Sender",

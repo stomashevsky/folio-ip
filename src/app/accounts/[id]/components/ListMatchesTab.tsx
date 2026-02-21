@@ -78,107 +78,118 @@ export function ListMatchesTab({ reports }: { reports: Report[] }) {
         </div>
       </div>
 
-      {filtered.length > 0 ? (
-        <div className="overflow-x-auto rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]">
-          <table className="-mb-px w-full">
-            <thead>
-              <tr className="border-b border-[var(--color-border)]">
-                <th className={thClass}>
-                  <span className="inline-flex items-center gap-1">
-                    Name
-                    <Tooltip
-                      content="Name or alias found in the screening database"
-                      side="top"
-                      maxWidth={260}
-                    >
-                      <span className="inline-flex shrink-0 cursor-help items-center text-[var(--color-text-tertiary)]">
-                        <InfoCircle style={{ width: 14, height: 14 }} />
-                      </span>
-                    </Tooltip>
-                  </span>
-                </th>
-                <th className={thClass}>
-                  <span className="inline-flex items-center gap-1">
-                    Score
-                    <Tooltip
-                      content="Match confidence score (0-100%)"
-                      side="top"
-                      maxWidth={260}
-                    >
-                      <span className="inline-flex shrink-0 cursor-help items-center text-[var(--color-text-tertiary)]">
-                        <InfoCircle style={{ width: 14, height: 14 }} />
-                      </span>
-                    </Tooltip>
-                  </span>
-                </th>
-                <th className={thClass}>Source</th>
-                <th className={thClass}>Country</th>
-                <th className={thClass}>Type</th>
-                <th className={thClass}>Status</th>
-                <th className={thClass}>Report</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filtered.map((match) => (
-                <tr
-                  key={`${match.reportId}-${match.id}`}
-                  className="border-b border-[var(--color-border)]"
-                >
-                  <td className="px-4 py-3">
-                    <p className="text-sm font-medium text-[var(--color-text)]">
-                      {toTitleCase(match.name)}
-                    </p>
-                    {match.aliases && match.aliases.length > 0 && (
-                      <p className="mt-0.5 truncate text-xs text-[var(--color-text-tertiary)]">
-                        aka {match.aliases.map((a) => toTitleCase(a)).join(", ")}
-                      </p>
-                    )}
-                  </td>
-                  <td className="px-4 py-3">
-                    <Badge color={getMatchScoreColor(match.score) as BadgeColor} size="sm">
-                      {match.score}%
-                    </Badge>
-                  </td>
-                  <td className="px-4 py-3 text-sm text-[var(--color-text)]">
-                    {match.source}
-                  </td>
-                  <td className="px-4 py-3 text-sm text-[var(--color-text)]">
-                    {match.country ?? "\u2014"}
-                  </td>
-                  <td className="px-4 py-3">
-                    <Badge color={getMatchTypeColor(match.matchType) as BadgeColor} size="sm">
-                      {match.matchType.charAt(0).toUpperCase() + match.matchType.slice(1)}
-                    </Badge>
-                  </td>
-                  <td className="px-4 py-3">
-                    <Badge
-                      color={getMatchStatusColor(match.status) as BadgeColor}
-                      size="sm"
-                      variant="outline"
-                    >
-                      {matchStatusLabels[match.status] ?? match.status}
-                    </Badge>
-                  </td>
-                  <td className="px-4 py-3">
-                    <Link
-                      href={`/reports/${match.reportId}`}
-                      className="block truncate font-mono text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-background-primary-solid)] hover:underline"
-                      title={match.reportId}
-                    >
-                      {match.reportId}
-                    </Link>
-                    <p className="mt-0.5 text-xs text-[var(--color-text-tertiary)]">
-                      {match.reportType}
-                    </p>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      ) : (
-        <InlineEmpty>{`No matches matching "${search}"`}</InlineEmpty>
-      )}
+       {filtered.length > 0 ? (
+         <div className="overflow-x-auto rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]">
+           <table className="-mb-px w-full table-fixed">
+             <colgroup>
+               <col className="w-[16%]" />
+               <col className="w-[10%]" />
+               <col className="w-[12%]" />
+               <col className="w-[10%]" />
+               <col className="w-[10%]" />
+               <col className="w-[12%]" />
+               <col className="w-[14%]" />
+               <col className="w-[16%]" />
+             </colgroup>
+             <thead>
+               <tr className="border-b border-[var(--color-border)]">
+                 <th className={thClass}>
+                   <span className="inline-flex items-center gap-1">
+                     Name
+                     <Tooltip
+                       content="Name or alias found in the screening database"
+                       side="top"
+                       maxWidth={260}
+                     >
+                       <span className="inline-flex shrink-0 cursor-help items-center text-[var(--color-text-tertiary)]">
+                         <InfoCircle style={{ width: 14, height: 14 }} />
+                       </span>
+                     </Tooltip>
+                   </span>
+                 </th>
+                 <th className={thClass}>
+                   <span className="inline-flex items-center gap-1">
+                     Score
+                     <Tooltip
+                       content="Match confidence score (0-100%)"
+                       side="top"
+                       maxWidth={260}
+                     >
+                       <span className="inline-flex shrink-0 cursor-help items-center text-[var(--color-text-tertiary)]">
+                         <InfoCircle style={{ width: 14, height: 14 }} />
+                       </span>
+                     </Tooltip>
+                   </span>
+                 </th>
+                 <th className={thClass}>Source</th>
+                 <th className={thClass}>Country</th>
+                 <th className={thClass}>Type</th>
+                 <th className={thClass}>Status</th>
+                 <th className={thClass}>Report ID</th>
+                 <th className={thClass}>Report Type</th>
+               </tr>
+             </thead>
+             <tbody>
+               {filtered.map((match) => (
+                 <tr
+                   key={`${match.reportId}-${match.id}`}
+                   className="border-b border-[var(--color-border)]"
+                 >
+                   <td className="px-4 py-3">
+                     <p className="text-sm font-medium text-[var(--color-text)]">
+                       {toTitleCase(match.name)}
+                     </p>
+                     {match.aliases && match.aliases.length > 0 && (
+                       <p className="mt-0.5 truncate text-xs text-[var(--color-text-tertiary)]">
+                         aka {match.aliases.map((a) => toTitleCase(a)).join(", ")}
+                       </p>
+                     )}
+                   </td>
+                   <td className="px-4 py-3">
+                     <Badge color={getMatchScoreColor(match.score) as BadgeColor} size="sm">
+                       {match.score}%
+                     </Badge>
+                   </td>
+                   <td className="px-4 py-3 text-sm text-[var(--color-text)]">
+                     {match.source}
+                   </td>
+                   <td className="px-4 py-3 text-sm text-[var(--color-text)]">
+                     {match.country ?? "\u2014"}
+                   </td>
+                   <td className="px-4 py-3">
+                     <Badge color={getMatchTypeColor(match.matchType) as BadgeColor} size="sm">
+                       {match.matchType.charAt(0).toUpperCase() + match.matchType.slice(1)}
+                     </Badge>
+                   </td>
+                   <td className="px-4 py-3">
+                     <Badge
+                       color={getMatchStatusColor(match.status) as BadgeColor}
+                       size="sm"
+                       variant="outline"
+                     >
+                       {matchStatusLabels[match.status] ?? match.status}
+                     </Badge>
+                   </td>
+                   <td className="px-4 py-3">
+                     <Link
+                       href={`/reports/${match.reportId}`}
+                       className="block truncate font-mono text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-background-primary-solid)] hover:underline"
+                       title={match.reportId}
+                     >
+                       {match.reportId}
+                     </Link>
+                   </td>
+                   <td className="px-4 py-3 text-xs text-[var(--color-text-tertiary)]">
+                     {match.reportType}
+                   </td>
+                 </tr>
+               ))}
+             </tbody>
+           </table>
+         </div>
+       ) : (
+         <InlineEmpty>{`No matches matching "${search}"`}</InlineEmpty>
+       )}
     </div>
   );
 }

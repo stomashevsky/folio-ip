@@ -147,7 +147,7 @@ export default function BillingPage() {
         <div className="rounded-lg border border-[var(--color-border)] overflow-hidden">
           <table className="-mb-px w-full">
             <thead>
-              <tr className="border-b border-[var(--color-border)] bg-[var(--color-surface)]">
+              <tr className="border-b border-[var(--color-border)]">
                 <th className="px-4 py-3 text-left text-sm font-medium text-[var(--color-text)]">
                   Date
                 </th>

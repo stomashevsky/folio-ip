@@ -186,7 +186,7 @@ export function DataTable<T>({
     <div className="flex min-h-0 flex-1 flex-col">
       {/* Table – scrollable area */}
       <div className="min-h-0 flex-1 overflow-auto">
-        <table className="w-full table-auto border-collapse">
+        <table className="w-full table-auto border-collapse" data-datatable>
           <thead>
             {table.getHeaderGroups().map((headerGroup) => (
               <tr key={headerGroup.id}>

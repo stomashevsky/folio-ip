@@ -73,7 +73,7 @@ export function KeyValueTable({
   rows,
   sections,
   title,
-  labelWidth = "w-2/5",
+  labelWidth = "w-1/4",
   bare = false,
 }: KeyValueTableProps) {
   const tableEl = (

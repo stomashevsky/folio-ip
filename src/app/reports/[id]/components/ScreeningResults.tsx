@@ -1,5 +1,5 @@
 import { Badge } from "@plexui/ui/components/Badge";
-import { ShieldCheck, ExclamationMarkCircleFilled } from "@plexui/ui/components/Icon";
+import { ExclamationMarkCircleFilled } from "@plexui/ui/components/Icon";
 import { EmptyMessage } from "@plexui/ui/components/EmptyMessage";
 import { SectionHeading, KeyValueTable, CardHeader } from "@/components/shared";
 import { REPORT_TYPE_LABELS } from "@/lib/constants/report-type-labels";
@@ -32,9 +32,6 @@ export function ScreeningResults({ report }: { report: Report }) {
         <div className="px-4 py-6">
           {!hasMatches ? (
             <EmptyMessage fill="none">
-              <EmptyMessage.Icon size="sm">
-                <ShieldCheck />
-              </EmptyMessage.Icon>
               <EmptyMessage.Title>No matches found</EmptyMessage.Title>
               <EmptyMessage.Description>
                 The subject was screened against all available databases. No

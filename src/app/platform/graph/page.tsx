@@ -1016,7 +1016,7 @@ export default function GraphPage() {
                 <div className="mt-4 overflow-x-auto rounded-lg border border-[var(--color-border)]">
                   <table className="-mb-px w-full text-sm">
                     <thead>
-                      <tr className="border-b border-[var(--color-border)] bg-[var(--color-surface)]">
+                      <tr className="border-b border-[var(--color-border)]">
                         <th className="px-4 py-3 text-left font-medium text-[var(--color-text-secondary)]">Source</th>
                         <th className="px-4 py-3 text-left font-medium text-[var(--color-text-secondary)]">Target</th>
                         <th className="px-4 py-3 text-left font-medium text-[var(--color-text-secondary)]">Relationship</th>

@@ -111,7 +111,7 @@ export function VerificationCard({
           </div>
         </div>
         {filteredChecks.length > 0 ? (
-          <table className="-mb-px w-full">
+          <table className="w-full">
             <thead>
               <tr className="border-b border-[var(--color-border)]">
                 {headers.map((h) => (

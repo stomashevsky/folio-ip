@@ -1,5 +1,54 @@
 # Agents Configuration — Folio App
 
+## CRITICAL RULE: Dev Browser — relay mode, NOT standalone
+
+**Dev Browser uses the Chrome extension + relay server.** It controls the user's real Chrome (with logged-in sessions), NOT a separate Chromium.
+
+**To start:**
+```bash
+cd ~/.opencode/skills/dev-browser && npm run start-extension
+```
+
+- **`npm run start-extension`** — relay server on port 9222, Chrome extension connects via `ws://localhost:9222/extension`. No extra browser launched. ✅
+- **`npm run start-server`** — launches a separate Chromium via Playwright. User does NOT want this. ❌
+
+**NEVER use `start-server`.** ALWAYS use `start-extension` (relay mode).
+
+Extension installed at `~/.dev-browser-extension`, skill at `~/.opencode/skills/dev-browser`.
+
+---
+
+## CRITICAL RULE: Table Border Pattern — border-b on every row, overflow-hidden clips last
+
+**Every table row (including `<thead><tr>`) gets `border-b border-[var(--color-border)]`.** The last row's border is clipped by `overflow-hidden` on the table's container — NEVER use `-mb-px`, `last:border-0`, or `border-t`. Only `border-b` on rows, only `overflow-hidden` on container.
+
+**Pattern:**
+```tsx
+<div className="overflow-hidden rounded-xl border border-[var(--color-border)]">
+  {/* header/toolbar rows — each gets border-b */}
+  <div className="border-b border-[var(--color-border)] ...">Header</div>
+  <div className="overflow-hidden">
+    <table className="w-full">
+      <thead>
+        <tr className="border-b border-[var(--color-border)]">...</tr>
+      </thead>
+      <tbody>
+        {/* CheckRow, etc. — each <tr> gets border-b */}
+        <tr className="border-b border-[var(--color-border)]">...</tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+```
+
+**NEVER:** `border-t` on `<table>`, `-mb-px` on `<table>`, `last:border-b-0` on rows.
+
+**Two table types — thead background differs:**
+1. **Inline tables in cards** (inside `<div class="rounded-xl border ...">`) — `<thead><tr>` gets gray background via global CSS rule `thead tr { background: var(--color-surface-secondary) }`. NEVER hardcode `bg-[var(--color-surface-secondary)]` on individual thead rows.
+2. **Full-page DataTable** (no outer border container) — no thead background. The global rule is overridden by `table[data-datatable] thead tr { background: transparent }`. DataTable component has `data-datatable` attribute on its `<table>` element.
+
+---
+
 ## CRITICAL RULE: No Hardcoding — Everything Shared
 
 **Every repeated value, pattern, or UI element MUST be extracted into a shared module.** This is the #1 architectural principle of the codebase. Hardcoded one-offs cause drift and break consistency.

@@ -23,7 +23,7 @@ export function SettingsTable<T>({
       <div className="hidden overflow-x-auto rounded-lg border border-[var(--color-border)] md:block">
         <table className="-mb-px w-full">
           <thead>
-            <tr className="border-b border-[var(--color-border)] bg-[var(--color-surface-secondary)]">
+            <tr className="border-b border-[var(--color-border)]">
               {columns.map((col) => (
                 <th
                   key={col.header}

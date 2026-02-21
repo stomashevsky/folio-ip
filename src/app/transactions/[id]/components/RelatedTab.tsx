@@ -23,7 +23,6 @@ export function RelatedTab({ transaction }: { transaction: Transaction }) {
       <div>
         <SectionHeading>Linked account</SectionHeading>
         <KeyValueTable
-          labelWidth="w-1/4"
           rows={[
             {
               label: "Account",

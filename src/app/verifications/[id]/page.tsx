@@ -190,7 +190,7 @@ function VerificationDetailContent() {
 
             {/* Checks – separate block */}
             <div className="mt-6 overflow-hidden rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]">
-              <div className="bg-[var(--color-surface-secondary)] px-4 py-2">
+              <div className="border-b border-[var(--color-border)] bg-[var(--color-surface-secondary)] px-4 py-2">
                 <span className="heading-xs text-[var(--color-text)]">
                   Checks
                 </span>
@@ -241,9 +241,9 @@ function VerificationDetailContent() {
                 </div>
               </div>
 
-              <div className="min-h-[200px]">
+              <div className="min-h-[200px] overflow-hidden">
               {filteredChecks.length > 0 ? (
-                <table className="-mb-px w-full">
+                <table className="w-full">
                   <thead>
                     <tr className="border-b border-[var(--color-border)]">
                       {CHECK_TABLE_HEADERS.map((h) => (
