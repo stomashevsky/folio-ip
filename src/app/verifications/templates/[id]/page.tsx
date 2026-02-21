@@ -41,7 +41,6 @@ import { Menu } from "@plexui/ui/components/Menu";
 import { SegmentedControl } from "@plexui/ui/components/SegmentedControl";
 import { Select } from "@plexui/ui/components/Select";
 import { Tabs } from "@plexui/ui/components/Tabs";
-import { Popover } from "@plexui/ui/components/Popover";
 import { ChevronDownMd, ChevronRightSm, DotsHorizontal, Search } from "@plexui/ui/components/Icon";
 
 /* ─── Constants ─── */
@@ -213,9 +212,6 @@ function VerificationTemplateDetailContent() {
   function patchSettings(p: Partial<VerificationForm["settings"]>) {
     setForm((prev) => ({ ...prev, settings: { ...prev.settings, ...p } }));
   }
-  function changeType(type: VerificationType) {
-    setForm((prev) => ({ ...prev, type, checks: checksForType(type) }));
-  }
   function updateCheck(i: number, next: VerificationCheckConfig) {
     setForm((prev) => ({ ...prev, checks: prev.checks.map((c, idx) => (idx === i ? next : c)) }));
   }
@@ -279,7 +275,7 @@ function VerificationTemplateDetailContent() {
     router.push("/verifications/templates");
   }
 
-  const title = isNew ? "New verification template" : (existing?.name ?? "Verification template");
+  const title = form.name || (isNew ? "Untitled template" : "Verification template");
   const canPublish = form.status === "draft";
   const canUnpublish = form.status === "active";
   const backHref = "/verifications/templates";
@@ -368,7 +364,6 @@ function VerificationTemplateDetailContent() {
               existing={existing}
               onPatch={patch}
               onPatchSettings={patchSettings}
-              onChangeType={changeType}
             />
           )}
         </div>
@@ -515,88 +510,6 @@ const STATUS_FILTER_OPTIONS = [
   { value: "disabled", label: "Disabled" },
 ];
 
-function FilterDropdown({
-  label,
-  options,
-  selected,
-  onToggle,
-  onClear,
-}: {
-  label: string;
-  options: { value: string; label: string }[];
-  selected: Set<string>;
-  onToggle: (value: string) => void;
-  onClear: () => void;
-}) {
-  const [filterSearch, setFilterSearch] = useState("");
-
-  const filtered = filterSearch.trim()
-    ? options.filter((o) => o.label.toLowerCase().includes(filterSearch.toLowerCase()))
-    : options;
-
-  const trigger = selected.size === 0
-    ? `All ${label}`
-    : selected.size === options.length
-      ? `All ${label}`
-      : `${selected.size} ${label}`;
-
-  return (
-    <Popover>
-      <Popover.Trigger>
-        <button
-          type="button"
-          className="flex h-[30px] items-center gap-1.5 rounded-full border border-[var(--color-border)] bg-[var(--color-surface)] px-3 text-sm text-[var(--color-text)] transition-colors hover:bg-[var(--color-nav-hover-bg)]"
-        >
-          {trigger}
-          <ChevronDownMd style={{ width: 14, height: 14, opacity: 0.5 }} />
-        </button>
-      </Popover.Trigger>
-      <Popover.Content side="bottom" align="start" sideOffset={4} className="w-64">
-        <div className="flex flex-col">
-          <div className="border-b border-[var(--color-border)] px-3 py-2">
-            <Input
-              size="xs"
-              placeholder="Search..."
-              value={filterSearch}
-              onChange={(e) => setFilterSearch(e.target.value)}
-              onClear={filterSearch ? () => setFilterSearch("") : undefined}
-              startAdornment={<Search style={{ width: 14, height: 14 }} />}
-            />
-          </div>
-          <div className="max-h-64 overflow-auto py-1">
-            {selected.size > 0 && (
-              <button
-                type="button"
-                onClick={onClear}
-                className="flex w-full items-center px-3 py-1.5 text-left text-sm text-[var(--color-text-secondary)] transition-colors hover:bg-[var(--color-nav-hover-bg)]"
-              >
-                Clear selection
-              </button>
-            )}
-            {filtered.map((opt) => (
-              <label
-                key={opt.value}
-                className="flex cursor-pointer items-center gap-2.5 px-3 py-1.5 transition-colors hover:bg-[var(--color-nav-hover-bg)]"
-              >
-                <Checkbox
-                  checked={selected.has(opt.value)}
-                  onCheckedChange={() => onToggle(opt.value)}
-                />
-                <span className="text-sm text-[var(--color-text)]">{opt.label}</span>
-              </label>
-            ))}
-            {filtered.length === 0 && (
-              <p className="px-3 py-4 text-center text-xs text-[var(--color-text-tertiary)]">
-                No matches
-              </p>
-            )}
-          </div>
-        </div>
-      </Popover.Content>
-    </Popover>
-  );
-}
-
 function CountriesTab({
   selected,
   countrySettings,
@@ -612,8 +525,8 @@ function CountriesTab({
 }) {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
-  const [regionFilters, setRegionFilters] = useState<Set<Region>>(new Set());
-  const [idTypeFilters, setIdTypeFilters] = useState<Set<IdDocType>>(new Set());
+  const [regionFilters, setRegionFilters] = useState<string[]>([]);
+  const [idTypeFilters, setIdTypeFilters] = useState<string[]>([]);
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
   const [bulkConfigOpen, setBulkConfigOpen] = useState(false);
 
@@ -635,14 +548,14 @@ function CountriesTab({
       countries = countries.filter((c) => !selectedSet.has(c.value));
     }
 
-    if (regionFilters.size > 0) {
-      countries = countries.filter((c) => regionFilters.has(COUNTRY_REGIONS[c.value]));
+    if (regionFilters.length > 0) {
+      countries = countries.filter((c) => regionFilters.includes(COUNTRY_REGIONS[c.value]));
     }
 
-    if (idTypeFilters.size > 0) {
+    if (idTypeFilters.length > 0) {
       countries = countries.filter((c) => {
         const types = getCountryIdTypes(c.value);
-        return Array.from(idTypeFilters).some((t) => types.includes(t));
+        return idTypeFilters.some((t) => types.includes(t as IdDocType));
       });
     }
 
@@ -666,7 +579,7 @@ function CountriesTab({
     onToggleBatch(codes, !allFilteredSelected);
   }
 
-  const hasActiveFilters = statusFilter !== "all" || regionFilters.size > 0 || idTypeFilters.size > 0 || search.trim() !== "";
+  const hasActiveFilters = statusFilter !== "all" || regionFilters.length > 0 || idTypeFilters.length > 0 || search.trim() !== "";
 
   return (
     <div>
@@ -693,34 +606,36 @@ function CountriesTab({
             block
           />
         </div>
-        <FilterDropdown
-          label="regions"
-          options={REGION_OPTIONS.map((r) => ({ value: r.value, label: r.label }))}
-          selected={regionFilters as Set<string>}
-          onToggle={(v) => {
-            setRegionFilters((prev) => {
-              const next = new Set(prev);
-              if (next.has(v as Region)) next.delete(v as Region);
-              else next.add(v as Region);
-              return next;
-            });
-          }}
-          onClear={() => setRegionFilters(new Set())}
-        />
-        <FilterDropdown
-          label="ID types"
-          options={ALL_ID_DOC_TYPES.map((t) => ({ value: t, label: ID_DOC_TYPE_LABELS[t] }))}
-          selected={idTypeFilters as Set<string>}
-          onToggle={(v) => {
-            setIdTypeFilters((prev) => {
-              const next = new Set(prev);
-              if (next.has(v as IdDocType)) next.delete(v as IdDocType);
-              else next.add(v as IdDocType);
-              return next;
-            });
-          }}
-          onClear={() => setIdTypeFilters(new Set())}
-        />
+        <div className="w-40">
+          <Select
+            options={REGION_OPTIONS}
+            value={regionFilters}
+            onChange={(opts) => setRegionFilters(opts.map((o) => o.value))}
+            multiple
+            clearable
+            placeholder="All regions"
+            size="sm"
+            pill
+            variant="outline"
+            block
+            listMinWidth={180}
+          />
+        </div>
+        <div className="w-40">
+          <Select
+            options={ALL_ID_DOC_TYPES.map((t) => ({ value: t, label: ID_DOC_TYPE_LABELS[t] }))}
+            value={idTypeFilters}
+            onChange={(opts) => setIdTypeFilters(opts.map((o) => o.value))}
+            multiple
+            clearable
+            placeholder="All ID types"
+            size="sm"
+            pill
+            variant="outline"
+            block
+            listMinWidth={200}
+          />
+        </div>
         {hasActiveFilters && (
           <Button
             color="secondary"
@@ -730,8 +645,8 @@ function CountriesTab({
             onClick={() => {
               setSearch("");
               setStatusFilter("all");
-              setRegionFilters(new Set());
-              setIdTypeFilters(new Set());
+              setRegionFilters([]);
+              setIdTypeFilters([]);
             }}
           >
             Clear filters
@@ -765,13 +680,13 @@ function CountriesTab({
                   />
                 </th>
                 <th className="w-8 px-0 py-2.5" />
-                <th className="px-3 py-2.5 text-left text-xs font-medium uppercase tracking-wider text-[var(--color-text-tertiary)]">
+                <th className="w-56 px-3 py-2.5 text-left text-xs font-medium uppercase tracking-wider text-[var(--color-text-tertiary)]">
                   Country
                 </th>
                 <th className="px-3 py-2.5 text-left text-xs font-medium uppercase tracking-wider text-[var(--color-text-tertiary)]">
                   Accepted ID Types
                 </th>
-                <th className="w-28 px-3 py-2.5 text-left text-xs font-medium uppercase tracking-wider text-[var(--color-text-tertiary)]">
+                <th className="w-32 px-3 py-2.5 text-right text-xs font-medium uppercase tracking-wider text-[var(--color-text-tertiary)]">
                   Region
                 </th>
               </tr>
@@ -1134,7 +1049,7 @@ function CountryRow({
   return (
     <>
       <tr
-        className={`border-b border-[var(--color-border)] transition-colors ${enabled ? "" : "opacity-50"}`}
+        className={`border-b border-[var(--color-border)] transition-colors ${enabled ? "bg-[var(--color-success-surface-bg)]" : ""}`}
       >
         <td className="w-10 px-3 py-2">
           <Checkbox checked={enabled} onCheckedChange={onToggle} />
@@ -1152,11 +1067,11 @@ function CountryRow({
             )}
           </button>
         </td>
-        <td className="px-3 py-2">
+        <td className="w-56 px-3 py-2">
           <span className="flex items-center gap-2">
             <span className="text-base leading-none">{countryFlag(code)}</span>
-            <span className="text-sm text-[var(--color-text)]">{name}</span>
-            <span className="text-2xs text-[var(--color-text-tertiary)]">{code}</span>
+            <span className="truncate text-sm text-[var(--color-text)]">{name}</span>
+            <span className="shrink-0 text-2xs text-[var(--color-text-tertiary)]">{code}</span>
           </span>
         </td>
         <td className="px-3 py-2">
@@ -1173,7 +1088,7 @@ function CountryRow({
             ))}
           </div>
         </td>
-        <td className="w-28 px-3 py-2">
+        <td className="w-32 px-3 py-2 text-right">
           <span className="text-xs text-[var(--color-text-tertiary)]">{region ?? "—"}</span>
         </td>
       </tr>
@@ -1237,13 +1152,11 @@ function SettingsTab({
   existing,
   onPatch,
   onPatchSettings,
-  onChangeType,
 }: {
   form: VerificationForm;
   existing: VerificationTemplate | undefined;
   onPatch: (partial: Partial<VerificationForm>) => void;
   onPatchSettings: (p: Partial<VerificationForm["settings"]>) => void;
-  onChangeType: (type: VerificationType) => void;
 }) {
   return (
     <div className="mx-auto w-full max-w-xl">
@@ -1259,25 +1172,10 @@ function SettingsTab({
         </Field>
       </div>
       <div className="mb-8">
-        <Field
-          label="Type"
-          description={existing ? "Type cannot be changed after creation" : "The type of verification this template performs"}
-        >
-          {existing ? (
-            <p className="text-sm text-[var(--color-text)]">
-              {VERIFICATION_TYPE_OPTIONS.find((o) => o.value === form.type)?.label ?? form.type}
-            </p>
-          ) : (
-            <div className="w-48">
-              <Select
-                options={VERIFICATION_TYPE_OPTIONS}
-                value={form.type}
-                onChange={(o) => { if (o) onChangeType(o.value as VerificationType); }}
-                pill={false}
-                block
-              />
-            </div>
-          )}
+        <Field label="Type" description="Type is set at creation and cannot be changed">
+          <p className="text-sm text-[var(--color-text)]">
+            {VERIFICATION_TYPE_OPTIONS.find((o) => o.value === form.type)?.label ?? form.type}
+          </p>
         </Field>
       </div>
 
