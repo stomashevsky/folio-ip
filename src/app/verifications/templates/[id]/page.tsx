@@ -11,9 +11,9 @@ import {
   ALL_ID_DOC_TYPES,
   COUNTRY_OPTIONS,
   COUNTRY_REGIONS,
+  ID_DOC_TYPE_COLORS,
   ID_DOC_TYPE_LABELS,
   ID_DOC_TYPE_SHORT,
-  ID_DOC_TYPE_COLORS,
   REGION_OPTIONS,
   countryFlag,
   getCountryIdTypes,
@@ -26,6 +26,13 @@ import { useUnsavedChanges } from "@/lib/hooks/useUnsavedChanges";
 import { useTemplateStore } from "@/lib/stores/template-store";
 import { getStatusColor } from "@/lib/utils/format";
 import type {
+  AttributeMatchRequirement,
+  CheckConfigType,
+  CheckSubConfig,
+  ComparisonAttribute,
+  ExtractedProperty,
+  MatchLevel,
+  NormalizationMethodType,
   TemplateStatus,
   VerificationCheckConfig,
   VerificationTemplate,
@@ -41,7 +48,9 @@ import { Menu } from "@plexui/ui/components/Menu";
 import { SegmentedControl } from "@plexui/ui/components/SegmentedControl";
 import { Select } from "@plexui/ui/components/Select";
 import { Tabs } from "@plexui/ui/components/Tabs";
-import { ChevronDownMd, ChevronRightSm, DotsHorizontal, Search } from "@plexui/ui/components/Icon";
+import { Popover } from "@plexui/ui/components/Popover";
+import { Switch } from "@plexui/ui/components/Switch";
+import { CloseBold, DotsHorizontal, Plus, Search } from "@plexui/ui/components/Icon";
 
 /* ─── Constants ─── */
 
@@ -68,10 +77,39 @@ const CHECK_CATEGORY_COLORS: Record<string, string> = {
 };
 
 const CHECK_CATEGORY_OPTIONS = [
-  { value: "all", label: "All categories" },
   { value: "fraud", label: "Fraud" },
   { value: "validity", label: "Validity" },
   { value: "biometrics", label: "Biometrics" },
+];
+
+const CHECK_REQUIRED_OPTIONS = [
+  { value: "required", label: "Required" },
+  { value: "optional", label: "Optional" },
+];
+
+const ATTRIBUTE_OPTIONS: { value: ComparisonAttribute; label: string }[] = [
+  { value: "name_first", label: "First name" },
+  { value: "name_last", label: "Last name" },
+  { value: "name_middle", label: "Middle name" },
+  { value: "birthdate", label: "Date of birth" },
+  { value: "address_street", label: "Street address" },
+  { value: "address_city", label: "City" },
+  { value: "address_subdivision", label: "State / Province" },
+  { value: "address_postal_code", label: "Postal code" },
+  { value: "identification_number", label: "ID number" },
+];
+
+const MATCH_LEVEL_OPTIONS: { value: MatchLevel; label: string }[] = [
+  { value: "full", label: "Full match" },
+  { value: "partial", label: "Partial match" },
+  { value: "none", label: "No match required" },
+];
+
+const NORMALIZATION_OPTIONS: { value: NormalizationMethodType; label: string }[] = [
+  { value: "remove_prefixes", label: "Remove prefixes" },
+  { value: "remove_suffixes", label: "Remove suffixes" },
+  { value: "remove_special_characters", label: "Remove special characters" },
+  { value: "fold_characters", label: "Fold characters" },
 ];
 
 /* ─── Tabs ─── */
@@ -344,29 +382,29 @@ function VerificationTemplateDetailContent() {
         }
       />
 
-      <div className="flex flex-1 flex-col overflow-auto">
-        <div className="flex-1 overflow-auto px-4 py-6 md:px-6">
-          {activeTab === "Checks" && (
-            <ChecksTab checks={form.checks} type={form.type} onUpdateCheck={updateCheck} />
-          )}
-          {activeTab === "Allowed Countries" && (
-            <CountriesTab
-              selected={form.settings.allowedCountries}
-              countrySettings={form.settings.countrySettings}
-              onToggle={toggleCountry}
-              onToggleBatch={toggleCountries}
-              onUpdateCountrySettings={updateCountrySettings}
-            />
-          )}
-          {activeTab === "Settings" && (
+      <div className="flex-1 overflow-auto px-4 md:px-6">
+        {activeTab === "Checks" && (
+          <ChecksTab checks={form.checks} type={form.type} onUpdateCheck={updateCheck} />
+        )}
+        {activeTab === "Allowed Countries" && (
+          <CountriesTab
+            selected={form.settings.allowedCountries}
+            countrySettings={form.settings.countrySettings}
+            onToggle={toggleCountry}
+            onToggleBatch={toggleCountries}
+            onUpdateCountrySettings={updateCountrySettings}
+          />
+        )}
+        {activeTab === "Settings" && (
+          <div className="py-6">
             <SettingsTab
               form={form}
               existing={existing}
               onPatch={patch}
               onPatchSettings={patchSettings}
             />
-          )}
-        </div>
+          </div>
+        )}
       </div>
 
       <ConfirmLeaveModal open={showLeaveConfirm} onConfirm={confirmLeave} onCancel={cancelLeave} />
@@ -375,6 +413,28 @@ function VerificationTemplateDetailContent() {
 }
 
 /* ─── Checks Tab ─── */
+
+const CHECK_SCOPE_OPTIONS = [
+  { value: "same_account", label: "Same account" },
+  { value: "all_accounts", label: "All accounts" },
+];
+
+const EXTRACTED_PROPERTY_OPTIONS: { value: ExtractedProperty; label: string }[] = [
+  { value: "name_first", label: "First name" },
+  { value: "name_last", label: "Last name" },
+  { value: "name_middle", label: "Middle name" },
+  { value: "birthdate", label: "Date of birth" },
+  { value: "address_street", label: "Street address" },
+  { value: "address_city", label: "City" },
+  { value: "address_subdivision", label: "State / Province" },
+  { value: "address_postal_code", label: "Postal code" },
+  { value: "identification_number", label: "ID number" },
+  { value: "document_number", label: "Document number" },
+  { value: "issuing_country", label: "Issuing country" },
+  { value: "expiration_date", label: "Expiration date" },
+  { value: "issue_date", label: "Issue date" },
+  { value: "nationality", label: "Nationality" },
+];
 
 function ChecksTab({
   checks,
@@ -386,117 +446,567 @@ function ChecksTab({
   onUpdateCheck: (index: number, check: VerificationCheckConfig) => void;
 }) {
   const [search, setSearch] = useState("");
-  const [category, setCategory] = useState("all");
+  const [categoryFilters, setCategoryFilters] = useState<string[]>([]);
+  const [requiredFilter, setRequiredFilter] = useState<string[]>([]);
 
   const filtered = useMemo(() => {
     return checks.filter((check) => {
       const matchesSearch = !search || check.name.toLowerCase().includes(search.toLowerCase());
-      const matchesCategory = category === "all" || check.category === category;
-      return matchesSearch && matchesCategory;
+      const matchesCategory = categoryFilters.length === 0 || categoryFilters.includes(check.category);
+      const matchesRequired = requiredFilter.length === 0 || (
+        (requiredFilter.includes("required") && check.required) ||
+        (requiredFilter.includes("optional") && !check.required)
+      );
+      return matchesSearch && matchesCategory && matchesRequired;
     });
-  }, [checks, search, category]);
+  }, [checks, search, categoryFilters, requiredFilter]);
 
   const requiredCount = checks.filter((c) => c.required).length;
 
+  function updateSubConfig(index: number, check: VerificationCheckConfig, patch: Partial<CheckSubConfig>) {
+    onUpdateCheck(index, {
+      ...check,
+      subConfig: { ...check.subConfig, ...patch },
+    });
+  }
+
   return (
-    <div>
-      <div className="mb-4 flex items-center gap-3">
-        <div className="w-56">
-          <Input
-            size="sm"
-            pill
-            placeholder="Search checks..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            onClear={search ? () => setSearch("") : undefined}
-            startAdornment={<Search style={{ width: 16, height: 16 }} />}
+    <table className="-mb-px w-full" data-datatable>
+      <thead className="sticky top-0 z-10 bg-[var(--color-surface)]">
+        <tr>
+          <th colSpan={4} className="px-1 pt-3 pb-2 text-left font-normal">
+            <div className="flex items-center gap-2">
+              <div className="w-56">
+                <Input
+                  size={TOPBAR_CONTROL_SIZE}
+                  pill={TOPBAR_TOOLBAR_PILL}
+                  placeholder="Search checks..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  onClear={search ? () => setSearch("") : undefined}
+                  startAdornment={<Search style={{ width: 16, height: 16 }} />}
+                />
+              </div>
+              <div className="w-36">
+                <Select
+                  options={CHECK_CATEGORY_OPTIONS}
+                  value={categoryFilters}
+                  onChange={(opts) => setCategoryFilters(opts.map((o) => o.value))}
+                  multiple
+                  clearable
+                  placeholder="All categories"
+                  size={TOPBAR_CONTROL_SIZE}
+                  pill={TOPBAR_TOOLBAR_PILL}
+                  variant="outline"
+                  block
+                  listMinWidth={180}
+                />
+              </div>
+              <div className="w-36">
+                <Select
+                  options={CHECK_REQUIRED_OPTIONS}
+                  value={requiredFilter}
+                  onChange={(opts) => setRequiredFilter(opts.map((o) => o.value))}
+                  multiple
+                  clearable
+                  placeholder="All checks"
+                  size={TOPBAR_CONTROL_SIZE}
+                  pill={TOPBAR_TOOLBAR_PILL}
+                  variant="outline"
+                  block
+                  listMinWidth={160}
+                />
+              </div>
+              <div className="ml-auto flex items-center gap-1.5">
+                <Badge color="success" variant="soft" size="sm">{requiredCount} required</Badge>
+                <Badge color="secondary" variant="soft" size="sm">{checks.length} total</Badge>
+              </div>
+            </div>
+          </th>
+        </tr>
+        <tr className="border-b border-[var(--color-border)]">
+          <th className="w-16 px-3 py-2.5 text-left text-xs font-medium uppercase tracking-wider text-[var(--color-text-tertiary)]">
+            Required
+          </th>
+          <th className="px-3 py-2.5 text-left text-xs font-medium uppercase tracking-wider text-[var(--color-text-tertiary)]">
+            Check
+          </th>
+          <th className="w-28 px-3 py-2.5 text-left text-xs font-medium uppercase tracking-wider text-[var(--color-text-tertiary)]">
+            Type
+          </th>
+          <th className="w-10 px-3 py-2.5" />
+        </tr>
+      </thead>
+      <tbody>
+        {filtered.map((check) => {
+          const formIndex = checks.findIndex((c) => c.name === check.name);
+          const availCheck = AVAILABLE_CHECKS[type]?.find((a) => a.name === check.name);
+          const isConfigurable = availCheck?.configurable === true;
+          const configType = availCheck?.configType;
+
+          return (
+            <CheckRow
+              key={check.name}
+              check={check}
+              formIndex={formIndex}
+              isConfigurable={isConfigurable}
+              configType={configType}
+              defaultRequired={availCheck?.defaultRequired ?? false}
+              onUpdateCheck={onUpdateCheck}
+              onUpdateSubConfig={(patch) => updateSubConfig(formIndex, check, patch)}
+            />
+          );
+        })}
+        {filtered.length === 0 && (
+          <tr className="border-b border-[var(--color-border)]">
+            <td colSpan={4} className="py-8 text-center text-sm text-[var(--color-text-tertiary)]">
+              No checks match your filters.
+            </td>
+          </tr>
+        )}
+      </tbody>
+    </table>
+  );
+}
+
+/* ─── Check Row ─── */
+
+function CheckRow({
+  check,
+  formIndex,
+  isConfigurable,
+  configType,
+  defaultRequired,
+  onUpdateCheck,
+  onUpdateSubConfig,
+}: {
+  check: VerificationCheckConfig;
+  formIndex: number;
+  isConfigurable: boolean;
+  configType: CheckConfigType | undefined;
+  defaultRequired: boolean;
+  onUpdateCheck: (index: number, check: VerificationCheckConfig) => void;
+  onUpdateSubConfig: (patch: Partial<CheckSubConfig>) => void;
+}) {
+  const isModified = check.required !== defaultRequired || check.subConfig != null;
+  const hasConfig = isConfigurable && !!configType;
+
+  function resetToDefault() {
+    onUpdateCheck(formIndex, { ...check, required: defaultRequired, subConfig: undefined });
+  }
+
+  return (
+    <>
+      <tr className={hasConfig ? "border-b border-[var(--color-border)] border-dashed" : "border-b border-[var(--color-border)]"}>
+        <td className="w-16 px-3 py-2.5">
+          <Checkbox
+            checked={check.required}
+            onCheckedChange={(c) => onUpdateCheck(formIndex, { ...check, required: !!c })}
           />
-        </div>
-        <div className="w-40">
-          <Select
-            options={CHECK_CATEGORY_OPTIONS}
-            value={category}
-            onChange={(o) => { if (o) setCategory(o.value); }}
+        </td>
+        <td className="px-3 py-2.5">
+          <span className="inline-flex items-center gap-2">
+            <span className="text-md text-[var(--color-text)]">{check.name}</span>
+            {check.lifecycle === "beta" && (
+              <Badge color="discovery" variant="soft" size="sm">Beta</Badge>
+            )}
+            {check.lifecycle === "sunset" && (
+              <Badge color="warning" variant="soft" size="sm">Sunset</Badge>
+            )}
+          </span>
+        </td>
+        <td className="w-28 px-3 py-2.5">
+          <Badge
+            color={CHECK_CATEGORY_COLORS[check.category] as "danger" | "secondary" | "info" | "warning"}
+            variant="soft"
             size="sm"
-            pill
-            variant="outline"
-            block
-          />
+          >
+            {CHECK_CATEGORY_LABELS[check.category] ?? check.category}
+          </Badge>
+        </td>
+        <td className="w-10 px-3 py-2.5">
+          <Menu>
+            <Menu.Trigger>
+              <Button color="secondary" variant="ghost" size="3xs" uniform>
+                <DotsHorizontal />
+              </Button>
+            </Menu.Trigger>
+            <Menu.Content side="bottom" align="end" sideOffset={4}>
+              <Menu.Item onClick={() => onUpdateCheck(formIndex, { ...check, required: !check.required })}>
+                {check.required ? "Mark optional" : "Mark required"}
+              </Menu.Item>
+              {isModified && (
+                <>
+                  <Menu.Separator />
+                  <Menu.Item onClick={resetToDefault}>Reset to default</Menu.Item>
+                </>
+              )}
+            </Menu.Content>
+          </Menu>
+        </td>
+      </tr>
+      {hasConfig && (
+        <tr className="border-b border-[var(--color-border)]">
+          <td />
+          <td colSpan={3} className="px-3 pb-4 pt-2">
+            <CheckConfigPanel
+              configType={configType}
+              subConfig={check.subConfig}
+              onUpdate={onUpdateSubConfig}
+            />
+          </td>
+        </tr>
+      )}
+    </>
+  );
+}
+
+/* ─── Check Config Panel ─── */
+
+function CheckConfigPanel({
+  configType,
+  subConfig,
+  onUpdate,
+}: {
+  configType: CheckConfigType;
+  subConfig: CheckSubConfig | undefined;
+  onUpdate: (patch: Partial<CheckSubConfig>) => void;
+}) {
+  switch (configType) {
+    case "age_range":
+      return (
+        <div className="flex items-center gap-4">
+          <Field label="Minimum age" size="sm">
+            <div className="w-20">
+              <Input
+                size="sm"
+                type="number"
+                placeholder="—"
+                value={subConfig?.ageRange?.min != null ? String(subConfig.ageRange.min) : ""}
+                onChange={(e) => {
+                  const val = e.target.value === "" ? undefined : Number(e.target.value);
+                  onUpdate({ ageRange: { ...subConfig?.ageRange, min: val } });
+                }}
+              />
+            </div>
+          </Field>
+          <Field label="Maximum age" size="sm">
+            <div className="w-20">
+              <Input
+                size="sm"
+                type="number"
+                placeholder="—"
+                value={subConfig?.ageRange?.max != null ? String(subConfig.ageRange.max) : ""}
+                onChange={(e) => {
+                  const val = e.target.value === "" ? undefined : Number(e.target.value);
+                  onUpdate({ ageRange: { ...subConfig?.ageRange, max: val } });
+                }}
+              />
+            </div>
+          </Field>
         </div>
-        <p className="ml-auto text-xs text-[var(--color-text-tertiary)]">
-          {checks.length} checks · {requiredCount} required
+      );
+
+    case "expiration":
+      return (
+        <Field label="Grace period" description="Number of days past expiration to still accept" size="sm">
+          <div className="w-24">
+            <Input
+              size="sm"
+              type="number"
+              placeholder="0"
+              value={subConfig?.gracePeriodDays != null ? String(subConfig.gracePeriodDays) : ""}
+              onChange={(e) => {
+                const val = e.target.value === "" ? undefined : Number(e.target.value);
+                onUpdate({ gracePeriodDays: val });
+              }}
+            />
+          </div>
+        </Field>
+      );
+
+    case "barcode":
+      return (
+        <Field label="Require successful extraction" description="Fail the check if barcode data cannot be extracted" size="sm">
+          <Switch
+            checked={subConfig?.requireSuccessfulExtraction ?? false}
+            onCheckedChange={(v) => onUpdate({ requireSuccessfulExtraction: v })}
+          />
+        </Field>
+      );
+
+    case "country":
+      return (
+        <Field label="Map to sovereign country" description="Map territories and dependencies to their sovereign country" size="sm">
+          <Switch
+            checked={subConfig?.mapToSovereignCountry ?? false}
+            onCheckedChange={(v) => onUpdate({ mapToSovereignCountry: v })}
+          />
+        </Field>
+      );
+
+    case "repeat":
+      return (
+        <Field label="Detection scope" description="Scope for detecting repeated submissions" size="sm">
+          <div className="w-44">
+            <Select
+              options={CHECK_SCOPE_OPTIONS}
+              value={subConfig?.scope ?? "same_account"}
+              onChange={(o) => { if (o) onUpdate({ scope: o.value as "same_account" | "all_accounts" }); }}
+              size="sm"
+              pill={false}
+              block
+            />
+          </div>
+        </Field>
+      );
+
+    case "id_type":
+      return (
+        <p className="text-sm text-[var(--color-text-secondary)]">
+          Configure accepted ID types in the Countries tab.
+        </p>
+      );
+
+    case "comparison":
+      return (
+        <MatchRequirementsEditor
+          requirements={subConfig?.matchRequirements ?? []}
+          onChange={(reqs) => onUpdate({ matchRequirements: reqs.length > 0 ? reqs : undefined })}
+        />
+      );
+
+    case "extracted_properties":
+      return (
+        <ExtractedPropertiesPanel
+          requiredAttributes={subConfig?.requiredAttributes ?? []}
+          passWhenMissing={subConfig?.passWhenPropertyMissing ?? true}
+          onUpdate={onUpdate}
+        />
+      );
+
+    default:
+      return null;
+  }
+}
+
+/* ─── Match Requirements Editor ─── */
+
+function MatchRequirementsEditor({
+  requirements,
+  onChange,
+}: {
+  requirements: AttributeMatchRequirement[];
+  onChange: (reqs: AttributeMatchRequirement[]) => void;
+}) {
+  const usedAttributes = useMemo(
+    () => new Set(requirements.map((r) => r.attribute)),
+    [requirements],
+  );
+
+  const availableAttributes = useMemo(
+    () => ATTRIBUTE_OPTIONS.filter((a) => !usedAttributes.has(a.value)),
+    [usedAttributes],
+  );
+
+  function addRule() {
+    const next = availableAttributes[0];
+    if (!next) return;
+    onChange([
+      ...requirements,
+      { attribute: next.value, normalization: [], comparison: { type: "simple", matchLevel: "partial" } },
+    ]);
+  }
+
+  function removeRule(index: number) {
+    onChange(requirements.filter((_, i) => i !== index));
+  }
+
+  function updateRule(index: number, patch: Partial<AttributeMatchRequirement>) {
+    onChange(requirements.map((r, i) => (i === index ? { ...r, ...patch } : r)));
+  }
+
+  function updateNormalization(index: number, methods: NormalizationMethodType[]) {
+    const steps = methods.map((method, i) => ({
+      step: (i === 0 ? "apply" : "then") as "apply" | "then",
+      method,
+    }));
+    updateRule(index, { normalization: steps });
+  }
+
+  function updateMatchLevel(index: number, matchLevel: MatchLevel) {
+    updateRule(index, { comparison: { type: "simple", matchLevel } });
+  }
+
+  return (
+    <div className="flex flex-col gap-3">
+      {requirements.length === 0 ? (
+        <>
+          <p className="text-sm text-[var(--color-text-tertiary)]">
+            No rules configured — default matching will be used.
+          </p>
+          {availableAttributes.length > 0 && (
+            <div>
+              <Button color="secondary" variant="soft" size="xs" onClick={addRule}>
+                <Plus /> Add rule
+              </Button>
+            </div>
+          )}
+        </>
+      ) : (
+        <>
+          {requirements.map((rule, index) => {
+            const connector = index === 0 ? "If" : "And";
+
+            return (
+              <div key={rule.attribute} className="flex flex-col gap-3 rounded-lg border border-[var(--color-border)] p-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium text-[var(--color-text)]">{connector}</span>
+                  <Button
+                    color="secondary"
+                    variant="ghost"
+                    size="3xs"
+                    uniform
+                    onClick={() => removeRule(index)}
+                  >
+                    <CloseBold />
+                  </Button>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="flex-1">
+                    <Field label="Attribute" size="sm">
+                      <Select
+                        options={[
+                          ...ATTRIBUTE_OPTIONS.filter((a) => a.value === rule.attribute),
+                          ...availableAttributes,
+                        ]}
+                        value={rule.attribute}
+                        onChange={(o) => { if (o) updateRule(index, { attribute: o.value as ComparisonAttribute }); }}
+                        size="sm"
+                        block
+                        listMinWidth={180}
+                      />
+                    </Field>
+                  </div>
+                  <div className="flex-1">
+                    <Field label="Match level" size="sm">
+                      <Select
+                        options={MATCH_LEVEL_OPTIONS}
+                        value={rule.comparison.type === "simple" ? rule.comparison.matchLevel : "partial"}
+                        onChange={(o) => { if (o) updateMatchLevel(index, o.value as MatchLevel); }}
+                        size="sm"
+                        block
+                        listMinWidth={160}
+                      />
+                    </Field>
+                  </div>
+                  <div className="flex-1">
+                    <Field label="Normalization" size="sm">
+                      <Select
+                        options={NORMALIZATION_OPTIONS}
+                        value={rule.normalization.map((n) => n.method)}
+                        onChange={(opts) => updateNormalization(index, opts.map((o) => o.value as NormalizationMethodType))}
+                        multiple
+                        clearable
+                        placeholder="None"
+                        size="sm"
+                        block
+                        listMinWidth={260}
+                      />
+                    </Field>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+          {availableAttributes.length > 0 && (
+            <div>
+              <Button color="secondary" variant="soft" size="xs" onClick={addRule}>
+                <Plus /> Add rule
+              </Button>
+            </div>
+          )}
+        </>
+      )}
+    </div>
+  );
+}
+
+/* ─── Extracted Properties Panel ─── */
+
+function ExtractedPropertiesPanel({
+  requiredAttributes,
+  passWhenMissing,
+  onUpdate,
+}: {
+  requiredAttributes: ExtractedProperty[];
+  passWhenMissing: boolean;
+  onUpdate: (patch: Partial<CheckSubConfig>) => void;
+}) {
+  const available = useMemo(
+    () => EXTRACTED_PROPERTY_OPTIONS.filter((o) => !requiredAttributes.includes(o.value)),
+    [requiredAttributes],
+  );
+
+  function addAttribute() {
+    const next = available[0];
+    if (!next) return;
+    onUpdate({ requiredAttributes: [...requiredAttributes, next.value] });
+  }
+
+  function removeAttribute(attr: ExtractedProperty) {
+    const next = requiredAttributes.filter((a) => a !== attr);
+    onUpdate({ requiredAttributes: next.length > 0 ? next : undefined });
+  }
+
+  return (
+    <div className="flex flex-col gap-4">
+      <div>
+        <div className="flex items-center justify-between">
+          <p className="text-sm font-medium text-[var(--color-text)]">Default required attributes</p>
+          {available.length > 0 && (
+            <Button color="secondary" variant="soft" size="xs" onClick={addAttribute}>
+              <Plus /> Add attribute
+            </Button>
+          )}
+        </div>
+        <p className="mt-1 text-sm text-[var(--color-text-secondary)]">
+          These default required attributes will be used for every country and ID type. You can override this default on a per-country and per-ID basis in Countries and ID Types.
         </p>
       </div>
 
-      <div className="overflow-hidden rounded-xl border border-[var(--color-border)]">
-        <div className="overflow-hidden">
-          <table className="-mb-px w-full">
-            <thead>
-              <tr className="border-b border-[var(--color-border)]">
-                <th className="px-4 py-2.5 text-left text-xs font-medium uppercase tracking-wider text-[var(--color-text-tertiary)]">
-                  Check
-                </th>
-                <th className="w-28 px-4 py-2.5 text-left text-xs font-medium uppercase tracking-wider text-[var(--color-text-tertiary)]">
-                  Category
-                </th>
-                <th className="w-28 px-4 py-2.5 text-center text-xs font-medium uppercase tracking-wider text-[var(--color-text-tertiary)]">
-                  Configurable
-                </th>
-                <th className="w-24 px-4 py-2.5 text-center text-xs font-medium uppercase tracking-wider text-[var(--color-text-tertiary)]">
-                  Required
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {filtered.map((check) => {
-                const formIndex = checks.findIndex((c) => c.name === check.name);
-                const availCheck = AVAILABLE_CHECKS[type]?.find((a) => a.name === check.name);
-                return (
-                  <tr key={check.name} className="border-b border-[var(--color-border)]">
-                    <td className="px-4 py-2.5">
-                      <span className="text-sm text-[var(--color-text)]">{check.name}</span>
-                      {check.lifecycle === "beta" && (
-                        <Badge color="discovery" variant="soft" size="sm" className="ml-2">Beta</Badge>
-                      )}
-                      {check.lifecycle === "sunset" && (
-                        <Badge color="warning" variant="soft" size="sm" className="ml-2">Sunset</Badge>
-                      )}
-                    </td>
-                    <td className="w-28 px-4 py-2.5">
-                      <Badge
-                        color={CHECK_CATEGORY_COLORS[check.category] as "danger" | "secondary" | "info" | "warning"}
-                        variant="soft"
-                        size="sm"
-                      >
-                        {CHECK_CATEGORY_LABELS[check.category] ?? check.category}
-                      </Badge>
-                    </td>
-                    <td className="w-28 px-4 py-2.5 text-center">
-                      {availCheck?.configurable && (
-                        <span className="text-sm text-[var(--color-text-secondary)]">✓</span>
-                      )}
-                    </td>
-                    <td className="w-24 px-4 py-2.5">
-                      <div className="flex justify-center">
-                        <Checkbox
-                          checked={check.required}
-                          onCheckedChange={(c) => onUpdateCheck(formIndex, { ...check, required: !!c })}
-                        />
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
-              {filtered.length === 0 && (
-                <tr className="border-b border-[var(--color-border)]">
-                  <td colSpan={4} className="py-8 text-center text-sm text-[var(--color-text-tertiary)]">
-                    No checks match your filters.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+      {requiredAttributes.length === 0 ? (
+        <p className="rounded-lg border border-[var(--color-border)] px-3 py-2 text-sm text-[var(--color-text-tertiary)]">
+          No required attributes
+        </p>
+      ) : (
+        <div className="flex flex-wrap gap-1.5">
+          {requiredAttributes.map((attr) => {
+            const label = EXTRACTED_PROPERTY_OPTIONS.find((o) => o.value === attr)?.label ?? attr;
+            return (
+              <Badge key={attr} color="secondary" variant="outline" size="md">
+                <span className="flex items-center gap-1">
+                  {label}
+                  <button
+                    type="button"
+                    className="ml-0.5 opacity-60 hover:opacity-100"
+                    onClick={() => removeAttribute(attr)}
+                  >
+                    <CloseBold style={{ width: 10, height: 10 }} />
+                  </button>
+                </span>
+              </Badge>
+            );
+          })}
         </div>
+      )}
+
+      <div className="flex items-center justify-between">
+        <p className="text-sm text-[var(--color-text)]">Pass when required property does not appear on the ID</p>
+        <Switch
+          checked={passWhenMissing}
+          onCheckedChange={(v) => onUpdate({ passWhenPropertyMissing: v })}
+        />
       </div>
     </div>
   );
@@ -505,7 +1015,6 @@ function ChecksTab({
 /* ─── Countries Tab ─── */
 
 const STATUS_FILTER_OPTIONS = [
-  { value: "all", label: "All countries" },
   { value: "enabled", label: "Enabled" },
   { value: "disabled", label: "Disabled" },
 ];
@@ -524,10 +1033,9 @@ function CountriesTab({
   onUpdateCountrySettings: (code: string, cs: CountrySettings) => void;
 }) {
   const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState("all");
+  const [statusFilters, setStatusFilters] = useState<string[]>([]);
   const [regionFilters, setRegionFilters] = useState<string[]>([]);
   const [idTypeFilters, setIdTypeFilters] = useState<string[]>([]);
-  const [expanded, setExpanded] = useState<Set<string>>(new Set());
   const [bulkConfigOpen, setBulkConfigOpen] = useState(false);
 
   const selectedSet = useMemo(() => new Set(selected), [selected]);
@@ -542,10 +1050,11 @@ function CountriesTab({
       );
     }
 
-    if (statusFilter === "enabled") {
-      countries = countries.filter((c) => selectedSet.has(c.value));
-    } else if (statusFilter === "disabled") {
-      countries = countries.filter((c) => !selectedSet.has(c.value));
+    if (statusFilters.length > 0) {
+      countries = countries.filter((c) => {
+        const isEnabled = selectedSet.has(c.value);
+        return statusFilters.includes("enabled") ? isEnabled : !isEnabled;
+      });
     }
 
     if (regionFilters.length > 0) {
@@ -560,141 +1069,141 @@ function CountriesTab({
     }
 
     return countries;
-  }, [search, statusFilter, regionFilters, idTypeFilters, selectedSet]);
+  }, [search, statusFilters, regionFilters, idTypeFilters, selectedSet]);
 
   const allFilteredSelected = filtered.length > 0 && filtered.every((c) => selectedSet.has(c.value));
   const someFilteredSelected = filtered.some((c) => selectedSet.has(c.value));
-
-  function toggleExpanded(code: string) {
-    setExpanded((prev) => {
-      const next = new Set(prev);
-      if (next.has(code)) next.delete(code);
-      else next.add(code);
-      return next;
-    });
-  }
 
   function handleSelectAll() {
     const codes = filtered.map((c) => c.value);
     onToggleBatch(codes, !allFilteredSelected);
   }
 
-  const hasActiveFilters = statusFilter !== "all" || regionFilters.length > 0 || idTypeFilters.length > 0 || search.trim() !== "";
+  const hasActiveFilters = statusFilters.length > 0 || regionFilters.length > 0 || idTypeFilters.length > 0 || search.trim() !== "";
 
   return (
     <div>
-      <div className="mb-4 flex items-center gap-3">
-        <div className="w-56">
-          <Input
-            size="sm"
-            pill
-            placeholder="Search countries..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            onClear={search ? () => setSearch("") : undefined}
-            startAdornment={<Search style={{ width: 16, height: 16 }} />}
-          />
-        </div>
-        <div className="w-36">
-          <Select
-            options={STATUS_FILTER_OPTIONS}
-            value={statusFilter}
-            onChange={(o) => { if (o) setStatusFilter(o.value); }}
-            size="sm"
-            pill
-            variant="outline"
-            block
-          />
-        </div>
-        <div className="w-40">
-          <Select
-            options={REGION_OPTIONS}
-            value={regionFilters}
-            onChange={(opts) => setRegionFilters(opts.map((o) => o.value))}
-            multiple
-            clearable
-            placeholder="All regions"
-            size="sm"
-            pill
-            variant="outline"
-            block
-            listMinWidth={180}
-          />
-        </div>
-        <div className="w-40">
-          <Select
-            options={ALL_ID_DOC_TYPES.map((t) => ({ value: t, label: ID_DOC_TYPE_LABELS[t] }))}
-            value={idTypeFilters}
-            onChange={(opts) => setIdTypeFilters(opts.map((o) => o.value))}
-            multiple
-            clearable
-            placeholder="All ID types"
-            size="sm"
-            pill
-            variant="outline"
-            block
-            listMinWidth={200}
-          />
-        </div>
-        {hasActiveFilters && (
-          <Button
-            color="secondary"
-            variant="soft"
-            size="sm"
-            pill
-            onClick={() => {
-              setSearch("");
-              setStatusFilter("all");
-              setRegionFilters([]);
-              setIdTypeFilters([]);
-            }}
-          >
-            Clear filters
-          </Button>
-        )}
-        {selected.length >= 2 && (
-          <Button
-            color="secondary"
-            variant="outline"
-            size="sm"
-            pill
-            onClick={() => setBulkConfigOpen(true)}
-          >
-            Bulk configure ({selected.length})
-          </Button>
-        )}
-        <p className="ml-auto text-xs text-[var(--color-text-tertiary)]">
-          {selected.length} of {COUNTRY_OPTIONS.length} enabled
-        </p>
-      </div>
-
-      <div className="overflow-hidden rounded-xl border border-[var(--color-border)]">
-        <div className="overflow-hidden">
-          <table className="-mb-px w-full">
-            <thead>
-              <tr className="border-b border-[var(--color-border)]">
-                <th className="w-10 px-3 py-2.5">
-                  <Checkbox
-                    checked={allFilteredSelected ? true : someFilteredSelected ? "indeterminate" : false}
-                    onCheckedChange={handleSelectAll}
+      <table className="-mb-px w-full" data-datatable>
+        <thead className="sticky top-0 z-10 bg-[var(--color-surface)]">
+          <tr>
+            <th colSpan={6} className="px-3 pt-6 pb-3 text-left font-normal">
+              <div className="flex flex-wrap items-center gap-3">
+                <div className="w-56">
+                  <Input
+                    size="sm"
+                    pill
+                    placeholder="Search countries..."
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    onClear={search ? () => setSearch("") : undefined}
+                    startAdornment={<Search style={{ width: 16, height: 16 }} />}
                   />
-                </th>
-                <th className="w-8 px-0 py-2.5" />
-                <th className="w-56 px-3 py-2.5 text-left text-xs font-medium uppercase tracking-wider text-[var(--color-text-tertiary)]">
-                  Country
-                </th>
-                <th className="px-3 py-2.5 text-left text-xs font-medium uppercase tracking-wider text-[var(--color-text-tertiary)]">
-                  Accepted ID Types
-                </th>
-                <th className="w-32 px-3 py-2.5 text-right text-xs font-medium uppercase tracking-wider text-[var(--color-text-tertiary)]">
-                  Region
-                </th>
-              </tr>
-            </thead>
-            <tbody>
+                </div>
+                <div className="w-36">
+                  <Select
+                    options={STATUS_FILTER_OPTIONS}
+                    value={statusFilters}
+                    onChange={(opts) => setStatusFilters(opts.map((o) => o.value))}
+                    multiple
+                    clearable
+                    placeholder="All countries"
+                    size="sm"
+                    pill
+                    variant="outline"
+                    block
+                    listMinWidth={160}
+                  />
+                </div>
+                <div className="w-40">
+                  <Select
+                    options={REGION_OPTIONS}
+                    value={regionFilters}
+                    onChange={(opts) => setRegionFilters(opts.map((o) => o.value))}
+                    multiple
+                    clearable
+                    placeholder="All regions"
+                    size="sm"
+                    pill
+                    variant="outline"
+                    block
+                    listMinWidth={180}
+                  />
+                </div>
+                <div className="w-40">
+                  <Select
+                    options={ALL_ID_DOC_TYPES.map((t) => ({ value: t, label: ID_DOC_TYPE_LABELS[t] }))}
+                    value={idTypeFilters}
+                    onChange={(opts) => setIdTypeFilters(opts.map((o) => o.value))}
+                    multiple
+                    clearable
+                    placeholder="All ID types"
+                    size="sm"
+                    pill
+                    variant="outline"
+                    block
+                    listMinWidth={260}
+                  />
+                </div>
+                {hasActiveFilters && (
+                  <Button
+                    color="secondary"
+                    variant="soft"
+                    size="sm"
+                    pill
+                    onClick={() => {
+                      setSearch("");
+                      setStatusFilters([]);
+                      setRegionFilters([]);
+                      setIdTypeFilters([]);
+                    }}
+                  >
+                    Clear filters
+                  </Button>
+                )}
+                {selected.length >= 2 && (
+                  <Button
+                    color="secondary"
+                    variant="outline"
+                    size="sm"
+                    pill
+                    onClick={() => setBulkConfigOpen(true)}
+                  >
+                    Bulk configure ({selected.length})
+                  </Button>
+                )}
+                <p className="ml-auto text-sm text-[var(--color-text-tertiary)]">
+                  {selected.length} of {COUNTRY_OPTIONS.length} enabled
+                </p>
+              </div>
+            </th>
+          </tr>
+          <tr className="border-b border-[var(--color-border)]">
+            <th className="w-10 px-3 py-2.5">
+              <Checkbox
+                checked={allFilteredSelected ? true : someFilteredSelected ? "indeterminate" : false}
+                onCheckedChange={handleSelectAll}
+              />
+            </th>
+            <th className="w-52 px-3 py-2.5 text-left text-xs font-medium uppercase tracking-wider text-[var(--color-text-tertiary)]">
+              Country
+            </th>
+            <th className="px-3 py-2.5 text-left text-xs font-medium uppercase tracking-wider text-[var(--color-text-tertiary)]">
+              Accepted ID Types
+            </th>
+            <th className="w-20 px-3 py-2.5 text-left text-xs font-medium uppercase tracking-wider text-[var(--color-text-tertiary)]">
+              Min Age
+            </th>
+            <th className="w-20 px-3 py-2.5 text-left text-xs font-medium uppercase tracking-wider text-[var(--color-text-tertiary)]">
+              Max Age
+            </th>
+            <th className="w-36 px-3 py-2.5 text-right text-xs font-medium uppercase tracking-wider text-[var(--color-text-tertiary)]">
+              Region
+            </th>
+          </tr>
+        </thead>
+        <tbody>
               {filtered.map((country) => {
                 const isEnabled = selectedSet.has(country.value);
-                const isExpanded = expanded.has(country.value);
                 const availableTypes = getCountryIdTypes(country.value);
                 const cs = countrySettings[country.value];
                 const activeTypes = cs?.allowedIdTypes ?? availableTypes;
@@ -705,28 +1214,24 @@ function CountriesTab({
                     code={country.value}
                     name={country.label}
                     enabled={isEnabled}
-                    expanded={isExpanded}
                     availableTypes={availableTypes}
                     activeTypes={activeTypes}
                     cs={cs}
                     region={COUNTRY_REGIONS[country.value]}
                     onToggle={() => onToggle(country.value)}
-                    onToggleExpand={() => toggleExpanded(country.value)}
                     onUpdateSettings={(next) => onUpdateCountrySettings(country.value, next)}
                   />
                 );
               })}
               {filtered.length === 0 && (
                 <tr className="border-b border-[var(--color-border)]">
-                  <td colSpan={5} className="py-8 text-center text-sm text-[var(--color-text-tertiary)]">
+                  <td colSpan={6} className="py-8 text-center text-sm text-[var(--color-text-tertiary)]">
                     No countries match your filters.
                   </td>
                 </tr>
               )}
-            </tbody>
-          </table>
-        </div>
-      </div>
+        </tbody>
+      </table>
 
       <BulkConfigModal
         open={bulkConfigOpen}
@@ -991,41 +1496,113 @@ function BulkConfigModal({
 
 /* ─── Country Row ─── */
 
+/* ─── ID Type Badges with Popover ─── */
+
+function IdTypeBadges({
+  availableTypes,
+  activeTypes,
+  onChange,
+}: {
+  availableTypes: IdDocType[];
+  activeTypes: IdDocType[];
+  onChange: (types: IdDocType[]) => void;
+}) {
+  const allSelected = activeTypes.length === 0 || activeTypes.length === availableTypes.length;
+  const displayTypes = allSelected ? availableTypes : activeTypes;
+
+  function toggleType(t: IdDocType) {
+    const current = allSelected ? [...availableTypes] : [...activeTypes];
+    const idx = current.indexOf(t);
+    if (idx >= 0) {
+      current.splice(idx, 1);
+    } else {
+      current.push(t);
+    }
+    // If all selected again, clear to mean "all"
+    if (current.length === availableTypes.length) {
+      onChange([]);
+    } else {
+      onChange(current);
+    }
+  }
+
+  function selectAll() {
+    onChange([]);
+  }
+
+  function clearAll() {
+    onChange([availableTypes[0]]);
+  }
+
+  return (
+    <Popover>
+      <Popover.Trigger>
+        <button type="button" className="flex max-w-72 cursor-pointer flex-wrap gap-1">
+          {displayTypes.map((t) => (
+            <Badge
+              key={t}
+              color={ID_DOC_TYPE_COLORS[t] as "info" | "discovery" | "warning" | "success" | "caution" | "secondary" | "danger"}
+              variant="soft"
+              size="sm"
+            >
+              {ID_DOC_TYPE_SHORT[t]}
+            </Badge>
+          ))}
+        </button>
+      </Popover.Trigger>
+      <Popover.Content side="bottom" align="start" sideOffset={4} className="w-64">
+        <div className="flex flex-col gap-2 p-3">
+          <div className="flex items-center justify-between">
+            <p className="text-xs font-medium text-[var(--color-text-tertiary)]">Accepted ID types</p>
+            <div className="flex gap-2">
+              <button type="button" className="text-xs text-[var(--color-primary-solid-bg)] hover:underline" onClick={selectAll}>
+                All
+              </button>
+              <button type="button" className="text-xs text-[var(--color-text-tertiary)] hover:underline" onClick={clearAll}>
+                Clear
+              </button>
+            </div>
+          </div>
+          <div className="flex max-h-64 flex-col gap-0.5 overflow-auto">
+            {availableTypes.map((t) => {
+              const isActive = allSelected || activeTypes.includes(t);
+              return (
+                <Checkbox
+                  key={t}
+                  label={ID_DOC_TYPE_LABELS[t]}
+                  checked={isActive}
+                  onCheckedChange={() => toggleType(t)}
+                />
+              );
+            })}
+          </div>
+        </div>
+      </Popover.Content>
+    </Popover>
+  );
+}
+
 function CountryRow({
   code,
   name,
   enabled,
-  expanded,
   availableTypes,
   activeTypes,
   cs,
   region,
   onToggle,
-  onToggleExpand,
   onUpdateSettings,
 }: {
   code: string;
   name: string;
   enabled: boolean;
-  expanded: boolean;
   availableTypes: IdDocType[];
   activeTypes: IdDocType[];
   cs: CountrySettings | undefined;
   region: Region | undefined;
   onToggle: () => void;
-  onToggleExpand: () => void;
   onUpdateSettings: (next: CountrySettings) => void;
 }) {
-  const activeSet = useMemo(() => new Set(activeTypes), [activeTypes]);
-
-  function toggleIdType(type: IdDocType) {
-    const current = cs?.allowedIdTypes ?? [...availableTypes];
-    const set = new Set(current);
-    if (set.has(type)) set.delete(type);
-    else set.add(type);
-    onUpdateSettings({ ...cs, allowedIdTypes: Array.from(set) });
-  }
-
   function setAgeMin(val: string) {
     const num = val === "" ? undefined : Number(val);
     const range = { ...cs?.ageRange, min: num };
@@ -1047,101 +1624,48 @@ function CountryRow({
   }
 
   return (
-    <>
-      <tr
-        className={`border-b border-[var(--color-border)] transition-colors ${enabled ? "bg-[var(--color-success-surface-bg)]" : ""}`}
-      >
-        <td className="w-10 px-3 py-2">
-          <Checkbox checked={enabled} onCheckedChange={onToggle} />
-        </td>
-        <td className="w-8 px-0 py-2">
-          <button
-            type="button"
-            onClick={onToggleExpand}
-            className="flex h-6 w-6 items-center justify-center rounded text-[var(--color-text-tertiary)] transition-colors hover:bg-[var(--color-nav-hover-bg)] hover:text-[var(--color-text)]"
-          >
-            {expanded ? (
-              <ChevronDownMd style={{ width: 14, height: 14 }} />
-            ) : (
-              <ChevronRightSm style={{ width: 14, height: 14 }} />
-            )}
-          </button>
-        </td>
-        <td className="w-56 px-3 py-2">
-          <span className="flex items-center gap-2">
-            <span className="text-base leading-none">{countryFlag(code)}</span>
-            <span className="truncate text-sm text-[var(--color-text)]">{name}</span>
-            <span className="shrink-0 text-2xs text-[var(--color-text-tertiary)]">{code}</span>
-          </span>
-        </td>
-        <td className="px-3 py-2">
-          <div className="flex flex-wrap gap-1">
-            {availableTypes.map((type) => (
-              <Badge
-                key={type}
-                color={activeSet.has(type) ? (ID_DOC_TYPE_COLORS[type] as "info" | "discovery" | "warning" | "success" | "secondary") : "secondary"}
-                variant={activeSet.has(type) ? "soft" : "outline"}
-                size="sm"
-              >
-                {ID_DOC_TYPE_SHORT[type]}
-              </Badge>
-            ))}
-          </div>
-        </td>
-        <td className="w-32 px-3 py-2 text-right">
-          <span className="text-xs text-[var(--color-text-tertiary)]">{region ?? "—"}</span>
-        </td>
-      </tr>
-      {expanded && (
-        <tr className="border-b border-[var(--color-border)]">
-          <td colSpan={5} className="bg-[var(--color-surface-secondary)] px-6 py-4">
-            <div className="flex gap-8">
-              <div className="flex-1">
-                <p className="mb-2 text-xs font-medium uppercase tracking-wider text-[var(--color-text-tertiary)]">
-                  Accepted ID Types
-                </p>
-                <div className="flex flex-col gap-1.5">
-                  {availableTypes.map((type) => (
-                    <Checkbox
-                      key={type}
-                      label={ID_DOC_TYPE_LABELS[type]}
-                      checked={activeSet.has(type)}
-                      onCheckedChange={() => toggleIdType(type)}
-                    />
-                  ))}
-                </div>
-              </div>
-              <div className="w-56">
-                <p className="mb-2 text-xs font-medium uppercase tracking-wider text-[var(--color-text-tertiary)]">
-                  Age Range
-                </p>
-                <div className="flex items-center gap-2">
-                  <div className="w-20">
-                    <Input
-                      size="sm"
-                      type="number"
-                      placeholder="Min"
-                      value={cs?.ageRange?.min != null ? String(cs.ageRange.min) : ""}
-                      onChange={(e) => setAgeMin(e.target.value)}
-                    />
-                  </div>
-                  <span className="text-xs text-[var(--color-text-tertiary)]">to</span>
-                  <div className="w-20">
-                    <Input
-                      size="sm"
-                      type="number"
-                      placeholder="Max"
-                      value={cs?.ageRange?.max != null ? String(cs.ageRange.max) : ""}
-                      onChange={(e) => setAgeMax(e.target.value)}
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-          </td>
-        </tr>
-      )}
-    </>
+    <tr
+      className={`border-b border-[var(--color-border)] transition-colors ${enabled ? "bg-[var(--color-success-surface-bg)]" : ""}`}
+    >
+      <td className="w-10 px-3 py-2">
+        <Checkbox checked={enabled} onCheckedChange={onToggle} />
+      </td>
+      <td className="w-52 px-3 py-2">
+        <span className="flex items-center gap-2">
+          <span className="text-base leading-none">{countryFlag(code)}</span>
+          <span className="truncate text-md text-[var(--color-text)]">{name}</span>
+          <span className="shrink-0 text-xs text-[var(--color-text-tertiary)]">{code}</span>
+        </span>
+      </td>
+      <td className="px-3 py-2">
+        <IdTypeBadges
+          availableTypes={availableTypes}
+          activeTypes={activeTypes}
+          onChange={(types) => onUpdateSettings({ ...cs, allowedIdTypes: types })}
+        />
+      </td>
+      <td className="w-20 px-3 py-2">
+        <Input
+          size="sm"
+          type="number"
+          placeholder="—"
+          value={cs?.ageRange?.min != null ? String(cs.ageRange.min) : ""}
+          onChange={(e) => setAgeMin(e.target.value)}
+        />
+      </td>
+      <td className="w-20 px-3 py-2">
+        <Input
+          size="sm"
+          type="number"
+          placeholder="—"
+          value={cs?.ageRange?.max != null ? String(cs.ageRange.max) : ""}
+          onChange={(e) => setAgeMax(e.target.value)}
+        />
+      </td>
+      <td className="w-36 px-3 py-2 text-right">
+        <span className="text-sm text-[var(--color-text-secondary)]">{region ?? "—"}</span>
+      </td>
+    </tr>
   );
 }
 

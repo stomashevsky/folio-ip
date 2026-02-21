@@ -1,38 +1,32 @@
 "use client";
 
-import { Suspense, useState, useMemo, useCallback } from "react";
-import { useTabParam } from "@/lib/hooks/useTabParam";
+import { Suspense, useCallback, useMemo, useState } from "react";
 import { DateTime } from "luxon";
-import { TopBar, TOPBAR_CONTROL_SIZE, TOPBAR_TOOLBAR_PILL, TOPBAR_ACTION_PILL } from "@/components/layout/TopBar";
-import { ChartCard, MetricCard, SavedViewsControl, SectionHeading } from "@/components/shared";
-import { StackedTypeBarChart } from "@/components/charts/StackedTypeBarChart";
-import { TypeRatesLineChart } from "@/components/charts/TypeRatesLineChart";
-import { VolumeComparisonTable } from "./components/VolumeComparisonTable";
-import { ChecksComparisonTable } from "./components/ChecksComparisonTable";
+import { TopBar, TOPBAR_ACTION_PILL, TOPBAR_CONTROL_SIZE, TOPBAR_TOOLBAR_PILL } from "@/components/layout/TopBar";
+import { SavedViewsControl } from "@/components/shared";
+import { VerificationTypeSection } from "./components/VerificationTypeSection";
 import {
   VERIFICATION_TYPE_ANALYTICS_CONFIG,
-  generateStackedVolumeTimeSeries,
-  generateMultiTypeRateTimeSeries,
-  deriveVerificationTypeRows,
-  deriveVerificationTypeCheckRows,
-  deriveVerificationTypeAggregateHighlights,
-  deriveVerificationTypeCheckAggregateHighlights,
+  deriveVerificationTypeCheckHighlights,
+  deriveVerificationTypeHighlights,
+  generateVerificationTypeRateTimeSeries,
+  generateVerificationTypeTimeSeries,
 } from "@/lib/data";
-import type { TypedTimeSeriesPoint } from "@/lib/data";
-import { aggregateTypedVolume, aggregateTypedRates } from "@/lib/utils/analytics";
+import { aggregateVerificationRates, aggregateVolume } from "@/lib/utils/analytics";
 import { DASHBOARD_DATE_SHORTCUTS, type DateRange } from "@/lib/constants/date-shortcuts";
 import type { AnalyticsInterval } from "@/lib/types";
 import {
-  VERIFICATION_TYPE_OPTIONS,
-  INQUIRY_TEMPLATE_OPTIONS,
-  CHECK_REQUIREMENT_OPTIONS,
   ANALYTICS_INTERVAL_OPTIONS,
+  CHECK_REQUIREMENT_OPTIONS,
+  INQUIRY_TEMPLATE_OPTIONS,
+  VERIFICATION_TYPE_OPTIONS,
 } from "@/lib/constants/filter-options";
-import { SegmentedControl } from "@plexui/ui/components/SegmentedControl";
-import { Select } from "@plexui/ui/components/Select";
+import { useTabParam } from "@/lib/hooks/useTabParam";
 import { Button } from "@plexui/ui/components/Button";
 import { DateRangePicker } from "@plexui/ui/components/DateRangePicker";
 import { Download, InfoCircle } from "@plexui/ui/components/Icon";
+import { SegmentedControl } from "@plexui/ui/components/SegmentedControl";
+import { Select } from "@plexui/ui/components/Select";
 import { Switch } from "@plexui/ui/components/Switch";
 import { Tooltip } from "@plexui/ui/components/Tooltip";
 
@@ -40,11 +34,15 @@ const tabs = ["Volume", "Checks"] as const;
 type Tab = (typeof tabs)[number];
 
 const ALL_TYPE_KEYS = Object.keys(VERIFICATION_TYPE_ANALYTICS_CONFIG);
-const VERIFICATION_LABEL_MAP = Object.fromEntries(
-  Object.entries(VERIFICATION_TYPE_ANALYTICS_CONFIG).map(([k, v]) => [k, v.label]),
-);
-
 const defaultRange: DateRange = DASHBOARD_DATE_SHORTCUTS[1].getDateRange();
+
+interface VerificationTypeSectionData {
+  typeKey: string;
+  typeLabel: string;
+  highlights: ReturnType<typeof deriveVerificationTypeHighlights>;
+  volumeData: ReturnType<typeof aggregateVolume>;
+  rateData: ReturnType<typeof aggregateVerificationRates>;
+}
 
 export default function VerificationsAnalyticsPage() {
   return (
@@ -64,7 +62,9 @@ function VerificationsAnalyticsContent() {
   const [checkRequirementFilter, setCheckRequirementFilter] = useState("");
   const [groupByInquiries, setGroupByInquiries] = useState(true);
 
-  const handleRangeChange = useCallback((next: DateRange | null) => { setDateRange(next); }, []);
+  const handleRangeChange = useCallback((next: DateRange | null) => {
+    setDateRange(next);
+  }, []);
 
   function clearAllFilters() {
     setTypeFilter([]);
@@ -109,90 +109,85 @@ function VerificationsAnalyticsContent() {
     return scale;
   }, [filterScale, checkRequirementFilter]);
 
-  const volumeHighlights = useMemo(() => {
+  const volumeSections = useMemo<VerificationTypeSectionData[]>(() => {
     if (activeTab !== "Volume") return [];
-    const raw = deriveVerificationTypeAggregateHighlights(days, activeTypeKeys);
-    if (filterScale === 1) return raw;
-    return raw.map((m) => {
-      if (m.label === "Total Verifications") {
-        const num = Number(m.value.replace(/,/g, ""));
-        return { ...m, value: Math.round(num * filterScale).toLocaleString() };
-      }
-      return m;
+
+    return activeTypeKeys.map((typeKey) => {
+      const typeLabel = VERIFICATION_TYPE_ANALYTICS_CONFIG[typeKey]?.label ?? typeKey;
+
+      const highlights = deriveVerificationTypeHighlights(days, typeKey).map((metric) => {
+        if (metric.label !== "Created" || filterScale === 1) return metric;
+        const count = Number(String(metric.value).replace(/,/g, ""));
+        return { ...metric, value: Math.round(count * filterScale).toLocaleString() };
+      });
+
+      const volumeData = aggregateVolume(generateVerificationTypeTimeSeries(days, typeKey), interval).map((point) => ({
+        ...point,
+        value: filterScale === 1 ? point.value : Math.round(point.value * filterScale),
+      }));
+
+      const rateData = aggregateVerificationRates(generateVerificationTypeRateTimeSeries(days, typeKey), interval);
+
+      return {
+        typeKey,
+        typeLabel,
+        highlights,
+        volumeData,
+        rateData,
+      };
     });
-  }, [activeTab, days, activeTypeKeys, filterScale]);
+  }, [activeTab, activeTypeKeys, days, interval, filterScale]);
 
-  const volumeTableRows = useMemo(() => {
-    if (activeTab !== "Volume") return [];
-    const raw = deriveVerificationTypeRows(days, activeTypeKeys);
-    if (filterScale === 1) return raw;
-    return raw.map((r) => ({ ...r, created: Math.round(r.created * filterScale) }));
-  }, [activeTab, days, activeTypeKeys, filterScale]);
-
-  const volumeChartData = useMemo(() => {
-    if (activeTab !== "Volume") return [];
-    const raw = generateStackedVolumeTimeSeries(days, activeTypeKeys);
-    const aggregated = aggregateTypedVolume(raw, interval, activeTypeKeys);
-    if (filterScale === 1) return aggregated;
-    return aggregated.map((point) => {
-      const scaled: TypedTimeSeriesPoint = { date: point.date };
-      for (const key of activeTypeKeys) {
-        scaled[key] = Math.round((point[key] as number) * filterScale);
-      }
-      return scaled;
-    });
-  }, [activeTab, days, activeTypeKeys, interval, filterScale]);
-
-  const checkHighlights = useMemo(() => {
+  const checkSections = useMemo<VerificationTypeSectionData[]>(() => {
     if (activeTab !== "Checks") return [];
-    const raw = deriveVerificationTypeCheckAggregateHighlights(days, activeTypeKeys);
-    if (checkFilterScale === 1) return raw;
-    const rateShift = (1 - checkFilterScale) * 8;
-    return raw.map((m) => {
-      if (m.label === "Avg Pass Rate") {
-        const num = parseFloat(m.value);
-        return { ...m, value: `${Math.round((num + rateShift) * 10) / 10}%` };
-      }
-      if (m.label === "Avg Fail Rate") {
-        const num = parseFloat(m.value);
-        return { ...m, value: `${Math.max(0.1, Math.round((num - rateShift * 0.6) * 10) / 10)}%` };
-      }
-      if (m.label === "Avg Processing") {
-        const num = parseInt(m.value, 10);
-        const scaled = Math.max(3, Math.round(num * (0.6 + checkFilterScale * 0.4)));
-        return { ...m, value: `${scaled}s` };
-      }
-      return m;
-    });
-  }, [activeTab, days, activeTypeKeys, checkFilterScale]);
 
-  const checkTableRows = useMemo(() => {
-    if (activeTab !== "Checks") return [];
-    const raw = deriveVerificationTypeCheckRows(days, activeTypeKeys);
-    if (checkFilterScale === 1) return raw;
     const rateShift = (1 - checkFilterScale) * 8;
-    return raw.map((r) => ({
-      ...r,
-      passRate: Math.round(Math.min(99.9, r.passRate + rateShift) * 10) / 10,
-      failRate: Math.max(0.1, Math.round((r.failRate - rateShift * 0.6) * 10) / 10),
-      avgProcessing: Math.max(3, Math.round(r.avgProcessing * (0.6 + checkFilterScale * 0.4))),
-    }));
-  }, [activeTab, days, activeTypeKeys, checkFilterScale]);
+    return activeTypeKeys.map((typeKey) => {
+      const typeLabel = VERIFICATION_TYPE_ANALYTICS_CONFIG[typeKey]?.label ?? typeKey;
 
-  const checkChartData = useMemo(() => {
-    if (activeTab !== "Checks") return [];
-    const raw = generateMultiTypeRateTimeSeries(days, activeTypeKeys);
-    const aggregated = aggregateTypedRates(raw, interval, activeTypeKeys);
-    if (checkFilterScale === 1) return aggregated;
-    const rateShift = (1 - checkFilterScale) * 8;
-    return aggregated.map((point) => {
-      const scaled: TypedTimeSeriesPoint = { date: point.date };
-      for (const key of activeTypeKeys) {
-        scaled[key] = Math.min(100, Math.round(((point[key] as number) + rateShift) * 10) / 10);
-      }
-      return scaled;
+      const highlights = deriveVerificationTypeCheckHighlights(days, typeKey).map((metric) => {
+        if (checkFilterScale === 1) return metric;
+
+        if (metric.label === "Pass Rate") {
+          const value = parseFloat(String(metric.value));
+          return { ...metric, value: `${Math.min(99.9, Math.round((value + rateShift) * 10) / 10)}%` };
+        }
+
+        if (metric.label === "Fail Rate") {
+          const value = parseFloat(String(metric.value));
+          return { ...metric, value: `${Math.max(0.1, Math.round((value - rateShift * 0.6) * 10) / 10)}%` };
+        }
+
+        if (metric.label === "Avg Processing") {
+          const value = parseInt(String(metric.value), 10);
+          const scaled = Math.max(3, Math.round(value * (0.6 + checkFilterScale * 0.4)));
+          return { ...metric, value: `${scaled}s` };
+        }
+
+        return metric;
+      });
+
+      const volumeData = aggregateVolume(generateVerificationTypeTimeSeries(days, typeKey), interval).map((point) => ({
+        ...point,
+        value: checkFilterScale === 1 ? point.value : Math.round(point.value * checkFilterScale),
+      }));
+
+      const rateData = aggregateVerificationRates(generateVerificationTypeRateTimeSeries(days, typeKey), interval).map((point) => ({
+        ...point,
+        passRate: checkFilterScale === 1
+          ? point.passRate
+          : Math.min(100, Math.round((point.passRate + rateShift) * 10) / 10),
+      }));
+
+      return {
+        typeKey,
+        typeLabel,
+        highlights,
+        volumeData,
+        rateData,
+      };
     });
-  }, [activeTab, days, activeTypeKeys, interval, checkFilterScale]);
+  }, [activeTab, activeTypeKeys, days, interval, checkFilterScale]);
 
   return (
     <div className="flex min-h-full flex-col">
@@ -225,7 +220,7 @@ function VerificationsAnalyticsContent() {
           <SegmentedControl
             aria-label="Analytics views"
             value={activeTab}
-            onChange={(v) => setActiveTab(v as Tab)}
+            onChange={(value) => setActiveTab(value as Tab)}
             size={TOPBAR_CONTROL_SIZE}
             pill={TOPBAR_TOOLBAR_PILL}
           >
@@ -234,12 +229,14 @@ function VerificationsAnalyticsContent() {
           </SegmentedControl>
         }
       />
+
       <div className="px-4 pb-6 pt-6 md:px-6">
-        <p className="text-sm -mt-1 mb-5 text-[var(--color-text-tertiary)]">
+        <p className="-mt-1 mb-5 text-sm text-[var(--color-text-tertiary)]">
           {activeTab === "Volume"
             ? "Creation volume, processing throughput, and pass rates by verification type."
             : "Pass/fail rates, check outcomes, and average processing times by verification type."}
         </p>
+
         {activeTab === "Volume" && (
           <>
             <div className="mb-6 flex flex-wrap items-center gap-3">
@@ -255,7 +252,7 @@ function VerificationsAnalyticsContent() {
                 <Select
                   options={VERIFICATION_TYPE_OPTIONS}
                   value={typeFilter}
-                  onChange={(opts) => setTypeFilter(opts.map((o) => o.value))}
+                  onChange={(options) => setTypeFilter(options.map((option) => option.value))}
                   multiple
                   clearable
                   placeholder="All types"
@@ -268,7 +265,7 @@ function VerificationsAnalyticsContent() {
                 <Select
                   options={INQUIRY_TEMPLATE_OPTIONS}
                   value={templateFilter}
-                  onChange={(opt) => setTemplateFilter(opt?.value ?? "")}
+                  onChange={(option) => setTemplateFilter(option?.value ?? "")}
                   clearable
                   placeholder="All templates"
                   size="sm"
@@ -277,10 +274,7 @@ function VerificationsAnalyticsContent() {
                 />
               </div>
               <div className="flex items-center gap-2">
-                <Switch
-                  checked={groupByInquiries}
-                  onCheckedChange={setGroupByInquiries}
-                />
+                <Switch checked={groupByInquiries} onCheckedChange={setGroupByInquiries} />
                 <span className="text-xs text-[var(--color-text-secondary)]">Group by Inquiries</span>
                 <Tooltip content="Dedupes verifications associated with the same inquiry.">
                   <InfoCircle className="h-3.5 w-3.5 text-[var(--color-text-tertiary)]" />
@@ -288,36 +282,13 @@ function VerificationsAnalyticsContent() {
               </div>
             </div>
 
-            <div>
-              <SectionHeading>Highlights</SectionHeading>
-              <div className="grid grid-cols-3 gap-3">
-                {volumeHighlights.map((metric) => (
-                  <MetricCard
-                    key={metric.label}
-                    label={metric.label}
-                    value={metric.value}
-                    description={metric.description}
-                    tooltip={metric.tooltip}
-                    trend={metric.trend != null ? { value: metric.trend } : undefined}
-                    invertTrend={metric.invertTrend}
-                    variant="compact"
-                  />
-                ))}
-              </div>
-            </div>
-
-            <div className="mt-6">
-              <SectionHeading>By Verification Type</SectionHeading>
-              <VolumeComparisonTable rows={volumeTableRows} typeKeys={activeTypeKeys} />
-            </div>
-
-            <div className="mt-6 flex items-center">
+            <div className="mb-6 flex items-center">
               <div className="w-[120px]">
                 <Select
                   options={ANALYTICS_INTERVAL_OPTIONS}
                   value={interval}
-                  onChange={(opt) => {
-                    if (opt) setInterval(opt.value as AnalyticsInterval);
+                  onChange={(option) => {
+                    if (option) setInterval(option.value as AnalyticsInterval);
                   }}
                   size="sm"
                   pill
@@ -327,10 +298,17 @@ function VerificationsAnalyticsContent() {
               </div>
             </div>
 
-            <div className="mt-3">
-              <ChartCard title="Volume by Type" description="Stacked verification volume over time">
-                <StackedTypeBarChart data={volumeChartData} typeKeys={activeTypeKeys} labelMap={VERIFICATION_LABEL_MAP} />
-              </ChartCard>
+            <div className="space-y-8">
+              {volumeSections.map((section) => (
+                <VerificationTypeSection
+                  key={section.typeKey}
+                  typeKey={section.typeKey}
+                  typeLabel={section.typeLabel}
+                  highlights={section.highlights}
+                  volumeData={section.volumeData}
+                  rateData={section.rateData}
+                />
+              ))}
             </div>
           </>
         )}
@@ -350,7 +328,7 @@ function VerificationsAnalyticsContent() {
                 <Select
                   options={VERIFICATION_TYPE_OPTIONS}
                   value={typeFilter}
-                  onChange={(opts) => setTypeFilter(opts.map((o) => o.value))}
+                  onChange={(options) => setTypeFilter(options.map((option) => option.value))}
                   multiple
                   clearable
                   placeholder="All types"
@@ -363,7 +341,7 @@ function VerificationsAnalyticsContent() {
                 <Select
                   options={INQUIRY_TEMPLATE_OPTIONS}
                   value={templateFilter}
-                  onChange={(opt) => setTemplateFilter(opt?.value ?? "")}
+                  onChange={(option) => setTemplateFilter(option?.value ?? "")}
                   clearable
                   placeholder="All templates"
                   size="sm"
@@ -375,7 +353,7 @@ function VerificationsAnalyticsContent() {
                 <Select
                   options={CHECK_REQUIREMENT_OPTIONS}
                   value={checkRequirementFilter}
-                  onChange={(opt) => setCheckRequirementFilter(opt?.value ?? "")}
+                  onChange={(option) => setCheckRequirementFilter(option?.value ?? "")}
                   clearable
                   placeholder="All requirements"
                   size="sm"
@@ -384,10 +362,7 @@ function VerificationsAnalyticsContent() {
                 />
               </div>
               <div className="flex items-center gap-2">
-                <Switch
-                  checked={groupByInquiries}
-                  onCheckedChange={setGroupByInquiries}
-                />
+                <Switch checked={groupByInquiries} onCheckedChange={setGroupByInquiries} />
                 <span className="text-xs text-[var(--color-text-secondary)]">Group by Inquiries</span>
                 <Tooltip content="Dedupes verifications associated with the same inquiry.">
                   <InfoCircle className="h-3.5 w-3.5 text-[var(--color-text-tertiary)]" />
@@ -395,36 +370,13 @@ function VerificationsAnalyticsContent() {
               </div>
             </div>
 
-            <div>
-              <SectionHeading>Check Performance</SectionHeading>
-              <div className="grid grid-cols-3 gap-3">
-                {checkHighlights.map((metric) => (
-                  <MetricCard
-                    key={metric.label}
-                    label={metric.label}
-                    value={metric.value}
-                    description={metric.description}
-                    tooltip={metric.tooltip}
-                    trend={metric.trend != null ? { value: metric.trend } : undefined}
-                    invertTrend={metric.invertTrend}
-                    variant="compact"
-                  />
-                ))}
-              </div>
-            </div>
-
-            <div className="mt-6">
-              <SectionHeading>By Verification Type</SectionHeading>
-              <ChecksComparisonTable rows={checkTableRows} typeKeys={activeTypeKeys} />
-            </div>
-
-            <div className="mt-6 flex items-center">
+            <div className="mb-6 flex items-center">
               <div className="w-[120px]">
                 <Select
                   options={ANALYTICS_INTERVAL_OPTIONS}
                   value={interval}
-                  onChange={(opt) => {
-                    if (opt) setInterval(opt.value as AnalyticsInterval);
+                  onChange={(option) => {
+                    if (option) setInterval(option.value as AnalyticsInterval);
                   }}
                   size="sm"
                   pill
@@ -434,10 +386,17 @@ function VerificationsAnalyticsContent() {
               </div>
             </div>
 
-            <div className="mt-3">
-              <ChartCard title="Pass Rates by Type" description="Pass rate comparison over time">
-                <TypeRatesLineChart data={checkChartData} typeKeys={activeTypeKeys} labelMap={VERIFICATION_LABEL_MAP} />
-              </ChartCard>
+            <div className="space-y-8">
+              {checkSections.map((section) => (
+                <VerificationTypeSection
+                  key={section.typeKey}
+                  typeKey={section.typeKey}
+                  typeLabel={section.typeLabel}
+                  highlights={section.highlights}
+                  volumeData={section.volumeData}
+                  rateData={section.rateData}
+                />
+              ))}
             </div>
           </>
         )}

@@ -179,12 +179,98 @@ export interface InquiryTemplate {
 
 export type CheckLifecycle = "ga" | "beta" | "sunset";
 
+// ─── Check Configuration Types ───
+
+export type CheckConfigType =
+  | "comparison"
+  | "age_range"
+  | "expiration"
+  | "barcode"
+  | "country"
+  | "id_type"
+  | "repeat"
+  | "extracted_properties";
+
+export type ComparisonMethod =
+  | "string_similarity"
+  | "string_difference"
+  | "nickname"
+  | "substring"
+  | "tokenization"
+  | "date_similarity";
+
+export type NormalizationMethodType =
+  | "remove_prefixes"
+  | "remove_suffixes"
+  | "remove_special_characters"
+  | "fold_characters";
+
+export type MatchLevel = "full" | "partial" | "none";
+
+export type ComparisonAttribute =
+  | "name_first"
+  | "name_last"
+  | "name_middle"
+  | "birthdate"
+  | "address_street"
+  | "address_city"
+  | "address_subdivision"
+  | "address_postal_code"
+  | "identification_number";
+
+export interface NormalizationStep {
+  step: "apply" | "then";
+  method: NormalizationMethodType;
+}
+
+export interface MatchCondition {
+  method: ComparisonMethod;
+  matchLevel: MatchLevel;
+  threshold?: number;
+}
+
+export interface AttributeMatchRequirement {
+  attribute: ComparisonAttribute;
+  normalization: NormalizationStep[];
+  comparison:
+    | { type: "simple"; matchLevel: MatchLevel }
+    | { type: "complex"; conditions: MatchCondition[] };
+}
+
+export type ExtractedProperty =
+  | "name_first"
+  | "name_last"
+  | "name_middle"
+  | "birthdate"
+  | "address_street"
+  | "address_city"
+  | "address_subdivision"
+  | "address_postal_code"
+  | "identification_number"
+  | "document_number"
+  | "issuing_country"
+  | "expiration_date"
+  | "issue_date"
+  | "nationality";
+
+export interface CheckSubConfig {
+  ageRange?: { min?: number; max?: number };
+  gracePeriodDays?: number;
+  requireSuccessfulExtraction?: boolean;
+  mapToSovereignCountry?: boolean;
+  scope?: "same_account" | "all_accounts";
+  matchRequirements?: AttributeMatchRequirement[];
+  requiredAttributes?: ExtractedProperty[];
+  passWhenPropertyMissing?: boolean;
+}
+
 export interface VerificationCheckConfig {
   name: string;
   category: CheckCategory;
   required: boolean;
   enabled: boolean;
   lifecycle?: CheckLifecycle;
+  subConfig?: CheckSubConfig;
 }
 
 export interface VerificationTemplate {

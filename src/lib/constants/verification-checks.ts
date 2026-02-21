@@ -1,4 +1,4 @@
-import type { CheckCategory, CheckLifecycle, VerificationType } from "@/lib/types";
+import type { CheckCategory, CheckConfigType, CheckLifecycle, VerificationType } from "@/lib/types";
 
 export interface AvailableCheck {
   name: string;
@@ -7,26 +7,27 @@ export interface AvailableCheck {
   defaultEnabled: boolean;
   lifecycle?: CheckLifecycle;
   configurable?: boolean;
+  configType?: CheckConfigType;
 }
 
 export const AVAILABLE_CHECKS: Record<VerificationType, AvailableCheck[]> = {
   government_id: [
-    { name: "Account comparison", category: "validity", defaultRequired: false, defaultEnabled: true, configurable: true },
-    { name: "Age comparison", category: "validity", defaultRequired: false, defaultEnabled: false, configurable: true },
-    { name: "Allowed country", category: "validity", defaultRequired: true, defaultEnabled: true, configurable: true },
-    { name: "Allowed ID type", category: "validity", defaultRequired: true, defaultEnabled: true, configurable: true },
-    { name: "Attribute comparison", category: "validity", defaultRequired: false, defaultEnabled: true, configurable: true },
-    { name: "Barcode", category: "validity", defaultRequired: false, defaultEnabled: true },
+    { name: "Account comparison", category: "validity", defaultRequired: false, defaultEnabled: true, configurable: true, configType: "comparison" },
+    { name: "Age comparison", category: "validity", defaultRequired: false, defaultEnabled: false, configurable: true, configType: "age_range" },
+    { name: "Allowed country", category: "validity", defaultRequired: true, defaultEnabled: true, configurable: true, configType: "country" },
+    { name: "Allowed ID type", category: "validity", defaultRequired: true, defaultEnabled: true, configurable: true, configType: "id_type" },
+    { name: "Attribute comparison", category: "validity", defaultRequired: false, defaultEnabled: true, configurable: true, configType: "comparison" },
+    { name: "Barcode", category: "validity", defaultRequired: false, defaultEnabled: true, configurable: true, configType: "barcode" },
     { name: "Barcode inconsistency", category: "fraud", defaultRequired: false, defaultEnabled: true },
     { name: "Blur", category: "validity", defaultRequired: false, defaultEnabled: false, lifecycle: "beta" },
     { name: "Color", category: "validity", defaultRequired: false, defaultEnabled: true },
     { name: "Compromised submission", category: "fraud", defaultRequired: true, defaultEnabled: true },
     { name: "Damaged detection", category: "validity", defaultRequired: false, defaultEnabled: false, lifecycle: "beta" },
     { name: "Double side", category: "validity", defaultRequired: false, defaultEnabled: true },
-    { name: "Electronic replica", category: "fraud", defaultRequired: true, defaultEnabled: true },
-    { name: "Expiration", category: "validity", defaultRequired: true, defaultEnabled: true },
-    { name: "Extracted properties", category: "validity", defaultRequired: false, defaultEnabled: true },
-    { name: "Extraction inconsistency", category: "fraud", defaultRequired: false, defaultEnabled: true },
+    { name: "Electronic replica", category: "fraud", defaultRequired: true, defaultEnabled: true, configurable: true, configType: "comparison" },
+    { name: "Expiration", category: "validity", defaultRequired: true, defaultEnabled: true, configurable: true, configType: "expiration" },
+    { name: "Extracted properties", category: "validity", defaultRequired: false, defaultEnabled: true, configurable: true, configType: "extracted_properties" },
+    { name: "Extraction inconsistency", category: "fraud", defaultRequired: false, defaultEnabled: true, configurable: true, configType: "comparison" },
     { name: "Fabrication", category: "fraud", defaultRequired: true, defaultEnabled: true },
     { name: "Glare", category: "validity", defaultRequired: false, defaultEnabled: false, lifecycle: "beta" },
     { name: "Government ID", category: "validity", defaultRequired: true, defaultEnabled: true },
@@ -34,20 +35,20 @@ export const AVAILABLE_CHECKS: Record<VerificationType, AvailableCheck[]> = {
     { name: "ID image tampering", category: "fraud", defaultRequired: true, defaultEnabled: true },
     { name: "ID number format inconsistency", category: "fraud", defaultRequired: false, defaultEnabled: true },
     { name: "ID physical tampering", category: "fraud", defaultRequired: false, defaultEnabled: false, lifecycle: "beta" },
-    { name: "ID-to-Selfie comparison", category: "biometrics", defaultRequired: false, defaultEnabled: false, configurable: true },
-    { name: "Inconsistent repeat", category: "fraud", defaultRequired: false, defaultEnabled: true },
-    { name: "Inquiry comparison", category: "validity", defaultRequired: false, defaultEnabled: false, configurable: true },
-    { name: "MRZ detected", category: "validity", defaultRequired: false, defaultEnabled: true },
+    { name: "ID-to-Selfie comparison", category: "biometrics", defaultRequired: false, defaultEnabled: false, configurable: true, configType: "comparison" },
+    { name: "Inconsistent repeat", category: "fraud", defaultRequired: false, defaultEnabled: true, configurable: true, configType: "repeat" },
+    { name: "Inquiry comparison", category: "validity", defaultRequired: false, defaultEnabled: false, configurable: true, configType: "comparison" },
+    { name: "MRZ detected", category: "validity", defaultRequired: false, defaultEnabled: true, configurable: true, configType: "comparison" },
     { name: "MRZ inconsistency", category: "fraud", defaultRequired: false, defaultEnabled: true },
     { name: "Paper detection", category: "fraud", defaultRequired: false, defaultEnabled: false, lifecycle: "beta" },
     { name: "PO box", category: "validity", defaultRequired: false, defaultEnabled: false },
     { name: "Portrait", category: "biometrics", defaultRequired: false, defaultEnabled: true },
-    { name: "Portrait age", category: "biometrics", defaultRequired: false, defaultEnabled: false, configurable: true },
+    { name: "Portrait age", category: "biometrics", defaultRequired: false, defaultEnabled: false, configurable: true, configType: "comparison" },
     { name: "Portrait clarity", category: "biometrics", defaultRequired: false, defaultEnabled: true },
     { name: "Processable submission", category: "validity", defaultRequired: true, defaultEnabled: true },
     { name: "Public figure", category: "fraud", defaultRequired: false, defaultEnabled: false },
     { name: "REAL ID", category: "validity", defaultRequired: false, defaultEnabled: false },
-    { name: "Repeat", category: "fraud", defaultRequired: false, defaultEnabled: false, configurable: true },
+    { name: "Repeat", category: "fraud", defaultRequired: false, defaultEnabled: false, configurable: true, configType: "repeat" },
     { name: "Valid dates", category: "validity", defaultRequired: false, defaultEnabled: true },
   ],
   selfie: [
@@ -55,8 +56,8 @@ export const AVAILABLE_CHECKS: Record<VerificationType, AvailableCheck[]> = {
     { name: "Face comparison", category: "biometrics", defaultRequired: true, defaultEnabled: true },
     { name: "Liveness", category: "biometrics", defaultRequired: true, defaultEnabled: true },
     { name: "Pose repeat", category: "biometrics", defaultRequired: false, defaultEnabled: true },
-    { name: "Selfie account comparison", category: "biometrics", defaultRequired: false, defaultEnabled: false, configurable: true },
-    { name: "Selfie attribute comparison", category: "biometrics", defaultRequired: false, defaultEnabled: false, configurable: true },
+    { name: "Selfie account comparison", category: "biometrics", defaultRequired: false, defaultEnabled: false, configurable: true, configType: "comparison" },
+    { name: "Selfie attribute comparison", category: "biometrics", defaultRequired: false, defaultEnabled: false, configurable: true, configType: "comparison" },
     { name: "Selfie duplicate", category: "fraud", defaultRequired: false, defaultEnabled: false },
     { name: "Selfie glasses", category: "biometrics", defaultRequired: false, defaultEnabled: false },
     { name: "Selfie ID comparison", category: "biometrics", defaultRequired: false, defaultEnabled: true },
@@ -64,7 +65,7 @@ export const AVAILABLE_CHECKS: Record<VerificationType, AvailableCheck[]> = {
     { name: "Selfie suspicious", category: "fraud", defaultRequired: false, defaultEnabled: true },
   ],
   database: [
-    { name: "Database inquiry comparison", category: "validity", defaultRequired: false, defaultEnabled: false, configurable: true },
+    { name: "Database inquiry comparison", category: "validity", defaultRequired: false, defaultEnabled: false, configurable: true, configType: "comparison" },
     { name: "Database address match", category: "validity", defaultRequired: false, defaultEnabled: true },
     { name: "Database date of birth match", category: "validity", defaultRequired: true, defaultEnabled: true },
     { name: "Database name match", category: "validity", defaultRequired: true, defaultEnabled: true },
@@ -72,15 +73,15 @@ export const AVAILABLE_CHECKS: Record<VerificationType, AvailableCheck[]> = {
     { name: "Database SSN match", category: "validity", defaultRequired: false, defaultEnabled: false },
   ],
   document: [
-    { name: "Document attribute comparison", category: "validity", defaultRequired: false, defaultEnabled: false, configurable: true },
-    { name: "Document date of birth comparison", category: "validity", defaultRequired: false, defaultEnabled: false, configurable: true },
-    { name: "Document disallowed country", category: "validity", defaultRequired: false, defaultEnabled: false, configurable: true },
+    { name: "Document attribute comparison", category: "validity", defaultRequired: false, defaultEnabled: false, configurable: true, configType: "comparison" },
+    { name: "Document date of birth comparison", category: "validity", defaultRequired: false, defaultEnabled: false, configurable: true, configType: "comparison" },
+    { name: "Document disallowed country", category: "validity", defaultRequired: false, defaultEnabled: false, configurable: true, configType: "country" },
     { name: "Document duplicate detection", category: "fraud", defaultRequired: false, defaultEnabled: true },
     { name: "Document extraction", category: "validity", defaultRequired: true, defaultEnabled: true },
     { name: "Document inconsistency", category: "fraud", defaultRequired: false, defaultEnabled: true },
-    { name: "Document name comparison", category: "validity", defaultRequired: false, defaultEnabled: false, configurable: true },
+    { name: "Document name comparison", category: "validity", defaultRequired: false, defaultEnabled: false, configurable: true, configType: "comparison" },
     { name: "Document tampering", category: "fraud", defaultRequired: true, defaultEnabled: true },
-    { name: "Document type detection", category: "validity", defaultRequired: false, defaultEnabled: true, configurable: true },
+    { name: "Document type detection", category: "validity", defaultRequired: false, defaultEnabled: true, configurable: true, configType: "id_type" },
     { name: "Document valid", category: "validity", defaultRequired: true, defaultEnabled: true },
   ],
   aamva: [

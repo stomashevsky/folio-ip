@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState, useMemo } from "react";
+import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { TopBar, TOPBAR_CONTROL_SIZE, TOPBAR_TOOLBAR_PILL, TOPBAR_ACTION_PILL } from "@/components/layout/TopBar";
 import { TABLE_PAGE_WRAPPER, TABLE_PAGE_CONTENT } from "@/lib/constants/page-layout";
@@ -11,17 +11,14 @@ import { idCell, dateTimeCell, statusCell } from "@/lib/utils/columnHelpers";
 import type { ColumnDef, VisibilityState } from "@tanstack/react-table";
 import type { VerificationTemplate } from "@/lib/types";
 import { Button } from "@plexui/ui/components/Button";
-import { Badge } from "@plexui/ui/components/Badge";
 import { Select } from "@plexui/ui/components/Select";
+import { Menu } from "@plexui/ui/components/Menu";
 import { Plus } from "@plexui/ui/components/Icon";
 import { VERIFICATION_TYPE_LABELS } from "@/lib/constants/verification-type-labels";
 import {
   TEMPLATE_STATUS_OPTIONS,
   VERIFICATION_TYPE_OPTIONS,
 } from "@/lib/constants/filter-options";
-import { VERIFICATION_TEMPLATE_PRESETS } from "@/lib/constants/template-presets";
-import { AVAILABLE_CHECKS } from "@/lib/constants/verification-checks";
-import { TemplatePickerModal } from "@/components/shared";
 import {
   VERIFICATION_TEMPLATE_COLUMN_CONFIG,
   VERIFICATION_TEMPLATE_DEFAULT_VISIBILITY,
@@ -77,51 +74,6 @@ const columns: ColumnDef<VerificationTemplate, unknown>[] = [
   },
 ];
 
-const CATEGORY_COLORS: Record<string, string> = {
-  fraud: "danger",
-  validity: "secondary",
-  biometrics: "info",
-  user_action_required: "warning",
-};
-
-function PresetPreview({ presetId }: { presetId: string }) {
-  const preset = VERIFICATION_TEMPLATE_PRESETS.find((p) => p.id === presetId);
-  if (!preset) return null;
-  const type = preset.defaults.type;
-  const allChecks = AVAILABLE_CHECKS[type] ?? [];
-  const presetCheckNames = new Set(preset.defaults.checks.map((c) => c.name));
-
-  return (
-    <div>
-      <p className="text-sm text-[var(--color-text-secondary)] mb-3">
-        {preset.description}
-      </p>
-      <p className="text-2xs font-medium uppercase tracking-wider text-[var(--color-text-tertiary)] mb-2">
-        {allChecks.length} checks included
-      </p>
-      <div className="flex flex-col gap-1.5">
-        {allChecks.map((check) => (
-          <div key={check.name} className="flex items-center gap-2">
-            <Badge
-              color={CATEGORY_COLORS[check.category] as "danger" | "secondary" | "info" | "warning"}
-              variant="soft"
-              size="sm"
-            >
-              {check.category}
-            </Badge>
-            <span className={`text-sm ${presetCheckNames.has(check.name) ? "text-[var(--color-text)]" : "text-[var(--color-text-tertiary)]"}`}>
-              {check.name}
-            </span>
-            {check.lifecycle === "beta" && (
-              <Badge color="discovery" variant="soft" size="sm">Beta</Badge>
-            )}
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
 export default function VerificationTemplatesPage() {
   const router = useRouter();
   const { verificationTemplates } = useTemplateStore();
@@ -129,14 +81,8 @@ export default function VerificationTemplatesPage() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string[]>([]);
   const [typeFilter, setTypeFilter] = useState<string[]>([]);
-  const [pickerOpen, setPickerOpen] = useState(false);
   const [columnVisibility, setColumnVisibility] =
     useState<VisibilityState>(DEFAULT_VISIBILITY);
-
-  const renderPreview = useCallback(
-    (presetId: string) => <PresetPreview presetId={presetId} />,
-    [],
-  );
 
   const allTemplates = verificationTemplates.getAll();
 
@@ -168,15 +114,25 @@ export default function VerificationTemplatesPage() {
               visibility={columnVisibility}
               onVisibilityChange={setColumnVisibility}
             />
-            <Button
-              color="primary"
-              size={TOPBAR_CONTROL_SIZE}
-              pill={TOPBAR_ACTION_PILL}
-              onClick={() => setPickerOpen(true)}
-            >
-              <Plus />
-              <span className="hidden md:inline">Create Template</span>
-            </Button>
+            <Menu>
+              <Menu.Trigger>
+                <Button
+                  color="primary"
+                  size={TOPBAR_CONTROL_SIZE}
+                  pill={TOPBAR_ACTION_PILL}
+                >
+                  <Plus />
+                  <span className="hidden md:inline">Create Template</span>
+                </Button>
+              </Menu.Trigger>
+              <Menu.Content align="end" sideOffset={4} minWidth={200}>
+                {Object.entries(VERIFICATION_TYPE_LABELS).map(([type, label]) => (
+                  <Menu.Item key={type} onSelect={() => router.push(`/verifications/templates/new?type=${type}`)}>
+                    {label}
+                  </Menu.Item>
+                ))}
+              </Menu.Content>
+            </Menu>
           </div>
         }
         toolbar={
@@ -252,14 +208,6 @@ export default function VerificationTemplatesPage() {
         />
       </div>
 
-      <TemplatePickerModal
-        open={pickerOpen}
-        onOpenChange={setPickerOpen}
-        title="Create verification template"
-        presets={VERIFICATION_TEMPLATE_PRESETS}
-        onSelect={(presetId) => router.push(`/verifications/templates/new?preset=${presetId}`)}
-        renderPreview={renderPreview}
-      />
     </div>
   );
 }

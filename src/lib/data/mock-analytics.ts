@@ -510,6 +510,42 @@ export function generateVerificationTypeRateTimeSeries(days: number, typeKey: st
   });
 }
 
+export function deriveVerificationTypeHighlights(days: number, typeKey: string): HighlightMetric[] {
+  const config = VERIFICATION_TYPE_ANALYTICS_CONFIG[typeKey];
+  if (!config) return [];
+  const seed = typeKeyToSeed(typeKey);
+
+  const created = Math.round(config.baseVolume * days * (0.85 + seededRandom(seed + days * 2) * 0.3));
+  const processedRate = config.baseProcessedRate + (seededRandom(seed + days * 4) - 0.5) * 4;
+  const passRate = config.basePassRate + (seededRandom(seed + days * 6) - 0.5) * 6;
+
+  const t = (s: number, scale: number) => Math.round(((seededRandom(seed + days * s) - 0.4) * scale) * 10) / 10;
+
+  return [
+    { label: "Created", value: created.toLocaleString(), tooltip: `${config.label} verifications created in this period`, trend: t(11, 15) },
+    { label: "Processed Rate", value: `${Math.round(processedRate * 10) / 10}%`, tooltip: `% of ${config.label} verifications processed`, trend: t(13, 5) },
+    { label: "Pass Rate", value: `${Math.round(passRate * 10) / 10}%`, tooltip: `% of ${config.label} verifications that passed`, trend: t(17, 5) },
+  ];
+}
+
+export function deriveVerificationTypeCheckHighlights(days: number, typeKey: string): HighlightMetric[] {
+  const config = VERIFICATION_TYPE_ANALYTICS_CONFIG[typeKey];
+  if (!config) return [];
+  const seed = typeKeyToSeed(typeKey);
+
+  const passRate = config.basePassRate + (seededRandom(seed + days * 6) - 0.5) * 6;
+  const failRate = 100 - passRate - (config.baseProcessedRate - config.basePassRate);
+  const avgProcessing = 8 + Math.round(seededRandom(seed + days * 14) * 20);
+
+  const t = (s: number, scale: number) => Math.round(((seededRandom(seed + days * s) - 0.4) * scale) * 10) / 10;
+
+  return [
+    { label: "Pass Rate", value: `${Math.round(passRate * 10) / 10}%`, tooltip: `% of ${config.label} checks that passed`, trend: t(19, 5) },
+    { label: "Fail Rate", value: `${Math.round(Math.max(0.5, failRate) * 10) / 10}%`, tooltip: `% of ${config.label} checks that failed`, trend: t(23, 4), invertTrend: true },
+    { label: "Avg Processing", value: `${avgProcessing}s`, tooltip: `Average processing time for ${config.label} checks`, trend: t(29, 8), invertTrend: true },
+  ];
+}
+
 export function generateStackedVolumeTimeSeries(days: number, typeKeys: string[]): TypedTimeSeriesPoint[] {
   const seriesMap = new Map<string, TimeSeriesPoint[]>();
   for (const key of typeKeys) {

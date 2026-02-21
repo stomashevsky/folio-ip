@@ -25,6 +25,8 @@ export {
   VERIFICATION_TYPE_ANALYTICS_CONFIG,
   generateVerificationTypeTimeSeries,
   generateVerificationTypeRateTimeSeries,
+  deriveVerificationTypeHighlights,
+  deriveVerificationTypeCheckHighlights,
   generateStackedVolumeTimeSeries,
   generateMultiTypeRateTimeSeries,
   deriveVerificationTypeRows,
