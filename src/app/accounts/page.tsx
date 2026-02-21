@@ -6,7 +6,7 @@ import { TABLE_PAGE_WRAPPER, TABLE_PAGE_CONTENT } from "@/lib/constants/page-lay
 import { DataTable, TableSearch, SavedViewsControl } from "@/components/shared";
 import { ColumnSettings, type ColumnConfig } from "@/components/shared/ColumnSettings";
 import { mockAccounts } from "@/lib/data";
-import { idCell, dateTimeCell, statusCell } from "@/lib/utils/columnHelpers";
+import { idCell, dateTimeCell, statusCell, tooltipHeader } from "@/lib/utils/columnHelpers";
 import { applyAccountFilters } from "@/lib/utils/filters";
 import { useRouter } from "next/navigation";
 import type { ColumnDef, VisibilityState } from "@tanstack/react-table";
@@ -43,7 +43,7 @@ const columns: ColumnDef<Account, unknown>[] = [
   },
   {
     accessorKey: "id",
-    header: "Account ID",
+    header: tooltipHeader("Account ID", "A unique identifier assigned when the Account is created. Use this ID or the Reference ID to identify a specific Account."),
     size: 220,
     cell: idCell<Account>((r) => r.id),
   },
@@ -77,7 +77,7 @@ const columns: ColumnDef<Account, unknown>[] = [
   },
   {
     accessorKey: "referenceId",
-    header: "Reference ID",
+    header: tooltipHeader("Reference ID", "The unique ID you use to identify a user in your own system."),
     size: 180,
     cell: ({ row }) => (
       <span className="font-mono text-[var(--color-text-secondary)]">

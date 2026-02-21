@@ -241,7 +241,7 @@ export function DataTable<T>({
               table.getRowModel().rows.map((row) => (
                 <tr
                   key={row.id}
-                  className={`h-11 border-t border-[var(--color-border)] transition-colors hover:bg-[var(--color-surface-secondary)] ${
+                  className={`group/row h-11 border-t border-[var(--color-border)] transition-colors hover:bg-[var(--color-surface-secondary)] ${
                     onRowClick ? "cursor-pointer" : ""
                   }`}
                   onClick={() => onRowClick?.(row.original)}

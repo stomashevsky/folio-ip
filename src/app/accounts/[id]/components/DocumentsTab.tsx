@@ -1,8 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
-import { InlineEmpty, DocumentViewer, KeyValueTable, SectionHeading } from "@/components/shared";
+import { InlineEmpty, DocumentViewer, KeyValueTable, SectionHeading, PhotoThumbnail } from "@/components/shared";
 import { COUNTRY_LABEL_MAP } from "@/lib/constants/countries";
 import { DOCUMENT_SECTION_TITLES, ID_CLASS_LABELS } from "@/lib/constants/document-labels";
 import { toTitleCase, formatDateTime } from "@/lib/utils/format";
@@ -65,24 +64,12 @@ export function DocumentsTab({ verifications }: { verifications: Verification[] 
                       <div className="border-b border-[var(--color-border)] px-4 py-4">
                         <div className="flex flex-wrap gap-6">
                           {v.photos.map((photo, i) => (
-                            <button
+                            <PhotoThumbnail
                               key={photo.label + i}
-                              type="button"
-                              aria-label={`View ${photo.label}`}
-                              className="group flex cursor-pointer flex-col gap-1.5 outline-none"
+                              src={photo.url}
+                              label={photo.label}
                               onClick={() => setLightboxIndex(startIdx + i)}
-                            >
-                              <Image
-                                src={photo.url}
-                                alt={photo.label}
-                                width={160}
-                                height={160}
-                                className="h-[160px] w-auto rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] object-contain transition-opacity group-hover:opacity-90"
-                              />
-                              <span className="w-full truncate text-left text-xs text-[var(--color-text-tertiary)]">
-                                {photo.label}
-                              </span>
-                            </button>
+                            />
                           ))}
                         </div>
                       </div>

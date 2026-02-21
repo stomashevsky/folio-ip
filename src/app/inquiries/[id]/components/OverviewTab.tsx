@@ -1,11 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
 import {
   SectionHeading,
   KeyValueTable,
   DocumentViewer,
+  PhotoThumbnail,
 } from "@/components/shared";
 import {
   formatDuration,
@@ -88,24 +88,12 @@ export function OverviewTab({
           )}
            <div className="flex flex-wrap gap-4">
              {viewerItems.map((item, i) => (
-               <button
-                 type="button"
+               <PhotoThumbnail
                  key={item.photo.label + i}
-                 aria-label={`View ${item.photo.label}`}
-                 className="group flex min-w-[100px] cursor-pointer flex-col gap-1.5 outline-none"
+                 src={item.photo.url}
+                 label={item.photo.label}
                  onClick={() => setLightboxIndex(i)}
-               >
-                <Image
-                   src={item.photo.url}
-                   alt={item.photo.label}
-                   width={160}
-                   height={160}
-                   className="h-[160px] w-auto rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] object-contain transition-opacity group-hover:opacity-90"
-                 />
-                <span className="w-full truncate text-center text-xs text-[var(--color-text-tertiary)]">
-                  {item.photo.label}
-                </span>
-              </button>
+               />
             ))}
           </div>
         </div>

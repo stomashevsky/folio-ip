@@ -1,7 +1,6 @@
 "use client";
 
 import { Suspense, useState } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { Alert } from "@plexui/ui/components/Alert";
@@ -20,6 +19,7 @@ import {
   TagEditModal,
   CardHeader,
   DetailPageSidebar,
+  PhotoThumbnail,
 } from "@/components/shared";
 import { mockVerifications, mockInquiries } from "@/lib/data";
 import { formatDateTime, formatDuration, toTitleCase } from "@/lib/utils/format";
@@ -154,28 +154,13 @@ function VerificationDetailContent() {
                 <div className="border-b border-[var(--color-border)] px-4 py-4">
                   <div className="flex flex-wrap gap-6">
                      {verification.photos.map((photo, i) => (
-                       <div key={photo.label + i} className="flex flex-col">
-                         <button
-                           type="button"
-                           aria-label={`View ${photo.label}`}
-                           className="group flex cursor-pointer flex-col gap-1.5 outline-none"
-                           onClick={() => setLightboxIndex(i)}
-                         >
-                          <Image
-                             src={photo.url}
-                             alt={photo.label}
-                             width={160}
-                             height={160}
-                             className="h-[160px] w-auto rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] object-contain transition-opacity group-hover:opacity-90"
-                           />
-                          <span className="w-full truncate text-left text-xs text-[var(--color-text-tertiary)]">
-                            {photo.label}
-                          </span>
-                        </button>
-                        <p className="mt-1 text-xs text-[var(--color-text-tertiary)]">
-                          {photo.captureMethod === "auto" ? "Autocapture" : "Manual"}
-                        </p>
-                      </div>
+                       <PhotoThumbnail
+                         key={photo.label + i}
+                         src={photo.url}
+                         label={photo.label}
+                         subtitle={photo.captureMethod === "auto" ? "Autocapture" : "Manual"}
+                         onClick={() => setLightboxIndex(i)}
+                       />
                     ))}
                   </div>
                 </div>

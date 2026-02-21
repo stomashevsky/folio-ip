@@ -142,6 +142,7 @@ export interface Account {
   email?: string;
   nationality?: string;
   gender?: string;
+  identificationNumbers?: { label: string; value: string }[];
 }
 
 // ─── Templates ───

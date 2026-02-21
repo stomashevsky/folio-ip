@@ -19,6 +19,10 @@ export const mockAccounts: Account[] = [
     email: "alexander.sample@email.com",
     nationality: "United States",
     gender: "Male",
+    identificationNumbers: [
+      { label: "SSN", value: "***-**-0134" },
+      { label: "Driver's License", value: "DL-CA-8827451" },
+    ],
   },
   {
     id: "act_7FgHiJkLmNoPqRsTuVwXyZaBcDeF",
@@ -38,6 +42,10 @@ export const mockAccounts: Account[] = [
     email: "maria.gonzalez@email.com",
     nationality: "Spain",
     gender: "Female",
+    identificationNumbers: [
+      { label: "Citizen ID", value: "50764829-K" },
+      { label: "Passport", value: "AAB456712" },
+    ],
   },
   {
     id: "act_9HiJkLmNoPqRsTuVwXyZaBcDeFgH",
@@ -56,6 +64,10 @@ export const mockAccounts: Account[] = [
     email: "john.williams@email.com",
     nationality: "United Kingdom",
     gender: "Male",
+    identificationNumbers: [
+      { label: "Passport", value: "532891047" },
+      { label: "National Insurance", value: "QQ 12 34 56 C" },
+    ],
   },
   {
     id: "act_2AbCdEfGhIjKlMnOpQrStUvWxYz",
@@ -75,6 +87,10 @@ export const mockAccounts: Account[] = [
     email: "yuki.tanaka@email.com",
     nationality: "Japan",
     gender: "Female",
+    identificationNumbers: [
+      { label: "My Number", value: "1234-5678-9012" },
+      { label: "Residence Card", value: "RC-2024-00847" },
+    ],
   },
   {
     id: "act_4EfGhIjKlMnOpQrStUvWxYzAbCdE",
@@ -93,6 +109,9 @@ export const mockAccounts: Account[] = [
     email: "emma.johnson@email.com",
     nationality: "United States",
     gender: "Female",
+    identificationNumbers: [
+      { label: "SSN", value: "***-**-0199" },
+    ],
   },
   {
     id: "act_6GhIjKlMnOpQrStUvWxYzAbCdEfG",
@@ -111,6 +130,10 @@ export const mockAccounts: Account[] = [
     email: "carlos.martinez@email.com",
     nationality: "Mexico",
     gender: "Male",
+    identificationNumbers: [
+      { label: "CURP", value: "MARC821128HDFRRL09" },
+      { label: "Passport", value: "G40185293" },
+    ],
   },
   {
     id: "act_8IjKlMnOpQrStUvWxYzAbCdEfGhI",

@@ -18,7 +18,8 @@ export function CopyButton({ value, className }: CopyButtonProps) {
   const [copied, setCopied] = useState(false);
   const timerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
-  const handleCopy = () => {
+  const handleCopy = (e: React.MouseEvent) => {
+    e.stopPropagation();
     navigator.clipboard.writeText(value);
     setCopied(true);
     clearTimeout(timerRef.current);

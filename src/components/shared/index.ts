@@ -37,3 +37,4 @@ export { SavedViewsControl } from "./SavedViewsControl";
 export { BulkActionBar } from "./BulkActionBar";
 export { CopilotButton } from "./CopilotPanel";
 export { NotificationDropdown } from "./NotificationDropdown";
+export { PhotoThumbnail } from "./PhotoThumbnail";
