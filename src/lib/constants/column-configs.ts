@@ -180,26 +180,30 @@ export const WORKFLOW_RUN_DEFAULT_VISIBILITY: VisibilityState = {
 // Transaction columns
 
 export const TRANSACTION_COLUMN_CONFIG: ColumnConfig[] = [
-  { id: "accountName", label: "Account" },
   { id: "id", label: "Transaction ID" },
+  { id: "referenceId", label: "Reference ID" },
   { id: "type", label: "Type" },
-  { id: "amount", label: "Amount" },
+  { id: "updatedAt", label: "Updated at (UTC)" },
+  { id: "createdAt", label: "Created at (UTC)" },
   { id: "status", label: "Status" },
+  { id: "accountName", label: "Account" },
+  { id: "amount", label: "Amount" },
   { id: "riskScore", label: "Risk score" },
-  { id: "createdAt", label: "Created at" },
-  { id: "reviewedAt", label: "Reviewed at" },
+  { id: "reviewedAt", label: "Reviewed at (UTC)" },
   { id: "description", label: "Description" },
   { id: "tags", label: "Tags" },
 ];
 
 export const TRANSACTION_DEFAULT_VISIBILITY: VisibilityState = {
-  accountName: true,
   id: true,
+  referenceId: true,
   type: true,
-  amount: true,
-  status: true,
-  riskScore: true,
+  updatedAt: true,
   createdAt: true,
+  status: true,
+  accountName: false,
+  amount: false,
+  riskScore: false,
   reviewedAt: false,
   description: false,
   tags: false,

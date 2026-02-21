@@ -52,7 +52,7 @@ function TransactionAnalyticsContent() {
 
   const riskHighlights = useMemo(() => {
     const hl = deriveTransactionHighlights(days);
-    return hl.filter((h) => h.label === "Flagged Rate" || h.label === "Approval Rate" || h.label === "Total Transactions" || h.label === "Avg Processing");
+    return hl.filter((h) => h.label === "Needs Review Rate" || h.label === "Approval Rate" || h.label === "Total Transactions" || h.label === "Avg Processing");
   }, [days]);
 
   return (
@@ -89,7 +89,7 @@ function TransactionAnalyticsContent() {
               <ChartCard title="Transaction Volume" description="Number of transactions monitored">
                 <SimpleBarChart data={volumeData} />
               </ChartCard>
-              <ChartCard title="Approval & Flagged Rates" description="Percentage trends over time">
+              <ChartCard title="Approval & Review Rates" description="Percentage trends over time">
                 <TransactionRatesChart data={ratesData} />
               </ChartCard>
             </div>
@@ -111,7 +111,7 @@ function TransactionAnalyticsContent() {
               </div>
             </div>
             <div className="mt-3 space-y-4">
-              <ChartCard title="Flagged Rate Trend" description="Transaction flagging rates over time">
+              <ChartCard title="Needs Review Rate Trend" description="Transaction review rates over time">
                 <TransactionRatesChart data={ratesData} />
               </ChartCard>
               <ChartCard title="Transaction Volume by Period" description="Transactions per period">

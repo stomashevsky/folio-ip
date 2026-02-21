@@ -84,12 +84,12 @@ export function TransactionRatesChart({ data }: TransactionRatesChartProps) {
         />
         <Line
           type="monotone"
-          dataKey="flaggedRate"
+          dataKey="needsReviewRate"
           stroke={CHART_COLORS.danger}
           strokeWidth={2}
           dot={false}
           activeDot={{ r: 4 }}
-          name="Flagged Rate"
+          name="Needs Review Rate"
         />
       </LineChart>
     </ResponsiveContainer>

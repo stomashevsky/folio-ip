@@ -62,7 +62,7 @@ function TransactionDetailContent() {
               <Menu.Content align="end" minWidth="auto">
                 <Menu.Item onSelect={() => {}}>Approve</Menu.Item>
                 <Menu.Item onSelect={() => {}}>Decline</Menu.Item>
-                <Menu.Item onSelect={() => {}}>Flag</Menu.Item>
+                <Menu.Item onSelect={() => {}}>Needs review</Menu.Item>
                 <Menu.Separator />
                 <Menu.Item onSelect={() => {}} className="text-[var(--color-text-danger-ghost)]">Delete</Menu.Item>
               </Menu.Content>
@@ -103,6 +103,15 @@ function TransactionDetailContent() {
               <InfoRow label="Transaction ID" copyValue={transaction.id} mono>
                 {transaction.id}
               </InfoRow>
+              {transaction.referenceId ? (
+                <InfoRow label="Reference ID" copyValue={transaction.referenceId} mono>
+                  {transaction.referenceId}
+                </InfoRow>
+              ) : (
+                <InfoRow label="Reference ID">
+                  <span className="text-[var(--color-text-tertiary)]">No reference ID</span>
+                </InfoRow>
+              )}
               <InfoRow label="Account ID" copyValue={transaction.accountId} mono>
                 <Link
                   href={`/accounts/${transaction.accountId}`}
@@ -135,6 +144,9 @@ function TransactionDetailContent() {
               </InfoRow>
               <InfoRow label="Created At">
                 {formatDateTime(transaction.createdAt)} UTC
+              </InfoRow>
+              <InfoRow label="Updated At">
+                {formatDateTime(transaction.updatedAt)} UTC
               </InfoRow>
               {transaction.reviewedAt && (
                 <InfoRow label="Reviewed At">

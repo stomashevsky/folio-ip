@@ -117,10 +117,9 @@ export const WORKFLOW_RUN_STATUS_OPTIONS = [
 
 export const TRANSACTION_STATUS_OPTIONS = [
   { value: "created", label: "Created" },
-  { value: "reviewed", label: "Reviewed" },
+  { value: "needs_review", label: "Needs Review" },
   { value: "approved", label: "Approved" },
   { value: "declined", label: "Declined" },
-  { value: "flagged", label: "Flagged" },
 ];
 
 export const TRANSACTION_TYPE_OPTIONS = [

@@ -18,8 +18,8 @@ function generateEvents(txn: Transaction): ActivityEvent[] {
     { timestamp: new Date(new Date(txn.createdAt).getTime() + 2000).toISOString(), title: "Risk assessment completed", description: `Risk score: ${txn.riskScore}%`, type: txn.riskScore > 70 ? "danger" : txn.riskScore > 40 ? "warning" : "success" },
   ];
 
-  if (txn.riskScore > 50) {
-    events.push({ timestamp: new Date(new Date(txn.createdAt).getTime() + 5000).toISOString(), title: "Flagged for review", description: "Transaction exceeds risk threshold", type: "warning" });
+  if (txn.status === "needs_review" || txn.riskScore > 50) {
+    events.push({ timestamp: new Date(new Date(txn.createdAt).getTime() + 5000).toISOString(), title: "Sent for review", description: "Transaction requires manual review", type: "warning" });
   }
 
   if (txn.reviewedAt) {

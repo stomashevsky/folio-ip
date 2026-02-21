@@ -164,24 +164,24 @@ export function aggregateTransactionRates(
 ): TransactionRatePoint[] {
   if (interval === "daily") return data;
 
-  const buckets = new Map<string, { approvalSum: number; flaggedSum: number; count: number }>();
+  const buckets = new Map<string, { approvalSum: number; needsReviewSum: number; count: number }>();
 
   for (const point of data) {
     const key = bucketKey(point.date, interval);
     const existing = buckets.get(key);
     if (existing) {
       existing.approvalSum += point.approvalRate;
-      existing.flaggedSum += point.flaggedRate;
+      existing.needsReviewSum += point.needsReviewRate;
       existing.count += 1;
     } else {
-      buckets.set(key, { approvalSum: point.approvalRate, flaggedSum: point.flaggedRate, count: 1 });
+      buckets.set(key, { approvalSum: point.approvalRate, needsReviewSum: point.needsReviewRate, count: 1 });
     }
   }
 
   return Array.from(buckets.entries()).map(([date, b]) => ({
     date,
     approvalRate: Math.round((b.approvalSum / b.count) * 10) / 10,
-    flaggedRate: Math.round((b.flaggedSum / b.count) * 10) / 10,
+    needsReviewRate: Math.round((b.needsReviewSum / b.count) * 10) / 10,
   }));
 }
 

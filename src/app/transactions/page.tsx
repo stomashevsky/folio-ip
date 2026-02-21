@@ -38,18 +38,21 @@ const DEFAULT_VISIBILITY: VisibilityState = TRANSACTION_DEFAULT_VISIBILITY;
 
 const columns: ColumnDef<Transaction, unknown>[] = [
   {
-    accessorKey: "accountName",
-    header: "Account",
-    size: 200,
-    cell: ({ row }) => (
-      <span className="font-medium">{row.original.accountName}</span>
-    ),
-  },
-  {
     accessorKey: "id",
     header: "Transaction ID",
     size: 220,
     cell: idCell<Transaction>((r) => r.id),
+  },
+  {
+    accessorKey: "referenceId",
+    header: "Reference ID",
+    size: 220,
+    cell: ({ row }) =>
+      row.original.referenceId ? (
+        <span className="font-mono text-[var(--color-text)]">{row.original.referenceId}</span>
+      ) : (
+        <span className="text-[var(--color-text-tertiary)]">No reference ID</span>
+      ),
   },
   {
     accessorKey: "type",
@@ -59,6 +62,32 @@ const columns: ColumnDef<Transaction, unknown>[] = [
       <span className="text-[var(--color-text-secondary)]">
         {row.original.type.charAt(0).toUpperCase() + row.original.type.slice(1)}
       </span>
+    ),
+  },
+  {
+    accessorKey: "updatedAt",
+    header: "Updated at (UTC)",
+    size: 180,
+    cell: dateTimeCell<Transaction>((r) => r.updatedAt),
+  },
+  {
+    accessorKey: "createdAt",
+    header: "Created at (UTC)",
+    size: 180,
+    cell: dateTimeCell<Transaction>((r) => r.createdAt),
+  },
+  {
+    accessorKey: "status",
+    header: "Status",
+    size: 120,
+    cell: statusCell<Transaction>((r) => r.status),
+  },
+  {
+    accessorKey: "accountName",
+    header: "Account",
+    size: 200,
+    cell: ({ row }) => (
+      <span className="font-medium">{row.original.accountName}</span>
     ),
   },
   {
@@ -75,12 +104,6 @@ const columns: ColumnDef<Transaction, unknown>[] = [
     ),
   },
   {
-    accessorKey: "status",
-    header: "Status",
-    size: 120,
-    cell: statusCell<Transaction>((r) => r.status),
-  },
-  {
     accessorKey: "riskScore",
     header: "Risk score",
     size: 120,
@@ -94,12 +117,6 @@ const columns: ColumnDef<Transaction, unknown>[] = [
             : "var(--color-text-success-solid)";
       return <span style={{ color }}>{score}</span>;
     },
-  },
-  {
-    accessorKey: "createdAt",
-    header: "Created at (UTC)",
-    size: 180,
-    cell: dateTimeCell<Transaction>((r) => r.createdAt),
   },
   {
     accessorKey: "reviewedAt",
@@ -171,6 +188,7 @@ export default function TransactionsPage() {
         const searchLower = search.toLowerCase();
         return (
           txn.id.toLowerCase().includes(searchLower) ||
+          txn.referenceId?.toLowerCase().includes(searchLower) ||
           txn.accountName.toLowerCase().includes(searchLower) ||
           txn.description?.toLowerCase().includes(searchLower) ||
           txn.tags.some((tag) => tag.toLowerCase().includes(searchLower))
@@ -226,7 +244,7 @@ export default function TransactionsPage() {
             <TableSearch
               value={search}
               onChange={setSearch}
-              placeholder="Search transactions..."
+              placeholder="Search by transaction ID, reference ID, or external ID"
             />
 
             {/* ── Status filter ── */}
@@ -308,12 +326,15 @@ export default function TransactionsPage() {
           columnVisibility={columnVisibility}
           onColumnVisibilityChange={setColumnVisibility}
           mobileColumnVisibility={{
-            id: false,
+            referenceId: false,
             type: false,
+            updatedAt: false,
             riskScore: false,
             reviewedAt: false,
             description: false,
             tags: false,
+            amount: false,
+            accountName: false,
           }}
         />
       </div>

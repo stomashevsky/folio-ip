@@ -521,13 +521,13 @@ export function generateTransactionRateTimeSeries(days: number): TransactionRate
     const approvalNoise = (seededRandom(i * 33 + 1900) - 0.5) * 10;
     const approvalRate = Math.max(60, Math.min(100, 88 + approvalNoise));
 
-    const flaggedNoise = (seededRandom(i * 39 + 2100) - 0.5) * 6;
-    const flaggedRate = Math.max(1, Math.min(25, 8 + flaggedNoise));
+    const needsReviewNoise = (seededRandom(i * 39 + 2100) - 0.5) * 6;
+    const needsReviewRate = Math.max(1, Math.min(25, 8 + needsReviewNoise));
 
     return {
       date: date.toISOString().split("T")[0],
       approvalRate: Math.round(approvalRate * 10) / 10,
-      flaggedRate: Math.round(flaggedRate * 10) / 10,
+      needsReviewRate: Math.round(needsReviewRate * 10) / 10,
     };
   });
 }
@@ -538,7 +538,7 @@ export function deriveTransactionHighlights(days: number): HighlightMetric[] {
   const totalVolume = Math.round(total * (120 + seededRandom(days * 6) * 80));
   const avgAmount = total > 0 ? Math.round(totalVolume / total) : 0;
   const approvalRate = 85 + seededRandom(days * 8) * 10;
-  const flaggedRate = 5 + seededRandom(days * 10) * 8;
+  const needsReviewRate = 5 + seededRandom(days * 10) * 8;
   const avgProcessing = 1.2 + seededRandom(days * 14) * 2.5;
 
   return [
@@ -546,7 +546,7 @@ export function deriveTransactionHighlights(days: number): HighlightMetric[] {
     { label: "Total Volume", value: `$${(totalVolume / 1000).toFixed(0)}k`, tooltip: "Combined dollar amount of all transactions" },
     { label: "Avg Amount", value: `$${avgAmount.toLocaleString()}`, tooltip: "Average transaction amount" },
     { label: "Approval Rate", value: `${Math.round(approvalRate * 10) / 10}%`, tooltip: "% of transactions approved" },
-    { label: "Flagged Rate", value: `${Math.round(flaggedRate * 10) / 10}%`, tooltip: "% of transactions flagged for review" },
+    { label: "Needs Review Rate", value: `${Math.round(needsReviewRate * 10) / 10}%`, tooltip: "% of transactions sent for review" },
     { label: "Avg Processing", value: `${avgProcessing.toFixed(1)}s`, tooltip: "Average time to process a transaction" },
   ];
 }

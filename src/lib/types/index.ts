@@ -386,11 +386,11 @@ export interface ReportRatePoint {
   readyRate: number; // 0-100
 }
 
-// Transaction rate time series: approval + flagged rates per day
+// Transaction rate time series: approval + needs_review rates per day
 export interface TransactionRatePoint {
   date: string; // ISO 8601 date
   approvalRate: number; // 0-100
-  flaggedRate: number; // 0-100
+  needsReviewRate: number; // 0-100
 }
 
 // Case rate time series: resolution + SLA compliance rates per day
@@ -628,7 +628,7 @@ export interface WorkflowRun {
 
 // ─── Transactions ───
 
-export type TransactionStatus = "created" | "reviewed" | "approved" | "declined" | "flagged";
+export type TransactionStatus = "created" | "needs_review" | "approved" | "declined";
 export type TransactionType = "payment" | "withdrawal" | "transfer" | "deposit" | "refund";
 
 export interface Transaction {
@@ -642,8 +642,10 @@ export interface Transaction {
   description?: string;
   riskScore: number; // 0-100
   createdAt: string;
+  updatedAt: string;
   reviewedAt?: string;
   reviewedBy?: string;
+  referenceId?: string;
   tags: string[];
 }
 
