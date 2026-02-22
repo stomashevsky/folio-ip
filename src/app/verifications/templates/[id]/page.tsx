@@ -39,6 +39,7 @@ import { useTemplateStore } from "@/lib/stores/template-store";
 import { getStatusColor } from "@/lib/utils/format";
 import type {
   AttributeMatchRequirement,
+  CheckCategory,
   CheckConfigType,
   CheckSubConfig,
   ComparisonAttribute,
@@ -499,7 +500,7 @@ function ChecksTab({
         }
         const availCheck = AVAILABLE_CHECKS[type]?.find((a) => a.name === check.name);
         if (typeFilter.length > 0) {
-          const matchesCat = typeFilter.some((t) => t === "biometric" ? availCheck?.requiresBiometric === true : check.categories.includes(t));
+          const matchesCat = typeFilter.some((t) => t === "biometric" ? availCheck?.requiresBiometric === true : check.categories.includes(t as CheckCategory));
           if (!matchesCat) return null;
         }
         const isConfigurable = availCheck?.configurable === true;
