@@ -553,7 +553,7 @@ export const mockVerificationTemplates: VerificationTemplate[] = [
     updatedAt: "2026-01-28T09:45:00.000Z",
     checks: [
       ...GOV_ID_CHECKS,
-      { name: "Account comparison", categories: ["user_action_required"], required: false, enabled: true },
+      { name: "Account comparison", categories: ["user_action_required"], required: false, enabled: true, subConfig: { matchRequirements: [{ attribute: "birthdate", normalization: [], comparison: { type: "complex", conditions: [{ method: "date_similarity", matchLevel: "partial", threshold: 2 }] } }, { attribute: "name_full", normalization: [{ step: "apply", method: "fold_characters" }, { step: "then", method: "remove_special_characters" }, { step: "then", method: "remove_prefixes" }, { step: "then", method: "remove_suffixes" }], comparison: { type: "simple", matchLevel: "full" } }, { attribute: "name_first", normalization: [{ step: "apply", method: "fold_characters" }], comparison: { type: "complex", conditions: [{ method: "string_similarity", matchLevel: "full", threshold: 80 }, { method: "nickname", matchLevel: "full", threshold: 100 }] } }] } },
       { name: "Double side", categories: ["user_action_required"], required: false, enabled: true },
       { name: "Inconsistent repeat", categories: ["fraud"], required: false, enabled: true },
     ],

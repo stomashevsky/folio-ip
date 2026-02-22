@@ -194,16 +194,31 @@ export type CheckConfigType =
 export type ComparisonMethod =
   | "string_similarity"
   | "string_difference"
+  | "string_missing"
   | "nickname"
   | "substring"
   | "tokenization"
-  | "date_similarity";
+  | "date_similarity"
+  | "date_difference_day"
+  | "date_difference_month"
+  | "date_difference_year"
+  | "person_full_name"
+  | "doing_business_as";
 
 export type NormalizationMethodType =
   | "remove_prefixes"
   | "remove_suffixes"
   | "remove_special_characters"
-  | "fold_characters";
+  | "fold_characters"
+  | "abbreviate_street_suffix"
+  | "abbreviate_street_unit"
+  | "abbreviate_subdivision"
+  | "canonicalize_email_address"
+  | "expand_city_abbreviation"
+  | "expand_city_suffix"
+  | "expand_street_suffix"
+  | "expand_street_unit"
+  | "expand_subdivision";
 
 export type MatchLevel = "full" | "partial" | "none";
 
@@ -211,12 +226,14 @@ export type ComparisonAttribute =
   | "name_first"
   | "name_last"
   | "name_middle"
+  | "name_full"
   | "birthdate"
   | "address_street"
   | "address_city"
   | "address_subdivision"
   | "address_postal_code"
-  | "identification_number";
+  | "identification_number"
+  | "social_security_number";
 
 export interface NormalizationStep {
   step: "apply" | "then";

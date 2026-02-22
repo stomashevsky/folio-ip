@@ -43,9 +43,12 @@ import type {
   CheckConfigType,
   CheckSubConfig,
   ComparisonAttribute,
+  ComparisonMethod,
   ExtractedProperty,
+  MatchCondition,
   MatchLevel,
   NormalizationMethodType,
+  NormalizationStep,
   TemplateStatus,
   VerificationCheckConfig,
   VerificationTemplate,
@@ -101,28 +104,54 @@ const CHECK_TYPE_FILTER_OPTIONS = [
   { value: "biometric", label: "Biometric" },
 ];
 const ATTRIBUTE_OPTIONS: { value: ComparisonAttribute; label: string }[] = [
-  { value: "name_first", label: "First name" },
-  { value: "name_last", label: "Last name" },
-  { value: "name_middle", label: "Middle name" },
-  { value: "birthdate", label: "Date of birth" },
-  { value: "address_street", label: "Street address" },
+  { value: "name_first", label: "First Name" },
+  { value: "name_last", label: "Last Name" },
+  { value: "name_middle", label: "Middle Name" },
+  { value: "name_full", label: "Full Name" },
+  { value: "birthdate", label: "Birthdate" },
+  { value: "address_street", label: "Street" },
   { value: "address_city", label: "City" },
-  { value: "address_subdivision", label: "State / Province" },
-  { value: "address_postal_code", label: "Postal code" },
-  { value: "identification_number", label: "ID number" },
+  { value: "address_subdivision", label: "Subdivision" },
+  { value: "address_postal_code", label: "Postal Code" },
+  { value: "identification_number", label: "Identification Number" },
+  { value: "social_security_number", label: "Social Security Number" },
 ];
 
 const MATCH_LEVEL_OPTIONS: { value: MatchLevel; label: string }[] = [
-  { value: "full", label: "Full match" },
-  { value: "partial", label: "Partial match" },
-  { value: "none", label: "No match required" },
+  { value: "full", label: "Exact" },
+  { value: "partial", label: "Partial" },
+  { value: "none", label: "None" },
 ];
 
 const NORMALIZATION_OPTIONS: { value: NormalizationMethodType; label: string }[] = [
-  { value: "remove_prefixes", label: "Remove prefixes" },
-  { value: "remove_suffixes", label: "Remove suffixes" },
-  { value: "remove_special_characters", label: "Remove special characters" },
-  { value: "fold_characters", label: "Fold characters" },
+  { value: "fold_characters", label: "fold_characters" },
+  { value: "remove_special_characters", label: "remove_special_characters" },
+  { value: "remove_prefixes", label: "remove_prefixes" },
+  { value: "remove_suffixes", label: "remove_suffixes" },
+  { value: "abbreviate_street_suffix", label: "abbreviate_street_suffix" },
+  { value: "abbreviate_street_unit", label: "abbreviate_street_unit" },
+  { value: "abbreviate_subdivision", label: "abbreviate_subdivision" },
+  { value: "canonicalize_email_address", label: "canonicalize_email_address" },
+  { value: "expand_city_abbreviation", label: "expand_city_abbreviation" },
+  { value: "expand_city_suffix", label: "expand_city_suffix" },
+  { value: "expand_street_suffix", label: "expand_street_suffix" },
+  { value: "expand_street_unit", label: "expand_street_unit" },
+  { value: "expand_subdivision", label: "expand_subdivision" },
+];
+
+const COMPARISON_METHOD_OPTIONS: { value: ComparisonMethod; label: string }[] = [
+  { value: "string_similarity", label: "string_similarity" },
+  { value: "string_difference", label: "string_difference" },
+  { value: "string_missing", label: "string_missing" },
+  { value: "nickname", label: "nickname" },
+  { value: "substring", label: "substring" },
+  { value: "tokenization", label: "tokenization" },
+  { value: "date_similarity", label: "date_similarity" },
+  { value: "date_difference_day", label: "date_difference_day" },
+  { value: "date_difference_month", label: "date_difference_month" },
+  { value: "date_difference_year", label: "date_difference_year" },
+  { value: "person_full_name", label: "person_full_name" },
+  { value: "doing_business_as", label: "doing_business_as" },
 ];
 
 /* ─── Tabs ─── */
@@ -964,6 +993,31 @@ function CheckConfigPanel({
 
 /* ─── Match Requirements Editor ─── */
 
+function getMatchSummaryText(req: AttributeMatchRequirement): string {
+  const { comparison } = req;
+  if (comparison.type === "simple") {
+    const levelMap: Record<MatchLevel, string> = { full: "Exact", partial: "Partial", none: "None" };
+    return levelMap[comparison.matchLevel] ?? comparison.matchLevel;
+  }
+  const { conditions } = comparison;
+  if (conditions.length === 0) return "No conditions";
+  if (conditions.length === 1) {
+    const c = conditions[0];
+    if (c.method === "date_similarity" && c.threshold != null) return `matching ${c.threshold} date components`;
+    if (c.method === "string_similarity" && c.threshold != null) return `${c.threshold}% similar`;
+    if (c.threshold != null) return `${c.method} \u2265 ${c.threshold}`;
+    return c.method;
+  }
+  const parts = conditions.map((c) => {
+    if (c.method === "string_similarity" && c.threshold != null) return `${c.threshold}% similar`;
+    if (c.method === "nickname" && c.threshold != null) return "nickname match";
+    if (c.method === "date_similarity" && c.threshold != null) return `matching ${c.threshold} date components`;
+    if (c.threshold != null) return `${c.method} \u2265 ${c.threshold}`;
+    return c.method;
+  });
+  return parts.join(" or ");
+}
+
 function MatchRequirementsEditor({
   requirements,
   onChange,
@@ -971,9 +1025,23 @@ function MatchRequirementsEditor({
   requirements: AttributeMatchRequirement[];
   onChange: (reqs: AttributeMatchRequirement[]) => void;
 }) {
+  const [modalOpen, setModalOpen] = useState(false);
+  const [draft, setDraft] = useState<AttributeMatchRequirement[]>([]);
+  const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
+
+  /* Sync draft when modal opens (prevOpen pattern — same as BulkConfigModal) */
+  const [prevOpen, setPrevOpen] = useState(false);
+  if (modalOpen && !prevOpen) {
+    setDraft(structuredClone(requirements));
+    setSelectedIndex(requirements.length > 0 ? 0 : null);
+  }
+  if (modalOpen !== prevOpen) setPrevOpen(modalOpen);
+
+  const selectedReq = selectedIndex != null && selectedIndex < draft.length ? draft[selectedIndex] : null;
+
   const usedAttributes = useMemo(
-    () => new Set(requirements.map((r) => r.attribute)),
-    [requirements],
+    () => new Set(draft.map((r) => r.attribute)),
+    [draft],
   );
 
   const availableAttributes = useMemo(
@@ -981,132 +1049,349 @@ function MatchRequirementsEditor({
     [usedAttributes],
   );
 
+  /* ── Draft CRUD ── */
+
   function addRule() {
     const next = availableAttributes[0];
     if (!next) return;
-    onChange([
-      ...requirements,
+    const newDraft: AttributeMatchRequirement[] = [
+      ...draft,
       { attribute: next.value, normalization: [], comparison: { type: "simple", matchLevel: "partial" } },
-    ]);
+    ];
+    setDraft(newDraft);
+    setSelectedIndex(newDraft.length - 1);
   }
 
   function removeRule(index: number) {
-    onChange(requirements.filter((_, i) => i !== index));
+    const newDraft = draft.filter((_, i) => i !== index);
+    setDraft(newDraft);
+    if (selectedIndex === index) {
+      setSelectedIndex(newDraft.length > 0 ? Math.min(index, newDraft.length - 1) : null);
+    } else if (selectedIndex != null && selectedIndex > index) {
+      setSelectedIndex(selectedIndex - 1);
+    }
   }
 
   function updateRule(index: number, patch: Partial<AttributeMatchRequirement>) {
-    onChange(requirements.map((r, i) => (i === index ? { ...r, ...patch } : r)));
+    setDraft(draft.map((r, i) => (i === index ? { ...r, ...patch } : r)));
   }
 
-  function updateNormalization(index: number, methods: NormalizationMethodType[]) {
-    const steps = methods.map((method, i) => ({
-      step: (i === 0 ? "apply" : "then") as "apply" | "then",
-      method,
-    }));
-    updateRule(index, { normalization: steps });
+  /* ── Normalization helpers ── */
+
+  function addNormalizationStep() {
+    if (selectedIndex == null) return;
+    const req = draft[selectedIndex];
+    const usedMethods = new Set((req.normalization ?? []).map((n) => n.method));
+    const available = NORMALIZATION_OPTIONS.filter((o) => !usedMethods.has(o.value));
+    if (available.length === 0) return;
+    const steps: NormalizationStep[] = [...(req.normalization ?? [])];
+    steps.push({ step: steps.length === 0 ? "apply" : "then", method: available[0].value });
+    updateRule(selectedIndex, { normalization: steps });
   }
 
-  function updateMatchLevel(index: number, matchLevel: MatchLevel) {
-    updateRule(index, { comparison: { type: "simple", matchLevel } });
+  function removeNormalizationStep(stepIndex: number) {
+    if (selectedIndex == null) return;
+    const req = draft[selectedIndex];
+    const steps = (req.normalization ?? []).filter((_, i) => i !== stepIndex);
+    const fixed: NormalizationStep[] = steps.map((s, i) => ({ ...s, step: i === 0 ? "apply" : "then" }));
+    updateRule(selectedIndex, { normalization: fixed });
+  }
+
+  function updateNormalizationMethod(stepIndex: number, method: NormalizationMethodType) {
+    if (selectedIndex == null) return;
+    const req = draft[selectedIndex];
+    const steps = (req.normalization ?? []).map((s, i) => (i === stepIndex ? { ...s, method } : s));
+    updateRule(selectedIndex, { normalization: steps });
+  }
+
+  /* ── Comparison helpers ── */
+
+  function handleComparisonTypeChange(type: "simple" | "complex") {
+    if (selectedIndex == null) return;
+    if (type === "simple") {
+      updateRule(selectedIndex, { comparison: { type: "simple", matchLevel: "partial" } });
+    } else {
+      updateRule(selectedIndex, { comparison: { type: "complex", conditions: [{ method: "string_similarity", matchLevel: "full", threshold: 100 }] } });
+    }
+  }
+
+  function addCondition() {
+    if (selectedIndex == null) return;
+    const req = draft[selectedIndex];
+    if (req.comparison.type !== "complex") return;
+    const conditions: MatchCondition[] = [...req.comparison.conditions, { method: "string_similarity", matchLevel: "full", threshold: 100 }];
+    updateRule(selectedIndex, { comparison: { type: "complex", conditions } });
+  }
+
+  function removeCondition(condIndex: number) {
+    if (selectedIndex == null) return;
+    const req = draft[selectedIndex];
+    if (req.comparison.type !== "complex") return;
+    const conditions = req.comparison.conditions.filter((_, i) => i !== condIndex);
+    if (conditions.length === 0) {
+      updateRule(selectedIndex, { comparison: { type: "simple", matchLevel: "partial" } });
+      return;
+    }
+    updateRule(selectedIndex, { comparison: { type: "complex", conditions } });
+  }
+
+  function updateCondition(condIndex: number, patch: Partial<MatchCondition>) {
+    if (selectedIndex == null) return;
+    const req = draft[selectedIndex];
+    if (req.comparison.type !== "complex") return;
+    const conditions = req.comparison.conditions.map((c, i) => (i === condIndex ? { ...c, ...patch } : c));
+    updateRule(selectedIndex, { comparison: { type: "complex", conditions } });
+  }
+
+  function handleSave() {
+    onChange(draft);
+    setModalOpen(false);
   }
 
   return (
-    <div className="flex flex-col gap-3">
-      {requirements.length === 0 ? (
-        <>
-          <p className="text-sm text-[var(--color-text-secondary)]">
-            No rules configured — default matching will be used.
-          </p>
-          {availableAttributes.length > 0 && (
-            <div>
-              <Button color="secondary" variant="soft" size="xs" pill={false} onClick={addRule}>
-                <Plus /> Add rule
-              </Button>
-            </div>
-          )}
-        </>
-      ) : (
-        <>
-          {requirements.map((rule, index) => {
-            const connector = index === 0 ? "If" : "And";
+    <>
+      <Button
+        color="secondary"
+        variant={requirements.length > 0 ? "soft" : "outline"}
+        size="sm"
+        pill
+        onClick={() => setModalOpen(true)}
+      >
+        {requirements.length === 0 ? (
+          <><Plus /> Add match logic</>
+        ) : (
+          <>Edit match logic ({requirements.length})</>
+        )}
+      </Button>
 
-            return (
-              <div key={rule.attribute} className="flex flex-col gap-3 rounded-lg border border-[var(--color-border)] p-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-[var(--color-text)]">{connector}</span>
-                  <Button
-                    color="secondary"
-                    variant="ghost"
-                    size="3xs"
-                    pill={false}
-                    onClick={() => removeRule(index)}
+      <Modal open={modalOpen} onOpenChange={setModalOpen} maxWidth="max-w-2xl">
+        <ModalHeader onClose={() => setModalOpen(false)}>
+          <div className="flex flex-col gap-1">
+            <span className="heading-sm">Match requirements</span>
+            <span className="text-xs text-[var(--color-text-secondary)]">
+              Configure how attributes are normalized and compared during matching.
+            </span>
+          </div>
+        </ModalHeader>
+
+        <ModalBody>
+          <div className="flex gap-4" style={{ minHeight: 340 }}>
+            {/* Left column — requirement list */}
+            <div className="flex w-52 shrink-0 flex-col gap-1">
+              {draft.map((rule, index) => {
+                const attrLabel = ATTRIBUTE_OPTIONS.find((a) => a.value === rule.attribute)?.label ?? rule.attribute;
+                const summaryText = getMatchSummaryText(rule);
+                const isSelected = selectedIndex === index;
+
+                return (
+                  <div
+                    key={`${rule.attribute}-${index}`}
+                    className={`group flex cursor-pointer items-center gap-2 rounded-lg border px-3 py-2 transition-colors ${
+                      isSelected
+                        ? "border-[var(--color-primary-solid-bg)] bg-[var(--color-primary-surface-bg)]"
+                        : "border-transparent hover:bg-[var(--color-surface-secondary)]"
+                    }`}
+                    onClick={() => setSelectedIndex(index)}
                   >
-                    <Trash />
-                  </Button>
-                </div>
-                <div className="flex items-start gap-3">
-                  <div className="flex-1">
-                    <div className="flex flex-col gap-1.5">
-                      <ConfigLabel>Attribute</ConfigLabel>
-                      <Select
-                        options={[
-                          ...ATTRIBUTE_OPTIONS.filter((a) => a.value === rule.attribute),
-                          ...availableAttributes,
-                        ]}
-                        value={rule.attribute}
-                        onChange={(o) => { if (o) updateRule(index, { attribute: o.value as ComparisonAttribute }); }}
-                        size="sm"
-                        pill={false}
-                        block
-                        listMinWidth={180}
-                      />
+                    <div className="flex min-w-0 flex-1 flex-col">
+                      <span className="text-sm font-medium text-[var(--color-text)] truncate">{attrLabel}</span>
+                      <span className="text-xs text-[var(--color-text-secondary)] truncate">{summaryText}</span>
                     </div>
+                    <Button
+                      color="secondary"
+                      variant="ghost"
+                      size="3xs"
+                      uniform
+                      className={isSelected ? "" : "opacity-0 group-hover:opacity-100"}
+                      onClick={(e: React.MouseEvent) => {
+                        e.stopPropagation();
+                        removeRule(index);
+                      }}
+                    >
+                      <Trash />
+                    </Button>
                   </div>
-                  <div className="flex-1">
-                    <div className="flex flex-col gap-1.5">
-                      <ConfigLabel>Match level</ConfigLabel>
-                      <Select
-                        options={MATCH_LEVEL_OPTIONS}
-                        value={rule.comparison.type === "simple" ? rule.comparison.matchLevel : "partial"}
-                        onChange={(o) => { if (o) updateMatchLevel(index, o.value as MatchLevel); }}
-                        size="sm"
-                        pill={false}
-                        block
-                        listMinWidth={160}
-                      />
-                    </div>
-                  </div>
-                  <div className="flex-1">
-                    <div className="flex flex-col gap-1.5">
-                      <ConfigLabel>Normalization</ConfigLabel>
-                      <Select
-                        options={NORMALIZATION_OPTIONS}
-                        value={(rule.normalization ?? []).map((n) => n.method)}
-                        onChange={(opts) => updateNormalization(index, opts.map((o) => o.value as NormalizationMethodType))}
-                        multiple
-                        clearable
-                        placeholder="None"
-                        size="sm"
-                        pill={false}
-                        block
-                        listMinWidth={260}
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-          {availableAttributes.length > 0 && (
-            <div>
-              <Button color="secondary" variant="soft" size="xs" pill={false} onClick={addRule}>
-                <Plus /> Add rule
-              </Button>
+                );
+              })}
+
+              {availableAttributes.length > 0 && (
+                <button
+                  type="button"
+                  onClick={addRule}
+                  className="mt-1 flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm text-[var(--color-text-secondary)] transition-colors hover:bg-[var(--color-surface-secondary)]"
+                >
+                  <Plus className="h-3.5 w-3.5" /> Add requirement
+                </button>
+              )}
             </div>
-          )}
-        </>
-      )}
-    </div>
+
+            {/* Right column — edit selected */}
+            <div className="flex flex-1 flex-col gap-4 border-l border-[var(--color-border)] pl-4">
+              {selectedReq && selectedIndex != null ? (
+                <>
+                  {/* Attribute */}
+                  <div className="flex flex-col gap-1.5">
+                    <span className="text-xs font-medium text-[var(--color-text-secondary)]">Attribute</span>
+                    <Select
+                      options={[
+                        ...ATTRIBUTE_OPTIONS.filter((a) => a.value === selectedReq.attribute),
+                        ...availableAttributes,
+                      ]}
+                      value={selectedReq.attribute}
+                      onChange={(o) => { if (o) updateRule(selectedIndex, { attribute: o.value as ComparisonAttribute }); }}
+                      size="sm"
+                      pill={false}
+                      block
+                    />
+                  </div>
+
+                  {/* Normalization */}
+                  <div className="flex flex-col gap-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-medium text-[var(--color-text-secondary)]">Normalization</span>
+                      <Button color="secondary" variant="ghost" size="3xs" uniform onClick={addNormalizationStep}>
+                        <Plus />
+                      </Button>
+                    </div>
+                    {(selectedReq.normalization ?? []).length === 0 ? (
+                      <p className="text-xs text-[var(--color-text-tertiary)]">No normalization steps</p>
+                    ) : (
+                      <div className="flex flex-col gap-1.5">
+                        {(selectedReq.normalization ?? []).map((step, i) => (
+                          <div key={i} className="flex items-center gap-1.5">
+                            <span className="w-10 shrink-0 text-xs text-[var(--color-text-secondary)]">
+                              {step.step === "apply" ? "Apply" : "Then"}
+                            </span>
+                            <div className="min-w-0 flex-1">
+                              <Select
+                                options={NORMALIZATION_OPTIONS}
+                                value={step.method}
+                                onChange={(o) => { if (o) updateNormalizationMethod(i, o.value as NormalizationMethodType); }}
+                                size="sm"
+                                pill={false}
+                                block
+                              />
+                            </div>
+                            <Button
+                              color="secondary"
+                              variant="ghost"
+                              size="3xs"
+                              uniform
+                              onClick={() => removeNormalizationStep(i)}
+                            >
+                              <Trash />
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Comparison */}
+                  <div className="flex flex-col gap-2">
+                    <span className="text-xs font-medium text-[var(--color-text-secondary)]">Comparison</span>
+                    <SegmentedControl
+                      aria-label="Comparison type"
+                      value={selectedReq.comparison.type}
+                      onChange={(v) => handleComparisonTypeChange(v as "simple" | "complex")}
+                      size="xs"
+                    >
+                      <SegmentedControl.Tab value="simple">Simple</SegmentedControl.Tab>
+                      <SegmentedControl.Tab value="complex">Complex</SegmentedControl.Tab>
+                    </SegmentedControl>
+
+                    {selectedReq.comparison.type === "simple" ? (
+                      <div className="flex flex-col gap-1.5">
+                        <span className="text-xs text-[var(--color-text-secondary)]">Match Level</span>
+                        <Select
+                          options={MATCH_LEVEL_OPTIONS}
+                          value={selectedReq.comparison.matchLevel}
+                          onChange={(o) => { if (o) updateRule(selectedIndex, { comparison: { type: "simple", matchLevel: o.value as MatchLevel } }); }}
+                          size="sm"
+                          pill={false}
+                          block
+                        />
+                      </div>
+                    ) : (() => {
+                      const cmp = selectedReq.comparison;
+                      if (cmp.type !== "complex") return null;
+                      return (
+                        <div className="flex flex-col gap-2">
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs text-[var(--color-text-secondary)]">Logic</span>
+                            <Button color="secondary" variant="ghost" size="3xs" uniform onClick={addCondition}>
+                              <Plus />
+                            </Button>
+                          </div>
+                          <div className="flex flex-col gap-2">
+                            {cmp.conditions.map((cond, i) => (
+                              <div key={i} className="flex flex-wrap items-center gap-1.5">
+                                <span className="shrink-0 text-xs text-[var(--color-text-secondary)]">
+                                  {i === 0 ? "Where" : "Or"}
+                                </span>
+                                <div className="w-36">
+                                  <Select
+                                    options={COMPARISON_METHOD_OPTIONS}
+                                    value={cond.method}
+                                    onChange={(o) => { if (o) updateCondition(i, { method: o.value as ComparisonMethod }); }}
+                                    size="sm"
+                                    pill={false}
+                                    block
+                                    listMinWidth={200}
+                                  />
+                                </div>
+                                <span className="shrink-0 text-xs text-[var(--color-text-secondary)]">threshold</span>
+                                <div className="w-16">
+                                  <Input
+                                    size="sm"
+                                    type="number"
+                                    value={cond.threshold != null ? String(cond.threshold) : ""}
+                                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                                      const val = e.target.value === "" ? undefined : Number(e.target.value);
+                                      updateCondition(i, { threshold: val });
+                                    }}
+                                  />
+                                </div>
+                                {cmp.conditions.length > 1 && (
+                                  <Button
+                                    color="secondary"
+                                    variant="ghost"
+                                    size="3xs"
+                                    uniform
+                                    onClick={() => removeCondition(i)}
+                                  >
+                                    <Trash />
+                                  </Button>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      );
+                    })()}
+                  </div>
+                </>
+              ) : (
+                <div className="flex flex-1 items-center justify-center">
+                  <p className="text-sm text-[var(--color-text-tertiary)]">
+                    {draft.length === 0 ? "Add a requirement to get started" : "Select a requirement to edit"}
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+        </ModalBody>
+
+        <ModalFooter>
+          <Button color="secondary" variant="outline" size="sm" onClick={() => setModalOpen(false)}>
+            Cancel
+          </Button>
+          <Button color="primary" size="sm" onClick={handleSave}>
+            Save
+          </Button>
+        </ModalFooter>
+      </Modal>
+    </>
   );
 }
 
