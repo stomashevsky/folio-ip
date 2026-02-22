@@ -189,8 +189,7 @@ export const mockInquiryTemplates: InquiryTemplate[] = [
     id: "itmpl_HiJkLmNoPqRs5TuVwXyZa6B7cDeFg",
     name: "Legacy KYC Flow (v1)",
     description: "Original verification flow — replaced by KYC + AML template",
-    status: "archived",
-    lastPublishedAt: "2025-04-12T08:00:00.000Z",
+    status: "draft",
     createdAt: "2024-11-01T09:00:00.000Z",
     updatedAt: "2025-06-15T10:30:00.000Z",
     steps: [
@@ -205,7 +204,7 @@ export const mockInquiryTemplates: InquiryTemplate[] = [
     id: "itmpl_WxYzAbCdEfGh8IjKlMnOpQr9StUvW",
     name: "Beta: Video Verification",
     description: "Experimental video-based liveness detection flow",
-    status: "disabled",
+    status: "draft",
     createdAt: "2025-12-01T14:00:00.000Z",
     updatedAt: "2026-01-10T09:00:00.000Z",
     steps: [
@@ -668,8 +667,7 @@ export const mockVerificationTemplates: VerificationTemplate[] = [
     versionId: "vtmplv_4sT5uV6wX7yZ8aB9c",
     name: "Legacy Selfie (v1)",
     type: "selfie",
-    status: "archived",
-    lastPublishedAt: "2025-03-20T08:00:00.000Z",
+    status: "draft",
     createdAt: "2024-10-15T09:00:00.000Z",
     updatedAt: "2025-06-15T10:30:00.000Z",
     checks: [
@@ -848,7 +846,7 @@ export const mockReportTemplates: ReportTemplate[] = [
     id: "rptp_LmNoPqRsTuVw2XyZaBcDeFgHiJk3L",
     name: "Legacy Watchlist (v1)",
     type: "watchlist",
-    status: "archived",
+    status: "draft",
     createdAt: "2024-11-01T09:00:00.000Z",
     updatedAt: "2025-06-15T10:30:00.000Z",
     screeningSources: [WATCHLIST_SOURCES[0], WATCHLIST_SOURCES[1]],
