@@ -43,3 +43,7 @@ next-env.d.ts
 # skills (opencode plugins)
 /skills/
 scripts/
+
+# screenshots / debug artifacts
+/*.png
+firebase-debug.log
