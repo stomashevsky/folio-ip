@@ -613,9 +613,9 @@ function ChecksTab({
         id: "enabled",
         accessorFn: (row) => row.check.enabled,
         header: "Enabled",
-        size: 56,
-        meta: { align: "right" },
-        enableSorting: false,
+        size: 88,
+        meta: { align: "right", thClassName: "pl-3", tdClassName: "pl-3" },
+        enableSorting: true,
         cell: ({ row }) => {
           const { check, formIndex } = row.original;
           return (
@@ -706,7 +706,7 @@ function ChecksTab({
                 <th
                   key={header.id}
                   style={header.getSize() !== 150 ? { minWidth: header.getSize(), width: header.getSize() } : undefined}
-                  className={TABLE_TH}
+                  className={`${TABLE_TH}${(header.column.columnDef.meta as { thClassName?: string })?.thClassName ? ` ${(header.column.columnDef.meta as { thClassName?: string }).thClassName}` : ""}`}
                 >
                   {header.isPlaceholder ? null : (
                     <div
@@ -719,7 +719,7 @@ function ChecksTab({
                     >
                       {flexRender(header.column.columnDef.header, header.getContext())}
                       {header.column.getCanSort() && (
-                        <span className="ml-1">
+                        <span>
                           {header.column.getIsSorted() === "asc" ? (
                             <ArrowUpSm style={{ width: TABLE_SORT_ICON_SIZE, height: TABLE_SORT_ICON_SIZE }} />
                           ) : header.column.getIsSorted() === "desc" ? (
@@ -754,7 +754,7 @@ function ChecksTab({
                       <td
                         key={cell.id}
                         style={cell.column.getSize() !== 150 ? { minWidth: cell.column.getSize(), width: cell.column.getSize() } : undefined}
-                        className="h-[50px] py-2.5 pr-2 align-middle"
+                        className={`h-[50px] py-2.5 pr-2 align-middle${(cell.column.columnDef.meta as { tdClassName?: string })?.tdClassName ? ` ${(cell.column.columnDef.meta as { tdClassName?: string }).tdClassName}` : ""}`}
                       >
                         {flexRender(cell.column.columnDef.cell, cell.getContext())}
                       </td>
