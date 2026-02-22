@@ -562,7 +562,7 @@ function ChecksTab({
         accessorFn: (row) => row.check.enabled,
         header: "",
         size: 44,
-        meta: { tdClassName: "pr-0" },
+        meta: { thClassName: "pr-0", tdClassName: "pr-0" },
         enableSorting: false,
         cell: ({ row }) => {
           const { check, formIndex } = row.original;
@@ -597,6 +597,29 @@ function ChecksTab({
               {check.lifecycle === "sunset" && (
                 <Badge pill color="warning" variant="soft" size="sm">Sunset</Badge>
               )}
+            </div>
+          );
+        },
+      },
+      {
+        id: "settings",
+        header: "Configuration",
+        accessorFn: (row) => row.hasConfig,
+        size: 140,
+        enableSorting: true,
+        cell: ({ row }) => {
+          const { check, hasConfig } = row.original;
+          if (!hasConfig) return null;
+          return (
+            <div onClick={(e) => e.stopPropagation()}>
+              <Button
+                color="secondary"
+                variant="ghost"
+                size="xs"
+                onClick={() => setSettingsCheckName(check.name)}
+              >
+                <SettingsCog /> Settings
+              </Button>
             </div>
           );
         },
@@ -663,31 +686,6 @@ function ChecksTab({
           );
         },
       },
-      {
-        id: "settings",
-        header: "Config",
-        accessorFn: (row) => row.hasConfig,
-        size: 52,
-        enableSorting: true,
-        cell: ({ row }) => {
-          const { check, hasConfig } = row.original;
-          if (!hasConfig) return null;
-          return (
-            <div className="flex justify-end" onClick={(e) => e.stopPropagation()}>
-              <Button
-                color="secondary"
-                variant="ghost"
-                size="xs"
-                uniform
-                onClick={() => setSettingsCheckName(check.name)}
-              >
-                <SettingsCog />
-              </Button>
-            </div>
-          );
-        },
-      },
-
     ],
     [onUpdateCheck],
   );
