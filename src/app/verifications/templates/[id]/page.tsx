@@ -1,6 +1,6 @@
 "use client";
 
-import { Fragment, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 
 import {
@@ -68,7 +68,7 @@ import { Tabs } from "@plexui/ui/components/Tabs";
 import { Popover } from "@plexui/ui/components/Popover";
 import { Tooltip } from "@plexui/ui/components/Tooltip";
 import { Switch } from "@plexui/ui/components/Switch";
-import { ArrowDownSm, ArrowUpSm, CheckMd, ChevronDownMd, DotsHorizontal, InfoCircle, Plus, Search, Sort, Trash } from "@plexui/ui/components/Icon";
+import { ArrowDownSm, ArrowUpSm, CheckMd, DotsHorizontal, InfoCircle, Plus, Search, SettingsCog, Sort, Trash } from "@plexui/ui/components/Icon";
 
 /* ─── Constants ─── */
 
@@ -90,13 +90,13 @@ const CHECK_CATEGORY_COLORS: Record<string, string> = {
   user_action_required: "caution",
 };
 
-const CHECK_REQUIREMENT_OPTIONS = [
-  { value: "required", label: "Required" },
-  { value: "optional", label: "Optional" },
-];
-const CHECK_STATUS_OPTIONS = [
+const CHECK_STATUS_FILTER_OPTIONS = [
   { value: "enabled", label: "Enabled" },
   { value: "disabled", label: "Disabled" },
+  { value: "required", label: "Required" },
+  { value: "non_required", label: "Non-required" },
+  { value: "configurable", label: "Configurable" },
+  { value: "non_configurable", label: "Non-configurable" },
 ];
 const CHECK_TYPE_FILTER_OPTIONS = [
   { value: "fraud", label: "Fraud" },
@@ -497,10 +497,9 @@ function ChecksTab({
   onUpdateCheck: (index: number, check: VerificationCheckConfig) => void;
 }) {
   const [search, setSearch] = useState("");
-  const [reqFilter, setReqFilter] = useState("");
-  const [enabledFilter, setEnabledFilter] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string[]>([]);
   const [typeFilter, setTypeFilter] = useState<string[]>([]);
-  const [openConfigs, setOpenConfigs] = useState<Set<string>>(new Set());
+  const [settingsCheckName, setSettingsCheckName] = useState<string | null>(null);
   const [sorting, setSorting] = useState<SortingState>([{ id: "name", desc: false }]);
 
   // Suppress checkbox entry animation on initial mount — @starting-style in PlexUI
@@ -519,15 +518,22 @@ function ChecksTab({
       .map((check, formIndex) => {
         const matchesSearch = !search || check.name.toLowerCase().includes(search.toLowerCase());
         if (!matchesSearch) return null;
-        if (reqFilter) {
-          if (reqFilter === "required" && !check.required) return null;
-          if (reqFilter === "optional" && check.required) return null;
-        }
-        if (enabledFilter) {
-          if (enabledFilter === "enabled" && !check.enabled) return null;
-          if (enabledFilter === "disabled" && check.enabled) return null;
-        }
         const availCheck = AVAILABLE_CHECKS[type]?.find((a) => a.name === check.name);
+        if (statusFilter.length > 0) {
+          const isEnabled = check.enabled;
+          const isRequired = check.required;
+          const isConfigurable = availCheck?.configurable === true;
+          const matches = statusFilter.every((f) => {
+            if (f === "enabled") return isEnabled;
+            if (f === "disabled") return !isEnabled;
+            if (f === "required") return isRequired;
+            if (f === "non_required") return !isRequired;
+            if (f === "configurable") return isConfigurable;
+            if (f === "non_configurable") return !isConfigurable;
+            return true;
+          });
+          if (!matches) return null;
+        }
         if (typeFilter.length > 0) {
           const matchesCat = typeFilter.some((t) => t === "biometric" ? availCheck?.requiresBiometric === true : check.categories.includes(t as CheckCategory));
           if (!matchesCat) return null;
@@ -544,37 +550,41 @@ function ChecksTab({
         } as CheckRow;
       })
       .filter((r): r is CheckRow => r !== null);
-  }, [checks, search, reqFilter, enabledFilter, typeFilter, type]);
+  }, [checks, search, statusFilter, typeFilter, type]);
 
-  const toggleConfig = useCallback((name: string) => {
-    setOpenConfigs((prev) => {
-      const next = new Set(prev);
-      if (next.has(name)) next.delete(name);
-      else next.add(name);
-      return next;
-    });
-  }, []);
+  // Find the current check data for the settings modal
+  const settingsRow = settingsCheckName ? data.find((r) => r.check.name === settingsCheckName) : null;
 
   const columns = useMemo<ColumnDef<CheckRow, unknown>[]>(
     () => [
+      {
+        id: "enabled",
+        accessorFn: (row) => row.check.enabled,
+        header: "",
+        size: 44,
+        meta: { tdClassName: "pr-0" },
+        enableSorting: false,
+        cell: ({ row }) => {
+          const { check, formIndex } = row.original;
+          return (
+            <div onClick={(e) => e.stopPropagation()}>
+              <Switch
+                checked={check.enabled}
+                onCheckedChange={(v) => onUpdateCheck(formIndex, { ...check, enabled: v })}
+              />
+            </div>
+          );
+        },
+      },
       {
         id: "name",
         accessorFn: (row) => row.check.name,
         header: "Checks",
         enableSorting: true,
-        cell: ({ row, table: t }) => {
-          const { check, description, hasConfig } = row.original;
-          const oc = (t.options.meta as { openConfigs: Set<string> }).openConfigs;
-          const isOpen = hasConfig && oc.has(check.name);
+        cell: ({ row }) => {
+          const { check, description } = row.original;
           return (
             <div className="flex items-center gap-1.5">
-              {hasConfig ? (
-                <ChevronDownMd
-                  className={`size-4 shrink-0 text-[var(--color-text-secondary)] transition-transform duration-200${isOpen ? "" : " -rotate-90"}`}
-                />
-              ) : (
-                <span className="w-4 shrink-0" />
-              )}
               <span className="text-sm font-medium text-[var(--color-text)]">{check.name}</span>
               {description && (
                 <Tooltip content={description} side="top" sideOffset={4}>
@@ -615,7 +625,11 @@ function ChecksTab({
       {
         id: "required",
         accessorFn: (row) => row.check.required,
-        header: "Requirement",
+        header: () => (
+          <Tooltip content="If a required check fails, the associated Verification Check will fail." side="top" sideOffset={4}>
+            <span className="cursor-help border-b border-dashed border-[var(--color-text-tertiary)]">Required</span>
+          </Tooltip>
+        ),
         size: 120,
         meta: { align: "right" },
         enableSorting: true,
@@ -650,20 +664,25 @@ function ChecksTab({
         },
       },
       {
-        id: "enabled",
-        accessorFn: (row) => row.check.enabled,
-        header: "Enabled",
-        size: 88,
-        meta: { align: "right", thClassName: "pl-3", tdClassName: "pl-3" },
+        id: "settings",
+        header: "Config",
+        accessorFn: (row) => row.hasConfig,
+        size: 52,
         enableSorting: true,
         cell: ({ row }) => {
-          const { check, formIndex } = row.original;
+          const { check, hasConfig } = row.original;
+          if (!hasConfig) return null;
           return (
             <div className="flex justify-end" onClick={(e) => e.stopPropagation()}>
-              <Switch
-                checked={check.enabled}
-                onCheckedChange={(v) => onUpdateCheck(formIndex, { ...check, enabled: v })}
-              />
+              <Button
+                color="secondary"
+                variant="ghost"
+                size="xs"
+                uniform
+                onClick={() => setSettingsCheckName(check.name)}
+              >
+                <SettingsCog />
+              </Button>
             </div>
           );
         },
@@ -678,7 +697,7 @@ function ChecksTab({
     data,
     columns,
     state: { sorting },
-    meta: { openConfigs },
+    meta: {},
     onSortingChange: setSorting,
     getRowId: (row) => row.check.name,
     getCoreRowModel: getCoreRowModel(),
@@ -690,7 +709,7 @@ function ChecksTab({
       <table className="-mb-px w-full" data-datatable>
         <thead className="sticky top-0 z-10 bg-[var(--color-surface)]">
           <tr>
-            <th colSpan={4} className="pt-6 pb-3 text-left font-normal">
+            <th colSpan={5} className="pt-6 pb-3 text-left font-normal">
               <div className="flex flex-wrap items-center gap-2">
                 <div className="w-56">
                   <Input
@@ -703,30 +722,19 @@ function ChecksTab({
                     startAdornment={<Search style={{ width: 16, height: 16 }} />}
                   />
                 </div>
-                <div className="w-48">
+                <div className="w-52">
                   <Select
-                    options={CHECK_REQUIREMENT_OPTIONS}
-                    value={reqFilter}
-                    onChange={(opt) => setReqFilter(opt?.value ?? "")}
+                    options={CHECK_STATUS_FILTER_OPTIONS}
+                    value={statusFilter}
+                    onChange={(opts) => setStatusFilter(opts.map((o) => o.value))}
+                    multiple
                     clearable
-                    placeholder="Requirement"
+                    placeholder="All check statuses"
                     size="sm"
                     pill
                     variant="outline"
                     block
-                  />
-                </div>
-                <div className="w-44">
-                  <Select
-                    options={CHECK_STATUS_OPTIONS}
-                    value={enabledFilter}
-                    onChange={(opt) => setEnabledFilter(opt?.value ?? "")}
-                    clearable
-                    placeholder="Status"
-                    size="sm"
-                    pill
-                    variant="outline"
-                    block
+                    listMinWidth={220}
                   />
                 </div>
                 <div className="w-48">
@@ -744,8 +752,8 @@ function ChecksTab({
                     listMinWidth={180}
                   />
                 </div>
-                {(reqFilter || enabledFilter || typeFilter.length > 0) && (
-                  <Button color="secondary" variant="soft" size="sm" pill onClick={() => { setReqFilter(""); setEnabledFilter(""); setTypeFilter([]); }}>
+                {(statusFilter.length > 0 || typeFilter.length > 0) && (
+                  <Button color="secondary" variant="soft" size="sm" pill onClick={() => { setStatusFilter([]); setTypeFilter([]); }}>
                     Clear filters
                   </Button>
                 )}
@@ -794,49 +802,50 @@ function ChecksTab({
         <tbody>
           {table.getRowModel().rows.length === 0 ? (
             <tr>
-              <td colSpan={4} className="py-12 text-center text-sm text-[var(--color-text-tertiary)]">
+              <td colSpan={5} className="py-12 text-center text-sm text-[var(--color-text-tertiary)]">
                 No checks match your filters.
               </td>
             </tr>
           ) : (
-            table.getRowModel().rows.map((row) => {
-              const { check, formIndex, hasConfig, configType } = row.original;
-              const isConfigOpen = openConfigs.has(check.name);
-              return (
-                <Fragment key={row.id}>
-                  <tr className={`border-b border-[var(--color-border)]${hasConfig && isConfigOpen ? " border-b-transparent" : ""}${hasConfig ? " cursor-pointer" : ""}`} onClick={hasConfig ? () => toggleConfig(check.name) : undefined}>
-                    {row.getVisibleCells().map((cell) => (
-                      <td
-                        key={cell.id}
-                        style={cell.column.getSize() !== 150 ? { minWidth: cell.column.getSize(), width: cell.column.getSize() } : undefined}
-                        className={`h-[50px] py-2.5 pr-2 align-middle${(cell.column.columnDef.meta as { tdClassName?: string })?.tdClassName ? ` ${(cell.column.columnDef.meta as { tdClassName?: string }).tdClassName}` : ""}`}
-                      >
-                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                      </td>
-                    ))}
-                  </tr>
-                  {hasConfig && isConfigOpen && configType && (
-                    <tr className="border-b border-[var(--color-border)]">
-                      <td colSpan={4} className="py-3 pl-[22px]">
-                        <CheckConfigPanel
-                          configType={configType}
-                          subConfig={check.subConfig}
-                          onUpdate={(patch) => {
-                            onUpdateCheck(formIndex, {
-                              ...check,
-                              subConfig: { ...check.subConfig, ...patch },
-                            });
-                          }}
-                        />
-                      </td>
-                    </tr>
-                  )}
-                </Fragment>
-              );
-            })
+            table.getRowModel().rows.map((row) => (
+              <tr key={row.id} className="border-b border-[var(--color-border)]">
+                {row.getVisibleCells().map((cell) => (
+                  <td
+                    key={cell.id}
+                    style={cell.column.getSize() !== 150 ? { minWidth: cell.column.getSize(), width: cell.column.getSize() } : undefined}
+                    className={`h-[50px] py-2.5 pr-2 align-middle${(cell.column.columnDef.meta as { tdClassName?: string })?.tdClassName ? ` ${(cell.column.columnDef.meta as { tdClassName?: string }).tdClassName}` : ""}`}
+                  >
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </td>
+                ))}
+              </tr>
+            ))
           )}
         </tbody>
       </table>
+
+      {/* Check Settings Modal */}
+      <Modal open={!!settingsRow} maxWidth="max-w-lg" onOpenChange={(open) => { if (!open) setSettingsCheckName(null); }}>
+        {settingsRow && (
+          <>
+            <ModalHeader onClose={() => setSettingsCheckName(null)}>
+              {settingsRow.check.name}
+            </ModalHeader>
+            <ModalBody>
+              <CheckConfigPanel
+                configType={settingsRow.configType!}
+                subConfig={settingsRow.check.subConfig}
+                onUpdate={(patch) => {
+                  onUpdateCheck(settingsRow.formIndex, {
+                    ...settingsRow.check,
+                    subConfig: { ...settingsRow.check.subConfig, ...patch },
+                  });
+                }}
+              />
+            </ModalBody>
+          </>
+        )}
+      </Modal>
     </div>
   );
 }
