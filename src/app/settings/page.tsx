@@ -171,9 +171,9 @@ export default function YourProfilePage() {
               </div>
               <div className="flex shrink-0 items-center gap-3">
                 {twoFactorEnabled ? (
-                  <Badge color="success" size="sm">Enabled</Badge>
+                  <Badge pill color="success" size="sm">Enabled</Badge>
                 ) : (
-                  <Badge color="secondary" size="sm">Disabled</Badge>
+                  <Badge pill color="secondary" size="sm">Disabled</Badge>
                 )}
                 <Button
                   color={twoFactorEnabled ? "secondary" : "primary"}
@@ -194,7 +194,7 @@ export default function YourProfilePage() {
                   Manage devices where you are currently logged in
                 </p>
               </div>
-              <Badge color="info" size="sm">1 active</Badge>
+              <Badge pill color="info" size="sm">1 active</Badge>
             </div>
 
             <div className="flex items-center justify-between">

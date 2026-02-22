@@ -27,6 +27,7 @@ import {
   Sort,
   Search,
 } from "@plexui/ui/components/Icon";
+import { TABLE_TH, TABLE_TH_SORTABLE, TABLE_SORT_ICON_SIZE, TABLE_TD } from "@/lib/constants/page-layout";
 import { TOPBAR_CONTROL_SIZE, TOPBAR_TOOLBAR_PILL } from "@/components/layout/TopBar";
 
 const PAGE_SIZE_OPTIONS = [
@@ -194,15 +195,14 @@ export function DataTable<T>({
                   <th
                     key={header.id}
                     style={header.getSize() !== 150 ? { minWidth: header.getSize(), width: header.getSize() } : undefined}
-                    className="whitespace-nowrap py-1.5 pr-2 text-left text-xs font-semibold uppercase tracking-[0.5px] text-[var(--color-text)]"
+                    className={TABLE_TH}
                   >
                     {header.isPlaceholder ? null : (
                       <div
                         className={`flex items-center gap-1 ${
-                          header.column.getCanSort()
-                            ? "cursor-pointer select-none hover:text-[var(--color-text)]"
-                            : ""
+                          header.column.getCanSort() ? TABLE_TH_SORTABLE : ""
                         }`}
+
                         onClick={header.column.getToggleSortingHandler()}
                       >
                         {flexRender(
@@ -212,11 +212,11 @@ export function DataTable<T>({
                         {header.column.getCanSort() && (
                           <span className="ml-1">
                             {header.column.getIsSorted() === "asc" ? (
-                              <ArrowUpSm style={{ width: 14, height: 14 }} />
+                              <ArrowUpSm style={{ width: TABLE_SORT_ICON_SIZE, height: TABLE_SORT_ICON_SIZE }} />
                             ) : header.column.getIsSorted() === "desc" ? (
-                              <ArrowDownSm style={{ width: 14, height: 14 }} />
+                              <ArrowDownSm style={{ width: TABLE_SORT_ICON_SIZE, height: TABLE_SORT_ICON_SIZE }} />
                             ) : (
-                              <Sort style={{ width: 14, height: 14 }} className="opacity-40" />
+                              <Sort style={{ width: TABLE_SORT_ICON_SIZE, height: TABLE_SORT_ICON_SIZE }} className="opacity-40" />
                             )}
                           </span>
                         )}
@@ -250,7 +250,7 @@ export function DataTable<T>({
                     <td
                       key={cell.id}
                       style={cell.column.getSize() !== 150 ? { minWidth: cell.column.getSize(), width: cell.column.getSize() } : undefined}
-                      className="truncate py-0 pr-2 align-middle text-sm text-[var(--color-text)]"
+                      className={TABLE_TD}
                       {...(cell.column.id === "_select" && { onClick: (e: React.MouseEvent) => e.stopPropagation() })}
                     >
                       {flexRender(

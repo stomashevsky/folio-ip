@@ -135,11 +135,11 @@ const columns: ColumnDef<GraphTemplate, unknown>[] = [
     size: 120,
     cell: ({ row }) =>
       row.original.isDefault ? (
-        <Badge color="info" variant="soft" size="sm">
+        <Badge pill color="info" variant="soft" size="sm">
           Default
         </Badge>
       ) : (
-        <Badge color="secondary" variant="soft" size="sm">
+        <Badge pill color="secondary" variant="soft" size="sm">
           Custom
         </Badge>
       ),

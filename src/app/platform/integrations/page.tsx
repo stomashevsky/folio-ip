@@ -228,21 +228,15 @@ export default function IntegrationsPage() {
             >
               <div className="mb-2 flex items-center justify-between">
                 <span className="heading-xs">{integration.name}</span>
-                <Badge
-                  color={getStatusColor(integration.status)}
-                  variant="soft"
-                  size="sm"
-                >
-                  {getStatusLabel(integration.status)}
-                </Badge>
+                <Badge pill color={getStatusColor(integration.status)}
+                variant="soft"
+                size="sm">{getStatusLabel(integration.status)}</Badge>
               </div>
               <p className="mb-3 text-sm text-[var(--color-text-secondary)]">
                 {integration.description}
               </p>
               <div className="flex items-center justify-between">
-                <Badge variant="soft" size="sm">
-                  {integration.category}
-                </Badge>
+                <Badge pill variant="soft" size="sm">{integration.category}</Badge>
                 <Button
                   size="sm"
                   variant="outline"

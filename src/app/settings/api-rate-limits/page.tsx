@@ -161,9 +161,7 @@ const columns: ColumnDef<RateLimit, unknown>[] = [
     cell: ({ row }) => {
       const status = row.original.status;
       return (
-        <Badge color={getRateLimitStatusColor(status) as BadgeProps["color"]} variant="soft">
-          {status.charAt(0).toUpperCase() + status.slice(1)}
-        </Badge>
+        <Badge pill color={getRateLimitStatusColor(status) as BadgeProps["color"]} variant="soft">{status.charAt(0).toUpperCase() + status.slice(1)}</Badge>
       );
     },
   },

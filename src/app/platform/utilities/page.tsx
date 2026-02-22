@@ -214,9 +214,7 @@ export default function UtilitiesPage() {
                 className="flex flex-col rounded-lg border border-[var(--color-border)] p-5 transition-colors hover:border-[var(--color-text-secondary)]"
               >
                 <div className="mb-3 flex items-center justify-between">
-                  <Badge color={getStatusColor(tool.status) as BadgeProps["color"]} variant="soft" size="sm">
-                    {tool.status.charAt(0).toUpperCase() + tool.status.slice(1)}
-                  </Badge>
+                  <Badge pill color={getStatusColor(tool.status) as BadgeProps["color"]} variant="soft" size="sm">{tool.status.charAt(0).toUpperCase() + tool.status.slice(1)}</Badge>
                   <span className="text-xs text-[var(--color-text-tertiary)]">
                     {tool.category}
                   </span>

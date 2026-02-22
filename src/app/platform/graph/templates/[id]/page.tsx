@@ -47,9 +47,9 @@ export default function GraphTemplateDetailPage() {
         actions={
           <div className="flex items-center gap-2">
             {template.isDefault ? (
-              <Badge color="info" variant="soft" size="sm">Default</Badge>
+              <Badge pill color="info" variant="soft" size="sm">Default</Badge>
             ) : (
-              <Badge color="secondary" variant="soft" size="sm">Custom</Badge>
+              <Badge pill color="secondary" variant="soft" size="sm">Custom</Badge>
             )}
             <Button color="secondary" variant="outline" size={TOPBAR_CONTROL_SIZE} pill={TOPBAR_ACTION_PILL}>
               Duplicate
@@ -93,9 +93,7 @@ export default function GraphTemplateDetailPage() {
               return (
                 <div key={nodeType} className="flex items-center justify-between rounded-lg border border-[var(--color-border)] px-4 py-3">
                   <div className="flex items-center gap-3">
-                    <Badge color={getNodeTypeColor(nodeType) as BadgeProps["color"]} variant="soft" size="sm">
-                      {nodeType.replace("_", " ")}
-                    </Badge>
+                    <Badge pill color={getNodeTypeColor(nodeType) as BadgeProps["color"]} variant="soft" size="sm">{nodeType.replace("_", " ")}</Badge>
                   </div>
                   <Switch checked={included} onCheckedChange={() => {}} />
                 </div>

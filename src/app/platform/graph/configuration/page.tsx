@@ -60,7 +60,7 @@ export default function GraphConfigurationPage() {
         title="Graph Configuration"
          actions={
            <div className="flex items-center gap-2">
-             <Badge color="success" variant="soft" size="sm">Saved</Badge>
+             <Badge pill color="success" variant="soft" size="sm">Saved</Badge>
              <Button color="secondary" variant="outline" size={TOPBAR_CONTROL_SIZE} pill={TOPBAR_ACTION_PILL} onClick={() => {}}>
                Reset Defaults
              </Button>

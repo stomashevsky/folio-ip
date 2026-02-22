@@ -14,8 +14,6 @@ export function StatusBadge({ status, label }: StatusBadgeProps) {
   const displayLabel = label ?? status.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 
   return (
-    <Badge color={color} variant="soft">
-      {displayLabel}
-    </Badge>
+    <Badge pill color={color} variant="soft">{displayLabel}</Badge>
   );
 }

@@ -55,7 +55,7 @@ export function OverviewTab({ report }: { report: Report }) {
                     {src.lastChecked}
                   </td>
                   <td className="px-4 py-3 text-right">
-                    <Badge color="success" size="sm">Screened</Badge>
+                    <Badge pill color="success" size="sm">Screened</Badge>
                   </td>
                 </tr>
               ))}

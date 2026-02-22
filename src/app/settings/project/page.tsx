@@ -65,7 +65,7 @@ export default function ProjectGeneralPage() {
           <Field label="Environment" description="Current environment for this project">
             <div className="flex items-center gap-2">
               <Input defaultValue="Sandbox" disabled />
-              <Badge color="warning" size="sm">Sandbox</Badge>
+              <Badge pill color="warning" size="sm">Sandbox</Badge>
             </div>
           </Field>
         </div>

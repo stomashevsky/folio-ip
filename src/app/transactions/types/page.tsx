@@ -127,14 +127,10 @@ const columns: ColumnDef<TransactionTypeConfig, unknown>[] = [
     header: "Risk Level",
     size: 120,
     cell: ({ row }) => (
-      <Badge
-        color={getRiskColor(row.original.riskLevel) as BadgeProps["color"]}
-        variant="soft"
-        size="sm"
-      >
-        {row.original.riskLevel.charAt(0).toUpperCase() +
-          row.original.riskLevel.slice(1)}
-      </Badge>
+      <Badge pill color={getRiskColor(row.original.riskLevel) as BadgeProps["color"]}
+      variant="soft"
+      size="sm">{row.original.riskLevel.charAt(0).toUpperCase() +
+        row.original.riskLevel.slice(1)}</Badge>
     ),
   },
   {
@@ -142,13 +138,9 @@ const columns: ColumnDef<TransactionTypeConfig, unknown>[] = [
     header: "Review Required",
     size: 140,
     cell: ({ row }) => (
-      <Badge
-        color={row.original.requiresReview ? "warning" : "secondary"}
-        variant="soft"
-        size="sm"
-      >
-        {row.original.requiresReview ? "Required" : "Auto"}
-      </Badge>
+      <Badge pill color={row.original.requiresReview ? "warning" : "secondary"}
+      variant="soft"
+      size="sm">{row.original.requiresReview ? "Required" : "Auto"}</Badge>
     ),
   },
   {

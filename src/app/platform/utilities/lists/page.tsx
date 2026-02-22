@@ -126,10 +126,8 @@ const columns: ColumnDef<List, unknown>[] = [
      header: "Type",
      size: 120,
      cell: ({ row }) => (
-       <Badge color={getListTypeColor(row.original.type) as BadgeProps["color"]} variant="soft" size="sm">
-         {row.original.type.charAt(0).toUpperCase() +
-           row.original.type.slice(1)}
-       </Badge>
+       <Badge pill color={getListTypeColor(row.original.type) as BadgeProps["color"]} variant="soft" size="sm">{row.original.type.charAt(0).toUpperCase() +
+         row.original.type.slice(1)}</Badge>
      ),
    },
   {

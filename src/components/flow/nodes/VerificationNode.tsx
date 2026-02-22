@@ -38,9 +38,7 @@ export function VerificationNode({ data }: NodeProps<VerificationFlowNode>) {
       <Handle type="target" position={Position.Top} id="target" />
       <span className="min-w-0 flex-1 truncate text-sm font-medium text-[var(--color-text-secondary-soft)]">{config.label}</span>
       {showRetryBadge && (
-        <Badge color="secondary" variant="outline" size="sm" pill={true}>
-          {data.maxRetries}
-        </Badge>
+        <Badge pill color="secondary" variant="outline" size="sm">{data.maxRetries}</Badge>
       )}
       <Handle type="source" position={Position.Left} id="left" style={{ top: "80%" }} />
       <Handle type="source" position={Position.Right} id="right" style={{ top: "80%" }} />

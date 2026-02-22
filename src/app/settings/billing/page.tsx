@@ -71,7 +71,7 @@ export default function BillingPage() {
         <div className="rounded-lg border border-[var(--color-border)] p-4 mb-6">
           <div className="flex items-center justify-between mb-2">
             <span className="heading-sm">Growth</span>
-            <Badge color="success" variant="soft" size="sm">
+            <Badge pill color="success" variant="soft" size="sm">
               Active
             </Badge>
           </div>
@@ -181,14 +181,10 @@ export default function BillingPage() {
                     {item.amount}
                   </td>
                   <td className="px-4 py-3 text-sm">
-                    <Badge
-                      color={item.status === "paid" ? "success" : "secondary"}
-                      variant="soft"
-                      size="sm"
-                    >
-                      {item.status.charAt(0).toUpperCase() +
-                        item.status.slice(1)}
-                    </Badge>
+                    <Badge pill color={item.status === "paid" ? "success" : "secondary"}
+                    variant="soft"
+                    size="sm">{item.status.charAt(0).toUpperCase() +
+                      item.status.slice(1)}</Badge>
                   </td>
                   <td className="px-4 py-3 text-right text-sm">
                     <Button color="secondary" variant="soft" size="sm" pill={false}>

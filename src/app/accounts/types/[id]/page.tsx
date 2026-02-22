@@ -80,9 +80,7 @@ export default function AccountTypeDetailPage() {
           </Field>
           <Field label="Active Accounts">
             <div className="py-1">
-              <Badge color="info" variant="soft" size="sm">
-                {accountType.accountsCount.toLocaleString()}
-              </Badge>
+              <Badge pill color="info" variant="soft" size="sm">{accountType.accountsCount.toLocaleString()}</Badge>
             </div>
           </Field>
         </div>

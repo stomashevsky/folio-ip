@@ -163,9 +163,7 @@ const columns: ColumnDef<Signal, unknown>[] = [
     cell: ({ row }) => {
       const category = row.original.category;
       return (
-        <Badge color={getSignalCategoryColor(category) as BadgeProps["color"]} variant="soft">
-          {category.charAt(0).toUpperCase() + category.slice(1)}
-        </Badge>
+        <Badge pill color={getSignalCategoryColor(category) as BadgeProps["color"]} variant="soft">{category.charAt(0).toUpperCase() + category.slice(1)}</Badge>
       );
     },
   },
@@ -176,9 +174,7 @@ const columns: ColumnDef<Signal, unknown>[] = [
     cell: ({ row }) => {
       const severity = row.original.severity;
       return (
-        <Badge color={getRiskColor(severity) as BadgeProps["color"]} variant="soft">
-          {severity.charAt(0).toUpperCase() + severity.slice(1)}
-        </Badge>
+        <Badge pill color={getRiskColor(severity) as BadgeProps["color"]} variant="soft">{severity.charAt(0).toUpperCase() + severity.slice(1)}</Badge>
       );
     },
   },
@@ -189,9 +185,7 @@ const columns: ColumnDef<Signal, unknown>[] = [
     cell: ({ row }) => {
       const enabled = row.original.enabled;
       return (
-        <Badge color={enabled ? "success" : "secondary"} variant="soft">
-          {enabled ? "Active" : "Disabled"}
-        </Badge>
+        <Badge pill color={enabled ? "success" : "secondary"} variant="soft">{enabled ? "Active" : "Disabled"}</Badge>
       );
     },
   },

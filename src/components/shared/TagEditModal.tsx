@@ -76,9 +76,7 @@ export function TagEditModal({
                    pill={false}
                    onClick={() => addSuggestion(tag)}
                  >
-                   <Badge color="secondary" size="sm">
-                     {tag}
-                   </Badge>
+                   <Badge pill color="secondary" size="sm">{tag}</Badge>
                  </Button>
                ))}
              </div>

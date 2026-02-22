@@ -23,9 +23,7 @@ export function ActivityTab({ events }: { events: TimelineEvent[] }) {
               <p className="text-sm font-medium text-[var(--color-text)]">
                 {event.description}
               </p>
-              <Badge color={getEventLevelColor(event.level) as BadgeProps["color"]} size="sm">
-                {event.level}
-              </Badge>
+              <Badge pill color={getEventLevelColor(event.level) as BadgeProps["color"]} size="sm">{event.level}</Badge>
             </div>
             {event.actor && (
               <p className="mt-0.5 text-sm text-[var(--color-text-secondary)]">

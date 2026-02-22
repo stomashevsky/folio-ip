@@ -140,9 +140,7 @@ const columns: ColumnDef<AccountType, unknown>[] = [
     cell: ({ row }) => {
       const autoApprove = row.original.autoApprove;
       return (
-        <Badge color={autoApprove ? "success" : "secondary"} variant="soft">
-          {autoApprove ? "Auto" : "Manual"}
-        </Badge>
+        <Badge pill color={autoApprove ? "success" : "secondary"} variant="soft">{autoApprove ? "Auto" : "Manual"}</Badge>
       );
     },
   },

@@ -18,11 +18,9 @@ export function ScreeningResults({ report }: { report: Report }) {
           title="Screening results"
           badge={
             hasMatches ? (
-              <Badge color="danger" size="sm">
-                {report.matchCount} match{report.matchCount > 1 ? "es" : ""}
-              </Badge>
+              <Badge pill color="danger" size="sm">{report.matchCount} match{report.matchCount > 1 ? "es" : ""}</Badge>
             ) : (
-              <Badge color="success" size="sm">
+              <Badge pill color="success" size="sm">
                 Clear
               </Badge>
             )

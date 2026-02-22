@@ -52,14 +52,10 @@ export function OverviewTab({
             {
               label: "Priority",
               value: (
-                <Badge
-                  color={getPriorityColor(caseItem.priority) as BadgeProps["color"]}
-                  variant="soft"
-                  size="sm"
-                >
-                  {caseItem.priority.charAt(0).toUpperCase() +
-                    caseItem.priority.slice(1)}
-                </Badge>
+                <Badge pill color={getPriorityColor(caseItem.priority) as BadgeProps["color"]}
+                variant="soft"
+                size="sm">{caseItem.priority.charAt(0).toUpperCase() +
+                  caseItem.priority.slice(1)}</Badge>
               ),
             },
             {
@@ -180,9 +176,7 @@ export function OverviewTab({
                        </td>
                        <td className="px-4 py-3"><StatusBadge status={rc.status} /></td>
                        <td className="px-4 py-3">
-                         <Badge color={getPriorityColor(rc.priority) as BadgeProps["color"]} variant="soft" size="sm">
-                           {rc.priority.charAt(0).toUpperCase() + rc.priority.slice(1)}
-                         </Badge>
+                         <Badge pill color={getPriorityColor(rc.priority) as BadgeProps["color"]} variant="soft" size="sm">{rc.priority.charAt(0).toUpperCase() + rc.priority.slice(1)}</Badge>
                        </td>
                      </tr>
                    ))}

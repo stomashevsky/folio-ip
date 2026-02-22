@@ -61,9 +61,7 @@ export function DetailPageSidebar({
         {tags.length > 0 ? (
           <div className="flex flex-wrap gap-2">
             {tags.map((tag) => (
-              <Badge key={tag} color="secondary" size="sm">
-                {tag}
-              </Badge>
+              <Badge pill key={tag} color="secondary" size="sm">{tag}</Badge>
             ))}
           </div>
         ) : tagEmptyMessage ? (

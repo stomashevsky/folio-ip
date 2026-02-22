@@ -10,9 +10,7 @@ function ThreatBadge({ level }: { level: string }) {
   const color = getRiskColor(level) as BadgeProps["color"];
   const label = level.charAt(0).toUpperCase() + level.slice(1);
   return (
-    <Badge color={color} size="sm">
-      {label}
-    </Badge>
+    <Badge pill color={color} size="sm">{label}</Badge>
   );
 }
 

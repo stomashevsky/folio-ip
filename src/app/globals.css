@@ -173,6 +173,12 @@ body {
   outline: none !important;
 }
 
+/* Suppress checkbox @starting-style entry animation on initial mount */
+[data-suppress-anim] * {
+  transition-duration: 0s !important;
+  animation-duration: 0s !important;
+}
+
 /* ─── Mobile overrides ─── */
 @media (max-width: 767px) {
   /* SidebarInset has margin-left:0 (flush with sidebar on desktop).

@@ -122,9 +122,7 @@ const columns: ColumnDef<AssignmentPolicy, unknown>[] = [
     header: "Strategy",
     size: 140,
     cell: ({ row }) => (
-      <Badge color="secondary" size="sm">
-        {row.original.strategy.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}
-      </Badge>
+      <Badge pill color="secondary" size="sm">{row.original.strategy.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}</Badge>
     ),
   },
   {
@@ -143,7 +141,7 @@ const columns: ColumnDef<AssignmentPolicy, unknown>[] = [
     size: 120,
     cell: ({ row }) => {
       const p = row.original.priority;
-      return <Badge color={getPriorityColor(p) as BadgeProps["color"]} variant="soft" size="sm">{p.charAt(0).toUpperCase() + p.slice(1)}</Badge>;
+      return <Badge pill color={getPriorityColor(p) as BadgeProps["color"]} variant="soft" size="sm">{p.charAt(0).toUpperCase() + p.slice(1)}</Badge>;
     },
   },
   {
@@ -151,12 +149,8 @@ const columns: ColumnDef<AssignmentPolicy, unknown>[] = [
     header: "Status",
     size: 120,
     cell: ({ row }) => (
-      <Badge
-        color={row.original.enabled ? "success" : "secondary"}
-        size="sm"
-      >
-        {row.original.enabled ? "Active" : "Disabled"}
-      </Badge>
+      <Badge pill color={row.original.enabled ? "success" : "secondary"}
+      size="sm">{row.original.enabled ? "Active" : "Disabled"}</Badge>
     ),
   },
   {

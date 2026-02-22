@@ -63,7 +63,7 @@ export default function OrganizationGeneralPage() {
           <div className="flex items-center justify-between border-b border-[var(--color-border)] px-4 py-3">
             <div className="flex items-center gap-3">
               <p className="text-sm font-medium text-[var(--color-text)]">Current plan</p>
-              <Badge color="info" size="sm">Business</Badge>
+              <Badge pill color="info" size="sm">Business</Badge>
             </div>
             <Button color="secondary" variant="soft" size="sm" pill={false}>
               Manage plan
@@ -123,7 +123,7 @@ export default function OrganizationGeneralPage() {
                   Using simulated data for testing and development
                 </p>
               </div>
-              <Badge color="warning">Sandbox</Badge>
+              <Badge pill color="warning">Sandbox</Badge>
             </div>
           </div>
 

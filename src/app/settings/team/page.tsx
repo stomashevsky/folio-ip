@@ -183,16 +183,12 @@ export default function TeamPage() {
             {
               header: "Role",
               render: (member) => (
-                <Badge
-                  color={
-                    getRoleBadgeColor(member.role) as
-                      | "discovery"
-                      | "info"
-                      | "secondary"
-                  }
-                >
-                  {member.role}
-                </Badge>
+                <Badge pill color={
+                  getRoleBadgeColor(member.role) as
+                    | "discovery"
+                    | "info"
+                    | "secondary"
+                }>{member.role}</Badge>
               ),
             },
             {
@@ -258,16 +254,12 @@ export default function TeamPage() {
                       {member.name}
                     </span>
                     <div className="flex items-center gap-2">
-                      <Badge
-                        color={
-                          getRoleBadgeColor(member.role) as
-                            | "discovery"
-                            | "info"
-                            | "secondary"
-                        }
-                      >
-                        {member.role}
-                      </Badge>
+                      <Badge pill color={
+                        getRoleBadgeColor(member.role) as
+                          | "discovery"
+                          | "info"
+                          | "secondary"
+                      }>{member.role}</Badge>
                       {member.role !== "Owner" && (
                         <Menu>
                           <Menu.Trigger>

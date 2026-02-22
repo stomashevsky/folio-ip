@@ -52,9 +52,8 @@ export default function TransactionTypeDetailPage() {
         backHref="/transactions/types"
         actions={
           <div className="flex items-center gap-2">
-            <Badge color={getRiskColor(txType.riskLevel) as BadgeProps["color"]} variant="soft" size="sm">
-              {txType.riskLevel.charAt(0).toUpperCase() + txType.riskLevel.slice(1)} Risk
-            </Badge>
+            <Badge pill color={getRiskColor(txType.riskLevel) as BadgeProps["color"]} variant="soft" size="sm">{txType.riskLevel.charAt(0).toUpperCase() + txType.riskLevel.slice(1)} Risk
+                        </Badge>
             <Button color="primary" size={TOPBAR_CONTROL_SIZE} pill={TOPBAR_ACTION_PILL}>
               Save Changes
             </Button>

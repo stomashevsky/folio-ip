@@ -105,9 +105,7 @@ const columns: ColumnDef<Inquiry, unknown>[] = [
       row.original.tags.length > 0 ? (
         <div className="flex flex-wrap gap-1">
           {row.original.tags.map((tag) => (
-            <Badge key={tag} color="secondary" variant="soft">
-              {tag}
-            </Badge>
+            <Badge pill key={tag} color="secondary" variant="soft">{tag}</Badge>
           ))}
         </div>
       ) : (

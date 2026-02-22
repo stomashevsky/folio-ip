@@ -217,9 +217,7 @@ export default function WebhooksPage() {
       cell: ({ row }) => (
         <div className="flex flex-wrap gap-1">
           {row.original.events.map((event) => (
-            <Badge key={event} color="secondary" variant="soft">
-              {event}
-            </Badge>
+            <Badge pill key={event} color="secondary" variant="soft">{event}</Badge>
           ))}
         </div>
       ),
@@ -239,16 +237,12 @@ export default function WebhooksPage() {
       header: "Status",
       size: 100,
       cell: ({ row }) => (
-        <Badge
-          color={
-            getActiveBadgeColor(row.original.status === "active") as
-              | "success"
-              | "secondary"
-          }
-          variant="soft"
-        >
-          {row.original.status === "active" ? "Active" : "Disabled"}
-        </Badge>
+        <Badge pill color={
+          getActiveBadgeColor(row.original.status === "active") as
+            | "success"
+            | "secondary"
+        }
+        variant="soft">{row.original.status === "active" ? "Active" : "Disabled"}</Badge>
       ),
     },
     {

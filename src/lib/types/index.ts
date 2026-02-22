@@ -38,7 +38,7 @@ export type AccountStatus = "default" | "active" | "suspended" | "closed";
 
 export type CheckStatus = "passed" | "failed" | "not_applicable";
 
-export type CheckCategory = "fraud" | "user_action_required" | "validity" | "biometrics";
+export type CheckCategory = "fraud" | "user_action_required";
 
 export type SignalLevel = "low" | "medium" | "high";
 
@@ -266,7 +266,7 @@ export interface CheckSubConfig {
 
 export interface VerificationCheckConfig {
   name: string;
-  category: CheckCategory;
+  categories: CheckCategory[];
   required: boolean;
   enabled: boolean;
   lifecycle?: CheckLifecycle;

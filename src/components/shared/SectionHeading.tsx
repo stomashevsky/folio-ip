@@ -20,9 +20,7 @@ export function SectionHeading({ children, badge, action, size = "sm" }: Section
     <h2 className={`${headingClass} flex items-center gap-2 text-[var(--color-text)]`}>
       {children}
       {badge != null && badge > 0 && (
-        <Badge color="secondary" size="sm">
-          {badge}
-        </Badge>
+        <Badge pill color="secondary" size="sm">{badge}</Badge>
       )}
     </h2>
   );

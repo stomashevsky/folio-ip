@@ -35,9 +35,7 @@ export function OverviewTab({ transaction }: { transaction: Transaction }) {
             {
               label: "Type",
               value: (
-                <Badge color="secondary" variant="soft" size="sm" pill>
-                  {transaction.type.charAt(0).toUpperCase() + transaction.type.slice(1)}
-                </Badge>
+                <Badge pill color="secondary" variant="soft" size="sm">{transaction.type.charAt(0).toUpperCase() + transaction.type.slice(1)}</Badge>
               ),
             },
             { label: "Amount", value: <span className="font-medium">{formattedAmount}</span> },
@@ -77,7 +75,7 @@ export function OverviewTab({ transaction }: { transaction: Transaction }) {
                 <tr key={f.name} className="border-b border-[var(--color-border)]">
                   <td className="px-4 py-3 text-sm font-medium text-[var(--color-text)]">{f.name}</td>
                   <td className="px-4 py-3">
-                    <Badge color={getRiskColor(f.level) as BadgeProps["color"]} size="sm">{f.level.charAt(0).toUpperCase() + f.level.slice(1)}</Badge>
+                    <Badge pill color={getRiskColor(f.level) as BadgeProps["color"]} size="sm">{f.level.charAt(0).toUpperCase() + f.level.slice(1)}</Badge>
                   </td>
                   <td className="px-4 py-3 text-sm text-[var(--color-text-secondary)]">{f.description}</td>
                 </tr>

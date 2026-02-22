@@ -186,14 +186,10 @@ export default function SmtpTestPage() {
                     {result.recipient}
                   </td>
                   <td className="px-4 py-3 text-sm">
-                    <Badge
-                      color={result.status === "success" ? "success" : "danger"}
-                      variant="soft"
-                      size="sm"
-                    >
-                      {result.status.charAt(0).toUpperCase() +
-                        result.status.slice(1)}
-                    </Badge>
+                    <Badge pill color={result.status === "success" ? "success" : "danger"}
+                    variant="soft"
+                    size="sm">{result.status.charAt(0).toUpperCase() +
+                      result.status.slice(1)}</Badge>
                   </td>
                   <td className="px-4 py-3 text-sm text-[var(--color-text-secondary)]">
                     {result.sentAt}

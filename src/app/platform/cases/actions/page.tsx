@@ -147,9 +147,7 @@ const columns: ColumnDef<CaseAction, unknown>[] = [
     cell: ({ row }) => {
       const type = row.original.actionType;
       return (
-        <Badge color={getActionTypeColor(type) as BadgeProps["color"]} size="sm">
-          {type.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}
-        </Badge>
+        <Badge pill color={getActionTypeColor(type) as BadgeProps["color"]} size="sm">{type.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}</Badge>
       );
     },
   },
@@ -158,12 +156,8 @@ const columns: ColumnDef<CaseAction, unknown>[] = [
     header: "Status",
     size: 120,
     cell: ({ row }) => (
-      <Badge
-        color={row.original.enabled ? "success" : "secondary"}
-        size="sm"
-      >
-        {row.original.enabled ? "Active" : "Disabled"}
-      </Badge>
+      <Badge pill color={row.original.enabled ? "success" : "secondary"}
+      size="sm">{row.original.enabled ? "Active" : "Disabled"}</Badge>
     ),
   },
   {

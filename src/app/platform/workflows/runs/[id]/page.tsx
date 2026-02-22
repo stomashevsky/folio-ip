@@ -203,17 +203,13 @@ function RunDetailContent() {
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2">
                         <span className="text-sm font-medium text-[var(--color-text)]">{step.name}</span>
-                        <Badge
-                          color={
-                            step.status === "completed" ? "success" :
-                            step.status === "failed" ? "danger" :
-                            step.status === "running" ? "warning" :
-                            "secondary"
-                          }
-                          size="sm"
-                        >
-                          {step.status}
-                        </Badge>
+                        <Badge pill color={
+                          step.status === "completed" ? "success" :
+                          step.status === "failed" ? "danger" :
+                          step.status === "running" ? "warning" :
+                          "secondary"
+                        }
+                        size="sm">{step.status}</Badge>
                       </div>
                       <div className="mt-1 flex items-center gap-3 text-xs text-[var(--color-text-tertiary)]">
                         {step.startedAt && <span>Started: {formatDateTime(step.startedAt)}</span>}

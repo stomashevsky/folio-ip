@@ -181,7 +181,7 @@ function ReportDetailContent() {
               </InfoRow>
               <InfoRow label="Continuous Monitoring">
                 {report.continuousMonitoring ? (
-                  <Badge color="success" size="sm">
+                  <Badge pill color="success" size="sm">
                     Enabled
                   </Badge>
                 ) : (

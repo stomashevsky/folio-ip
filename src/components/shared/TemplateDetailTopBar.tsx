@@ -51,14 +51,10 @@ export function TemplateDetailTopBar({
         <span className="flex items-center gap-2">
           {title}
           {!isNew && (
-            <Badge
-              color={
-                getStatusColor(status) as "warning" | "success" | "secondary"
-              }
-              size="sm"
-            >
-              {status}
-            </Badge>
+            <Badge pill color={
+              getStatusColor(status) as "warning" | "success" | "secondary"
+            }
+            size="sm">{status}</Badge>
           )}
         </span>
       }

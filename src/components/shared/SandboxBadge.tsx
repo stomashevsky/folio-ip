@@ -11,20 +11,15 @@ export function SandboxBadge() {
     <Menu>
       <Menu.Trigger asChild>
         <button type="button" className="cursor-pointer">
-          <Badge
-            color={environment === "sandbox" ? "warning" : "success"}
-            variant="soft"
-            size="sm"
-            pill
-          >
-            {environment === "sandbox" ? "Sandbox" : "Production"}
-          </Badge>
+          <Badge pill color={environment === "sandbox" ? "warning" : "success"}
+          variant="soft"
+          size="sm">{environment === "sandbox" ? "Sandbox" : "Production"}</Badge>
         </button>
       </Menu.Trigger>
       <Menu.Content align="start" sideOffset={8} minWidth={160}>
         <Menu.Item onSelect={() => setEnvironment("sandbox")}>
           <span className="flex items-center gap-2">
-            <Badge color="warning" variant="soft" size="sm" pill>
+            <Badge pill color="warning" variant="soft" size="sm">
               Sandbox
             </Badge>
             {environment === "sandbox" && (
@@ -34,7 +29,7 @@ export function SandboxBadge() {
         </Menu.Item>
         <Menu.Item onSelect={() => setEnvironment("production")}>
           <span className="flex items-center gap-2">
-            <Badge color="success" variant="soft" size="sm" pill>
+            <Badge pill color="success" variant="soft" size="sm">
               Production
             </Badge>
             {environment === "production" && (

@@ -124,9 +124,7 @@ const columns: ColumnDef<Theme, unknown>[] = [
       const color = status === "active" ? "success" : "secondary";
       const label = status === "active" ? "Active" : "Draft";
       return (
-        <Badge color={color} variant="soft">
-          {label}
-        </Badge>
+        <Badge pill color={color} variant="soft">{label}</Badge>
       );
     },
   },

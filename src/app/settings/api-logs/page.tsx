@@ -188,9 +188,7 @@ const columns: ColumnDef<ApiLog, unknown>[] = [
      cell: ({ row }) => {
        const method = row.original.method;
        return (
-         <Badge color={getHttpMethodColor(method) as BadgeProps["color"]} variant="soft">
-           {method}
-         </Badge>
+         <Badge pill color={getHttpMethodColor(method) as BadgeProps["color"]} variant="soft">{method}</Badge>
        );
      },
    },
@@ -211,9 +209,7 @@ const columns: ColumnDef<ApiLog, unknown>[] = [
      cell: ({ row }) => {
        const code = row.original.statusCode;
        return (
-         <Badge color={getHttpStatusColor(code) as BadgeProps["color"]} variant="soft">
-           {code}
-         </Badge>
+         <Badge pill color={getHttpStatusColor(code) as BadgeProps["color"]} variant="soft">{code}</Badge>
        );
      },
    },

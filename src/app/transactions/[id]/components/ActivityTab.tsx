@@ -53,7 +53,7 @@ export function ActivityTab({ transaction }: { transaction: Transaction }) {
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2">
               <p className="text-sm font-medium text-[var(--color-text)]">{event.title}</p>
-              <Badge color={getEventLevelColor(event.type) as BadgeProps["color"]} size="sm">{event.type.charAt(0).toUpperCase() + event.type.slice(1)}</Badge>
+              <Badge pill color={getEventLevelColor(event.type) as BadgeProps["color"]} size="sm">{event.type.charAt(0).toUpperCase() + event.type.slice(1)}</Badge>
             </div>
             <p className="mt-0.5 text-sm text-[var(--color-text-secondary)]">{event.description}</p>
             <p className="mt-1 text-xs text-[var(--color-text-tertiary)]">{formatDateTime(event.timestamp)} UTC</p>

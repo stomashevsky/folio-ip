@@ -94,26 +94,18 @@ export default function DomainManagerPage() {
                     {domain.domain}
                   </td>
                   <td className="px-4 py-3 text-sm">
-                    <Badge
-                      color={
-                        domain.status === "verified" ? "success" : "secondary"
-                      }
-                      variant="soft"
-                      size="sm"
-                    >
-                      {domain.status.charAt(0).toUpperCase() +
-                        domain.status.slice(1)}
-                    </Badge>
+                    <Badge pill color={
+                      domain.status === "verified" ? "success" : "secondary"
+                    }
+                    variant="soft"
+                    size="sm">{domain.status.charAt(0).toUpperCase() +
+                      domain.status.slice(1)}</Badge>
                   </td>
                   <td className="px-4 py-3 text-sm">
-                    <Badge
-                      color={domain.ssl === "active" ? "success" : "secondary"}
-                      variant="soft"
-                      size="sm"
-                    >
-                      {domain.ssl.charAt(0).toUpperCase() +
-                        domain.ssl.slice(1)}
-                    </Badge>
+                    <Badge pill color={domain.ssl === "active" ? "success" : "secondary"}
+                    variant="soft"
+                    size="sm">{domain.ssl.charAt(0).toUpperCase() +
+                      domain.ssl.slice(1)}</Badge>
                   </td>
                   <td className="px-4 py-3 text-sm text-[var(--color-text-secondary)]">
                     {domain.addedAt}

@@ -198,9 +198,7 @@ const columns: ColumnDef<Event, unknown>[] = [
     cell: ({ row }) => {
       const actorType = row.original.actorType;
       return (
-        <Badge color="secondary" variant="soft">
-          {actorType.charAt(0).toUpperCase() + actorType.slice(1)}
-        </Badge>
+        <Badge pill color="secondary" variant="soft">{actorType.charAt(0).toUpperCase() + actorType.slice(1)}</Badge>
       );
     },
   },

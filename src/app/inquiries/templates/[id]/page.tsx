@@ -163,9 +163,7 @@ function InquiryTemplateDetailContent() {
           <span className="flex items-center gap-2">
             {title}
             {!isNew && (
-              <Badge color={getStatusColor(form.status) as "warning" | "success" | "secondary"} size="sm" pill>
-                {form.status.charAt(0).toUpperCase() + form.status.slice(1)}
-              </Badge>
+              <Badge pill color={getStatusColor(form.status) as "warning" | "success" | "secondary"} size="sm">{form.status.charAt(0).toUpperCase() + form.status.slice(1)}</Badge>
             )}
           </span>
         }

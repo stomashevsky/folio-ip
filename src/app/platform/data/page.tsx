@@ -72,9 +72,7 @@ const columns: ColumnDef<ActivityRecord, unknown>[] = [
     header: "Action",
     size: 100,
     cell: ({ row }) => (
-      <Badge color={row.original.action === "import" ? "info" : "secondary"} variant="soft" size="sm">
-        {row.original.action === "import" ? "Import" : "Export"}
-      </Badge>
+      <Badge pill color={row.original.action === "import" ? "info" : "secondary"} variant="soft" size="sm">{row.original.action === "import" ? "Import" : "Export"}</Badge>
     ),
   },
   {
@@ -96,9 +94,7 @@ const columns: ColumnDef<ActivityRecord, unknown>[] = [
     header: "Status",
     size: 120,
     cell: ({ row }) => (
-      <Badge color={getDataOpStatusColor(row.original.status) as BadgeProps["color"]} variant="soft" size="sm">
-        {row.original.status.charAt(0).toUpperCase() + row.original.status.slice(1)}
-      </Badge>
+      <Badge pill color={getDataOpStatusColor(row.original.status) as BadgeProps["color"]} variant="soft" size="sm">{row.original.status.charAt(0).toUpperCase() + row.original.status.slice(1)}</Badge>
     ),
   },
   {

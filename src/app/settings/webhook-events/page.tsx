@@ -227,9 +227,7 @@ const columns: ColumnDef<WebhookEvent, unknown>[] = [
         return <span className="text-[var(--color-text-tertiary)]">—</span>;
       }
       return (
-        <Badge color={getHttpStatusColor(code) as BadgeProps["color"]} variant="soft">
-          {code}
-        </Badge>
+        <Badge pill color={getHttpStatusColor(code) as BadgeProps["color"]} variant="soft">{code}</Badge>
       );
     },
   },
@@ -240,9 +238,7 @@ const columns: ColumnDef<WebhookEvent, unknown>[] = [
     cell: ({ row }) => {
       const status = row.original.status;
       return (
-        <Badge color={getDeliveryStatusColor(status) as BadgeProps["color"]} variant="soft">
-          {status}
-        </Badge>
+        <Badge pill color={getDeliveryStatusColor(status) as BadgeProps["color"]} variant="soft">{status}</Badge>
       );
     },
   },

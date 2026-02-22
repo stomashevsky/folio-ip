@@ -164,13 +164,9 @@ const platformColumns: ColumnDef<PlatformApiKey, unknown>[] = [
     header: "Environment",
     size: 130,
     cell: ({ row }) => (
-      <Badge
-        color={row.original.environment === "production" ? "info" : "secondary"}
-        variant="soft"
-        size="sm"
-      >
-        {row.original.environment === "production" ? "Production" : "Sandbox"}
-      </Badge>
+      <Badge pill color={row.original.environment === "production" ? "info" : "secondary"}
+      variant="soft"
+      size="sm">{row.original.environment === "production" ? "Production" : "Sandbox"}</Badge>
     ),
   },
   {
@@ -178,13 +174,9 @@ const platformColumns: ColumnDef<PlatformApiKey, unknown>[] = [
     header: "Status",
     size: 100,
     cell: ({ row }) => (
-      <Badge
-        color={row.original.status === "active" ? "success" : "danger"}
-        variant="soft"
-        size="sm"
-      >
-        {row.original.status === "active" ? "Active" : "Revoked"}
-      </Badge>
+      <Badge pill color={row.original.status === "active" ? "success" : "danger"}
+      variant="soft"
+      size="sm">{row.original.status === "active" ? "Active" : "Revoked"}</Badge>
     ),
   },
   {
@@ -276,7 +268,7 @@ function buildProviderColumns(onDelete: (key: StoredFlowChatKey) => void): Colum
       header: "Provider",
       size: 120,
       cell: ({ row }) => (
-        <Badge color="secondary" variant="soft" size="sm">{row.original.provider}</Badge>
+        <Badge pill color="secondary" variant="soft" size="sm">{row.original.provider}</Badge>
       ),
     },
     {
@@ -296,13 +288,9 @@ function buildProviderColumns(onDelete: (key: StoredFlowChatKey) => void): Colum
       header: "Status",
       size: 100,
       cell: ({ row }) => (
-        <Badge
-          color={row.original.active ? "success" : "danger"}
-          variant="soft"
-          size="sm"
-        >
-          {row.original.active ? "Active" : "Inactive"}
-        </Badge>
+        <Badge pill color={row.original.active ? "success" : "danger"}
+        variant="soft"
+        size="sm">{row.original.active ? "Active" : "Inactive"}</Badge>
       ),
     },
     {

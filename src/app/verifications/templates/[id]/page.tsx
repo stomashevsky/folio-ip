@@ -1,11 +1,22 @@
 "use client";
 
-import { Suspense, useMemo, useRef, useState } from "react";
+import { Fragment, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
+
+import {
+  useReactTable,
+  getCoreRowModel,
+  getSortedRowModel,
+  flexRender,
+  type ColumnDef,
+  type SortingState,
+} from "@tanstack/react-table";
 
 import { TopBar, TOPBAR_CONTROL_SIZE, TOPBAR_ACTION_PILL, TOPBAR_TOOLBAR_PILL } from "@/components/layout/TopBar";
 import { NotFoundPage, SectionHeading, ConfirmLeaveModal, CopyButton, Modal, ModalHeader, ModalBody, ModalFooter } from "@/components/shared";
 import { useTemplateForm } from "@/lib/hooks/useTemplateForm";
+
+import { checkDescriptions } from "@/lib/data/check-descriptions";
 
 import {
   ALL_ID_DOC_TYPES,
@@ -20,6 +31,7 @@ import {
 } from "@/lib/constants/countries";
 import type { CountrySettings, IdDocType, IdTypeConfig, Region, RequiredSides } from "@/lib/constants/countries";
 import { VERIFICATION_TYPE_OPTIONS } from "@/lib/constants/filter-options";
+import { TABLE_TH, TABLE_TH_BASE, TABLE_TH_SORTABLE, TABLE_SORT_ICON_SIZE, COUNTRIES_TD } from "@/lib/constants/page-layout";
 import { VERIFICATION_TEMPLATE_PRESETS } from "@/lib/constants/template-presets";
 import { AVAILABLE_CHECKS } from "@/lib/constants/verification-checks";
 import { useUnsavedChanges } from "@/lib/hooks/useUnsavedChanges";
@@ -49,8 +61,10 @@ import { SegmentedControl } from "@plexui/ui/components/SegmentedControl";
 import { Select } from "@plexui/ui/components/Select";
 import { Tabs } from "@plexui/ui/components/Tabs";
 import { Popover } from "@plexui/ui/components/Popover";
+import { Tooltip } from "@plexui/ui/components/Tooltip";
+import { TagInput, type Tag } from "@plexui/ui/components/TagInput";
 import { Switch } from "@plexui/ui/components/Switch";
-import { CloseBold, DotsHorizontal, Plus, Search } from "@plexui/ui/components/Icon";
+import { ArrowDownSm, ArrowUpSm, ChevronDownMd, DotsHorizontal, InfoCircle, Plus, Search, Sort, Trash } from "@plexui/ui/components/Icon";
 
 /* ─── Constants ─── */
 
@@ -64,29 +78,20 @@ const CAPTURE_METHOD_TYPES = new Set<VerificationType>(["government_id", "selfie
 
 const CHECK_CATEGORY_LABELS: Record<string, string> = {
   fraud: "Fraud",
-  validity: "Validity",
-  biometrics: "Biometrics",
-  user_action_required: "User action",
+  user_action_required: "User behavior",
 };
 
 const CHECK_CATEGORY_COLORS: Record<string, string> = {
   fraud: "danger",
-  validity: "secondary",
-  biometrics: "info",
-  user_action_required: "warning",
+  user_action_required: "secondary",
 };
 
-const CHECK_CATEGORY_OPTIONS = [
-  { value: "fraud", label: "Fraud" },
-  { value: "validity", label: "Validity" },
-  { value: "biometrics", label: "Biometrics" },
-];
-
-const CHECK_REQUIRED_OPTIONS = [
+const CHECK_FILTER_OPTIONS = [
   { value: "required", label: "Required" },
   { value: "optional", label: "Optional" },
+  { value: "enabled", label: "Enabled" },
+  { value: "disabled", label: "Disabled" },
 ];
-
 const ATTRIBUTE_OPTIONS: { value: ComparisonAttribute; label: string }[] = [
   { value: "name_first", label: "First name" },
   { value: "name_last", label: "Last name" },
@@ -135,9 +140,9 @@ interface VerificationForm {
 function checksForType(type: VerificationType): VerificationCheckConfig[] {
   return AVAILABLE_CHECKS[type].map((c) => ({
     name: c.name,
-    category: c.category,
+    categories: c.categories,
     required: c.defaultRequired,
-    enabled: true,
+    enabled: c.defaultEnabled,
     ...(c.lifecycle && { lifecycle: c.lifecycle }),
   }));
 }
@@ -159,9 +164,9 @@ function buildFormFromPreset(presetParam: string): VerificationForm {
     const existing = presetCheckNames.get(a.name);
     return {
       name: a.name,
-      category: a.category,
+      categories: a.categories,
       required: existing ? existing.required : a.defaultRequired,
-      enabled: true,
+      enabled: existing ? true : a.defaultEnabled,
       ...(a.lifecycle && { lifecycle: a.lifecycle }),
     };
   });
@@ -181,9 +186,9 @@ function toForm(t: VerificationTemplate): VerificationForm {
     const existing = existingByName.get(a.name);
     return {
       name: a.name,
-      category: a.category,
+      categories: a.categories,
       required: existing ? existing.required : a.defaultRequired,
-      enabled: true,
+      enabled: existing ? (existing.enabled ?? true) : a.defaultEnabled,
       ...(a.lifecycle && { lifecycle: a.lifecycle }),
     };
   });
@@ -242,6 +247,9 @@ function VerificationTemplateDetailContent() {
 
   const isDirty = isNew || JSON.stringify(form) !== JSON.stringify(initialForm);
   const { confirmNavigation, showLeaveConfirm, confirmLeave, cancelLeave } = useUnsavedChanges(isDirty);
+  const updateCheck = useCallback((i: number, next: VerificationCheckConfig) => {
+    setForm((prev) => ({ ...prev, checks: prev.checks.map((c, idx) => (idx === i ? next : c)) }));
+  }, [setForm]);
 
   if (!isNew && !existing) {
     return <NotFoundPage section="Verification Templates" backHref="/verifications/templates" entity="Verification template" />;
@@ -249,9 +257,6 @@ function VerificationTemplateDetailContent() {
 
   function patchSettings(p: Partial<VerificationForm["settings"]>) {
     setForm((prev) => ({ ...prev, settings: { ...prev.settings, ...p } }));
-  }
-  function updateCheck(i: number, next: VerificationCheckConfig) {
-    setForm((prev) => ({ ...prev, checks: prev.checks.map((c, idx) => (idx === i ? next : c)) }));
   }
   function toggleCountry(code: string) {
     const set = new Set(form.settings.allowedCountries);
@@ -325,9 +330,7 @@ function VerificationTemplateDetailContent() {
           <span className="flex items-center gap-2">
             {title}
             {!isNew && (
-              <Badge color={getStatusColor(form.status) as "warning" | "success" | "secondary"} size="sm" pill>
-                {form.status.charAt(0).toUpperCase() + form.status.slice(1)}
-              </Badge>
+              <Badge pill color={getStatusColor(form.status) as "warning" | "success" | "secondary"} size="sm">{form.status.charAt(0).toUpperCase() + form.status.slice(1)}</Badge>
             )}
           </span>
         }
@@ -436,6 +439,16 @@ const EXTRACTED_PROPERTY_OPTIONS: { value: ExtractedProperty; label: string }[] 
   { value: "nationality", label: "Nationality" },
 ];
 
+/** Row data shape used by TanStack Table in ChecksTab */
+interface CheckRow {
+  check: VerificationCheckConfig;
+  formIndex: number;
+  description: string | undefined;
+  requiresBiometric: boolean;
+  hasConfig: boolean;
+  configType: CheckConfigType | undefined;
+}
+
 function ChecksTab({
   checks,
   type,
@@ -446,218 +459,318 @@ function ChecksTab({
   onUpdateCheck: (index: number, check: VerificationCheckConfig) => void;
 }) {
   const [search, setSearch] = useState("");
-  const [categoryFilters, setCategoryFilters] = useState<string[]>([]);
-  const [requiredFilter, setRequiredFilter] = useState<string[]>([]);
+  const [filters, setFilters] = useState<string[]>([]);
+  const [openConfigs, setOpenConfigs] = useState<Set<string>>(new Set());
+  const [sorting, setSorting] = useState<SortingState>([{ id: "name", desc: false }]);
 
-  const filtered = useMemo(() => {
-    return checks.filter((check) => {
-      const matchesSearch = !search || check.name.toLowerCase().includes(search.toLowerCase());
-      const matchesCategory = categoryFilters.length === 0 || categoryFilters.includes(check.category);
-      const matchesRequired = requiredFilter.length === 0 || (
-        (requiredFilter.includes("required") && check.required) ||
-        (requiredFilter.includes("optional") && !check.required)
-      );
-      return matchesSearch && matchesCategory && matchesRequired;
-    });
-  }, [checks, search, categoryFilters, requiredFilter]);
+  // Suppress checkbox entry animation on initial mount — @starting-style in PlexUI
+  // Checkbox CSS causes all pre-checked checkboxes to animate in simultaneously.
+  const [suppressAnim, setSuppressAnim] = useState(true);
+  useEffect(() => {
+    const id = requestAnimationFrame(() => setSuppressAnim(false));
+    return () => cancelAnimationFrame(id);
+  }, []);
 
+  const enabledCount = checks.filter((c) => c.enabled).length;
   const requiredCount = checks.filter((c) => c.required).length;
 
-  function updateSubConfig(index: number, check: VerificationCheckConfig, patch: Partial<CheckSubConfig>) {
-    onUpdateCheck(index, {
-      ...check,
-      subConfig: { ...check.subConfig, ...patch },
+  const data = useMemo<CheckRow[]>(() => {
+    return checks
+      .map((check, formIndex) => {
+        const matchesSearch = !search || check.name.toLowerCase().includes(search.toLowerCase());
+        if (!matchesSearch) return null;
+        if (filters.length > 0) {
+          const matches =
+            (filters.includes("required") && check.required) ||
+            (filters.includes("optional") && !check.required) ||
+            (filters.includes("enabled") && check.enabled) ||
+            (filters.includes("disabled") && !check.enabled);
+          if (!matches) return null;
+        }
+        const availCheck = AVAILABLE_CHECKS[type]?.find((a) => a.name === check.name);
+        const isConfigurable = availCheck?.configurable === true;
+        const configType = availCheck?.configType;
+        return {
+          check,
+          formIndex,
+          description: checkDescriptions[check.name],
+          requiresBiometric: availCheck?.requiresBiometric === true,
+          hasConfig: isConfigurable && !!configType,
+          configType: isConfigurable ? configType : undefined,
+        } as CheckRow;
+      })
+      .filter((r): r is CheckRow => r !== null);
+  }, [checks, search, filters, type]);
+
+  const toggleConfig = useCallback((name: string) => {
+    setOpenConfigs((prev) => {
+      const next = new Set(prev);
+      if (next.has(name)) next.delete(name);
+      else next.add(name);
+      return next;
     });
-  }
+  }, []);
 
-  return (
-    <table className="-mb-px w-full" data-datatable>
-      <thead className="sticky top-0 z-10 bg-[var(--color-surface)]">
-        <tr>
-          <th colSpan={4} className="px-1 pt-3 pb-2 text-left font-normal">
-            <div className="flex items-center gap-2">
-              <div className="w-56">
-                <Input
-                  size={TOPBAR_CONTROL_SIZE}
-                  pill={TOPBAR_TOOLBAR_PILL}
-                  placeholder="Search checks..."
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  onClear={search ? () => setSearch("") : undefined}
-                  startAdornment={<Search style={{ width: 16, height: 16 }} />}
-                />
-              </div>
-              <div className="w-36">
-                <Select
-                  options={CHECK_CATEGORY_OPTIONS}
-                  value={categoryFilters}
-                  onChange={(opts) => setCategoryFilters(opts.map((o) => o.value))}
-                  multiple
-                  clearable
-                  placeholder="All categories"
-                  size={TOPBAR_CONTROL_SIZE}
-                  pill={TOPBAR_TOOLBAR_PILL}
-                  variant="outline"
-                  block
-                  listMinWidth={180}
-                />
-              </div>
-              <div className="w-36">
-                <Select
-                  options={CHECK_REQUIRED_OPTIONS}
-                  value={requiredFilter}
-                  onChange={(opts) => setRequiredFilter(opts.map((o) => o.value))}
-                  multiple
-                  clearable
-                  placeholder="All checks"
-                  size={TOPBAR_CONTROL_SIZE}
-                  pill={TOPBAR_TOOLBAR_PILL}
-                  variant="outline"
-                  block
-                  listMinWidth={160}
-                />
-              </div>
-              <div className="ml-auto flex items-center gap-1.5">
-                <Badge color="success" variant="soft" size="sm">{requiredCount} required</Badge>
-                <Badge color="secondary" variant="soft" size="sm">{checks.length} total</Badge>
-              </div>
-            </div>
-          </th>
-        </tr>
-        <tr className="border-b border-[var(--color-border)]">
-          <th className="w-16 px-3 py-2.5 text-left text-xs font-medium uppercase tracking-wider text-[var(--color-text-tertiary)]">
-            Required
-          </th>
-          <th className="px-3 py-2.5 text-left text-xs font-medium uppercase tracking-wider text-[var(--color-text-tertiary)]">
-            Check
-          </th>
-          <th className="w-28 px-3 py-2.5 text-left text-xs font-medium uppercase tracking-wider text-[var(--color-text-tertiary)]">
-            Type
-          </th>
-          <th className="w-10 px-3 py-2.5" />
-        </tr>
-      </thead>
-      <tbody>
-        {filtered.map((check) => {
-          const formIndex = checks.findIndex((c) => c.name === check.name);
-          const availCheck = AVAILABLE_CHECKS[type]?.find((a) => a.name === check.name);
-          const isConfigurable = availCheck?.configurable === true;
-          const configType = availCheck?.configType;
-
+  const columns = useMemo<ColumnDef<CheckRow, unknown>[]>(
+    () => [
+      {
+        id: "name",
+        accessorFn: (row) => row.check.name,
+        header: "Checks",
+        enableSorting: true,
+        cell: ({ row }) => {
+          const { check, description } = row.original;
           return (
-            <CheckRow
-              key={check.name}
-              check={check}
-              formIndex={formIndex}
-              isConfigurable={isConfigurable}
-              configType={configType}
-              defaultRequired={availCheck?.defaultRequired ?? false}
-              onUpdateCheck={onUpdateCheck}
-              onUpdateSubConfig={(patch) => updateSubConfig(formIndex, check, patch)}
-            />
+            <div className="flex items-center gap-1.5">
+              <span className="text-sm font-medium text-[var(--color-text)]">{check.name}</span>
+              {description && (
+                <Tooltip content={description} side="top" sideOffset={4}>
+                  <InfoCircle className="size-3.5 shrink-0 cursor-help text-[var(--color-text-tertiary)]" />
+                </Tooltip>
+              )}
+              {check.lifecycle === "beta" && (
+                <Badge pill color="discovery" variant="soft" size="sm">Beta</Badge>
+              )}
+              {check.lifecycle === "sunset" && (
+                <Badge pill color="warning" variant="soft" size="sm">Sunset</Badge>
+              )}
+            </div>
           );
-        })}
-        {filtered.length === 0 && (
-          <tr className="border-b border-[var(--color-border)]">
-            <td colSpan={4} className="py-8 text-center text-sm text-[var(--color-text-tertiary)]">
-              No checks match your filters.
-            </td>
-          </tr>
-        )}
-      </tbody>
-    </table>
+        },
+      },
+      {
+        id: "category",
+        accessorFn: (row) => row.check.categories[0] ?? "",
+        header: "Type",
+        size: 200,
+        enableSorting: true,
+        cell: ({ row }) => (
+          <div className="flex flex-wrap gap-1">
+            {row.original.check.categories.map((cat) => (
+              <Badge pill key={cat} color={(CHECK_CATEGORY_COLORS[cat] ?? "secondary") as "info" | "secondary" | "danger" | "discovery" | "warning"} variant="soft" size="sm">{CHECK_CATEGORY_LABELS[cat] ?? cat}</Badge>
+            ))}
+            {row.original.requiresBiometric && (
+              <Tooltip content="Biometric processing is required to use this feature. We recommend consulting with your legal team and compliance advisors to ensure that your business meets the proper requirements to process this biometric data." side="top" sideOffset={4}>
+                <Badge pill color="info" variant="soft" size="sm">
+                  <span className="flex items-center gap-1">Biometric <InfoCircle style={{ width: 12, height: 12 }} /></span>
+                </Badge>
+              </Tooltip>
+            )}
+          </div>
+        ),
+      },
+      {
+        id: "required",
+        accessorFn: (row) => row.check.required,
+        header: "Required",
+        size: 120,
+        enableSorting: true,
+        sortDescFirst: true,
+        cell: ({ row }) => {
+          const { check, formIndex } = row.original;
+          return (
+             
+            <div onClick={(e) => e.stopPropagation()}>
+              <Checkbox
+                checked={check.required}
+                onCheckedChange={(c) => onUpdateCheck(formIndex, { ...check, required: !!c })}
+              />
+            </div>
+          );
+        },
+      },
+      {
+        id: "enabled",
+        accessorFn: (row) => row.check.enabled,
+        header: "Enabled",
+        size: 120,
+        enableSorting: true,
+        sortDescFirst: true,
+        cell: ({ row }) => {
+          const { check, formIndex } = row.original;
+          return (
+             
+            <div onClick={(e) => e.stopPropagation()}>
+              <Checkbox
+                checked={check.enabled}
+                onCheckedChange={(enabled) => {
+                  onUpdateCheck(formIndex, { ...check, enabled: !!enabled });
+                }}
+              />
+            </div>
+          );
+        },
+      },
+      {
+        id: "_chevron",
+        size: 48,
+        enableSorting: false,
+        header: () => null,
+        cell: ({ row, table: t }) => {
+          const { check, hasConfig } = row.original;
+          if (!hasConfig) return null;
+          const oc = (t.options.meta as { openConfigs: Set<string> }).openConfigs;
+          const isOpen = oc.has(check.name);
+          return (
+            <div className="flex items-center justify-center" onClick={(e) => e.stopPropagation()}>
+              <Button
+                color="secondary"
+                variant="soft"
+                size="sm"
+                uniform
+                pill={false}
+                onClick={() => toggleConfig(check.name)}
+                className={`transition-transform duration-200${isOpen ? " rotate-180" : ""}`}
+              >
+                <ChevronDownMd className="size-5" />
+              </Button>
+            </div>
+          );
+        },
+      },
+    ],
+    [onUpdateCheck, toggleConfig],
   );
-}
 
-/* ─── Check Row ─── */
-
-function CheckRow({
-  check,
-  formIndex,
-  isConfigurable,
-  configType,
-  defaultRequired,
-  onUpdateCheck,
-  onUpdateSubConfig,
-}: {
-  check: VerificationCheckConfig;
-  formIndex: number;
-  isConfigurable: boolean;
-  configType: CheckConfigType | undefined;
-  defaultRequired: boolean;
-  onUpdateCheck: (index: number, check: VerificationCheckConfig) => void;
-  onUpdateSubConfig: (patch: Partial<CheckSubConfig>) => void;
-}) {
-  const isModified = check.required !== defaultRequired || check.subConfig != null;
-  const hasConfig = isConfigurable && !!configType;
-
-  function resetToDefault() {
-    onUpdateCheck(formIndex, { ...check, required: defaultRequired, subConfig: undefined });
-  }
+  // eslint-disable-next-line react-hooks/incompatible-library -- TanStack Table API is intentionally non-memoizable
+  const table = useReactTable({
+    data,
+    columns,
+    state: { sorting },
+    meta: { openConfigs },
+    onSortingChange: setSorting,
+    getRowId: (row) => row.check.name,
+    getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+  });
 
   return (
-    <>
-      <tr className={hasConfig ? "border-b border-[var(--color-border)] border-dashed" : "border-b border-[var(--color-border)]"}>
-        <td className="w-16 px-3 py-2.5">
-          <Checkbox
-            checked={check.required}
-            onCheckedChange={(c) => onUpdateCheck(formIndex, { ...check, required: !!c })}
-          />
-        </td>
-        <td className="px-3 py-2.5">
-          <span className="inline-flex items-center gap-2">
-            <span className="text-md text-[var(--color-text)]">{check.name}</span>
-            {check.lifecycle === "beta" && (
-              <Badge color="discovery" variant="soft" size="sm">Beta</Badge>
-            )}
-            {check.lifecycle === "sunset" && (
-              <Badge color="warning" variant="soft" size="sm">Sunset</Badge>
-            )}
-          </span>
-        </td>
-        <td className="w-28 px-3 py-2.5">
-          <Badge
-            color={CHECK_CATEGORY_COLORS[check.category] as "danger" | "secondary" | "info" | "warning"}
-            variant="soft"
-            size="sm"
-          >
-            {CHECK_CATEGORY_LABELS[check.category] ?? check.category}
-          </Badge>
-        </td>
-        <td className="w-10 px-3 py-2.5">
-          <Menu>
-            <Menu.Trigger>
-              <Button color="secondary" variant="ghost" size="3xs" uniform>
-                <DotsHorizontal />
-              </Button>
-            </Menu.Trigger>
-            <Menu.Content side="bottom" align="end" sideOffset={4}>
-              <Menu.Item onClick={() => onUpdateCheck(formIndex, { ...check, required: !check.required })}>
-                {check.required ? "Mark optional" : "Mark required"}
-              </Menu.Item>
-              {isModified && (
-                <>
-                  <Menu.Separator />
-                  <Menu.Item onClick={resetToDefault}>Reset to default</Menu.Item>
-                </>
-              )}
-            </Menu.Content>
-          </Menu>
-        </td>
-      </tr>
-      {hasConfig && (
-        <tr className="border-b border-[var(--color-border)]">
-          <td />
-          <td colSpan={3} className="px-3 pb-4 pt-2">
-            <CheckConfigPanel
-              configType={configType}
-              subConfig={check.subConfig}
-              onUpdate={onUpdateSubConfig}
-            />
-          </td>
-        </tr>
-      )}
-    </>
+    <div data-suppress-anim={suppressAnim || undefined}>
+      <table className="-mb-px w-full" data-datatable>
+        <thead className="sticky top-0 z-10 bg-[var(--color-surface)]">
+          <tr>
+            <th colSpan={5} className="pt-6 pb-3 text-left font-normal">
+              <div className="flex flex-wrap items-center gap-2">
+                <div className="w-56">
+                  <Input
+                    size="sm"
+                    pill
+                    placeholder="Search checks..."
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    onClear={search ? () => setSearch("") : undefined}
+                    startAdornment={<Search style={{ width: 16, height: 16 }} />}
+                  />
+                </div>
+                <div className="w-44">
+                  <Select
+                    options={CHECK_FILTER_OPTIONS}
+                    value={filters}
+                    onChange={(opts) => setFilters(opts.map((o) => o.value))}
+                    multiple
+                    clearable
+                    placeholder="All checks"
+                    size="sm"
+                    pill
+                    variant="outline"
+                    block
+                    listMinWidth={160}
+                  />
+                </div>
+                {filters.length > 0 && (
+                  <Button color="secondary" variant="soft" size="sm" pill onClick={() => setFilters([])}>
+                    Clear filters
+                  </Button>
+                )}
+                <p className="ml-auto text-sm text-[var(--color-text-tertiary)]">
+                  {enabledCount} of {checks.length} enabled · {requiredCount} required
+                </p>
+              </div>
+            </th>
+          </tr>
+          {table.getHeaderGroups().map((headerGroup) => (
+            <tr key={headerGroup.id} style={{ boxShadow: "inset 0 -1px 0 var(--color-border)" }}>
+              {headerGroup.headers.map((header) => (
+                <th
+                  key={header.id}
+                  style={header.getSize() !== 150 ? { minWidth: header.getSize(), width: header.getSize() } : undefined}
+                  className={TABLE_TH}
+                >
+                  {header.isPlaceholder ? null : (
+                    <div
+                      className={`flex items-center gap-1 ${
+                        header.column.getCanSort()
+                          ? TABLE_TH_SORTABLE
+                          : ""
+                      }`}
+                      onClick={header.column.getToggleSortingHandler()}
+                    >
+                      {flexRender(header.column.columnDef.header, header.getContext())}
+                      {header.column.getCanSort() && (
+                        <span className="ml-1">
+                          {header.column.getIsSorted() === "asc" ? (
+                            <ArrowUpSm style={{ width: TABLE_SORT_ICON_SIZE, height: TABLE_SORT_ICON_SIZE }} />
+                          ) : header.column.getIsSorted() === "desc" ? (
+                            <ArrowDownSm style={{ width: TABLE_SORT_ICON_SIZE, height: TABLE_SORT_ICON_SIZE }} />
+                          ) : (
+                            <Sort style={{ width: TABLE_SORT_ICON_SIZE, height: TABLE_SORT_ICON_SIZE }} className="opacity-40" />
+                          )}
+                        </span>
+                      )}
+                    </div>
+                  )}
+                </th>
+              ))}
+            </tr>
+          ))}
+        </thead>
+        <tbody>
+          {table.getRowModel().rows.length === 0 ? (
+            <tr>
+              <td colSpan={5} className="py-12 text-center text-sm text-[var(--color-text-tertiary)]">
+                No checks match your filters.
+              </td>
+            </tr>
+          ) : (
+            table.getRowModel().rows.map((row) => {
+              const { check, formIndex, hasConfig, configType } = row.original;
+              const isConfigOpen = openConfigs.has(check.name);
+              return (
+                <Fragment key={row.id}>
+                  <tr className={`border-b border-[var(--color-border)]${hasConfig && isConfigOpen ? " border-b-transparent" : ""}${hasConfig ? " cursor-pointer" : ""}`} onClick={hasConfig ? () => toggleConfig(check.name) : undefined}>
+                    {row.getVisibleCells().map((cell) => (
+                      <td
+                        key={cell.id}
+                        style={cell.column.getSize() !== 150 ? { minWidth: cell.column.getSize(), width: cell.column.getSize() } : undefined}
+                        className="h-[50px] py-2.5 pr-2 align-middle"
+                      >
+                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      </td>
+                    ))}
+                  </tr>
+                  {hasConfig && isConfigOpen && configType && (
+                    <tr className="border-b border-[var(--color-border)]">
+                      <td colSpan={5} className="py-3">
+                        <CheckConfigPanel
+                          configType={configType}
+                          subConfig={check.subConfig}
+                          onUpdate={(patch) => {
+                            onUpdateCheck(formIndex, {
+                              ...check,
+                              subConfig: { ...check.subConfig, ...patch },
+                            });
+                          }}
+                        />
+                      </td>
+                    </tr>
+                  )}
+                </Fragment>
+              );
+            })
+          )}
+        </tbody>
+      </table>
+    </div>
   );
 }
 
@@ -681,7 +794,7 @@ function CheckConfigPanel({
               <Input
                 size="sm"
                 type="number"
-                placeholder="—"
+                placeholder=""
                 value={subConfig?.ageRange?.min != null ? String(subConfig.ageRange.min) : ""}
                 onChange={(e) => {
                   const val = e.target.value === "" ? undefined : Number(e.target.value);
@@ -695,7 +808,7 @@ function CheckConfigPanel({
               <Input
                 size="sm"
                 type="number"
-                placeholder="—"
+                placeholder=""
                 value={subConfig?.ageRange?.max != null ? String(subConfig.ageRange.max) : ""}
                 onChange={(e) => {
                   const val = e.target.value === "" ? undefined : Number(e.target.value);
@@ -842,12 +955,12 @@ function MatchRequirementsEditor({
     <div className="flex flex-col gap-3">
       {requirements.length === 0 ? (
         <>
-          <p className="text-sm text-[var(--color-text-tertiary)]">
+          <p className="text-sm text-[var(--color-text-secondary)]">
             No rules configured — default matching will be used.
           </p>
           {availableAttributes.length > 0 && (
             <div>
-              <Button color="secondary" variant="soft" size="xs" onClick={addRule}>
+              <Button color="secondary" variant="soft" size="xs" pill={false} onClick={addRule}>
                 <Plus /> Add rule
               </Button>
             </div>
@@ -866,10 +979,10 @@ function MatchRequirementsEditor({
                     color="secondary"
                     variant="ghost"
                     size="3xs"
-                    uniform
+                    pill={false}
                     onClick={() => removeRule(index)}
                   >
-                    <CloseBold />
+                    <Trash />
                   </Button>
                 </div>
                 <div className="flex items-start gap-3">
@@ -883,6 +996,7 @@ function MatchRequirementsEditor({
                         value={rule.attribute}
                         onChange={(o) => { if (o) updateRule(index, { attribute: o.value as ComparisonAttribute }); }}
                         size="sm"
+                        pill={false}
                         block
                         listMinWidth={180}
                       />
@@ -895,6 +1009,7 @@ function MatchRequirementsEditor({
                         value={rule.comparison.type === "simple" ? rule.comparison.matchLevel : "partial"}
                         onChange={(o) => { if (o) updateMatchLevel(index, o.value as MatchLevel); }}
                         size="sm"
+                        pill={false}
                         block
                         listMinWidth={160}
                       />
@@ -904,12 +1019,13 @@ function MatchRequirementsEditor({
                     <Field label="Normalization" size="sm">
                       <Select
                         options={NORMALIZATION_OPTIONS}
-                        value={rule.normalization.map((n) => n.method)}
+                        value={(rule.normalization ?? []).map((n) => n.method)}
                         onChange={(opts) => updateNormalization(index, opts.map((o) => o.value as NormalizationMethodType))}
                         multiple
                         clearable
                         placeholder="None"
                         size="sm"
+                        pill={false}
                         block
                         listMinWidth={260}
                       />
@@ -921,7 +1037,7 @@ function MatchRequirementsEditor({
           })}
           {availableAttributes.length > 0 && (
             <div>
-              <Button color="secondary" variant="soft" size="xs" onClick={addRule}>
+              <Button color="secondary" variant="soft" size="xs" pill={false} onClick={addRule}>
                 <Plus /> Add rule
               </Button>
             </div>
@@ -934,6 +1050,10 @@ function MatchRequirementsEditor({
 
 /* ─── Extracted Properties Panel ─── */
 
+const ATTRIBUTE_LABEL_TO_VALUE = new Map(
+  EXTRACTED_PROPERTY_OPTIONS.map((o) => [o.label.toLowerCase(), o.value]),
+);
+
 function ExtractedPropertiesPanel({
   requiredAttributes,
   passWhenMissing,
@@ -943,71 +1063,47 @@ function ExtractedPropertiesPanel({
   passWhenMissing: boolean;
   onUpdate: (patch: Partial<CheckSubConfig>) => void;
 }) {
-  const available = useMemo(
-    () => EXTRACTED_PROPERTY_OPTIONS.filter((o) => !requiredAttributes.includes(o.value)),
+  const tags = useMemo<Tag[]>(
+    () =>
+      requiredAttributes.map((attr) => ({
+        value: EXTRACTED_PROPERTY_OPTIONS.find((o) => o.value === attr)?.label ?? attr,
+        valid: true,
+      })),
     [requiredAttributes],
   );
 
-  function addAttribute() {
-    const next = available[0];
-    if (!next) return;
-    onUpdate({ requiredAttributes: [...requiredAttributes, next.value] });
-  }
+  const handleTagsChange = useCallback(
+    (newTags: Tag[]) => {
+      const attrs = newTags
+        .map((t) => ATTRIBUTE_LABEL_TO_VALUE.get(t.value.toLowerCase()))
+        .filter((v): v is ExtractedProperty => v !== undefined);
+      onUpdate({ requiredAttributes: attrs.length > 0 ? attrs : undefined });
+    },
+    [onUpdate],
+  );
 
-  function removeAttribute(attr: ExtractedProperty) {
-    const next = requiredAttributes.filter((a) => a !== attr);
-    onUpdate({ requiredAttributes: next.length > 0 ? next : undefined });
-  }
+  const validateTag = useCallback(
+    (value: string) => ATTRIBUTE_LABEL_TO_VALUE.has(value.toLowerCase()),
+    [],
+  );
 
   return (
     <div className="flex flex-col gap-4">
-      <div>
-        <div className="flex items-center justify-between">
-          <p className="text-sm font-medium text-[var(--color-text)]">Default required attributes</p>
-          {available.length > 0 && (
-            <Button color="secondary" variant="soft" size="xs" onClick={addAttribute}>
-              <Plus /> Add attribute
-            </Button>
-          )}
-        </div>
-        <p className="mt-1 text-sm text-[var(--color-text-secondary)]">
-          These default required attributes will be used for every country and ID type. You can override this default on a per-country and per-ID basis in Countries and ID Types.
-        </p>
-      </div>
+      <Field label="Default required attributes" description="These default required attributes will be used for every country and ID type. You can override this default on a per-country and per-ID basis in Countries and ID Types." size="sm">
+        <TagInput
+          value={tags}
+          onChange={handleTagsChange}
+          placeholder="Type attribute name…"
+          validator={validateTag}
+        />
+      </Field>
 
-      {requiredAttributes.length === 0 ? (
-        <p className="rounded-lg border border-[var(--color-border)] px-3 py-2 text-sm text-[var(--color-text-tertiary)]">
-          No required attributes
-        </p>
-      ) : (
-        <div className="flex flex-wrap gap-1.5">
-          {requiredAttributes.map((attr) => {
-            const label = EXTRACTED_PROPERTY_OPTIONS.find((o) => o.value === attr)?.label ?? attr;
-            return (
-              <Badge key={attr} color="secondary" variant="outline" size="md">
-                <span className="flex items-center gap-1">
-                  {label}
-                  <button
-                    type="button"
-                    className="ml-0.5 opacity-60 hover:opacity-100"
-                    onClick={() => removeAttribute(attr)}
-                  >
-                    <CloseBold style={{ width: 10, height: 10 }} />
-                  </button>
-                </span>
-              </Badge>
-            );
-          })}
-        </div>
-      )}
-
-      <div className="flex items-center justify-between">
-        <p className="text-sm text-[var(--color-text)]">Pass when required property does not appear on the ID</p>
+      <Field label="Pass when required property does not appear on the ID" size="sm">
         <Switch
           checked={passWhenMissing}
           onCheckedChange={(v) => onUpdate({ passWhenPropertyMissing: v })}
         />
-      </div>
+      </Field>
     </div>
   );
 }
@@ -1037,6 +1133,13 @@ function CountriesTab({
   const [regionFilters, setRegionFilters] = useState<string[]>([]);
   const [idTypeFilters, setIdTypeFilters] = useState<string[]>([]);
   const [bulkConfigOpen, setBulkConfigOpen] = useState(false);
+
+  // Suppress checkbox entry animation on mount
+  const [suppressAnim, setSuppressAnim] = useState(true);
+  useEffect(() => {
+    const id = requestAnimationFrame(() => setSuppressAnim(false));
+    return () => cancelAnimationFrame(id);
+  }, []);
 
   const selectedSet = useMemo(() => new Set(selected), [selected]);
 
@@ -1082,12 +1185,12 @@ function CountriesTab({
   const hasActiveFilters = statusFilters.length > 0 || regionFilters.length > 0 || idTypeFilters.length > 0 || search.trim() !== "";
 
   return (
-    <div>
+    <div data-suppress-anim={suppressAnim || undefined}>
       <table className="-mb-px w-full" data-datatable>
         <thead className="sticky top-0 z-10 bg-[var(--color-surface)]">
           <tr>
-            <th colSpan={6} className="px-3 pt-6 pb-3 text-left font-normal">
-              <div className="flex flex-wrap items-center gap-3">
+            <th colSpan={6} className="pt-6 pb-3 text-left font-normal">
+              <div className="flex flex-wrap items-center gap-2">
                 <div className="w-56">
                   <Input
                     size="sm"
@@ -1177,26 +1280,26 @@ function CountriesTab({
               </div>
             </th>
           </tr>
-          <tr className="border-b border-[var(--color-border)]">
-            <th className="w-10 px-3 py-2.5">
+          <tr style={{ boxShadow: "inset 0 -1px 0 var(--color-border)" }}>
+            <th className={`w-10 ${TABLE_TH}`}>
               <Checkbox
                 checked={allFilteredSelected ? true : someFilteredSelected ? "indeterminate" : false}
                 onCheckedChange={handleSelectAll}
               />
             </th>
-            <th className="w-52 px-3 py-2.5 text-left text-xs font-medium uppercase tracking-wider text-[var(--color-text-tertiary)]">
+            <th className={`w-52 ${TABLE_TH}`}>
               Country
             </th>
-            <th className="px-3 py-2.5 text-left text-xs font-medium uppercase tracking-wider text-[var(--color-text-tertiary)]">
+            <th className={TABLE_TH}>
               Accepted ID Types
             </th>
-            <th className="w-20 px-3 py-2.5 text-left text-xs font-medium uppercase tracking-wider text-[var(--color-text-tertiary)]">
+            <th className={`w-24 ${TABLE_TH}`}>
               Min Age
             </th>
-            <th className="w-20 px-3 py-2.5 text-left text-xs font-medium uppercase tracking-wider text-[var(--color-text-tertiary)]">
+            <th className={`w-24 ${TABLE_TH}`}>
               Max Age
             </th>
-            <th className="w-36 px-3 py-2.5 text-right text-xs font-medium uppercase tracking-wider text-[var(--color-text-tertiary)]">
+            <th className={`w-36 text-right ${TABLE_TH_BASE}`}>
               Region
             </th>
           </tr>
@@ -1539,14 +1642,10 @@ function IdTypeBadges({
       <Popover.Trigger>
         <button type="button" className="flex max-w-72 cursor-pointer flex-wrap gap-1">
           {displayTypes.map((t) => (
-            <Badge
-              key={t}
-              color={ID_DOC_TYPE_COLORS[t] as "info" | "discovery" | "warning" | "success" | "caution" | "secondary" | "danger"}
-              variant="soft"
-              size="sm"
-            >
-              {ID_DOC_TYPE_SHORT[t]}
-            </Badge>
+            <Badge pill key={t}
+            color={ID_DOC_TYPE_COLORS[t] as "info" | "discovery" | "warning" | "success" | "caution" | "secondary" | "danger"}
+            variant="soft"
+            size="sm">{ID_DOC_TYPE_SHORT[t]}</Badge>
           ))}
         </button>
       </Popover.Trigger>
@@ -1627,42 +1726,42 @@ function CountryRow({
     <tr
       className={`border-b border-[var(--color-border)] transition-colors ${enabled ? "bg-[var(--color-success-surface-bg)]" : ""}`}
     >
-      <td className="w-10 px-3 py-2">
+      <td className={`w-10 ${COUNTRIES_TD}`}>
         <Checkbox checked={enabled} onCheckedChange={onToggle} />
       </td>
-      <td className="w-52 px-3 py-2">
+      <td className={`w-52 ${COUNTRIES_TD}`}>
         <span className="flex items-center gap-2">
           <span className="text-base leading-none">{countryFlag(code)}</span>
           <span className="truncate text-md text-[var(--color-text)]">{name}</span>
           <span className="shrink-0 text-xs text-[var(--color-text-tertiary)]">{code}</span>
         </span>
       </td>
-      <td className="px-3 py-2">
+      <td className={COUNTRIES_TD}>
         <IdTypeBadges
           availableTypes={availableTypes}
           activeTypes={activeTypes}
           onChange={(types) => onUpdateSettings({ ...cs, allowedIdTypes: types })}
         />
       </td>
-      <td className="w-20 px-3 py-2">
+      <td className={`w-24 ${COUNTRIES_TD}`}>
         <Input
           size="sm"
           type="number"
-          placeholder="—"
+          placeholder=""
           value={cs?.ageRange?.min != null ? String(cs.ageRange.min) : ""}
           onChange={(e) => setAgeMin(e.target.value)}
         />
       </td>
-      <td className="w-20 px-3 py-2">
+      <td className={`w-24 ${COUNTRIES_TD}`}>
         <Input
           size="sm"
           type="number"
-          placeholder="—"
+          placeholder=""
           value={cs?.ageRange?.max != null ? String(cs.ageRange.max) : ""}
           onChange={(e) => setAgeMax(e.target.value)}
         />
       </td>
-      <td className="w-36 px-3 py-2 text-right">
+      <td className={`w-36 text-right ${COUNTRIES_TD}`}>
         <span className="text-sm text-[var(--color-text-secondary)]">{region ?? "—"}</span>
       </td>
     </tr>

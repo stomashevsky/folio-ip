@@ -48,9 +48,9 @@ export function MonitoringTab({ report }: { report: Report }) {
             {
               label: "Status",
               value: report.continuousMonitoring ? (
-                <Badge color="success" size="sm">Active</Badge>
+                <Badge pill color="success" size="sm">Active</Badge>
               ) : (
-                <Badge color="secondary" size="sm">Disabled</Badge>
+                <Badge pill color="secondary" size="sm">Disabled</Badge>
               ),
             },
             { label: "Frequency", value: report.continuousMonitoring ? "Weekly" : "—" },
@@ -108,9 +108,7 @@ export function MonitoringTab({ report }: { report: Report }) {
                         {check.source}
                       </td>
                       <td className="px-4 py-3">
-                        <Badge color={resultColor} size="sm">
-                          {resultLabel}
-                        </Badge>
+                        <Badge pill color={resultColor} size="sm">{resultLabel}</Badge>
                       </td>
                       <td className="px-4 py-3 text-sm text-[var(--color-text)]">
                         {check.matchCount}

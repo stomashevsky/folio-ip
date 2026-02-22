@@ -241,7 +241,7 @@ export default function RoleDetailPage() {
         actions={
           <div className="flex items-center gap-2">
             {role.isSystem && (
-              <Badge color="secondary" variant="soft" size="sm">
+              <Badge pill color="secondary" variant="soft" size="sm">
                 System
               </Badge>
             )}
@@ -289,9 +289,6 @@ export default function RoleDetailPage() {
               const allSelected = group.permissions.every((p) =>
                 permissions.has(p.key)
               );
-              const _someSelected =
-                !allSelected &&
-                group.permissions.some((p) => permissions.has(p.key));
 
               return (
                 <div

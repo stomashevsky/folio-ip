@@ -7,22 +7,22 @@ export function SignalValue({ signal }: { signal: InquirySignal }) {
 
   // Threat / risk levels → colored badge
   if (lowered === "low" || lowered === "minimal") {
-    return <Badge color="success" size="sm">{v}</Badge>;
+    return <Badge pill color="success" size="sm">{v}</Badge>;
   }
   if (lowered === "medium" || lowered === "moderate") {
-    return <Badge color="warning" size="sm">{v}</Badge>;
+    return <Badge pill color="warning" size="sm">{v}</Badge>;
   }
   if (lowered === "high" || lowered === "critical") {
-    return <Badge color="danger" size="sm">{v}</Badge>;
+    return <Badge pill color="danger" size="sm">{v}</Badge>;
   }
 
   // Boolean flags — sentence case
   if (lowered === "true") {
     const isBad = /proxy|tor|rooted|incognito|spoof|unrecognized/i.test(signal.name);
-    return <Badge color={isBad ? "danger" : "success"} size="sm">True</Badge>;
+    return <Badge pill color={isBad ? "danger" : "success"} size="sm">True</Badge>;
   }
   if (lowered === "false") {
-    return <Badge color="secondary" size="sm">False</Badge>;
+    return <Badge pill color="secondary" size="sm">False</Badge>;
   }
 
   // N/A

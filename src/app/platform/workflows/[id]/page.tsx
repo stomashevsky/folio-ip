@@ -176,12 +176,8 @@ function WorkflowDetailContent() {
             {title}
             {!isNew && (
               <>
-                <Badge color={getStatusColor(form.status) as "warning" | "success" | "secondary"} size="sm" pill>
-                  {form.status.charAt(0).toUpperCase() + form.status.slice(1)}
-                </Badge>
-                <Badge color={form.lastPublishedAt ? "info" : "secondary"} variant="outline" size="sm" pill>
-                  {form.lastPublishedAt ? "Version: Published" : "Version: Draft"}
-                </Badge>
+                <Badge pill color={getStatusColor(form.status) as "warning" | "success" | "secondary"} size="sm">{form.status.charAt(0).toUpperCase() + form.status.slice(1)}</Badge>
+                <Badge pill color={form.lastPublishedAt ? "info" : "secondary"} variant="outline" size="sm">{form.lastPublishedAt ? "Version: Published" : "Version: Draft"}</Badge>
               </>
             )}
           </span>

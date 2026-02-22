@@ -93,9 +93,7 @@ const endpointColumns: ColumnDef<EndpointMetric, unknown>[] = [
      cell: ({ row }) => {
        const method = row.original.method;
        return (
-         <Badge color={getHttpMethodColor(method) as BadgeProps["color"]} variant="soft">
-           {method}
-         </Badge>
+         <Badge pill color={getHttpMethodColor(method) as BadgeProps["color"]} variant="soft">{method}</Badge>
        );
      },
    },
@@ -125,9 +123,8 @@ const endpointColumns: ColumnDef<EndpointMetric, unknown>[] = [
       const rate = row.original.errorRate;
       const color = rate > 2 ? "danger" : rate > 1 ? "warning" : "success";
       return (
-        <Badge color={color} variant="soft">
-          {rate.toFixed(1)}%
-        </Badge>
+        <Badge pill color={color} variant="soft">{rate.toFixed(1)}%
+                </Badge>
       );
     },
   },

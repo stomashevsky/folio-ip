@@ -79,9 +79,7 @@ export default function CaseTemplateDetailPage() {
           <div className="flex gap-6">
             <Field label="Priority">
               <div className="py-1">
-                <Badge color={getPriorityColor(template.priority) as BadgeProps["color"]} variant="soft" size="sm">
-                  {template.priority.charAt(0).toUpperCase() + template.priority.slice(1)}
-                </Badge>
+                <Badge pill color={getPriorityColor(template.priority) as BadgeProps["color"]} variant="soft" size="sm">{template.priority.charAt(0).toUpperCase() + template.priority.slice(1)}</Badge>
               </div>
             </Field>
             <Field label="Queue">

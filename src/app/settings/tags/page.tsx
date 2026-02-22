@@ -127,9 +127,7 @@ export default function TagsPage() {
                       className="border-b border-[var(--color-border)]"
                     >
                       <td className="px-4 py-3">
-                        <Badge color="secondary" size="sm">
-                          {tag.name}
-                        </Badge>
+                        <Badge pill color="secondary" size="sm">{tag.name}</Badge>
                       </td>
                       <td className="px-4 py-3 text-sm text-[var(--color-text-secondary)]">
                         {tag.count}
@@ -173,9 +171,7 @@ export default function TagsPage() {
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <Badge color="secondary" size="sm">
-                        {tag.name}
-                      </Badge>
+                      <Badge pill color="secondary" size="sm">{tag.name}</Badge>
                       <span className="text-xs text-[var(--color-text-tertiary)]">
                         {tag.count} inquiries
                       </span>
@@ -276,9 +272,7 @@ export default function TagsPage() {
         <ModalBody>
           <span className="text-sm text-[var(--color-text-secondary)]">
             Are you sure you want to delete the tag{" "}
-            <Badge color="secondary" size="sm">
-              {deleting}
-            </Badge>
+            <Badge pill color="secondary" size="sm">{deleting}</Badge>
             ? This will remove it from all inquiries.
           </span>
         </ModalBody>

@@ -172,9 +172,7 @@ function CaseDetailContent() {
                 <StatusBadge status={caseItem.status} />
               </InfoRow>
               <InfoRow label="Priority">
-                <Badge color={getPriorityColor(caseItem.priority) as BadgeProps["color"]} variant="soft" size="sm">
-                  {caseItem.priority.charAt(0).toUpperCase() + caseItem.priority.slice(1)}
-                </Badge>
+                <Badge pill color={getPriorityColor(caseItem.priority) as BadgeProps["color"]} variant="soft" size="sm">{caseItem.priority.charAt(0).toUpperCase() + caseItem.priority.slice(1)}</Badge>
               </InfoRow>
               <InfoRow label="Queue">
                 {caseItem.queue ?? (

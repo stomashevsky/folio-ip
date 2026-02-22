@@ -146,9 +146,8 @@ export function ListMatchesTab({ reports }: { reports: Report[] }) {
                      )}
                    </td>
                    <td className="px-4 py-3">
-                     <Badge color={getMatchScoreColor(match.score) as BadgeColor} size="sm">
-                       {match.score}%
-                     </Badge>
+                     <Badge pill color={getMatchScoreColor(match.score) as BadgeColor} size="sm">{match.score}%
+                                          </Badge>
                    </td>
                    <td className="px-4 py-3 text-sm text-[var(--color-text)]">
                      {match.source}
@@ -157,18 +156,12 @@ export function ListMatchesTab({ reports }: { reports: Report[] }) {
                      {match.country ?? "\u2014"}
                    </td>
                    <td className="px-4 py-3">
-                     <Badge color={getMatchTypeColor(match.matchType) as BadgeColor} size="sm">
-                       {match.matchType.charAt(0).toUpperCase() + match.matchType.slice(1)}
-                     </Badge>
+                     <Badge pill color={getMatchTypeColor(match.matchType) as BadgeColor} size="sm">{match.matchType.charAt(0).toUpperCase() + match.matchType.slice(1)}</Badge>
                    </td>
                    <td className="px-4 py-3">
-                     <Badge
-                       color={getMatchStatusColor(match.status) as BadgeColor}
-                       size="sm"
-                       variant="outline"
-                     >
-                       {matchStatusLabels[match.status] ?? match.status}
-                     </Badge>
+                     <Badge pill color={getMatchStatusColor(match.status) as BadgeColor}
+                     size="sm"
+                     variant="outline">{matchStatusLabels[match.status] ?? match.status}</Badge>
                    </td>
                    <td className="px-4 py-3">
                      <Link

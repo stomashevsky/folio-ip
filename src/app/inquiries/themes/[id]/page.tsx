@@ -43,9 +43,7 @@ export default function ThemeDetailPage() {
         backHref="/inquiries/themes"
         actions={
           <div className="flex items-center gap-2">
-            <Badge color={theme.status === "active" ? "success" : "secondary"} variant="soft" size="sm">
-              {theme.status === "active" ? "Active" : "Draft"}
-            </Badge>
+            <Badge pill color={theme.status === "active" ? "success" : "secondary"} variant="soft" size="sm">{theme.status === "active" ? "Active" : "Draft"}</Badge>
             <Button color="primary" size={TOPBAR_CONTROL_SIZE} pill={TOPBAR_ACTION_PILL}>
               Save Changes
             </Button>

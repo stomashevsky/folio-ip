@@ -873,13 +873,10 @@ export default function GraphPage() {
                 <div className="absolute right-3 top-3 z-10 w-80 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] shadow-200">
                   <div className="flex items-center justify-between border-b border-[var(--color-border)] px-4 py-3">
                     <div className="flex items-center gap-2">
-                      <Badge color={badgeColor(selectedEntity.type)} variant="soft" size="sm">
-                        {selectedEntity.type}
-                      </Badge>
+                      <Badge pill color={badgeColor(selectedEntity.type)} variant="soft" size="sm">{selectedEntity.type}</Badge>
                       {selectedEntity.riskLevel && (
-                        <Badge color={getRiskColor(selectedEntity.riskLevel) as BadgeColor} variant="outline" size="sm">
-                          {selectedEntity.riskLevel} risk
-                        </Badge>
+                        <Badge pill color={getRiskColor(selectedEntity.riskLevel) as BadgeColor} variant="outline" size="sm">{selectedEntity.riskLevel} risk
+                                                </Badge>
                       )}
                     </div>
                     <button
@@ -897,7 +894,7 @@ export default function GraphPage() {
                       <p className="mt-1 text-xs text-[var(--color-text-tertiary)]">
                         Cluster: {selectedEntity.clusterId}
                         {selectedEntity.clusterId.startsWith("fraud_ring") && (
-                          <Badge color="danger" variant="soft" size="sm" className="ml-2">
+                          <Badge pill color="danger" variant="soft" size="sm" className="ml-2">
                             Fraud Ring
                           </Badge>
                         )}
@@ -927,9 +924,7 @@ export default function GraphPage() {
                             onClick={() => setSelectedNode(`${otherType}:${otherId}`)}
                           >
                             <span className="flex items-center gap-1.5">
-                              <Badge color={badgeColor(otherType)} variant="soft" size="sm">
-                                {otherType}
-                              </Badge>
+                              <Badge pill color={badgeColor(otherType)} variant="soft" size="sm">{otherType}</Badge>
                               <span className="text-[var(--color-text-secondary)]">{otherId}</span>
                             </span>
                             <span className="flex items-center gap-2">
@@ -984,7 +979,7 @@ export default function GraphPage() {
               {queryResult && (
                 <div className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] p-4">
                   <div className="flex items-start gap-2">
-                    <Badge color="success" variant="soft" size="sm">Result</Badge>
+                    <Badge pill color="success" variant="soft" size="sm">Result</Badge>
                     <p className="text-sm text-[var(--color-text)]">{queryResult}</p>
                   </div>
                 </div>
@@ -1029,21 +1024,15 @@ export default function GraphPage() {
                       {filteredConnections.slice(0, 15).map((conn) => (
                         <tr key={conn.id} className="border-b border-[var(--color-border)] hover:bg-[var(--color-nav-hover-bg)]">
                           <td className="px-4 py-3">
-                            <Badge color={badgeColor(conn.sourceType)} variant="soft" size="sm">
-                              {conn.sourceType}:{conn.sourceId}
-                            </Badge>
+                            <Badge pill color={badgeColor(conn.sourceType)} variant="soft" size="sm">{conn.sourceType}:{conn.sourceId}</Badge>
                           </td>
                           <td className="px-4 py-3">
-                            <Badge color={badgeColor(conn.targetType)} variant="soft" size="sm">
-                              {conn.targetType}:{conn.targetId}
-                            </Badge>
+                            <Badge pill color={badgeColor(conn.targetType)} variant="soft" size="sm">{conn.targetType}:{conn.targetId}</Badge>
                           </td>
                           <td className="px-4 py-3 text-[var(--color-text)]">{conn.relationship}</td>
                           <td className="px-4 py-3">
                             {conn.riskLevel && (
-                              <Badge color={getRiskColor(conn.riskLevel) as BadgeColor} variant="outline" size="sm">
-                                {conn.riskLevel}
-                              </Badge>
+                              <Badge pill color={getRiskColor(conn.riskLevel) as BadgeColor} variant="outline" size="sm">{conn.riskLevel}</Badge>
                             )}
                           </td>
                           <td className="px-4 py-3">
@@ -1088,10 +1077,9 @@ export default function GraphPage() {
                         {cluster.id.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}
                       </span>
                       {cluster.isFraudRing && (
-                        <Badge color="danger" variant="soft" size="sm">
-                          <Warning />
-                          Fraud Ring
-                        </Badge>
+                        <Badge pill color="danger" variant="soft" size="sm"><Warning />
+                        Fraud Ring
+                                                </Badge>
                       )}
                     </div>
 
@@ -1106,9 +1094,7 @@ export default function GraphPage() {
                       </div>
                       <div>
                         <p className="text-xs text-[var(--color-text-tertiary)]">Risk</p>
-                        <Badge color={getRiskColor(cluster.avgRisk) as BadgeColor} variant="outline" size="sm">
-                          {cluster.avgRisk}
-                        </Badge>
+                        <Badge pill color={getRiskColor(cluster.avgRisk) as BadgeColor} variant="outline" size="sm">{cluster.avgRisk}</Badge>
                       </div>
                     </div>
                   </button>

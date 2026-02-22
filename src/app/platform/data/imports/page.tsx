@@ -168,9 +168,7 @@ const columns: ColumnDef<Import, unknown>[] = [
     size: 100,
     cell: ({ row }) => {
       return (
-        <Badge color={getFormatColor(row.original.format) as BadgeProps["color"]} variant="soft" size="sm">
-          {row.original.format.toUpperCase()}
-        </Badge>
+        <Badge pill color={getFormatColor(row.original.format) as BadgeProps["color"]} variant="soft" size="sm">{row.original.format.toUpperCase()}</Badge>
       );
     },
   },
@@ -188,10 +186,8 @@ const columns: ColumnDef<Import, unknown>[] = [
     size: 120,
     cell: ({ row }) => {
       return (
-        <Badge color={getDataOpStatusColor(row.original.status) as BadgeProps["color"]} variant="soft" size="sm">
-          {row.original.status.charAt(0).toUpperCase() +
-            row.original.status.slice(1)}
-        </Badge>
+        <Badge pill color={getDataOpStatusColor(row.original.status) as BadgeProps["color"]} variant="soft" size="sm">{row.original.status.charAt(0).toUpperCase() +
+          row.original.status.slice(1)}</Badge>
       );
     },
   },

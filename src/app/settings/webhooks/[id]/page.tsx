@@ -210,9 +210,7 @@ const deliveryColumns: ColumnDef<DeliveryAttempt, unknown>[] = [
       const code = row.original.statusCode;
       const color = code >= 200 && code < 300 ? "success" : "danger";
       return (
-        <Badge color={color} variant="soft" size="sm">
-          {code}
-        </Badge>
+        <Badge pill color={color} variant="soft" size="sm">{code}</Badge>
       );
     },
   },
@@ -229,13 +227,9 @@ const deliveryColumns: ColumnDef<DeliveryAttempt, unknown>[] = [
     header: "Result",
     size: 100,
     cell: ({ row }) => (
-      <Badge
-        color={row.original.success ? "success" : "danger"}
-        variant="soft"
-        size="sm"
-      >
-        {row.original.success ? "Success" : "Failed"}
-      </Badge>
+      <Badge pill color={row.original.success ? "success" : "danger"}
+      variant="soft"
+      size="sm">{row.original.success ? "Success" : "Failed"}</Badge>
     ),
   },
   {
@@ -309,13 +303,9 @@ export default function WebhookDetailPage() {
         backHref="/settings/webhooks"
         actions={
           <div className="flex items-center gap-2">
-            <Badge
-              color={isEnabled ? "success" : "secondary"}
-              variant="soft"
-              size="sm"
-            >
-              {isEnabled ? "Active" : "Disabled"}
-            </Badge>
+            <Badge pill color={isEnabled ? "success" : "secondary"}
+            variant="soft"
+            size="sm">{isEnabled ? "Active" : "Disabled"}</Badge>
             <Button
               color="primary"
               size={TOPBAR_CONTROL_SIZE}
@@ -334,9 +324,8 @@ export default function WebhookDetailPage() {
               Success Rate
             </p>
             <p className="heading-md mt-1">
-              <Badge color={successColor} variant="soft" size="md">
-                {webhook.successRate}%
-              </Badge>
+              <Badge pill color={successColor} variant="soft" size="md">{webhook.successRate}%
+                            </Badge>
             </p>
           </div>
           <div className="rounded-lg border border-[var(--color-border)] p-4">

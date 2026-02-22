@@ -112,9 +112,7 @@ export default function ListDetailPage() {
         backHref="/platform/utilities/lists"
         actions={
           <div className="flex items-center gap-2">
-            <Badge color={getListTypeColor(list.type) as BadgeProps["color"]} variant="soft" size="sm">
-              {list.type.charAt(0).toUpperCase() + list.type.slice(1)}
-            </Badge>
+            <Badge pill color={getListTypeColor(list.type) as BadgeProps["color"]} variant="soft" size="sm">{list.type.charAt(0).toUpperCase() + list.type.slice(1)}</Badge>
             <Button color="secondary" variant="outline" size={TOPBAR_CONTROL_SIZE} pill={TOPBAR_ACTION_PILL}>
               <FileUpload style={{ width: 14, height: 14 }} />
               Import CSV

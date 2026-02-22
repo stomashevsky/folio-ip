@@ -141,7 +141,7 @@ const columns: ColumnDef<CaseTemplate, unknown>[] = [
     size: 120,
     cell: ({ row }) => {
       const p = row.original.priority;
-      return <Badge color={getPriorityColor(p) as BadgeProps["color"]} variant="soft" size="sm">{p.charAt(0).toUpperCase() + p.slice(1)}</Badge>;
+      return <Badge pill color={getPriorityColor(p) as BadgeProps["color"]} variant="soft" size="sm">{p.charAt(0).toUpperCase() + p.slice(1)}</Badge>;
     },
   },
   {

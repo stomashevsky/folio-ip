@@ -2,34 +2,34 @@ import type { Verification, Check, VerificationPhoto } from "@/lib/types";
 import { generateId } from "./id-generator";
 
 const govIdChecksAllPassed: Check[] = [
-  { name: "Age comparison", status: "passed", category: "validity", required: true },
+  { name: "Age comparison", status: "passed", category: "user_action_required", required: true },
   { name: "Color", status: "passed", category: "user_action_required", required: true },
   { name: "Compromised submission", status: "passed", category: "fraud", required: true },
-  { name: "Allowed country", status: "passed", category: "validity", required: true },
-  { name: "Allowed ID type", status: "passed", category: "validity", required: true },
+  { name: "Allowed country", status: "passed", category: "user_action_required", required: true },
+  { name: "Allowed ID type", status: "passed", category: "user_action_required", required: true },
   { name: "Double side", status: "passed", category: "user_action_required", required: true },
-  { name: "Government ID", status: "passed", category: "validity", required: true },
-  { name: "Expiration", status: "passed", category: "validity", required: true },
+  { name: "Government ID", status: "passed", category: "user_action_required", required: true },
+  { name: "Expiration", status: "passed", category: "user_action_required", required: true },
   { name: "Fabrication", status: "passed", category: "fraud", required: true },
-  { name: "MRZ Detected", status: "passed", category: "validity", required: true },
+  { name: "MRZ Detected", status: "passed", category: "user_action_required", required: true },
   { name: "Portrait clarity", status: "passed", category: "user_action_required", required: true },
   { name: "Portrait", status: "passed", category: "user_action_required", required: true },
-  { name: "ID-to-Selfie comparison", status: "passed", category: "biometrics", required: true },
+  { name: "ID-to-Selfie comparison", status: "passed", category: "fraud", required: true },
   { name: "ID image tampering", status: "passed", category: "fraud", required: true },
   { name: "Processable submission", status: "passed", category: "user_action_required", required: true },
-  { name: "Barcode", status: "passed", category: "validity", required: false },
+  { name: "Barcode", status: "passed", category: "user_action_required", required: false },
   { name: "Blur", status: "passed", category: "user_action_required", required: false },
   { name: "Electronic replica", status: "passed", category: "fraud", required: false },
   { name: "Glare", status: "passed", category: "user_action_required", required: false },
 ];
 
 const selfieChecksAllPassed: Check[] = [
-  { name: "Selfie-to-ID comparison", status: "passed", category: "biometrics", required: true },
-  { name: "Pose position", status: "passed", category: "biometrics", required: true },
+  { name: "Selfie-to-ID comparison", status: "passed", category: "fraud", required: true },
+  { name: "Pose position", status: "passed", category: "fraud", required: true },
   { name: "Multiple faces", status: "passed", category: "fraud", required: true },
   { name: "Pose repeat", status: "passed", category: "fraud", required: true },
   { name: "Suspicious entity", status: "passed", category: "fraud", required: true },
-  { name: "Selfie liveness", status: "passed", category: "biometrics", required: true },
+  { name: "Selfie liveness", status: "passed", category: "fraud", required: true },
   { name: "Face covering", status: "passed", category: "user_action_required", required: true },
   { name: "Glasses", status: "passed", category: "user_action_required", required: false },
   { name: "Portrait quality", status: "passed", category: "user_action_required", required: false },
@@ -226,18 +226,6 @@ export const mockVerifications: Verification[] = [
 /* ── Generate verifications from shared seed data ── */
 import { generatedPeople } from "./mock-data-seed";
 
-const regionToCode: Record<string, string> = {
-  us: "US", ca: "CA", uk: "GB", de: "DE", fr: "FR", es: "ES", it: "IT",
-  nl: "NL", se: "SE", no: "NO", pl: "PL", cz: "CZ", ch: "CH",
-  jp: "JP", kr: "KR", cn: "CN", in: "IN", sg: "SG", au: "AU", nz: "NZ",
-  br: "BR", mx: "MX", ar: "AR", co: "CO", ae: "AE", sa: "SA",
-  pk: "PK", tr: "TR", eg: "EG", ng: "NG", ke: "KE", za: "ZA", sn: "SN", il: "IL",
-};
-
-const idClassByRegion: Record<string, string> = {
-  us: "dl", ca: "dl", uk: "dl", au: "dl", nz: "dl",
-  ch: "pp", sg: "pp", ae: "pp", sa: "pp",
-};
 
 let verIdx = 200;
 

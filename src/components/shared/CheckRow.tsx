@@ -45,11 +45,11 @@ function StatusCell({ check }: { check: Check }) {
   return (
     <td className="w-[100px] px-4 py-2.5 text-right">
       {check.status === "passed" ? (
-        <Badge color="success" size="sm">Passed</Badge>
+        <Badge pill color="success" size="sm">Passed</Badge>
       ) : check.status === "failed" ? (
-        <Badge color="danger" size="sm">Failed</Badge>
+        <Badge pill color="danger" size="sm">Failed</Badge>
       ) : (
-        <Badge color="secondary" size="sm">N/A</Badge>
+        <Badge pill color="secondary" size="sm">N/A</Badge>
       )}
     </td>
   );
