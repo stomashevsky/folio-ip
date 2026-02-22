@@ -786,6 +786,21 @@ function ChecksTab({
   );
 }
 
+/* ─── Config Label ─── */
+
+function ConfigLabel({ children, description }: { children: React.ReactNode; description?: string }) {
+  return (
+    <div className="flex items-center gap-1.5">
+      <span className="text-sm font-medium text-[var(--color-text)]">{children}</span>
+      {description && (
+        <Tooltip content={description} side="top" sideOffset={4}>
+          <InfoCircle className="size-3.5 shrink-0 cursor-help text-[var(--color-text-tertiary)]" />
+        </Tooltip>
+      )}
+    </div>
+  );
+}
+
 /* ─── Check Config Panel ─── */
 
 function CheckConfigPanel({
@@ -801,7 +816,8 @@ function CheckConfigPanel({
     case "age_range":
       return (
         <div className="flex items-center gap-4">
-          <Field label="Minimum age" size="sm">
+          <div className="flex flex-col gap-1.5">
+            <ConfigLabel>Minimum age</ConfigLabel>
             <div className="w-20">
               <Input
                 size="sm"
@@ -814,8 +830,9 @@ function CheckConfigPanel({
                 }}
               />
             </div>
-          </Field>
-          <Field label="Maximum age" size="sm">
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <ConfigLabel>Maximum age</ConfigLabel>
             <div className="w-20">
               <Input
                 size="sm"
@@ -828,13 +845,14 @@ function CheckConfigPanel({
                 }}
               />
             </div>
-          </Field>
+          </div>
         </div>
       );
 
     case "expiration":
       return (
-        <Field label="Grace period" description="Number of days past expiration to still accept" size="sm">
+        <div className="flex flex-col gap-1.5">
+          <ConfigLabel description="Number of days past expiration to still accept">Grace period</ConfigLabel>
           <div className="w-24">
             <Input
               size="sm"
@@ -847,32 +865,35 @@ function CheckConfigPanel({
               }}
             />
           </div>
-        </Field>
+        </div>
       );
 
     case "barcode":
       return (
-        <Field label="Require successful extraction" description="Fail the check if barcode data cannot be extracted" size="sm">
+        <div className="flex items-center gap-2">
           <Switch
             checked={subConfig?.requireSuccessfulExtraction ?? false}
             onCheckedChange={(v) => onUpdate({ requireSuccessfulExtraction: v })}
           />
-        </Field>
+          <ConfigLabel description="Fail the check if barcode data cannot be extracted">Require successful extraction</ConfigLabel>
+        </div>
       );
 
     case "country":
       return (
-        <Field label="Map to sovereign country" description="Map territories and dependencies to their sovereign country" size="sm">
+        <div className="flex items-center gap-2">
           <Switch
             checked={subConfig?.mapToSovereignCountry ?? false}
             onCheckedChange={(v) => onUpdate({ mapToSovereignCountry: v })}
           />
-        </Field>
+          <ConfigLabel description="Map territories and dependencies to their sovereign country">Map to sovereign country</ConfigLabel>
+        </div>
       );
 
     case "repeat":
       return (
-        <Field label="Detection scope" description="Scope for detecting repeated submissions" size="sm">
+        <div className="flex flex-col gap-1.5">
+          <ConfigLabel description="Scope for detecting repeated submissions">Detection scope</ConfigLabel>
           <div className="w-44">
             <Select
               options={CHECK_SCOPE_OPTIONS}
@@ -883,7 +904,7 @@ function CheckConfigPanel({
               block
             />
           </div>
-        </Field>
+        </div>
       );
 
     case "id_type":
@@ -999,7 +1020,8 @@ function MatchRequirementsEditor({
                 </div>
                 <div className="flex items-start gap-3">
                   <div className="flex-1">
-                    <Field label="Attribute" size="sm">
+                    <div className="flex flex-col gap-1.5">
+                      <ConfigLabel>Attribute</ConfigLabel>
                       <Select
                         options={[
                           ...ATTRIBUTE_OPTIONS.filter((a) => a.value === rule.attribute),
@@ -1012,10 +1034,11 @@ function MatchRequirementsEditor({
                         block
                         listMinWidth={180}
                       />
-                    </Field>
+                    </div>
                   </div>
                   <div className="flex-1">
-                    <Field label="Match level" size="sm">
+                    <div className="flex flex-col gap-1.5">
+                      <ConfigLabel>Match level</ConfigLabel>
                       <Select
                         options={MATCH_LEVEL_OPTIONS}
                         value={rule.comparison.type === "simple" ? rule.comparison.matchLevel : "partial"}
@@ -1025,10 +1048,11 @@ function MatchRequirementsEditor({
                         block
                         listMinWidth={160}
                       />
-                    </Field>
+                    </div>
                   </div>
                   <div className="flex-1">
-                    <Field label="Normalization" size="sm">
+                    <div className="flex flex-col gap-1.5">
+                      <ConfigLabel>Normalization</ConfigLabel>
                       <Select
                         options={NORMALIZATION_OPTIONS}
                         value={(rule.normalization ?? []).map((n) => n.method)}
@@ -1041,7 +1065,7 @@ function MatchRequirementsEditor({
                         block
                         listMinWidth={260}
                       />
-                    </Field>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -1101,21 +1125,23 @@ function ExtractedPropertiesPanel({
 
   return (
     <div className="flex flex-col gap-4">
-      <Field label="Default required attributes" description="These default required attributes will be used for every country and ID type. You can override this default on a per-country and per-ID basis in Countries and ID Types." size="sm">
+      <div className="flex flex-col gap-1.5">
+        <ConfigLabel description="These default required attributes will be used for every country and ID type. You can override this default on a per-country and per-ID basis in Countries and ID Types.">Default required attributes</ConfigLabel>
         <TagInput
           value={tags}
           onChange={handleTagsChange}
           placeholder="Type attribute name…"
           validator={validateTag}
         />
-      </Field>
+      </div>
 
-      <Field label="Pass when required property does not appear on the ID" size="sm">
+      <div className="flex items-center gap-2">
         <Switch
           checked={passWhenMissing}
           onCheckedChange={(v) => onUpdate({ passWhenPropertyMissing: v })}
         />
-      </Field>
+        <ConfigLabel>Pass when required property does not appear on the ID</ConfigLabel>
+      </div>
     </div>
   );
 }
