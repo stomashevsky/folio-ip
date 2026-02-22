@@ -53,7 +53,7 @@ export function Modal({
 
       {/* Content */}
       <div
-        className={`relative z-10 w-full ${maxWidth} rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] shadow-lg`}
+        className={`relative z-10 w-full ${maxWidth} rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] shadow-lg`}
       >
         {children}
       </div>

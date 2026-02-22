@@ -13,7 +13,7 @@ import {
 } from "@tanstack/react-table";
 
 import { TopBar, TOPBAR_CONTROL_SIZE, TOPBAR_ACTION_PILL, TOPBAR_TOOLBAR_PILL } from "@/components/layout/TopBar";
-import { NotFoundPage, SectionHeading, ConfirmLeaveModal, CopyButton, Modal, ModalHeader, ModalBody, ModalFooter } from "@/components/shared";
+import { NotFoundPage, SectionHeading, ConfirmLeaveModal, CopyButton, Modal } from "@/components/shared";
 import { useTemplateForm } from "@/lib/hooks/useTemplateForm";
 
 import { checkDescriptions } from "@/lib/data/check-descriptions";
@@ -500,6 +500,7 @@ function ChecksTab({
   const [statusFilter, setStatusFilter] = useState<string[]>([]);
   const [typeFilter, setTypeFilter] = useState<string[]>([]);
   const [settingsCheckName, setSettingsCheckName] = useState<string | null>(null);
+  const [matchReqCheckName, setMatchReqCheckName] = useState<string | null>(null);
   const [sorting, setSorting] = useState<SortingState>([{ id: "name", desc: false }]);
   const [draftSubConfig, setDraftSubConfig] = useState<CheckSubConfig | undefined>(undefined);
 
@@ -606,9 +607,6 @@ function ChecksTab({
         enableSorting: true,
         cell: ({ row }) => (
           <div className="flex flex-wrap justify-end gap-1">
-            {row.original.check.categories.map((cat) => (
-              <Badge pill key={cat} color={(CHECK_CATEGORY_COLORS[cat] ?? "secondary") as "info" | "secondary" | "danger" | "discovery" | "warning"} variant="soft" size="sm">{CHECK_CATEGORY_LABELS[cat] ?? cat}</Badge>
-            ))}
             {row.original.requiresBiometric && (
               <Tooltip content="Biometric processing is required to use this feature. We recommend consulting with your legal team and compliance advisors to ensure that your business meets the proper requirements to process this biometric data." side="top" sideOffset={4}>
                 <Badge pill color="info" variant="soft" size="sm">
@@ -616,6 +614,9 @@ function ChecksTab({
                 </Badge>
               </Tooltip>
             )}
+            {row.original.check.categories.map((cat) => (
+              <Badge pill key={cat} color={(CHECK_CATEGORY_COLORS[cat] ?? "secondary") as "info" | "secondary" | "danger" | "discovery" | "warning"} variant="soft" size="sm">{CHECK_CATEGORY_LABELS[cat] ?? cat}</Badge>
+            ))}
           </div>
         ),
       },
@@ -627,7 +628,7 @@ function ChecksTab({
             <span className="cursor-help border-b border-dashed border-[var(--color-text-tertiary)]">Required</span>
           </Tooltip>
         ),
-        size: 100,
+        size: 140,
         meta: { align: "right" },
         enableSorting: true,
         sortDescFirst: true,
@@ -662,21 +663,27 @@ function ChecksTab({
       },
       {
         id: "settings",
-        header: "",
+        header: "Config",
         accessorFn: (row) => row.hasConfig,
-        size: 60,
+        size: 100,
         meta: { align: "right" },
-        enableSorting: false,
+        enableSorting: true,
         cell: ({ row }) => {
-          const { check, hasConfig } = row.original;
+          const { check, hasConfig, configType } = row.original;
           if (!hasConfig) return null;
           return (
             <div className="flex justify-end" onClick={(e) => e.stopPropagation()}>
               <Button
                 color="secondary"
-                variant="soft"
+                variant="ghost"
                 size="xs"
-                onClick={() => setSettingsCheckName(check.name)}
+                onClick={() => {
+                  if (configType === "comparison") {
+                    setMatchReqCheckName(check.name);
+                  } else {
+                    setSettingsCheckName(check.name);
+                  }
+                }}
               >
                 <SettingsCog />
               </Button>
@@ -823,18 +830,16 @@ function ChecksTab({
       {/* Check Settings Modal */}
       <Modal open={!!settingsRow} maxWidth="max-w-lg" onOpenChange={(open) => { if (!open) setSettingsCheckName(null); }}>
         {settingsRow && (
-          <>
-            <div className="px-5 pt-5 pb-1">
-              <h2 className="heading-md">{settingsRow.check.name}</h2>
-            </div>
-            <ModalBody>
+          <div className="p-6">
+            <h2 className="heading-lg">{settingsRow.check.name}</h2>
+            <div className="mt-4">
               <CheckConfigPanel
                 configType={settingsRow.configType!}
                 subConfig={draftSubConfig}
                 onUpdate={(patch) => setDraftSubConfig((prev) => ({ ...prev, ...patch }))}
               />
-            </ModalBody>
-            <ModalFooter>
+            </div>
+            <div className="mt-6 flex justify-end gap-2">
               <Button color="secondary" variant="soft" pill onClick={() => setSettingsCheckName(null)}>
                 Cancel
               </Button>
@@ -847,10 +852,29 @@ function ChecksTab({
               }}>
                 Save
               </Button>
-            </ModalFooter>
-          </>
+            </div>
+          </div>
         )}
       </Modal>
+
+      {/* Match Requirements — direct modal for comparison checks */}
+      {(() => {
+        const mqRow = matchReqCheckName ? data.find((r) => r.check.name === matchReqCheckName) : null;
+        if (!mqRow) return null;
+        return (
+          <MatchRequirementsEditor
+            requirements={mqRow.check.subConfig?.matchRequirements ?? []}
+            onChange={(reqs) => {
+              onUpdateCheck(mqRow.formIndex, {
+                ...mqRow.check,
+                subConfig: { ...mqRow.check.subConfig, matchRequirements: reqs.length > 0 ? reqs : undefined },
+              });
+            }}
+            defaultOpen
+            onClose={() => setMatchReqCheckName(null)}
+          />
+        );
+      })()}
     </div>
   );
 }
@@ -1035,11 +1059,15 @@ function getMatchSummaryText(req: AttributeMatchRequirement): string {
 function MatchRequirementsEditor({
   requirements,
   onChange,
+  defaultOpen = false,
+  onClose,
 }: {
   requirements: AttributeMatchRequirement[];
   onChange: (reqs: AttributeMatchRequirement[]) => void;
+  defaultOpen?: boolean;
+  onClose?: () => void;
 }) {
-  const [modalOpen, setModalOpen] = useState(false);
+  const [modalOpen, setModalOpen] = useState(defaultOpen);
   const [draft, setDraft] = useState<AttributeMatchRequirement[]>([]);
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
 
@@ -1160,36 +1188,37 @@ function MatchRequirementsEditor({
   function handleSave() {
     onChange(draft);
     setModalOpen(false);
+    onClose?.();
+  }
+
+  function handleCancel() {
+    setModalOpen(false);
+    onClose?.();
   }
 
   return (
     <>
-      <Button
-        color="secondary"
-        variant={requirements.length > 0 ? "soft" : "outline"}
-        size="sm"
-        pill
-        onClick={() => setModalOpen(true)}
-      >
-        {requirements.length === 0 ? (
-          <><Plus /> Add match logic</>
-        ) : (
-          <>Edit match logic ({requirements.length})</>
-        )}
-      </Button>
+      {!defaultOpen && (
+        <Button
+          color="secondary"
+          variant={requirements.length > 0 ? "soft" : "outline"}
+          size="sm"
+          pill
+          onClick={() => setModalOpen(true)}
+        >
+          {requirements.length === 0 ? (
+            <><Plus /> Add match logic</>
+          ) : (
+            <>Edit match logic ({requirements.length})</>
+          )}
+        </Button>
+      )}
 
-      <Modal open={modalOpen} onOpenChange={setModalOpen} maxWidth="max-w-2xl">
-        <ModalHeader onClose={() => setModalOpen(false)}>
-          <div className="flex flex-col gap-1">
-            <span className="heading-sm">Match requirements</span>
-            <span className="text-xs text-[var(--color-text-secondary)]">
-              Configure how attributes are normalized and compared during matching.
-            </span>
-          </div>
-        </ModalHeader>
-
-        <ModalBody>
-          <div className="flex gap-4" style={{ minHeight: 340 }}>
+      <Modal open={modalOpen} onOpenChange={(open) => { setModalOpen(open); if (!open) onClose?.(); }} maxWidth="max-w-2xl">
+        <div className="p-6">
+          <h2 className="heading-lg">Match requirements</h2>
+          <div className="mt-4">
+            <div className="flex gap-4" style={{ minHeight: 340 }}>
             {/* Left column — requirement list */}
             <div className="flex w-52 shrink-0 flex-col gap-1">
               {draft.map((rule, index) => {
@@ -1394,16 +1423,16 @@ function MatchRequirementsEditor({
               )}
             </div>
           </div>
-        </ModalBody>
-
-        <ModalFooter>
-          <Button color="secondary" variant="outline" size="sm" onClick={() => setModalOpen(false)}>
-            Cancel
-          </Button>
-          <Button color="primary" size="sm" onClick={handleSave}>
-            Save
-          </Button>
-        </ModalFooter>
+          </div>
+          <div className="mt-6 flex justify-end gap-3">
+            <Button color="secondary" variant="soft" pill onClick={handleCancel}>
+              Cancel
+            </Button>
+            <Button color="primary" pill onClick={handleSave}>
+              Save
+            </Button>
+          </div>
+        </div>
       </Modal>
     </>
   );
@@ -1838,14 +1867,13 @@ function BulkConfigModal({
 
   return (
     <Modal open={open} onOpenChange={onOpenChange} maxWidth="max-w-lg">
-      <ModalHeader>
-        <h2 className="heading-md">Bulk configure</h2>
+      <div className="p-6">
+        <h2 className="heading-lg">Bulk configure</h2>
         <p className="mt-1 text-sm text-[var(--color-text-secondary)]">
           Apply settings to {selectedCodes.length} selected countries.
         </p>
-      </ModalHeader>
+        <div className="mt-4">
 
-      <ModalBody>
         <Tabs
           aria-label="Bulk configuration sections"
           value={activeTab}
@@ -1955,16 +1983,16 @@ function BulkConfigModal({
             </div>
           </div>
         )}
-      </ModalBody>
-
-      <ModalFooter>
-        <Button color="secondary" variant="outline" size="sm" pill={false} onClick={() => onOpenChange(false)}>
-          Cancel
-        </Button>
-        <Button color="primary" size="sm" pill={false} onClick={handleApply}>
-          Apply to {selectedCodes.length} countries
-        </Button>
-      </ModalFooter>
+        </div>
+        <div className="mt-6 flex justify-end gap-3">
+          <Button color="secondary" variant="soft" pill onClick={() => onOpenChange(false)}>
+            Cancel
+          </Button>
+          <Button color="primary" pill onClick={handleApply}>
+            Apply to {selectedCodes.length} countries
+          </Button>
+        </div>
+      </div>
     </Modal>
   );
 }
