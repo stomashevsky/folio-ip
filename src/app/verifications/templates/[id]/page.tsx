@@ -83,7 +83,7 @@ const CHECK_CATEGORY_LABELS: Record<string, string> = {
 
 const CHECK_CATEGORY_COLORS: Record<string, string> = {
   fraud: "danger",
-  user_action_required: "secondary",
+  user_action_required: "caution",
 };
 
 const CHECK_FILTER_OPTIONS = [
