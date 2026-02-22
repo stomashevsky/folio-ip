@@ -612,36 +612,18 @@ function ChecksTab({
       {
         id: "enabled",
         accessorFn: (row) => row.check.enabled,
-        header: "Status",
-        size: 120,
+        header: "",
+        size: 56,
         meta: { align: "right" },
-        enableSorting: true,
-        sortDescFirst: true,
+        enableSorting: false,
         cell: ({ row }) => {
           const { check, formIndex } = row.original;
           return (
             <div className="flex justify-end" onClick={(e) => e.stopPropagation()}>
-              <Menu>
-                <Menu.Trigger>
-                  <SelectControl variant="ghost" selected size="xs" block={false} className={check.enabled ? undefined : "text-[var(--color-text-tertiary)]"}>
-                    {check.enabled ? "Enabled" : "Disabled"}
-                  </SelectControl>
-                </Menu.Trigger>
-                <Menu.Content minWidth={120}>
-                  <Menu.Item onSelect={() => onUpdateCheck(formIndex, { ...check, enabled: true })}>
-                    <span className="flex items-center gap-2">
-                      {check.enabled ? <CheckMd className="size-3.5" /> : <span className="w-3.5" />}
-                      Enabled
-                    </span>
-                  </Menu.Item>
-                  <Menu.Item onSelect={() => onUpdateCheck(formIndex, { ...check, enabled: false })}>
-                    <span className="flex items-center gap-2">
-                      {!check.enabled ? <CheckMd className="size-3.5" /> : <span className="w-3.5" />}
-                      Disabled
-                    </span>
-                  </Menu.Item>
-                </Menu.Content>
-              </Menu>
+              <Switch
+                checked={check.enabled}
+                onCheckedChange={(v) => onUpdateCheck(formIndex, { ...check, enabled: v })}
+              />
             </div>
           );
         },
