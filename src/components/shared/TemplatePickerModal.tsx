@@ -8,6 +8,7 @@ interface TemplatePresetOption {
   id: string;
   name: string;
   description: string;
+  icon?: React.ReactNode;
 }
 
 interface TemplatePickerModalProps {
@@ -18,6 +19,8 @@ interface TemplatePickerModalProps {
   onSelect: (presetId: string) => void;
   /** When provided, enables two-panel layout with preview on the right */
   renderPreview?: (presetId: string) => React.ReactNode;
+  /** "list" (default) = vertical list, "grid" = 2-column card grid */
+  layout?: "list" | "grid";
 }
 
 export function TemplatePickerModal({
@@ -27,6 +30,7 @@ export function TemplatePickerModal({
   presets,
   onSelect,
   renderPreview,
+  layout = "list",
 }: TemplatePickerModalProps) {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [prevOpen, setPrevOpen] = useState(open);
@@ -44,9 +48,48 @@ export function TemplatePickerModal({
   }
 
   const hasPreview = !!renderPreview;
+  const isGrid = layout === "grid" && !hasPreview;
+
+  const modalWidth = hasPreview ? "max-w-3xl" : "max-w-lg";
+
+  if (isGrid) {
+    return (
+      <Modal open={open} onOpenChange={onOpenChange} maxWidth={modalWidth}>
+        <ModalHeader onClose={() => onOpenChange(false)}>
+          <h2 className="heading-md">{title}</h2>
+        </ModalHeader>
+
+        <div className="px-5 pb-5">
+          <div className="grid grid-cols-2 gap-1.5 max-h-[32rem] overflow-y-auto">
+            {presets.map((preset) => (
+              <button
+                key={preset.id}
+                type="button"
+                aria-label={`Select ${preset.name} template`}
+                onClick={() => handleSelect(preset.id)}
+                className="flex h-full cursor-pointer flex-col items-start rounded-[10px] border border-[var(--color-border)] px-3 py-2.5 text-left transition-colors hover:bg-[var(--color-nav-hover-bg)] focus-visible:outline-2 focus-visible:outline-[var(--color-background-primary-solid)]"
+              >
+                {preset.icon && (
+                  <span className="mb-1.5 flex h-6 w-6 items-center justify-center text-[var(--color-text-secondary)]" aria-hidden>
+                    {preset.icon}
+                  </span>
+                )}
+                <p className="text-sm font-medium text-[var(--color-text)]">
+                  {preset.name}
+                </p>
+                <p className="text-xs text-[var(--color-text-secondary)] mt-1">
+                  {preset.description}
+                </p>
+              </button>
+            ))}
+          </div>
+        </div>
+      </Modal>
+    );
+  }
 
   return (
-    <Modal open={open} onOpenChange={onOpenChange} maxWidth={hasPreview ? "max-w-3xl" : "max-w-lg"}>
+    <Modal open={open} onOpenChange={onOpenChange} maxWidth={modalWidth}>
       <ModalHeader>
         <h2 className="heading-md">{title}</h2>
         <p className="text-sm text-[var(--color-text-secondary)] mt-1">

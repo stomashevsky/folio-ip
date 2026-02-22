@@ -15,6 +15,7 @@ import { Select } from "@plexui/ui/components/Select";
 import { Menu } from "@plexui/ui/components/Menu";
 import { Plus } from "@plexui/ui/components/Icon";
 import { VERIFICATION_TYPE_LABELS } from "@/lib/constants/verification-type-labels";
+import { VERIFICATION_TEMPLATE_PRESETS } from "@/lib/constants/template-presets";
 import {
   TEMPLATE_STATUS_OPTIONS,
   VERIFICATION_TYPE_OPTIONS,
@@ -125,11 +126,17 @@ export default function VerificationTemplatesPage() {
                   <span className="hidden md:inline">Create Template</span>
                 </Button>
               </Menu.Trigger>
-              <Menu.Content align="end" sideOffset={4} minWidth={200}>
-                {Object.entries(VERIFICATION_TYPE_LABELS).map(([type, label]) => (
-                  <Menu.Item key={type} onSelect={() => router.push(`/verifications/templates/new?type=${type}`)}>
-                    {label}
-                  </Menu.Item>
+              <Menu.Content align="end" minWidth="auto" width={300}>
+                {VERIFICATION_TEMPLATE_PRESETS.map((preset) => (
+                    <Menu.Item
+                      key={preset.id}
+                      onSelect={() => router.push(`/verifications/templates/new?preset=${preset.id}`)}
+                    >
+                      <div>
+                        <p className="font-semibold">{preset.name}</p>
+                        <p className="font-normal text-secondary text-[0.935em] leading-[1.45]">{preset.description}</p>
+                      </div>
+                    </Menu.Item>
                 ))}
               </Menu.Content>
             </Menu>
@@ -196,7 +203,7 @@ export default function VerificationTemplatesPage() {
           columns={columns}
           globalFilter={search}
           pageSize={50}
-          initialSorting={[{ id: "updatedAt", desc: true }]}
+          initialSorting={[{ id: "name", desc: false }]}
           columnVisibility={columnVisibility}
           onColumnVisibilityChange={setColumnVisibility}
           onRowClick={(row) => router.push(`/verifications/templates/${row.id}`)}
@@ -207,7 +214,6 @@ export default function VerificationTemplatesPage() {
           }}
         />
       </div>
-
     </div>
   );
 }
