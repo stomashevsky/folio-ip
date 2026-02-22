@@ -63,7 +63,6 @@ import { SelectControl } from "@plexui/ui/components/SelectControl";
 import { Tabs } from "@plexui/ui/components/Tabs";
 import { Popover } from "@plexui/ui/components/Popover";
 import { Tooltip } from "@plexui/ui/components/Tooltip";
-import { TagInput, type Tag } from "@plexui/ui/components/TagInput";
 import { Switch } from "@plexui/ui/components/Switch";
 import { ArrowDownSm, ArrowUpSm, CheckMd, ChevronDownMd, DotsHorizontal, InfoCircle, Plus, Search, Sort, Trash } from "@plexui/ui/components/Icon";
 
@@ -94,6 +93,11 @@ const CHECK_REQUIREMENT_OPTIONS = [
 const CHECK_STATUS_OPTIONS = [
   { value: "enabled", label: "Enabled" },
   { value: "disabled", label: "Disabled" },
+];
+const CHECK_TYPE_FILTER_OPTIONS = [
+  { value: "fraud", label: "Fraud" },
+  { value: "user_action_required", label: "User behavior" },
+  { value: "biometric", label: "Biometric" },
 ];
 const ATTRIBUTE_OPTIONS: { value: ComparisonAttribute; label: string }[] = [
   { value: "name_first", label: "First name" },
@@ -193,6 +197,7 @@ function toForm(t: VerificationTemplate): VerificationForm {
       required: existing ? existing.required : a.defaultRequired,
       enabled: existing ? (existing.enabled ?? true) : a.defaultEnabled,
       ...(a.lifecycle && { lifecycle: a.lifecycle }),
+      ...(existing?.subConfig && { subConfig: existing.subConfig }),
     };
   });
   return {
@@ -464,6 +469,7 @@ function ChecksTab({
   const [search, setSearch] = useState("");
   const [reqFilter, setReqFilter] = useState("");
   const [enabledFilter, setEnabledFilter] = useState("");
+  const [typeFilter, setTypeFilter] = useState<string[]>([]);
   const [openConfigs, setOpenConfigs] = useState<Set<string>>(new Set());
   const [sorting, setSorting] = useState<SortingState>([{ id: "name", desc: false }]);
 
@@ -492,6 +498,10 @@ function ChecksTab({
           if (enabledFilter === "disabled" && check.enabled) return null;
         }
         const availCheck = AVAILABLE_CHECKS[type]?.find((a) => a.name === check.name);
+        if (typeFilter.length > 0) {
+          const matchesCat = typeFilter.some((t) => t === "biometric" ? availCheck?.requiresBiometric === true : check.categories.includes(t));
+          if (!matchesCat) return null;
+        }
         const isConfigurable = availCheck?.configurable === true;
         const configType = availCheck?.configType;
         return {
@@ -504,7 +514,7 @@ function ChecksTab({
         } as CheckRow;
       })
       .filter((r): r is CheckRow => r !== null);
-  }, [checks, search, reqFilter, enabledFilter, type]);
+  }, [checks, search, reqFilter, enabledFilter, typeFilter, type]);
 
   const toggleConfig = useCallback((name: string) => {
     setOpenConfigs((prev) => {
@@ -689,8 +699,23 @@ function ChecksTab({
                     block
                   />
                 </div>
-                {(reqFilter || enabledFilter) && (
-                  <Button color="secondary" variant="soft" size="sm" pill onClick={() => { setReqFilter(""); setEnabledFilter(""); }}>
+                <div className="w-48">
+                  <Select
+                    options={CHECK_TYPE_FILTER_OPTIONS}
+                    value={typeFilter}
+                    onChange={(opts) => setTypeFilter(opts.map((o) => o.value))}
+                    multiple
+                    clearable
+                    placeholder="All check types"
+                    size="sm"
+                    pill
+                    variant="outline"
+                    block
+                    listMinWidth={180}
+                  />
+                </div>
+                {(reqFilter || enabledFilter || typeFilter.length > 0) && (
+                  <Button color="secondary" variant="soft" size="sm" pill onClick={() => { setReqFilter(""); setEnabledFilter(""); setTypeFilter([]); }}>
                     Clear filters
                   </Button>
                 )}
@@ -1086,10 +1111,6 @@ function MatchRequirementsEditor({
 
 /* ─── Extracted Properties Panel ─── */
 
-const ATTRIBUTE_LABEL_TO_VALUE = new Map(
-  EXTRACTED_PROPERTY_OPTIONS.map((o) => [o.label.toLowerCase(), o.value]),
-);
-
 function ExtractedPropertiesPanel({
   requiredAttributes,
   passWhenMissing,
@@ -1099,40 +1120,53 @@ function ExtractedPropertiesPanel({
   passWhenMissing: boolean;
   onUpdate: (patch: Partial<CheckSubConfig>) => void;
 }) {
-  const tags = useMemo<Tag[]>(
-    () =>
-      requiredAttributes.map((attr) => ({
-        value: EXTRACTED_PROPERTY_OPTIONS.find((o) => o.value === attr)?.label ?? attr,
-        valid: true,
-      })),
-    [requiredAttributes],
-  );
-
-  const handleTagsChange = useCallback(
-    (newTags: Tag[]) => {
-      const attrs = newTags
-        .map((t) => ATTRIBUTE_LABEL_TO_VALUE.get(t.value.toLowerCase()))
-        .filter((v): v is ExtractedProperty => v !== undefined);
-      onUpdate({ requiredAttributes: attrs.length > 0 ? attrs : undefined });
+  const removeAttribute = useCallback(
+    (attr: ExtractedProperty) => {
+      const next = requiredAttributes.filter((a) => a !== attr);
+      onUpdate({ requiredAttributes: next.length > 0 ? next : undefined });
     },
-    [onUpdate],
-  );
-
-  const validateTag = useCallback(
-    (value: string) => ATTRIBUTE_LABEL_TO_VALUE.has(value.toLowerCase()),
-    [],
+    [requiredAttributes, onUpdate],
   );
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-5">
       <div className="flex flex-col gap-1.5">
         <ConfigLabel description="These default required attributes will be used for every country and ID type. You can override this default on a per-country and per-ID basis in Countries and ID Types.">Default required attributes</ConfigLabel>
-        <TagInput
-          value={tags}
-          onChange={handleTagsChange}
-          placeholder="Type attribute name…"
-          validator={validateTag}
-        />
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="w-52">
+            <Select
+              options={EXTRACTED_PROPERTY_OPTIONS}
+              value={requiredAttributes}
+              onChange={(opts) => {
+                const next = opts.map((o) => o.value as ExtractedProperty);
+                onUpdate({ requiredAttributes: next.length > 0 ? next : undefined });
+              }}
+              multiple
+              clearable
+              placeholder="Add"
+              size="sm"
+              block
+              listMinWidth={200}
+              TriggerView={() => <span className="truncate">{requiredAttributes.length === 0 ? 'No required attributes' : `${requiredAttributes.length} selected`}</span>}
+            />
+          </div>
+          {requiredAttributes.map((attr) => {
+            const label = EXTRACTED_PROPERTY_OPTIONS.find((o) => o.value === attr)?.label ?? attr;
+            return (
+              <SelectControl
+                key={attr}
+                variant="soft"
+                size="xs"
+                selected
+                pill
+                dropdownIconType="none"
+                onClearClick={() => removeAttribute(attr)}
+              >
+                {label}
+              </SelectControl>
+            );
+          })}
+        </div>
       </div>
 
       <div className="flex items-center gap-2">

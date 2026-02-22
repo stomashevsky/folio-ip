@@ -14,7 +14,7 @@ const GOV_ID_CHECKS: VerificationCheckConfig[] = [
   { name: "Compromised submission", categories: ["fraud"], required: true, enabled: true },
   { name: "Electronic replica", categories: ["fraud"], required: true, enabled: true },
   { name: "Expiration", categories: ["user_action_required"], required: true, enabled: true },
-  { name: "Extracted properties", categories: ["user_action_required"], required: false, enabled: true },
+  { name: "Extracted properties", categories: ["user_action_required"], required: false, enabled: true, subConfig: { requiredAttributes: ["name_first", "name_last", "birthdate"], passWhenPropertyMissing: true } },
   { name: "Extraction inconsistency", categories: ["fraud"], required: false, enabled: true },
   { name: "Fabrication", categories: ["fraud"], required: true, enabled: true },
   { name: "Government ID", categories: ["user_action_required"], required: true, enabled: true },
