@@ -53,7 +53,7 @@ export function Modal({
 
       {/* Content */}
       <div
-        className={`relative z-10 w-full ${maxWidth} rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] shadow-lg`}
+        className={`relative z-10 w-full ${maxWidth} rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] shadow-lg`}
       >
         {children}
       </div>
@@ -97,5 +97,60 @@ export function ModalBody({ children }: { children: ReactNode }) {
 export function ModalFooter({ children }: { children: ReactNode }) {
   return (
     <div className="flex justify-end gap-2 px-5 py-4">{children}</div>
+  );
+}
+
+/* ─── OpenAI-pattern modal — use this for ALL settings/config modals ─── */
+
+interface SettingsModalProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  /** Modal title (rendered as heading-md, 18px/600) */
+  title: string;
+  /** Optional subtitle below title */
+  description?: ReactNode;
+  /** Footer content — typically Cancel + Save buttons */
+  footer: ReactNode;
+  children: ReactNode;
+  /** Max-width class, defaults to "max-w-lg" */
+  maxWidth?: string;
+}
+
+/**
+ * Reusable modal following the OpenAI settings pattern.
+ *
+ * Extracted from platform.openai.com — exact computed values:
+ * - Dialog: 12px border-radius, no border, shadow-lg
+ * - Body padding: 16px 20px (py-4 px-5)
+ * - Title: 18px/600 (heading-md), margin-bottom 8px
+ * - Title → content gap: mt-4 (16px)
+ * - Content fields gap: gap-4 (16px) between field groups
+ * - Footer: separate section, padding 16px 20px, flex justify-end, gap-2 (8px)
+ * - Buttons: 32px height (md), 8px border-radius (no pill)
+ * - Cancel: color="primary" variant="soft"
+ * - Action: color="primary" (solid)
+ * - Labels: 14px/500 (text-sm font-medium)
+ * - Label → input gap: gap-1 (4px)
+ */
+export function SettingsModal({
+  open,
+  onOpenChange,
+  title,
+  description,
+  footer,
+  children,
+  maxWidth = "max-w-lg",
+}: SettingsModalProps) {
+  return (
+    <Modal open={open} onOpenChange={onOpenChange} maxWidth={maxWidth}>
+      <div className="px-5 py-4">
+        <h2 className="heading-md">{title}</h2>
+        {description && (
+          <p className="mt-1 text-sm text-[var(--color-text-secondary)]">{description}</p>
+        )}
+        <div className="mt-4">{children}</div>
+      </div>
+      <div className="flex items-center justify-end gap-2 px-5 py-4">{footer}</div>
+    </Modal>
   );
 }

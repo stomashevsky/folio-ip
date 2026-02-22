@@ -18,7 +18,7 @@ export { CardHeader } from "./CardHeader";
 export { InfoRow } from "./InfoRow";
 export { KeyValueTable } from "./KeyValueTable";
 export { ActivityItem } from "./ActivityItem";
-export { Modal, ModalHeader, ModalBody, ModalFooter } from "./Modal";
+export { Modal, ModalHeader, ModalBody, ModalFooter, SettingsModal } from "./Modal";
 export { TemplatePickerModal } from "./TemplatePickerModal";
 export { CountrySelectorModal } from "./CountrySelectorModal";
 export { ConfirmLeaveModal } from "./ConfirmLeaveModal";

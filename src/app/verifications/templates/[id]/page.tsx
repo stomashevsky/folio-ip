@@ -13,7 +13,7 @@ import {
 } from "@tanstack/react-table";
 
 import { TopBar, TOPBAR_CONTROL_SIZE, TOPBAR_ACTION_PILL, TOPBAR_TOOLBAR_PILL } from "@/components/layout/TopBar";
-import { NotFoundPage, SectionHeading, ConfirmLeaveModal, CopyButton, Modal } from "@/components/shared";
+import { NotFoundPage, SectionHeading, ConfirmLeaveModal, CopyButton, SettingsModal } from "@/components/shared";
 import { useTemplateForm } from "@/lib/hooks/useTemplateForm";
 
 import { checkDescriptions } from "@/lib/data/check-descriptions";
@@ -828,22 +828,17 @@ function ChecksTab({
       </table>
 
       {/* Check Settings Modal */}
-      <Modal open={!!settingsRow} maxWidth="max-w-lg" onOpenChange={(open) => { if (!open) setSettingsCheckName(null); }}>
-        {settingsRow && (
-          <div className="p-6">
-            <h2 className="heading-lg">{settingsRow.check.name}</h2>
-            <div className="mt-4">
-              <CheckConfigPanel
-                configType={settingsRow.configType!}
-                subConfig={draftSubConfig}
-                onUpdate={(patch) => setDraftSubConfig((prev) => ({ ...prev, ...patch }))}
-              />
-            </div>
-            <div className="mt-6 flex justify-end gap-2">
-              <Button color="secondary" variant="soft" pill onClick={() => setSettingsCheckName(null)}>
+      {settingsRow && (
+        <SettingsModal
+          open={!!settingsRow}
+          onOpenChange={(open) => { if (!open) setSettingsCheckName(null); }}
+          title={settingsRow.check.name}
+          footer={
+            <>
+              <Button color="primary" variant="soft" onClick={() => setSettingsCheckName(null)}>
                 Cancel
               </Button>
-              <Button color="primary" pill onClick={() => {
+              <Button color="primary" onClick={() => {
                 onUpdateCheck(settingsRow.formIndex, {
                   ...settingsRow.check,
                   subConfig: draftSubConfig,
@@ -852,10 +847,16 @@ function ChecksTab({
               }}>
                 Save
               </Button>
-            </div>
-          </div>
-        )}
-      </Modal>
+            </>
+          }
+        >
+          <CheckConfigPanel
+            configType={settingsRow.configType!}
+            subConfig={draftSubConfig}
+            onUpdate={(patch) => setDraftSubConfig((prev) => ({ ...prev, ...patch }))}
+          />
+        </SettingsModal>
+      )}
 
       {/* Match Requirements — direct modal for comparison checks */}
       {(() => {
@@ -908,49 +909,45 @@ function CheckConfigPanel({
   switch (configType) {
     case "age_range":
       return (
-        <div className="flex items-center gap-4">
-          <div className="flex flex-col gap-1.5">
+        <div className="flex gap-4">
+          <div className="flex flex-1 flex-col gap-2">
             <ConfigLabel>Minimum age</ConfigLabel>
-            <div className="w-20">
-              <Input
-                size="sm"
-                type="number"
-                placeholder=""
-                value={subConfig?.ageRange?.min != null ? String(subConfig.ageRange.min) : ""}
-                onChange={(e) => {
-                  const val = e.target.value === "" ? undefined : Number(e.target.value);
-                  onUpdate({ ageRange: { ...subConfig?.ageRange, min: val } });
-                }}
-              />
-            </div>
+            <Input
+              type="number"
+              placeholder=""
+
+              value={subConfig?.ageRange?.min != null ? String(subConfig.ageRange.min) : ""}
+              onChange={(e) => {
+                const val = e.target.value === "" ? undefined : Number(e.target.value);
+                onUpdate({ ageRange: { ...subConfig?.ageRange, min: val } });
+              }}
+            />
           </div>
-          <div className="flex flex-col gap-1.5">
+          <div className="flex flex-1 flex-col gap-2">
             <ConfigLabel>Maximum age</ConfigLabel>
-            <div className="w-20">
-              <Input
-                size="sm"
-                type="number"
-                placeholder=""
-                value={subConfig?.ageRange?.max != null ? String(subConfig.ageRange.max) : ""}
-                onChange={(e) => {
-                  const val = e.target.value === "" ? undefined : Number(e.target.value);
-                  onUpdate({ ageRange: { ...subConfig?.ageRange, max: val } });
-                }}
-              />
-            </div>
+            <Input
+              type="number"
+              placeholder=""
+
+              value={subConfig?.ageRange?.max != null ? String(subConfig.ageRange.max) : ""}
+              onChange={(e) => {
+                const val = e.target.value === "" ? undefined : Number(e.target.value);
+                onUpdate({ ageRange: { ...subConfig?.ageRange, max: val } });
+              }}
+            />
           </div>
         </div>
       );
 
     case "expiration":
       return (
-        <div className="flex flex-col gap-1.5">
+        <div className="flex flex-col gap-2">
           <ConfigLabel description="Number of days past expiration to still accept">Grace period</ConfigLabel>
-          <div className="w-24">
+          <div className="w-32">
             <Input
-              size="sm"
               type="number"
               placeholder="0"
+
               value={subConfig?.gracePeriodDays != null ? String(subConfig.gracePeriodDays) : ""}
               onChange={(e) => {
                 const val = e.target.value === "" ? undefined : Number(e.target.value);
@@ -985,14 +982,13 @@ function CheckConfigPanel({
 
     case "repeat":
       return (
-        <div className="flex flex-col gap-1.5">
+        <div className="flex flex-col gap-2">
           <ConfigLabel description="Scope for detecting repeated submissions">Detection scope</ConfigLabel>
-          <div className="w-44">
+          <div className="w-52">
             <Select
               options={CHECK_SCOPE_OPTIONS}
               value={subConfig?.scope ?? "same_account"}
               onChange={(o) => { if (o) onUpdate({ scope: o.value as "same_account" | "all_accounts" }); }}
-              size="sm"
               pill={false}
               block
             />
@@ -1214,10 +1210,18 @@ function MatchRequirementsEditor({
         </Button>
       )}
 
-      <Modal open={modalOpen} onOpenChange={(open) => { setModalOpen(open); if (!open) onClose?.(); }} maxWidth="max-w-2xl">
-        <div className="p-6">
-          <h2 className="heading-lg">Match requirements</h2>
-          <div className="mt-4">
+      <SettingsModal
+        open={modalOpen}
+        onOpenChange={(open) => { setModalOpen(open); if (!open) onClose?.(); }}
+        maxWidth="max-w-2xl"
+        title="Match requirements"
+        footer={
+          <>
+            <Button color="primary" variant="soft" onClick={handleCancel}>Cancel</Button>
+            <Button color="primary" onClick={handleSave}>Save</Button>
+          </>
+        }
+      >
             <div className="flex gap-4" style={{ minHeight: 340 }}>
             {/* Left column — requirement list */}
             <div className="flex w-52 shrink-0 flex-col gap-1">
@@ -1423,17 +1427,7 @@ function MatchRequirementsEditor({
               )}
             </div>
           </div>
-          </div>
-          <div className="mt-6 flex justify-end gap-3">
-            <Button color="secondary" variant="soft" pill onClick={handleCancel}>
-              Cancel
-            </Button>
-            <Button color="primary" pill onClick={handleSave}>
-              Save
-            </Button>
-          </div>
-        </div>
-      </Modal>
+      </SettingsModal>
     </>
   );
 }
@@ -1866,13 +1860,18 @@ function BulkConfigModal({
   }, [selectedCodes]);
 
   return (
-    <Modal open={open} onOpenChange={onOpenChange} maxWidth="max-w-lg">
-      <div className="p-6">
-        <h2 className="heading-lg">Bulk configure</h2>
-        <p className="mt-1 text-sm text-[var(--color-text-secondary)]">
-          Apply settings to {selectedCodes.length} selected countries.
-        </p>
-        <div className="mt-4">
+    <SettingsModal
+      open={open}
+      onOpenChange={onOpenChange}
+      title="Bulk configure"
+      description={`Apply settings to ${selectedCodes.length} selected countries.`}
+      footer={
+        <>
+          <Button color="primary" variant="soft" onClick={() => onOpenChange(false)}>Cancel</Button>
+          <Button color="primary" onClick={handleApply}>Apply to {selectedCodes.length} countries</Button>
+        </>
+      }
+    >
 
         <Tabs
           aria-label="Bulk configuration sections"
@@ -1983,17 +1982,7 @@ function BulkConfigModal({
             </div>
           </div>
         )}
-        </div>
-        <div className="mt-6 flex justify-end gap-3">
-          <Button color="secondary" variant="soft" pill onClick={() => onOpenChange(false)}>
-            Cancel
-          </Button>
-          <Button color="primary" pill onClick={handleApply}>
-            Apply to {selectedCodes.length} countries
-          </Button>
-        </div>
-      </div>
-    </Modal>
+    </SettingsModal>
   );
 }
 
