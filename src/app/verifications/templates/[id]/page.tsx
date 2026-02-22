@@ -501,6 +501,7 @@ function ChecksTab({
   const [typeFilter, setTypeFilter] = useState<string[]>([]);
   const [settingsCheckName, setSettingsCheckName] = useState<string | null>(null);
   const [sorting, setSorting] = useState<SortingState>([{ id: "name", desc: false }]);
+  const [draftSubConfig, setDraftSubConfig] = useState<CheckSubConfig | undefined>(undefined);
 
   // Suppress checkbox entry animation on initial mount — @starting-style in PlexUI
   // Checkbox CSS causes all pre-checked checkboxes to animate in simultaneously.
@@ -555,36 +556,31 @@ function ChecksTab({
   // Find the current check data for the settings modal
   const settingsRow = settingsCheckName ? data.find((r) => r.check.name === settingsCheckName) : null;
 
+  // Sync draft config when settings modal opens
+  const [prevSettingsOpen, setPrevSettingsOpen] = useState(false);
+  const isSettingsOpen = !!settingsCheckName;
+  if (isSettingsOpen && !prevSettingsOpen && settingsRow) {
+    setDraftSubConfig(settingsRow.check.subConfig ? structuredClone(settingsRow.check.subConfig) : undefined);
+  }
+  if (isSettingsOpen !== prevSettingsOpen) setPrevSettingsOpen(isSettingsOpen);
+
   const columns = useMemo<ColumnDef<CheckRow, unknown>[]>(
     () => [
-      {
-        id: "enabled",
-        accessorFn: (row) => row.check.enabled,
-        header: "",
-        size: 44,
-        meta: { thClassName: "pr-0", tdClassName: "pr-0" },
-        enableSorting: false,
-        cell: ({ row }) => {
-          const { check, formIndex } = row.original;
-          return (
-            <div onClick={(e) => e.stopPropagation()}>
-              <Switch
-                checked={check.enabled}
-                onCheckedChange={(v) => onUpdateCheck(formIndex, { ...check, enabled: v })}
-              />
-            </div>
-          );
-        },
-      },
       {
         id: "name",
         accessorFn: (row) => row.check.name,
         header: "Checks",
         enableSorting: true,
         cell: ({ row }) => {
-          const { check, description } = row.original;
+          const { check, description, formIndex } = row.original;
           return (
-            <div className="flex items-center gap-1.5">
+            <div className="flex items-center gap-2.5">
+              <div onClick={(e) => e.stopPropagation()}>
+                <Switch
+                  checked={check.enabled}
+                  onCheckedChange={(v) => onUpdateCheck(formIndex, { ...check, enabled: v })}
+                />
+              </div>
               <span className="text-sm font-medium text-[var(--color-text)]">{check.name}</span>
               {description && (
                 <Tooltip content={description} side="top" sideOffset={4}>
@@ -602,36 +598,14 @@ function ChecksTab({
         },
       },
       {
-        id: "settings",
-        header: "Configuration",
-        accessorFn: (row) => row.hasConfig,
-        size: 140,
-        enableSorting: true,
-        cell: ({ row }) => {
-          const { check, hasConfig } = row.original;
-          if (!hasConfig) return null;
-          return (
-            <div onClick={(e) => e.stopPropagation()}>
-              <Button
-                color="secondary"
-                variant="ghost"
-                size="xs"
-                onClick={() => setSettingsCheckName(check.name)}
-              >
-                <SettingsCog /> Settings
-              </Button>
-            </div>
-          );
-        },
-      },
-      {
         id: "category",
         accessorFn: (row) => row.check.categories[0] ?? "",
         header: "Type",
         size: 200,
+        meta: { align: "right" },
         enableSorting: true,
         cell: ({ row }) => (
-          <div className="flex flex-wrap gap-1">
+          <div className="flex flex-wrap justify-end gap-1">
             {row.original.check.categories.map((cat) => (
               <Badge pill key={cat} color={(CHECK_CATEGORY_COLORS[cat] ?? "secondary") as "info" | "secondary" | "danger" | "discovery" | "warning"} variant="soft" size="sm">{CHECK_CATEGORY_LABELS[cat] ?? cat}</Badge>
             ))}
@@ -653,7 +627,7 @@ function ChecksTab({
             <span className="cursor-help border-b border-dashed border-[var(--color-text-tertiary)]">Required</span>
           </Tooltip>
         ),
-        size: 120,
+        size: 100,
         meta: { align: "right" },
         enableSorting: true,
         sortDescFirst: true,
@@ -686,6 +660,30 @@ function ChecksTab({
           );
         },
       },
+      {
+        id: "settings",
+        header: "",
+        accessorFn: (row) => row.hasConfig,
+        size: 60,
+        meta: { align: "right" },
+        enableSorting: false,
+        cell: ({ row }) => {
+          const { check, hasConfig } = row.original;
+          if (!hasConfig) return null;
+          return (
+            <div className="flex justify-end" onClick={(e) => e.stopPropagation()}>
+              <Button
+                color="secondary"
+                variant="soft"
+                size="xs"
+                onClick={() => setSettingsCheckName(check.name)}
+              >
+                <SettingsCog />
+              </Button>
+            </div>
+          );
+        },
+      },
     ],
     [onUpdateCheck],
   );
@@ -707,7 +705,7 @@ function ChecksTab({
       <table className="-mb-px w-full" data-datatable>
         <thead className="sticky top-0 z-10 bg-[var(--color-surface)]">
           <tr>
-            <th colSpan={5} className="pt-6 pb-3 text-left font-normal">
+            <th colSpan={4} className="pt-6 pb-3 text-left font-normal">
               <div className="flex flex-wrap items-center gap-2">
                 <div className="w-56">
                   <Input
@@ -800,7 +798,7 @@ function ChecksTab({
         <tbody>
           {table.getRowModel().rows.length === 0 ? (
             <tr>
-              <td colSpan={5} className="py-12 text-center text-sm text-[var(--color-text-tertiary)]">
+              <td colSpan={4} className="py-12 text-center text-sm text-[var(--color-text-tertiary)]">
                 No checks match your filters.
               </td>
             </tr>
@@ -826,21 +824,30 @@ function ChecksTab({
       <Modal open={!!settingsRow} maxWidth="max-w-lg" onOpenChange={(open) => { if (!open) setSettingsCheckName(null); }}>
         {settingsRow && (
           <>
-            <ModalHeader onClose={() => setSettingsCheckName(null)}>
-              {settingsRow.check.name}
-            </ModalHeader>
+            <div className="px-5 pt-5 pb-1">
+              <h2 className="heading-md">{settingsRow.check.name}</h2>
+            </div>
             <ModalBody>
               <CheckConfigPanel
                 configType={settingsRow.configType!}
-                subConfig={settingsRow.check.subConfig}
-                onUpdate={(patch) => {
-                  onUpdateCheck(settingsRow.formIndex, {
-                    ...settingsRow.check,
-                    subConfig: { ...settingsRow.check.subConfig, ...patch },
-                  });
-                }}
+                subConfig={draftSubConfig}
+                onUpdate={(patch) => setDraftSubConfig((prev) => ({ ...prev, ...patch }))}
               />
             </ModalBody>
+            <ModalFooter>
+              <Button color="secondary" variant="soft" pill onClick={() => setSettingsCheckName(null)}>
+                Cancel
+              </Button>
+              <Button color="primary" pill onClick={() => {
+                onUpdateCheck(settingsRow.formIndex, {
+                  ...settingsRow.check,
+                  subConfig: draftSubConfig,
+                });
+                setSettingsCheckName(null);
+              }}>
+                Save
+              </Button>
+            </ModalFooter>
           </>
         )}
       </Modal>
