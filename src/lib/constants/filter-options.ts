@@ -172,6 +172,8 @@ export const CASE_QUEUE_OPTIONS = [
 export const TEMPLATE_STATUS_OPTIONS = [
   { value: "active", label: "Active" },
   { value: "draft", label: "Draft" },
+  { value: "archived", label: "Archived" },
+  { value: "disabled", label: "Disabled" },
 ];
 
 // Analytics filter options

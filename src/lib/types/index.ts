@@ -147,7 +147,7 @@ export interface Account {
 
 // ─── Templates ───
 
-export type TemplateStatus = "active" | "draft";
+export type TemplateStatus = "active" | "draft" | "archived" | "disabled";
 
 export type StepPassAction = "continue" | "approve" | "skip_next";
 export type StepFailAction = "decline" | "needs_review" | "skip" | "continue";

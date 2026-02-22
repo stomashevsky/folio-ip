@@ -59,13 +59,12 @@ import { Input } from "@plexui/ui/components/Input";
 import { Menu } from "@plexui/ui/components/Menu";
 import { SegmentedControl } from "@plexui/ui/components/SegmentedControl";
 import { Select } from "@plexui/ui/components/Select";
-import { SelectControl } from "@plexui/ui/components/SelectControl";
 import { Tabs } from "@plexui/ui/components/Tabs";
 import { Popover } from "@plexui/ui/components/Popover";
 import { Tooltip } from "@plexui/ui/components/Tooltip";
 import { TagInput, type Tag } from "@plexui/ui/components/TagInput";
 import { Switch } from "@plexui/ui/components/Switch";
-import { ArrowDownSm, ArrowUpSm, CheckMd, ChevronDownMd, DotsHorizontal, InfoCircle, Plus, Search, Sort, Trash } from "@plexui/ui/components/Icon";
+import { ArrowDownSm, ArrowUpSm, ChevronDownMd, DotsHorizontal, InfoCircle, Plus, Search, Sort, Trash } from "@plexui/ui/components/Icon";
 
 /* ─── Constants ─── */
 
@@ -87,11 +86,9 @@ const CHECK_CATEGORY_COLORS: Record<string, string> = {
   user_action_required: "caution",
 };
 
-const CHECK_REQUIREMENT_OPTIONS = [
+const CHECK_FILTER_OPTIONS = [
   { value: "required", label: "Required" },
   { value: "optional", label: "Optional" },
-];
-const CHECK_STATUS_OPTIONS = [
   { value: "enabled", label: "Enabled" },
   { value: "disabled", label: "Disabled" },
 ];
@@ -462,8 +459,7 @@ function ChecksTab({
   onUpdateCheck: (index: number, check: VerificationCheckConfig) => void;
 }) {
   const [search, setSearch] = useState("");
-  const [reqFilter, setReqFilter] = useState("");
-  const [enabledFilter, setEnabledFilter] = useState("");
+  const [filters, setFilters] = useState<string[]>([]);
   const [openConfigs, setOpenConfigs] = useState<Set<string>>(new Set());
   const [sorting, setSorting] = useState<SortingState>([{ id: "name", desc: false }]);
 
@@ -483,13 +479,13 @@ function ChecksTab({
       .map((check, formIndex) => {
         const matchesSearch = !search || check.name.toLowerCase().includes(search.toLowerCase());
         if (!matchesSearch) return null;
-        if (reqFilter) {
-          if (reqFilter === "required" && !check.required) return null;
-          if (reqFilter === "optional" && check.required) return null;
-        }
-        if (enabledFilter) {
-          if (enabledFilter === "enabled" && !check.enabled) return null;
-          if (enabledFilter === "disabled" && check.enabled) return null;
+        if (filters.length > 0) {
+          const matches =
+            (filters.includes("required") && check.required) ||
+            (filters.includes("optional") && !check.required) ||
+            (filters.includes("enabled") && check.enabled) ||
+            (filters.includes("disabled") && !check.enabled);
+          if (!matches) return null;
         }
         const availCheck = AVAILABLE_CHECKS[type]?.find((a) => a.name === check.name);
         const isConfigurable = availCheck?.configurable === true;
@@ -504,7 +500,7 @@ function ChecksTab({
         } as CheckRow;
       })
       .filter((r): r is CheckRow => r !== null);
-  }, [checks, search, reqFilter, enabledFilter, type]);
+  }, [checks, search, filters, type]);
 
   const toggleConfig = useCallback((name: string) => {
     setOpenConfigs((prev) => {
@@ -522,26 +518,10 @@ function ChecksTab({
         accessorFn: (row) => row.check.name,
         header: "Checks",
         enableSorting: true,
-        cell: ({ row, table: t }) => {
-          const { check, formIndex, description, hasConfig } = row.original;
-          const oc = (t.options.meta as { openConfigs: Set<string> }).openConfigs;
-          const isOpen = hasConfig && oc.has(check.name);
+        cell: ({ row }) => {
+          const { check, description } = row.original;
           return (
             <div className="flex items-center gap-1.5">
-              <div onClick={(e) => e.stopPropagation()} data-suppress-anim>
-                <Switch
-                  size="sm"
-                  checked={check.enabled}
-                  onCheckedChange={(v) => onUpdateCheck(formIndex, { ...check, enabled: v })}
-                />
-              </div>
-              {hasConfig ? (
-                <ChevronDownMd
-                  className={`size-4 shrink-0 text-[var(--color-text-secondary)] transition-transform duration-200${isOpen ? "" : " -rotate-90"}`}
-                />
-              ) : (
-                <span className="w-4 shrink-0" />
-              )}
               <span className="text-sm font-medium text-[var(--color-text)]">{check.name}</span>
               {description && (
                 <Tooltip content={description} side="top" sideOffset={4}>
@@ -582,43 +562,74 @@ function ChecksTab({
       {
         id: "required",
         accessorFn: (row) => row.check.required,
-        header: "Requirement",
+        header: "Required",
         size: 120,
-        meta: { align: "right" },
         enableSorting: true,
         sortDescFirst: true,
         cell: ({ row }) => {
           const { check, formIndex } = row.original;
           return (
-            <div className="flex justify-end" onClick={(e) => e.stopPropagation()}>
-              <Menu>
-                <Menu.Trigger>
-                  <SelectControl variant="ghost" selected size="xs" block={false} className={check.required ? undefined : "text-[var(--color-text-tertiary)]"}>
-                    {check.required ? "Required" : "Optional"}
-                  </SelectControl>
-                </Menu.Trigger>
-                <Menu.Content minWidth={120}>
-                  <Menu.Item onSelect={() => onUpdateCheck(formIndex, { ...check, required: true })}>
-                    <span className="flex items-center gap-2">
-                      {check.required ? <CheckMd className="size-3.5" /> : <span className="w-3.5" />}
-                      Required
-                    </span>
-                  </Menu.Item>
-                  <Menu.Item onSelect={() => onUpdateCheck(formIndex, { ...check, required: false })}>
-                    <span className="flex items-center gap-2">
-                      {!check.required ? <CheckMd className="size-3.5" /> : <span className="w-3.5" />}
-                      Optional
-                    </span>
-                  </Menu.Item>
-                </Menu.Content>
-              </Menu>
+             
+            <div onClick={(e) => e.stopPropagation()}>
+              <Checkbox
+                checked={check.required}
+                onCheckedChange={(c) => onUpdateCheck(formIndex, { ...check, required: !!c })}
+              />
             </div>
           );
         },
       },
-
+      {
+        id: "enabled",
+        accessorFn: (row) => row.check.enabled,
+        header: "Enabled",
+        size: 120,
+        enableSorting: true,
+        sortDescFirst: true,
+        cell: ({ row }) => {
+          const { check, formIndex } = row.original;
+          return (
+             
+            <div onClick={(e) => e.stopPropagation()}>
+              <Checkbox
+                checked={check.enabled}
+                onCheckedChange={(enabled) => {
+                  onUpdateCheck(formIndex, { ...check, enabled: !!enabled });
+                }}
+              />
+            </div>
+          );
+        },
+      },
+      {
+        id: "_chevron",
+        size: 48,
+        enableSorting: false,
+        header: () => null,
+        cell: ({ row, table: t }) => {
+          const { check, hasConfig } = row.original;
+          if (!hasConfig) return null;
+          const oc = (t.options.meta as { openConfigs: Set<string> }).openConfigs;
+          const isOpen = oc.has(check.name);
+          return (
+            <div className="flex items-center justify-center" onClick={(e) => e.stopPropagation()}>
+              <Button
+                color="secondary"
+                variant="soft"
+                size="sm"
+                uniform
+                pill={false}
+                onClick={() => toggleConfig(check.name)}
+                className={`transition-transform duration-200${isOpen ? " rotate-180" : ""}`}
+              >
+                <ChevronDownMd className="size-5" />
+              </Button>
+            </div>
+          );
+        },
+      },
     ],
-    [onUpdateCheck],
+    [onUpdateCheck, toggleConfig],
   );
 
   // eslint-disable-next-line react-hooks/incompatible-library -- TanStack Table API is intentionally non-memoizable
@@ -638,7 +649,7 @@ function ChecksTab({
       <table className="-mb-px w-full" data-datatable>
         <thead className="sticky top-0 z-10 bg-[var(--color-surface)]">
           <tr>
-            <th colSpan={3} className="pt-6 pb-3 text-left font-normal">
+            <th colSpan={5} className="pt-6 pb-3 text-left font-normal">
               <div className="flex flex-wrap items-center gap-2">
                 <div className="w-56">
                   <Input
@@ -651,34 +662,23 @@ function ChecksTab({
                     startAdornment={<Search style={{ width: 16, height: 16 }} />}
                   />
                 </div>
-                <div className="w-48">
-                  <Select
-                    options={CHECK_REQUIREMENT_OPTIONS}
-                    value={reqFilter}
-                    onChange={(opt) => setReqFilter(opt?.value ?? "")}
-                    clearable
-                    placeholder="Requirement"
-                    size="sm"
-                    pill
-                    variant="outline"
-                    block
-                  />
-                </div>
                 <div className="w-44">
                   <Select
-                    options={CHECK_STATUS_OPTIONS}
-                    value={enabledFilter}
-                    onChange={(opt) => setEnabledFilter(opt?.value ?? "")}
+                    options={CHECK_FILTER_OPTIONS}
+                    value={filters}
+                    onChange={(opts) => setFilters(opts.map((o) => o.value))}
+                    multiple
                     clearable
-                    placeholder="Status"
+                    placeholder="All checks"
                     size="sm"
                     pill
                     variant="outline"
                     block
+                    listMinWidth={160}
                   />
                 </div>
-                {(reqFilter || enabledFilter) && (
-                  <Button color="secondary" variant="soft" size="sm" pill onClick={() => { setReqFilter(""); setEnabledFilter(""); }}>
+                {filters.length > 0 && (
+                  <Button color="secondary" variant="soft" size="sm" pill onClick={() => setFilters([])}>
                     Clear filters
                   </Button>
                 )}
@@ -698,7 +698,7 @@ function ChecksTab({
                 >
                   {header.isPlaceholder ? null : (
                     <div
-                      className={`flex items-center gap-1${(header.column.columnDef.meta as { align?: string })?.align === "right" ? " justify-end" : ""} ${
+                      className={`flex items-center gap-1 ${
                         header.column.getCanSort()
                           ? TABLE_TH_SORTABLE
                           : ""
@@ -727,7 +727,7 @@ function ChecksTab({
         <tbody>
           {table.getRowModel().rows.length === 0 ? (
             <tr>
-              <td colSpan={3} className="py-12 text-center text-sm text-[var(--color-text-tertiary)]">
+              <td colSpan={5} className="py-12 text-center text-sm text-[var(--color-text-tertiary)]">
                 No checks match your filters.
               </td>
             </tr>
@@ -750,7 +750,7 @@ function ChecksTab({
                   </tr>
                   {hasConfig && isConfigOpen && configType && (
                     <tr className="border-b border-[var(--color-border)]">
-                      <td colSpan={3} className="py-3 pl-[22px]">
+                      <td colSpan={5} className="py-3">
                         <CheckConfigPanel
                           configType={configType}
                           subConfig={check.subConfig}
