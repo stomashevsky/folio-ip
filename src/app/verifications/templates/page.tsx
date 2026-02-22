@@ -12,12 +12,12 @@ import type { ColumnDef, VisibilityState } from "@tanstack/react-table";
 import type { VerificationTemplate } from "@/lib/types";
 import { Button } from "@plexui/ui/components/Button";
 import { Select } from "@plexui/ui/components/Select";
-import { SegmentedControl } from "@plexui/ui/components/SegmentedControl";
 import { Menu } from "@plexui/ui/components/Menu";
 import { Plus } from "@plexui/ui/components/Icon";
 import { VERIFICATION_TYPE_LABELS } from "@/lib/constants/verification-type-labels";
 import { VERIFICATION_TEMPLATE_PRESETS } from "@/lib/constants/template-presets";
 import {
+  TEMPLATE_STATUS_OPTIONS,
   VERIFICATION_TYPE_OPTIONS,
 } from "@/lib/constants/filter-options";
 import {
@@ -25,10 +25,7 @@ import {
   VERIFICATION_TEMPLATE_DEFAULT_VISIBILITY,
 } from "@/lib/constants/column-configs";
 
-const STATUS_TABS = [
-  { value: "active", label: "Active" },
-  { value: "draft", label: "Draft" },
-];
+const STATUS_OPTIONS = TEMPLATE_STATUS_OPTIONS;
 const TYPE_OPTIONS = VERIFICATION_TYPE_OPTIONS;
 const COLUMN_CONFIG: ColumnConfig[] = VERIFICATION_TEMPLATE_COLUMN_CONFIG;
 const DEFAULT_VISIBILITY: VisibilityState = VERIFICATION_TEMPLATE_DEFAULT_VISIBILITY;
@@ -83,26 +80,27 @@ export default function VerificationTemplatesPage() {
   const { verificationTemplates } = useTemplateStore();
 
   const [search, setSearch] = useState("");
-  const [statusTab, setStatusTab] = useState("active");
+  const [statusFilter, setStatusFilter] = useState<string[]>([]);
   const [typeFilter, setTypeFilter] = useState<string[]>([]);
   const [columnVisibility, setColumnVisibility] =
     useState<VisibilityState>(DEFAULT_VISIBILITY);
 
   const allTemplates = verificationTemplates.getAll();
 
-  const hasActiveFilters = typeFilter.length > 0;
+  const hasActiveFilters = statusFilter.length > 0 || typeFilter.length > 0;
 
   const filteredData = useMemo(
     () =>
       allTemplates.filter((t) => {
-        if (t.status !== statusTab) return false;
+        if (statusFilter.length > 0 && !statusFilter.includes(t.status)) return false;
         if (typeFilter.length > 0 && !typeFilter.includes(t.type)) return false;
         return true;
       }),
-    [allTemplates, statusTab, typeFilter],
+    [allTemplates, statusFilter, typeFilter],
   );
 
   function clearAllFilters() {
+    setStatusFilter([]);
     setTypeFilter([]);
   }
 
@@ -146,27 +144,27 @@ export default function VerificationTemplatesPage() {
         }
         toolbar={
           <>
-            <SegmentedControl
-              aria-label="Template status"
-              value={statusTab}
-              onChange={setStatusTab}
-              size={TOPBAR_CONTROL_SIZE}
-              pill={TOPBAR_TOOLBAR_PILL}
-            >
-              {STATUS_TABS.map((tab) => (
-                <SegmentedControl.Tab key={tab.value} value={tab.value}>
-                  {tab.label}
-                </SegmentedControl.Tab>
-              ))}
-            </SegmentedControl>
-
-            <div className="mx-1 h-5 w-px bg-[var(--color-border)]" />
-
             <TableSearch
               value={search}
               onChange={setSearch}
               placeholder="Search templates..."
             />
+
+            <div className="w-36">
+              <Select
+                multiple
+                clearable
+                block
+                pill={TOPBAR_TOOLBAR_PILL}
+                listMinWidth={180}
+                options={STATUS_OPTIONS}
+                value={statusFilter}
+                onChange={(opts) => setStatusFilter(opts.map((o) => o.value))}
+                placeholder="Status"
+                variant="outline"
+                size={TOPBAR_CONTROL_SIZE}
+              />
+            </div>
 
             <div className="w-36">
               <Select
