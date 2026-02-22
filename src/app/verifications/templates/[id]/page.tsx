@@ -523,18 +523,11 @@ function ChecksTab({
         header: "Checks",
         enableSorting: true,
         cell: ({ row, table: t }) => {
-          const { check, formIndex, description, hasConfig } = row.original;
+          const { check, description, hasConfig } = row.original;
           const oc = (t.options.meta as { openConfigs: Set<string> }).openConfigs;
           const isOpen = hasConfig && oc.has(check.name);
           return (
             <div className="flex items-center gap-1.5">
-              <div onClick={(e) => e.stopPropagation()} data-suppress-anim>
-                <Switch
-                  size="sm"
-                  checked={check.enabled}
-                  onCheckedChange={(v) => onUpdateCheck(formIndex, { ...check, enabled: v })}
-                />
-              </div>
               {hasConfig ? (
                 <ChevronDownMd
                   className={`size-4 shrink-0 text-[var(--color-text-secondary)] transition-transform duration-200${isOpen ? "" : " -rotate-90"}`}
@@ -616,6 +609,43 @@ function ChecksTab({
           );
         },
       },
+      {
+        id: "enabled",
+        accessorFn: (row) => row.check.enabled,
+        header: "Status",
+        size: 120,
+        meta: { align: "right" },
+        enableSorting: true,
+        sortDescFirst: true,
+        cell: ({ row }) => {
+          const { check, formIndex } = row.original;
+          return (
+            <div className="flex justify-end" onClick={(e) => e.stopPropagation()}>
+              <Menu>
+                <Menu.Trigger>
+                  <SelectControl variant="ghost" selected size="xs" block={false} className={check.enabled ? undefined : "text-[var(--color-text-tertiary)]"}>
+                    {check.enabled ? "Enabled" : "Disabled"}
+                  </SelectControl>
+                </Menu.Trigger>
+                <Menu.Content minWidth={120}>
+                  <Menu.Item onSelect={() => onUpdateCheck(formIndex, { ...check, enabled: true })}>
+                    <span className="flex items-center gap-2">
+                      {check.enabled ? <CheckMd className="size-3.5" /> : <span className="w-3.5" />}
+                      Enabled
+                    </span>
+                  </Menu.Item>
+                  <Menu.Item onSelect={() => onUpdateCheck(formIndex, { ...check, enabled: false })}>
+                    <span className="flex items-center gap-2">
+                      {!check.enabled ? <CheckMd className="size-3.5" /> : <span className="w-3.5" />}
+                      Disabled
+                    </span>
+                  </Menu.Item>
+                </Menu.Content>
+              </Menu>
+            </div>
+          );
+        },
+      },
 
     ],
     [onUpdateCheck],
@@ -638,7 +668,7 @@ function ChecksTab({
       <table className="-mb-px w-full" data-datatable>
         <thead className="sticky top-0 z-10 bg-[var(--color-surface)]">
           <tr>
-            <th colSpan={3} className="pt-6 pb-3 text-left font-normal">
+            <th colSpan={4} className="pt-6 pb-3 text-left font-normal">
               <div className="flex flex-wrap items-center gap-2">
                 <div className="w-56">
                   <Input
@@ -727,7 +757,7 @@ function ChecksTab({
         <tbody>
           {table.getRowModel().rows.length === 0 ? (
             <tr>
-              <td colSpan={3} className="py-12 text-center text-sm text-[var(--color-text-tertiary)]">
+              <td colSpan={4} className="py-12 text-center text-sm text-[var(--color-text-tertiary)]">
                 No checks match your filters.
               </td>
             </tr>
@@ -750,7 +780,7 @@ function ChecksTab({
                   </tr>
                   {hasConfig && isConfigOpen && configType && (
                     <tr className="border-b border-[var(--color-border)]">
-                      <td colSpan={3} className="py-3 pl-[22px]">
+                      <td colSpan={4} className="py-3 pl-[22px]">
                         <CheckConfigPanel
                           configType={configType}
                           subConfig={check.subConfig}
