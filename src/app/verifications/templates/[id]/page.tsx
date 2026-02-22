@@ -612,7 +612,7 @@ function ChecksTab({
       {
         id: "enabled",
         accessorFn: (row) => row.check.enabled,
-        header: "",
+        header: "Enabled",
         size: 56,
         meta: { align: "right" },
         enableSorting: false,
