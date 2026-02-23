@@ -46,4 +46,5 @@ scripts/
 
 # screenshots / debug artifacts
 /*.png
+/tmp/
 firebase-debug.log
