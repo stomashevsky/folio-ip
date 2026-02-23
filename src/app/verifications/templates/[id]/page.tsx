@@ -342,7 +342,7 @@ function VerificationTemplateDetailContent() {
         }
       />
 
-      <div className="flex-1 overflow-auto px-4 md:px-6">
+      <div className={`flex-1 ${activeTab === "Allowed Countries" ? "overflow-hidden" : "overflow-auto px-4 md:px-6"}`}>
         {activeTab === "Checks" && (
           <ChecksTab checks={form.checks} type={form.type} onUpdateCheck={updateCheck} />
         )}
