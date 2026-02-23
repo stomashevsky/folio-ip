@@ -55,7 +55,7 @@ export interface ReportPresetDefaults {
 }
 
 // ─── Inquiry Template Presets ───
-// Matches the 24 presets from Persona's "Choose a template" dialog.
+// Matches the 24 presets from the "Choose a template" dialog.
 
 export const INQUIRY_TEMPLATE_PRESETS: TemplatePreset<"inquiry">[] = [
   {

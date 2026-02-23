@@ -92,7 +92,8 @@ export const ACCOUNT_STATUS_OPTIONS = [
 
 export const CHECK_TYPE_OPTIONS = [
   { value: "fraud", label: "Fraud" },
-  { value: "user_action_required", label: "Action required" },
+  { value: "user_action_required", label: "User Action Required" },
+  { value: "biometric", label: "Biometric" },
 ];
 
 export const CHECK_REQUIREMENT_OPTIONS = [

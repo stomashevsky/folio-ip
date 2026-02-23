@@ -30,7 +30,7 @@ export type GlobalSection = {
 
 // ---------------------------------------------------------------------------
 // Identity section
-// Matches Persona: Home, Inquiries, Verifications, Reports, Accounts, Transactions
+// Home, Inquiries, Verifications, Reports, Accounts, Transactions
 // ---------------------------------------------------------------------------
 
 const identitySidebarGroups: NavGroup[] = [
@@ -75,7 +75,7 @@ const identitySidebarGroups: NavGroup[] = [
 
 // ---------------------------------------------------------------------------
 // Platform section
-// Matches Persona: Cases, Workflows, Graph, Data, Utilities, Integrations
+// Cases, Workflows, Graph, Data, Utilities, Integrations
 // ---------------------------------------------------------------------------
 
 const platformSidebarGroups: NavGroup[] = [

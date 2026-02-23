@@ -47,7 +47,7 @@ interface WebhookItem {
 const initialWebhooks: WebhookItem[] = [
   {
     id: `wh_${Math.random().toString(36).slice(2, 14)}`,
-    url: "https://api.lunacorp.com/webhooks/persona",
+    url: "https://api.lunacorp.com/webhooks/identity",
     events: ["inquiry.completed", "inquiry.failed"],
     status: "active",
     created: "Jan 20, 2026",

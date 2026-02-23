@@ -81,7 +81,7 @@ const EVENT_GROUPS: Record<string, string[]> = {
 const MOCK_WEBHOOKS: DeveloperWebhook[] = [
   {
     id: "wh_001",
-    url: "https://api.lunacorp.com/webhooks/persona",
+    url: "https://api.lunacorp.com/webhooks/identity",
     status: "active",
     description: "Production webhook for inquiry lifecycle events",
     events: ["inquiry.completed", "inquiry.failed", "inquiry.approved", "inquiry.declined"],

@@ -125,7 +125,7 @@ export default function ProjectGeneralPage() {
         <div className="mb-8 space-y-4">
           <div>
             <Field label="Webhook URL" description="Events will be sent to this endpoint via HTTP POST">
-              <Input defaultValue="https://api.lunacorp.com/webhooks/persona" disabled />
+              <Input defaultValue="https://api.lunacorp.com/webhooks/identity" disabled />
             </Field>
           </div>
           <div>

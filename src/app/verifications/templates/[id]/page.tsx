@@ -17,6 +17,7 @@ import { NotFoundPage, SectionHeading, ConfirmLeaveModal, CopyButton, SettingsMo
 import { useTemplateForm } from "@/lib/hooks/useTemplateForm";
 
 import { checkDescriptions } from "@/lib/data/check-descriptions";
+import { CHECK_CATEGORY_LABELS, CHECK_CATEGORY_COLORS, CHECK_CATEGORY_DESCRIPTIONS, CHECK_LIFECYCLE_HINTS } from "@/lib/constants/check-category-labels";
 
 import {
   ALL_ID_DOC_TYPES,
@@ -30,7 +31,7 @@ import {
   getCountryIdTypes,
 } from "@/lib/constants/countries";
 import type { CountrySettings, IdDocType, IdTypeConfig, Region, RequiredSides } from "@/lib/constants/countries";
-import { VERIFICATION_TYPE_OPTIONS } from "@/lib/constants/filter-options";
+import { VERIFICATION_TYPE_OPTIONS, CHECK_TYPE_OPTIONS } from "@/lib/constants/filter-options";
 import { TABLE_TH, TABLE_TH_BASE, TABLE_TH_SORTABLE, TABLE_SORT_ICON_SIZE, COUNTRIES_TD } from "@/lib/constants/page-layout";
 import { VERIFICATION_TEMPLATE_PRESETS } from "@/lib/constants/template-presets";
 import { AVAILABLE_CHECKS } from "@/lib/constants/verification-checks";
@@ -62,7 +63,7 @@ import { Tabs } from "@plexui/ui/components/Tabs";
 import { Popover } from "@plexui/ui/components/Popover";
 import { Tooltip } from "@plexui/ui/components/Tooltip";
 import { Switch } from "@plexui/ui/components/Switch";
-import { ArrowDownSm, ArrowUpSm, CheckMd, DotsHorizontal, InfoCircle, Search, SettingsCog, Sort } from "@plexui/ui/components/Icon";
+import { ArrowDownSm, ArrowUpSm, CheckMd, DotsHorizontal, Search, SettingsCog, Sort } from "@plexui/ui/components/Icon";
 
 /* ─── Constants ─── */
 
@@ -74,15 +75,6 @@ const CAPTURE_METHOD_OPTIONS = [
 
 const CAPTURE_METHOD_TYPES = new Set<VerificationType>(["government_id", "selfie", "document"]);
 
-const CHECK_CATEGORY_LABELS: Record<string, string> = {
-  fraud: "Fraud",
-  user_action_required: "Action required",
-};
-
-const CHECK_CATEGORY_COLORS: Record<string, string> = {
-  fraud: "danger",
-  user_action_required: "caution",
-};
 
 const CHECK_STATUS_FILTER_OPTIONS = [
   { value: "enabled", label: "Enabled" },
@@ -91,11 +83,6 @@ const CHECK_STATUS_FILTER_OPTIONS = [
   { value: "non_required", label: "Non-required" },
   { value: "configurable", label: "Configurable" },
   { value: "non_configurable", label: "Non-configurable" },
-];
-const CHECK_TYPE_FILTER_OPTIONS = [
-  { value: "fraud", label: "Fraud" },
-  { value: "user_action_required", label: "Action required" },
-  { value: "biometric", label: "Biometric" },
 ];
 
 /* ─── Tabs ─── */
@@ -530,16 +517,16 @@ function ChecksTab({
                 <div className="flex min-h-[26px] items-center gap-2">
                   <span className="text-sm font-medium text-[var(--color-text)]">{check.name}</span>
                   {check.lifecycle === "beta" && (
-                    <Tooltip content="Available to the public, but may be constantly tuned by Persona with different thresholds. Geographic coverage may also be limited." side="top" sideOffset={4}>
+                    <Tooltip content={CHECK_LIFECYCLE_HINTS.beta} side="top" sideOffset={4}>
                       <Badge pill color="discovery" variant="soft" size="sm">
-                        <span className="flex items-center gap-1">Beta <InfoCircle style={{ width: 12, height: 12 }} /></span>
+                        Beta
                       </Badge>
                     </Tooltip>
                   )}
                   {check.lifecycle === "sunset" && (
-                    <Tooltip content="Deprecated in favor of other checks." side="top" sideOffset={4}>
+                    <Tooltip content={CHECK_LIFECYCLE_HINTS.sunset} side="top" sideOffset={4}>
                       <Badge pill color="warning" variant="soft" size="sm">
-                        <span className="flex items-center gap-1">Sunset <InfoCircle style={{ width: 12, height: 12 }} /></span>
+                        Sunset
                       </Badge>
                     </Tooltip>
                   )}
@@ -564,16 +551,16 @@ function ChecksTab({
             {row.original.requiresBiometric && (
               <Tooltip content="Biometric processing is required to use this feature. We recommend consulting with your legal team and compliance advisors to ensure that your business meets the proper requirements to process this biometric data." side="top" sideOffset={4}>
                 <Badge pill color="info" variant="soft" size="sm">
-                  <span className="flex items-center gap-1">Biometric <InfoCircle style={{ width: 12, height: 12 }} /></span>
+                  Biometric
                 </Badge>
               </Tooltip>
             )}
             {row.original.check.categories.map((cat) => {
-              const catDescription = cat === "fraud" ? "Detects forgery, tampering, and other fraudulent manipulation of documents or identity" : cat === "user_action_required" ? "Checks that depend on submission quality \u2014 photo clarity, glare, blur, or missing information" : "";
+              const catDescription = CHECK_CATEGORY_DESCRIPTIONS[cat] ?? "";
               return (
                 <Tooltip key={cat} content={catDescription} side="top" sideOffset={4}>
                   <Badge pill color={(CHECK_CATEGORY_COLORS[cat] ?? "secondary") as "info" | "secondary" | "danger" | "discovery" | "warning" | "caution"} variant="soft" size="sm">
-                    <span className="flex items-center gap-1">{CHECK_CATEGORY_LABELS[cat] ?? cat} <InfoCircle style={{ width: 12, height: 12 }} /></span>
+                    {CHECK_CATEGORY_LABELS[cat] ?? cat}
                   </Badge>
                 </Tooltip>
               );
@@ -586,7 +573,7 @@ function ChecksTab({
         accessorFn: (row) => row.check.required,
         header: () => (
           <Tooltip content="If a required check fails, the associated Verification Check will fail." side="top" sideOffset={4}>
-            <span className="cursor-help border-b border-dashed border-[var(--color-text-tertiary)]">Required</span>
+            <span className="cursor-help border-b border-dashed border-[var(--color-text-tertiary)]">Requirement</span>
           </Tooltip>
         ),
         size: 140,
@@ -703,7 +690,7 @@ function ChecksTab({
                 </div>
                 <div className="w-48">
                   <Select
-                    options={CHECK_TYPE_FILTER_OPTIONS}
+                    options={CHECK_TYPE_OPTIONS}
                     value={typeFilter}
                     onChange={(opts) => setTypeFilter(opts.map((o) => o.value))}
                     multiple

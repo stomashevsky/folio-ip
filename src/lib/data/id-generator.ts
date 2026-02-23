@@ -1,6 +1,6 @@
 /**
  * Seeded pseudo-random ID generator for realistic mock data.
- * Produces Persona-style IDs like: inq_Wt77vKHwYVYFciFNNDQpvggYy6jD
+ * Produces prefixed IDs like: inq_Wt77vKHwYVYFciFNNDQpvggYy6jD
  */
 
 const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";

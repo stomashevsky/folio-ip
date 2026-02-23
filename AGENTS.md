@@ -1,5 +1,18 @@
 # Agents Configuration — Folio App
 
+## CRITICAL RULE: No "Persona" Mentions — Anywhere
+
+**The word "Persona" MUST NEVER appear in the codebase** — not in user-facing strings, not in code comments, not in constant names, nowhere. This is a white-label product; the upstream provider name must be completely invisible.
+
+ UI text, tooltips, descriptions — NEVER
+ Code comments — NEVER
+ Variable/constant names — NEVER
+ Commit messages — avoid
+
+If you find existing mentions, remove them immediately.
+
+---
+
 ## CRITICAL RULE: Build Check Before Commit
 
 **ALWAYS run `npm run build` before committing or after any significant code change.** A passing `next build` is the minimum bar — if it fails, the deploy will fail in production.
