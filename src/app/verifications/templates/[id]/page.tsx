@@ -1061,6 +1061,9 @@ const STATUS_FILTER_OPTIONS = [
   { value: "disabled", label: "Disabled" },
 ];
 
+
+const ID_DOC_TYPE_FILTER_OPTIONS = ALL_ID_DOC_TYPES.map((t) => ({ value: t, label: ID_DOC_TYPE_LABELS[t] }));
+
 function CountriesTab({
   selected,
   countrySettings,
@@ -1180,7 +1183,7 @@ function CountriesTab({
                 </div>
                 <div className="w-40">
                   <Select
-                    options={ALL_ID_DOC_TYPES.map((t) => ({ value: t, label: ID_DOC_TYPE_LABELS[t] }))}
+                    options={ID_DOC_TYPE_FILTER_OPTIONS}
                     value={idTypeFilters}
                     onChange={(opts) => setIdTypeFilters(opts.map((o) => o.value))}
                     multiple
