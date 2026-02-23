@@ -186,6 +186,7 @@ export type CheckConfigType =
   | "age_range"
   | "expiration"
   | "barcode"
+  | "mrz"
   | "country"
   | "id_type"
   | "repeat"
@@ -210,6 +211,9 @@ export type NormalizationMethodType =
   | "remove_suffixes"
   | "remove_special_characters"
   | "fold_characters"
+  | "lowercase"
+  | "trim_whitespace"
+  | "normalize_whitespace"
   | "abbreviate_street_suffix"
   | "abbreviate_street_unit"
   | "abbreviate_subdivision"
@@ -229,11 +233,17 @@ export type ComparisonAttribute =
   | "name_full"
   | "birthdate"
   | "address_street"
+  | "address_street_1"
+  | "address_street_2"
   | "address_city"
   | "address_subdivision"
   | "address_postal_code"
   | "identification_number"
-  | "social_security_number";
+  | "social_security_number"
+  | "expiration_date"
+  | "issue_date"
+  | "phone_number"
+  | "email_address";
 
 export interface NormalizationStep {
   step: "apply" | "then";
@@ -244,6 +254,16 @@ export interface MatchCondition {
   method: ComparisonMethod;
   matchLevel: MatchLevel;
   threshold?: number;
+  /** For string_similarity partial matching */
+  partialMatchThreshold?: number;
+  /** For string_difference: max Levenshtein distance */
+  maxDistance?: number;
+  /** For substring: minimum substring length */
+  minLength?: number;
+  /** For tokenization: minimum token matches */
+  minTokenMatches?: number;
+  /** For date_similarity: which date components to match, e.g. ["year","month","day"] */
+  requiredMatches?: string[];
 }
 
 export interface AttributeMatchRequirement {
@@ -274,6 +294,7 @@ export interface CheckSubConfig {
   ageRange?: { min?: number; max?: number };
   gracePeriodDays?: number;
   requireSuccessfulExtraction?: boolean;
+  requireFullMrz?: boolean;
   mapToSovereignCountry?: boolean;
   scope?: "same_account" | "all_accounts";
   matchRequirements?: AttributeMatchRequirement[];
