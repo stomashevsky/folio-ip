@@ -65,6 +65,15 @@ function getActiveTypeSet(settings: CountrySettings | undefined, availableTypes:
   return new Set(getActiveTypes(settings, availableTypes));
 }
 
+function getRequiredSidesParts(type: IdDocType, config: IdTypeConfig | undefined): string[] {
+  const parts: string[] = [];
+  if (config?.requireFront ?? true) parts.push("F");
+  if (ID_TYPE_HAS_BACK.has(type) && config?.requireBack) parts.push("B");
+  if (ID_TYPE_HAS_BARCODE.has(type) && config?.requireBarcode) parts.push("BC");
+  if (ID_TYPE_HAS_PASSPORT_SIGNATURE.has(type) && config?.requirePassportSignature) parts.push("SIG");
+  return parts;
+}
+
 export function CountriesTab({
   selected,
   countrySettings,
@@ -117,6 +126,13 @@ export function CountriesTab({
       });
     }
 
+    // Sort: enabled countries first, alphabetical within each group
+    countries = [...countries].sort((a, b) => {
+      const aEnabled = selectedSet.has(a.value) ? 0 : 1;
+      const bEnabled = selectedSet.has(b.value) ? 0 : 1;
+      if (aEnabled !== bEnabled) return aEnabled - bEnabled;
+      return a.label.localeCompare(b.label);
+    });
     return countries;
   }, [idTypeFilters, regionFilters, search, selectedSet, statusFilters]);
 
@@ -347,17 +363,17 @@ export function CountriesTab({
       <div className="mx-4 mb-4 flex min-h-0 flex-1 overflow-hidden rounded-xl border border-[var(--color-border)] md:mx-6">
         {/* Column 1: Countries */}
         <div className="flex min-h-0 min-w-0 flex-1 flex-col border-r border-[var(--color-border)]">
-          <div className="flex shrink-0 items-center gap-2.5 border-b border-[var(--color-border)] px-3 py-2.5">
+          <div className="flex shrink-0 items-center gap-2.5 border-b border-[var(--color-border)] bg-[var(--color-surface-secondary)] pl-4.5 pr-3 py-2.5">
             <Checkbox
               checked={allFilteredSelected ? true : someFilteredSelected ? "indeterminate" : false}
               onCheckedChange={handleSelectAll}
             />
             <span className="flex-1 text-xs font-semibold uppercase tracking-[0.5px] text-[var(--color-text-tertiary)]">Countries</span>
-            <span className="text-sm text-[var(--color-text-tertiary)]">
+            <span className="text-sm text-[var(--color-text)]">
               Enabled · {selected.length} / {COUNTRY_OPTIONS.length}
             </span>
           </div>
-          <div className="flex-1 overflow-y-auto">
+          <div className="flex-1 overflow-y-auto p-1.5">
             {filtered.map((country) => {
               const isEnabled = selectedSet.has(country.value);
               const isSelected = selectedCountryCode === country.value;
@@ -376,9 +392,9 @@ export function CountriesTab({
                       setSelectedCountryCode(country.value);
                     }
                   }}
-                  className={`flex cursor-pointer gap-2.5 border-b border-[var(--color-border)] px-3 py-2 transition-colors ${
+                  className={`flex cursor-pointer gap-2.5 rounded-lg px-3 py-2 transition-colors ${
                     isSelected
-                      ? "bg-[var(--color-surface-tertiary)]"
+                      ? "bg-[var(--gray-100)]"
                       : "hover:bg-[var(--color-surface-secondary)]"
                   }`}
                 >
@@ -432,11 +448,11 @@ export function CountriesTab({
 
         {/* Column 2: Document Types */}
         <div className="flex min-h-0 min-w-0 flex-1 flex-col border-r border-[var(--color-border)]">
-          <div className="flex shrink-0 items-center border-b border-[var(--color-border)] px-4 py-2.5">
+          <div className="flex shrink-0 items-center border-b border-[var(--color-border)] bg-[var(--color-surface-secondary)] px-4 py-2.5">
             {selectedCountry ? (
               <>
                 <span className="flex-1 text-xs font-semibold uppercase tracking-[0.5px] text-[var(--color-text-tertiary)]">{selectedCountry.label}</span>
-                <span className="text-sm text-[var(--color-text-tertiary)]">
+                <span className="text-sm text-[var(--color-text)]">
                   Accepted ID Types · {selectedCountryActiveSet.size} / {selectedCountryTypes.length}
                 </span>
               </>
@@ -445,7 +461,7 @@ export function CountriesTab({
             )}
           </div>
 
-          <div className="flex-1 overflow-y-auto">
+          <div className="flex-1 overflow-y-auto p-1.5">
             {!selectedCountry && (
               <div className="flex h-full items-center justify-center text-sm text-[var(--color-text-tertiary)]">
                 Select a country to configure.
@@ -470,9 +486,9 @@ export function CountriesTab({
                           setSelectedIdType(type);
                         }
                       }}
-                      className={`flex cursor-pointer items-center gap-2.5 border-b border-[var(--color-border)] px-4 py-2.5 transition-colors ${
+                      className={`flex cursor-pointer items-center gap-2.5 rounded-lg px-3 py-2 transition-colors ${
                         isDocSelected
-                          ? "bg-[var(--color-surface-tertiary)]"
+                          ? "bg-[var(--gray-100)]"
                           : "hover:bg-[var(--color-surface-secondary)]"
                       }`}
                     >
@@ -494,19 +510,13 @@ export function CountriesTab({
                       <span className="flex-1 text-sm text-[var(--color-text)]">
                         {ID_DOC_TYPE_LABELS[type]}
                       </span>
-                      <Badge
-                        pill
-                        color={
-                          isActive
-                            ? (ID_DOC_TYPE_COLORS[type] as BadgeColor)
-                            : "secondary"
-                        }
-                        variant={isActive ? "soft" : "outline"}
-                        size="sm"
-                        className={isActive ? undefined : "opacity-40"}
-                      >
-                        {ID_DOC_TYPE_SHORT[type]}
-                      </Badge>
+                      <div className="flex shrink-0 items-center gap-1">
+                        {getRequiredSidesParts(type, countrySettings[selectedCountry.value]?.idTypeConfig?.[type]).map((side) => (
+                          <Badge key={side} color="secondary" variant="soft" size="sm" pill>
+                            {side}
+                          </Badge>
+                        ))}
+                      </div>
                     </div>
                   );
                 })}
@@ -551,11 +561,11 @@ export function CountriesTab({
 
         {/* Column 3: Document Settings */}
         <div className="flex min-h-0 min-w-0 flex-1 flex-col">
-          <div className="flex shrink-0 items-center border-b border-[var(--color-border)] px-4 py-2.5">
+          <div className="flex shrink-0 items-center border-b border-[var(--color-border)] bg-[var(--color-surface-secondary)] px-4 py-2.5">
             {selectedIdType ? (
               <>
                 <span className="flex-1 text-xs font-semibold uppercase tracking-[0.5px] text-[var(--color-text-tertiary)]">{ID_DOC_TYPE_LABELS[selectedIdType]}</span>
-                <span className="text-sm text-[var(--color-text-tertiary)]">{selectedCountry?.label}</span>
+                <span className="text-sm text-[var(--color-text)]">{selectedCountry?.label}</span>
               </>
             ) : (
               <span className="text-xs font-semibold uppercase tracking-[0.5px] text-[var(--color-text-tertiary)]">Document Settings</span>
