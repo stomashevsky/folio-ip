@@ -2,8 +2,7 @@
 
 import { useMemo, useState } from "react";
 
-import { SectionHeading } from "@/components/shared";
-import { Modal, ModalBody, ModalFooter, ModalHeader } from "@/components/shared/Modal";
+import { Modal, ModalHeader, ModalFooter } from "@/components/shared/Modal";
 import {
   EXTRACTED_ATTRIBUTE_OPTIONS,
   ID_TYPE_HAS_BACK,
@@ -25,10 +24,10 @@ import {
 
 import { Button } from "@plexui/ui/components/Button";
 import { Checkbox } from "@plexui/ui/components/Checkbox";
+import { Field } from "@plexui/ui/components/Field";
 import { Input } from "@plexui/ui/components/Input";
 import { Select } from "@plexui/ui/components/Select";
 import { SelectControl } from "@plexui/ui/components/SelectControl";
-
 
 export interface CountrySettingsModalProps {
   open: boolean;
@@ -142,53 +141,54 @@ export function CountrySettingsModal({
         </div>
       </ModalHeader>
 
-      <ModalBody>
-        <div className="flex min-h-[420px]">
-          <div className={`${MODAL_SPLIT_LEFT_WIDTH} shrink-0 border-r border-[var(--color-border)] pr-5`}>
-            <div className="text-xs font-semibold uppercase tracking-[0.5px] text-[var(--color-text-tertiary)]">
-              Accepted ID Types
-            </div>
-            <div className="mt-3 flex flex-col gap-0.5">
-              {availableTypes.map((type) => (
+      {/* Two-panel body — fixed height, no ModalBody wrapper */}
+      <div className="flex h-[480px]">
+        {/* ── Left panel: ID types + age range ── */}
+        <div className={`${MODAL_SPLIT_LEFT_WIDTH} shrink-0 overflow-y-auto border-r border-[var(--color-border)] p-5`}>
+          <div className="text-xs font-semibold uppercase tracking-[0.5px] text-[var(--color-text-tertiary)]">
+            Accepted ID Types
+          </div>
+          <div className="mt-3 flex flex-col gap-0.5">
+            {availableTypes.map((type) => (
+              <div
+                key={type}
+                role="button"
+                tabIndex={0}
+                onClick={() => selectIdType(type)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    selectIdType(type);
+                  }
+                }}
+                className={`flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 transition-colors ${
+                  selectedIdType === type
+                    ? "bg-[var(--color-secondary-soft-bg)]"
+                    : "hover:bg-[var(--color-nav-hover-bg)]"
+                }`}
+              >
                 <div
-                  key={type}
-                  role="button"
-                  tabIndex={0}
-                  onClick={() => selectIdType(type)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" || e.key === " ") {
-                      e.preventDefault();
-                      selectIdType(type);
-                    }
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    toggleIdType(type);
                   }}
-                  className={`flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 transition-colors ${
-                    selectedIdType === type
-                      ? "bg-[var(--color-secondary-soft-bg)]"
-                      : "hover:bg-[var(--color-nav-hover-bg)]"
-                  }`}
                 >
-                  <div
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      toggleIdType(type);
-                    }}
-                  >
-                    <Checkbox
-                      checked={activeTypeSet.has(type)}
-                      onCheckedChange={() => toggleIdType(type)}
-                    />
-                  </div>
-                  <span className="text-sm text-[var(--color-text)]">
-                    {ID_DOC_TYPE_SHORT[type]} – {ID_DOC_TYPE_LABELS[type]}
-                  </span>
+                  <Checkbox
+                    checked={activeTypeSet.has(type)}
+                    onCheckedChange={() => toggleIdType(type)}
+                  />
                 </div>
-              ))}
-            </div>
+                <span className="text-sm text-[var(--color-text)]">
+                  {ID_DOC_TYPE_SHORT[type]} – {ID_DOC_TYPE_LABELS[type]}
+                </span>
+              </div>
+            ))}
+          </div>
 
-            <div className="my-4 border-t border-[var(--color-border)]" />
+          <div className="my-4 border-t border-[var(--color-border)]" />
 
-            <SectionHeading size="xs">Age Range</SectionHeading>
-            <div className="mt-2 flex items-center gap-2">
+          <Field label="Age Range">
+            <div className="flex items-center gap-2">
               <div className={MODAL_NUMBER_INPUT_WIDTH}>
                 <Input
                   size={MODAL_CONTROL_SIZE}
@@ -209,156 +209,156 @@ export function CountrySettingsModal({
                 />
               </div>
             </div>
-          </div>
+          </Field>
+        </div>
 
-          <div className="min-w-0 flex-1 pl-5">
-            {!selectedIdType && (
-              <div className="flex h-full min-h-[360px] items-center justify-center text-sm text-[var(--color-text-tertiary)]">
-                Select an ID type to configure requirements.
+        {/* ── Right panel: per-ID-type config ── */}
+        <div className="flex min-w-0 flex-1 flex-col overflow-y-auto p-5">
+          {!selectedIdType && (
+            <div className="flex flex-1 items-center justify-center text-sm text-[var(--color-text-tertiary)]">
+              Select an ID type to configure requirements.
+            </div>
+          )}
+
+          {selectedIdType && selectedConfig && (
+            <div className="flex flex-col gap-5">
+              <div className="heading-sm text-[var(--color-text)]">
+                {ID_DOC_TYPE_SHORT[selectedIdType]} – {ID_DOC_TYPE_LABELS[selectedIdType]}
               </div>
-            )}
 
-            {selectedIdType && selectedConfig && (
-              <div className="flex flex-col gap-5">
-                <div className="heading-sm text-[var(--color-text)]">{ID_DOC_TYPE_SHORT[selectedIdType]} – {ID_DOC_TYPE_LABELS[selectedIdType]}</div>
-                <div>
-                  <SectionHeading size="xs">Required Sides</SectionHeading>
-                  <div className="mt-2 flex flex-col gap-2">
+              <Field label="Required Sides">
+                <div className="flex flex-col gap-2">
+                  <Checkbox
+                    checked={selectedConfig.requireFront ?? true}
+                    label="Require front"
+                    onCheckedChange={(checked) => updateSelectedConfig({ requireFront: checked })}
+                  />
+                  {ID_TYPE_HAS_BACK.has(selectedIdType) && (
                     <Checkbox
-                      checked={selectedConfig.requireFront ?? true}
-                      label="Require front"
-                      onCheckedChange={(checked) => updateSelectedConfig({ requireFront: checked })}
+                      checked={selectedConfig.requireBack ?? false}
+                      label="Require back"
+                      onCheckedChange={(checked) => updateSelectedConfig({ requireBack: checked })}
                     />
-                    {ID_TYPE_HAS_BACK.has(selectedIdType) && (
-                      <Checkbox
-                        checked={selectedConfig.requireBack ?? false}
-                        label="Require back"
-                        onCheckedChange={(checked) => updateSelectedConfig({ requireBack: checked })}
-                      />
-                    )}
-                    {ID_TYPE_HAS_BARCODE.has(selectedIdType) && (
-                      <Checkbox
-                        checked={selectedConfig.requireBarcode ?? false}
-                        label="Require barcode"
-                        onCheckedChange={(checked) => updateSelectedConfig({ requireBarcode: checked })}
-                      />
-                    )}
-                    {ID_TYPE_HAS_PASSPORT_SIGNATURE.has(selectedIdType) && (
-                      <Checkbox
-                        checked={selectedConfig.requirePassportSignature ?? false}
-                        label="Require passport signature"
-                        onCheckedChange={(checked) =>
-                          updateSelectedConfig({ requirePassportSignature: checked })
-                        }
-                      />
-                    )}
-                  </div>
+                  )}
+                  {ID_TYPE_HAS_BARCODE.has(selectedIdType) && (
+                    <Checkbox
+                      checked={selectedConfig.requireBarcode ?? false}
+                      label="Require barcode"
+                      onCheckedChange={(checked) => updateSelectedConfig({ requireBarcode: checked })}
+                    />
+                  )}
+                  {ID_TYPE_HAS_PASSPORT_SIGNATURE.has(selectedIdType) && (
+                    <Checkbox
+                      checked={selectedConfig.requirePassportSignature ?? false}
+                      label="Require passport signature"
+                      onCheckedChange={(checked) =>
+                        updateSelectedConfig({ requirePassportSignature: checked })
+                      }
+                    />
+                  )}
                 </div>
+              </Field>
 
-                <div>
-                  <SectionHeading size="xs">Expiration</SectionHeading>
-                  <div className="mt-2 flex items-center gap-2">
-                    <div className={MODAL_NUMBER_INPUT_WIDTH}>
-                      <Input
-                        size={MODAL_CONTROL_SIZE}
-                        type="number"
-                        placeholder="0"
-                        value={
-                          selectedConfig.expirationDays != null
-                            ? String(selectedConfig.expirationDays)
-                            : ""
-                        }
-                        onChange={(e) => {
-                          const value = e.target.value;
-                          updateSelectedConfig({
-                            expirationDays: value === "" ? undefined : Number(value),
-                          });
-                        }}
-                      />
-                    </div>
-                    <span className="text-sm text-[var(--color-text-secondary)]">days</span>
-                  </div>
-                </div>
-
-                <div>
-                  <SectionHeading size="xs">Required Attributes</SectionHeading>
-                  <div className="mt-2 flex flex-wrap items-center gap-2">
-                    <div className={MODAL_PANEL_SELECT_WIDTH}>
-                      <Select
-                        options={EXTRACTED_ATTRIBUTE_OPTIONS}
-                        value={selectedConfig.requiredAttributes ?? []}
-                        onChange={(opts) => {
-                          const next = opts.map((o) => o.value);
-                          updateSelectedConfig({
-                            requiredAttributes: next.length > 0 ? next : undefined,
-                          });
-                        }}
-                        multiple
-                        clearable
-                        placeholder="Add"
-                        size={MODAL_CONTROL_SIZE}
-                        variant="outline"
-                        block
-                        listMinWidth={220}
-                        TriggerView={() => (
-                          <span className="truncate text-sm text-[var(--color-text)]">
-                            {(selectedConfig.requiredAttributes ?? []).length === 0
-                              ? "No required attributes"
-                              : `${(selectedConfig.requiredAttributes ?? []).length} selected`}
-                          </span>
-                        )}
-                      />
-                    </div>
-
-                    {(selectedConfig.requiredAttributes ?? []).map((attr) => {
-                      const label =
-                        EXTRACTED_ATTRIBUTE_OPTIONS.find((option) => option.value === attr)?.label ?? attr;
-                      return (
-                        <SelectControl
-                          key={attr}
-                          variant="soft"
-                          size="xs"
-                          selected
-                          pill
-                          dropdownIconType="none"
-                          onClearClick={() => removeRequiredAttribute(attr)}
-                        >
-                          {label}
-                        </SelectControl>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                <div>
-                  <SectionHeading size="xs">Accepted Alternatives</SectionHeading>
-                  <div className={`mt-2 ${MODAL_PANEL_SELECT_WIDTH}`}>
-                    <Select
-                      options={availableTypes
-                        .filter((type) => type !== selectedIdType)
-                        .map((type) => ({ value: type, label: ID_DOC_TYPE_LABELS[type] }))}
-                      value={selectedConfig.acceptedAlternatives ?? []}
-                      onChange={(opts) => {
-                        const next = opts.map((o) => o.value as IdDocType);
+              <Field label="Expiration">
+                <div className="flex items-center gap-2">
+                  <div className={MODAL_NUMBER_INPUT_WIDTH}>
+                    <Input
+                      size={MODAL_CONTROL_SIZE}
+                      type="number"
+                      placeholder="0"
+                      value={
+                        selectedConfig.expirationDays != null
+                          ? String(selectedConfig.expirationDays)
+                          : ""
+                      }
+                      onChange={(e) => {
+                        const value = e.target.value;
                         updateSelectedConfig({
-                          acceptedAlternatives: next.length > 0 ? next : undefined,
+                          expirationDays: value === "" ? undefined : Number(value),
+                        });
+                      }}
+                    />
+                  </div>
+                  <span className="text-sm text-[var(--color-text-secondary)]">days</span>
+                </div>
+              </Field>
+
+              <Field label="Required Attributes">
+                <div className="flex flex-wrap items-center gap-2">
+                  <div className={MODAL_PANEL_SELECT_WIDTH}>
+                    <Select
+                      options={EXTRACTED_ATTRIBUTE_OPTIONS}
+                      value={selectedConfig.requiredAttributes ?? []}
+                      onChange={(opts) => {
+                        const next = opts.map((o) => o.value);
+                        updateSelectedConfig({
+                          requiredAttributes: next.length > 0 ? next : undefined,
                         });
                       }}
                       multiple
                       clearable
-                      placeholder="None"
+                      placeholder="Add"
                       size={MODAL_CONTROL_SIZE}
                       variant="outline"
                       block
-                      listMinWidth={240}
+                      listMinWidth={220}
+                      TriggerView={() => (
+                        <span className="truncate text-sm text-[var(--color-text)]">
+                          {(selectedConfig.requiredAttributes ?? []).length === 0
+                            ? "No required attributes"
+                            : `${(selectedConfig.requiredAttributes ?? []).length} selected`}
+                        </span>
+                      )}
                     />
                   </div>
+
+                  {(selectedConfig.requiredAttributes ?? []).map((attr) => {
+                    const label =
+                      EXTRACTED_ATTRIBUTE_OPTIONS.find((option) => option.value === attr)?.label ?? attr;
+                    return (
+                      <SelectControl
+                        key={attr}
+                        variant="soft"
+                        size="xs"
+                        selected
+                        pill
+                        dropdownIconType="none"
+                        onClearClick={() => removeRequiredAttribute(attr)}
+                      >
+                        {label}
+                      </SelectControl>
+                    );
+                  })}
                 </div>
-              </div>
-            )}
-          </div>
+              </Field>
+
+              <Field label="Accepted Alternatives">
+                <div className={MODAL_PANEL_SELECT_WIDTH}>
+                  <Select
+                    options={availableTypes
+                      .filter((type) => type !== selectedIdType)
+                      .map((type) => ({ value: type, label: ID_DOC_TYPE_LABELS[type] }))}
+                    value={selectedConfig.acceptedAlternatives ?? []}
+                    onChange={(opts) => {
+                      const next = opts.map((o) => o.value as IdDocType);
+                      updateSelectedConfig({
+                        acceptedAlternatives: next.length > 0 ? next : undefined,
+                      });
+                    }}
+                    multiple
+                    clearable
+                    placeholder="None"
+                    size={MODAL_CONTROL_SIZE}
+                    variant="outline"
+                    block
+                    listMinWidth={240}
+                  />
+                </div>
+              </Field>
+            </div>
+          )}
         </div>
-      </ModalBody>
+      </div>
 
       <ModalFooter>
         <Button color="primary" variant="soft" onClick={() => onOpenChange(false)}>
