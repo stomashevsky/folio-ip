@@ -1398,79 +1398,101 @@ function BulkConfigModal({
           aria-label="Bulk configuration sections"
           value={activeTab}
           onChange={setActiveTab}
+          variant="underline"
+          flush
           size="sm"
-          pill
         >
           <Tabs.Tab value="id_types">ID Types</Tabs.Tab>
           <Tabs.Tab value="requirements">Requirements</Tabs.Tab>
           <Tabs.Tab value="age_range">Age Range</Tabs.Tab>
         </Tabs>
+
         {activeTab === "id_types" && (
-          <div className="flex flex-col gap-3">
+          <div className="mt-4 flex flex-col gap-3">
             <p className="text-sm text-[var(--color-text-secondary)]">
               Select which document types to accept across all selected countries.
             </p>
-            <IdTypeBadges
-              availableTypes={allDocTypes}
-              activeTypes={idTypes.size === allDocTypes.length ? [] : Array.from(idTypes)}
-              onChange={(types) => setIdTypes(new Set(types.length === 0 ? allDocTypes : types))}
-            />
+            <div className="flex flex-col">
+              {allDocTypes.map((t) => (
+                <Checkbox
+                  key={t}
+                  label={ID_DOC_TYPE_LABELS[t]}
+                  checked={idTypes.has(t)}
+                  onCheckedChange={() => {
+                    setIdTypes((prev) => {
+                      const next = new Set(prev);
+                      if (next.has(t)) {
+                        if (next.size <= 1) return prev;
+                        next.delete(t);
+                      } else {
+                        next.add(t);
+                      }
+                      return next;
+                    });
+                  }}
+                />
+              ))}
+            </div>
+            <button
+              type="button"
+              className="cursor-pointer self-start text-sm text-[var(--color-primary-solid-bg)] hover:underline"
+              onClick={() => setIdTypes(new Set(allDocTypes))}
+            >
+              Select all
+            </button>
           </div>
         )}
-
         {activeTab === "requirements" && (
-          <div className="flex flex-col gap-4">
+          <div className="mt-4 flex flex-col gap-3">
             <p className="text-sm text-[var(--color-text-secondary)]">
               Configure requirements for each document type.
             </p>
-            {allDocTypes
-              .filter((t) => idTypes.has(t))
-              .map((type) => (
-                <div key={type} className="rounded-lg border border-[var(--color-border)] p-3">
-                  <p className="mb-2 text-sm font-medium text-[var(--color-text)]">
-                    {ID_DOC_TYPE_LABELS[type]}
-                  </p>
-                  <div className="flex flex-col gap-2">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-[var(--color-text-secondary)]">Required sides</span>
-                      <div className="w-44">
-                        <Select
-                          options={REQUIRED_SIDES_OPTIONS}
-                          value={requiredSides[type] ?? "front_only"}
-                          onChange={(o) => {
-                            if (o) setRequiredSides((prev) => ({ ...prev, [type]: o.value as RequiredSides }));
-                          }}
-                          size="sm"
-                          pill={false}
-                          block
-                        />
-                      </div>
+            <div className="divide-y divide-[var(--color-border)]">
+              {allDocTypes
+                .filter((t) => idTypes.has(t))
+                .map((type) => (
+                  <div key={type} className="flex items-center justify-between gap-4 py-3 first:pt-0">
+                    <div className="flex min-w-0 flex-1 flex-col gap-1.5">
+                      <span className="text-sm font-medium text-[var(--color-text)]">
+                        {ID_DOC_TYPE_LABELS[type]}
+                      </span>
+                      <Checkbox
+                        label="Require expiration date"
+                        checked={requireExpiry.has(type)}
+                        onCheckedChange={() => {
+                          setRequireExpiry((prev) => {
+                            const next = new Set(prev);
+                            if (next.has(type)) next.delete(type);
+                            else next.add(type);
+                            return next;
+                          });
+                        }}
+                      />
                     </div>
-                    <Checkbox
-                      label="Require expiration date"
-                      checked={requireExpiry.has(type)}
-                      onCheckedChange={() => {
-                        setRequireExpiry((prev) => {
-                          const next = new Set(prev);
-                          if (next.has(type)) next.delete(type);
-                          else next.add(type);
-                          return next;
-                        });
-                      }}
-                    />
+                    <div className="w-36 shrink-0">
+                      <Select
+                        options={REQUIRED_SIDES_OPTIONS}
+                        value={requiredSides[type] ?? "front_only"}
+                        onChange={(o) => {
+                          if (o) setRequiredSides((prev) => ({ ...prev, [type]: o.value as RequiredSides }));
+                        }}
+                        size="sm"
+                        pill={false}
+                        block
+                      />
+                    </div>
                   </div>
-                </div>
-              ))}
-            {allDocTypes.filter((t) => idTypes.has(t)).length === 0 && (
-              <p className="py-4 text-center text-sm text-[var(--color-text-tertiary)]">
-                Enable at least one ID type to configure requirements.
-              </p>
-            )}
+                ))}
+              {allDocTypes.filter((t) => idTypes.has(t)).length === 0 && (
+                <p className="py-4 text-center text-sm text-[var(--color-text-tertiary)]">
+                  Enable at least one ID type to configure requirements.
+                </p>
+              )}
+            </div>
           </div>
         )}
-
         {activeTab === "age_range" && (
-          <div className="flex flex-col gap-3">
+          <div className="mt-4 flex flex-col gap-3">
             <p className="text-sm text-[var(--color-text-secondary)]">
               Set an age range restriction for all selected countries.
             </p>
@@ -1479,7 +1501,7 @@ function BulkConfigModal({
                 <Input
                   size="sm"
                   type="number"
-                  placeholder="Min age"
+                  placeholder="Min"
                   value={ageMin}
                   onChange={(e) => setAgeMin(e.target.value)}
                 />
@@ -1489,11 +1511,12 @@ function BulkConfigModal({
                 <Input
                   size="sm"
                   type="number"
-                  placeholder="Max age"
+                  placeholder="Max"
                   value={ageMax}
                   onChange={(e) => setAgeMax(e.target.value)}
                 />
               </div>
+              <span className="text-sm text-[var(--color-text-tertiary)]">years</span>
             </div>
           </div>
         )}
