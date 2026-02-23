@@ -284,7 +284,7 @@ export function CountriesTab({
             startAdornment={<Search style={{ width: 16, height: 16 }} />}
           />
         </div>
-        <div className="w-32">
+        <div className="w-36">
           <Select
             options={STATUS_FILTER_OPTIONS}
             value={statusFilters}
@@ -299,7 +299,7 @@ export function CountriesTab({
             listMinWidth={160}
           />
         </div>
-        <div className="w-32">
+        <div className="w-40">
           <Select
             options={REGION_OPTIONS}
             value={regionFilters}
@@ -392,20 +392,21 @@ export function CountriesTab({
                       setSelectedCountryCode(country.value);
                     }
                   }}
-                  className={`flex cursor-pointer gap-2.5 rounded-lg px-3 py-2 transition-colors ${
+                  className={`flex cursor-pointer items-start gap-2.5 rounded-lg px-3 py-2 transition-colors ${
                     isSelected
                       ? "bg-[var(--gray-100)]"
                       : "hover:bg-[var(--color-surface-secondary)]"
                   }`}
                 >
                   <div
-                    className="pt-0.5"
+                    className="mt-px"
                     onClick={(e) => {
                       e.stopPropagation();
                       onToggle(country.value);
+                      setSelectedCountryCode(country.value);
                     }}
                   >
-                    <Checkbox checked={isEnabled} onCheckedChange={() => onToggle(country.value)} />
+                    <Checkbox checked={isEnabled} onCheckedChange={() => { onToggle(country.value); setSelectedCountryCode(country.value); }} />
                   </div>
                   <div className="min-w-0 flex-1">
                     <div className="truncate text-sm text-[var(--color-text)]">
@@ -521,7 +522,7 @@ export function CountriesTab({
                   );
                 })}
 
-                <div className="p-4">
+                <div className="px-3 py-4">
                   <Field label="Age Range" size={MODAL_CONTROL_SIZE}>
                     <div className="flex items-center gap-2">
                       <div className={MODAL_NUMBER_INPUT_WIDTH}>
