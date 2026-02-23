@@ -76,7 +76,7 @@ const CAPTURE_METHOD_TYPES = new Set<VerificationType>(["government_id", "selfie
 
 const CHECK_CATEGORY_LABELS: Record<string, string> = {
   fraud: "Fraud",
-  user_action_required: "User behavior",
+  user_action_required: "Action required",
 };
 
 const CHECK_CATEGORY_COLORS: Record<string, string> = {
@@ -94,7 +94,7 @@ const CHECK_STATUS_FILTER_OPTIONS = [
 ];
 const CHECK_TYPE_FILTER_OPTIONS = [
   { value: "fraud", label: "Fraud" },
-  { value: "user_action_required", label: "User behavior" },
+  { value: "user_action_required", label: "Action required" },
   { value: "biometric", label: "Biometric" },
 ];
 
@@ -533,10 +533,18 @@ function ChecksTab({
                 </Tooltip>
               )}
               {check.lifecycle === "beta" && (
-                <Badge pill color="discovery" variant="soft" size="sm">Beta</Badge>
+                <Tooltip content="Available to the public, but may be constantly tuned by Persona with different thresholds. Geographic coverage may also be limited." side="top" sideOffset={4}>
+                  <Badge pill color="discovery" variant="soft" size="sm">
+                    <span className="flex items-center gap-1">Beta <InfoCircle style={{ width: 12, height: 12 }} /></span>
+                  </Badge>
+                </Tooltip>
               )}
               {check.lifecycle === "sunset" && (
-                <Badge pill color="warning" variant="soft" size="sm">Sunset</Badge>
+                <Tooltip content="Deprecated in favor of other checks." side="top" sideOffset={4}>
+                  <Badge pill color="warning" variant="soft" size="sm">
+                    <span className="flex items-center gap-1">Sunset <InfoCircle style={{ width: 12, height: 12 }} /></span>
+                  </Badge>
+                </Tooltip>
               )}
             </div>
           );
@@ -558,9 +566,16 @@ function ChecksTab({
                 </Badge>
               </Tooltip>
             )}
-            {row.original.check.categories.map((cat) => (
-              <Badge pill key={cat} color={(CHECK_CATEGORY_COLORS[cat] ?? "secondary") as "info" | "secondary" | "danger" | "discovery" | "warning"} variant="soft" size="sm">{CHECK_CATEGORY_LABELS[cat] ?? cat}</Badge>
-            ))}
+            {row.original.check.categories.map((cat) => {
+              const catDescription = cat === "fraud" ? "Detects forgery, tampering, and other fraudulent manipulation of documents or identity" : cat === "user_action_required" ? "Checks that depend on submission quality \u2014 photo clarity, glare, blur, or missing information" : "";
+              return (
+                <Tooltip key={cat} content={catDescription} side="top" sideOffset={4}>
+                  <Badge pill color={(CHECK_CATEGORY_COLORS[cat] ?? "secondary") as "info" | "secondary" | "danger" | "discovery" | "warning" | "caution"} variant="soft" size="sm">
+                    <span className="flex items-center gap-1">{CHECK_CATEGORY_LABELS[cat] ?? cat} <InfoCircle style={{ width: 12, height: 12 }} /></span>
+                  </Badge>
+                </Tooltip>
+              );
+            })}
           </div>
         ),
       },
@@ -855,29 +870,31 @@ function CheckConfigPanel({
       return (
         <Field label="Default age range" description="This default age range will be used for every country and ID type. You can override this default on a per-country basis in Countries and ID Types.">
           <div className="flex gap-4">
-            <div className="flex flex-1 flex-col gap-2">
-              <ConfigLabel>Min</ConfigLabel>
-              <Input
-                type="number"
-                placeholder=""
-                value={subConfig?.ageRange?.min != null ? String(subConfig.ageRange.min) : ""}
-                onChange={(e) => {
-                  const val = e.target.value === "" ? undefined : Number(e.target.value);
-                  onUpdate({ ageRange: { ...subConfig?.ageRange, min: val } });
-                }}
-              />
+            <div className="flex-1">
+              <Field label="Min">
+                <Input
+                  type="number"
+                  placeholder=""
+                  value={subConfig?.ageRange?.min != null ? String(subConfig.ageRange.min) : ""}
+                  onChange={(e) => {
+                    const val = e.target.value === "" ? undefined : Number(e.target.value);
+                    onUpdate({ ageRange: { ...subConfig?.ageRange, min: val } });
+                  }}
+                />
+              </Field>
             </div>
-            <div className="flex flex-1 flex-col gap-2">
-              <ConfigLabel>Max</ConfigLabel>
-              <Input
-                type="number"
-                placeholder=""
-                value={subConfig?.ageRange?.max != null ? String(subConfig.ageRange.max) : ""}
-                onChange={(e) => {
-                  const val = e.target.value === "" ? undefined : Number(e.target.value);
-                  onUpdate({ ageRange: { ...subConfig?.ageRange, max: val } });
-                }}
-              />
+            <div className="flex-1">
+              <Field label="Max">
+                <Input
+                  type="number"
+                  placeholder=""
+                  value={subConfig?.ageRange?.max != null ? String(subConfig.ageRange.max) : ""}
+                  onChange={(e) => {
+                    const val = e.target.value === "" ? undefined : Number(e.target.value);
+                    onUpdate({ ageRange: { ...subConfig?.ageRange, max: val } });
+                  }}
+                />
+              </Field>
             </div>
           </div>
         </Field>
@@ -905,24 +922,22 @@ function CheckConfigPanel({
 
     case "barcode":
       return (
-        <div className="flex items-center gap-2">
+        <Field label="Require successful barcode extraction" description="Require that information be successfully extracted from the barcode on the ID.">
           <Switch
             checked={subConfig?.requireSuccessfulExtraction ?? false}
             onCheckedChange={(v) => onUpdate({ requireSuccessfulExtraction: v })}
           />
-          <ConfigLabel>Require successful barcode extraction</ConfigLabel>
-        </div>
+        </Field>
       );
 
     case "mrz":
       return (
-        <div className="flex items-center gap-2">
+        <Field label="Require full and valid MRZ" description="Require that the Machine Readable Zone (MRZ) on the ID be fully detected and contains valid, well-formed data.">
           <Switch
             checked={subConfig?.requireFullMrz ?? false}
             onCheckedChange={(v) => onUpdate({ requireFullMrz: v })}
           />
-          <ConfigLabel>Require full and valid MRZ</ConfigLabel>
-        </div>
+        </Field>
       );
 
     case "country":

@@ -92,7 +92,7 @@ export const ACCOUNT_STATUS_OPTIONS = [
 
 export const CHECK_TYPE_OPTIONS = [
   { value: "fraud", label: "Fraud" },
-  { value: "user_action_required", label: "User behavior" },
+  { value: "user_action_required", label: "Action required" },
 ];
 
 export const CHECK_REQUIREMENT_OPTIONS = [
