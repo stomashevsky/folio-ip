@@ -71,8 +71,9 @@ export default function GraphTemplateDetailPage() {
             <Textarea defaultValue={template.description} rows={2} />
           </Field>
           <ToggleSetting
-            title="Set as default"
-            description="Use this template when opening the Graph Explorer"
+            title="Default template"
+            description="Use this template when opening the Graph Explorer."
+            switchLabel="Set as default"
             checked={template.isDefault}
             onCheckedChange={() => {}}
           />

@@ -9,6 +9,7 @@ interface NotificationSetting {
   id: string;
   label: string;
   description: string;
+  switchLabel: string;
   defaultEnabled: boolean;
 }
 
@@ -17,25 +18,28 @@ const emailNotifications: NotificationSetting[] = [
     id: "inquiry_completed",
     label: "Inquiry completed",
     description: "Receive an email when an inquiry finishes processing",
+    switchLabel: "Notify on completion",
     defaultEnabled: true,
   },
   {
     id: "inquiry_failed",
     label: "Inquiry failed",
     description: "Receive an email when an inquiry fails or is declined",
+    switchLabel: "Notify on failure",
     defaultEnabled: true,
   },
   {
     id: "daily_summary",
     label: "Daily summary",
     description: "Receive a daily digest of verification activity",
+    switchLabel: "Enable daily digest",
     defaultEnabled: false,
   },
   {
     id: "weekly_report",
     label: "Weekly report",
-    description:
-      "Receive a weekly analytics report for your organization",
+    description: "Receive a weekly analytics report for your organization",
+    switchLabel: "Enable weekly report",
     defaultEnabled: true,
   },
 ];
@@ -45,19 +49,21 @@ const alertNotifications: NotificationSetting[] = [
     id: "high_risk",
     label: "High-risk matches",
     description: "Get alerted when a verification triggers a high-risk signal",
+    switchLabel: "Enable high-risk alerts",
     defaultEnabled: true,
   },
   {
     id: "api_errors",
     label: "API errors",
     description: "Get alerted when API error rates exceed threshold",
+    switchLabel: "Enable error alerts",
     defaultEnabled: false,
   },
   {
     id: "usage_limit",
     label: "Usage limit warnings",
-    description:
-      "Get alerted when approaching monthly verification limits",
+    description: "Get alerted when approaching monthly verification limits",
+    switchLabel: "Enable usage alerts",
     defaultEnabled: true,
   },
 ];
@@ -88,6 +94,7 @@ function NotificationGroup({
             key={setting.id}
             title={setting.label}
             description={setting.description}
+            switchLabel={setting.switchLabel}
             checked={enabled[setting.id]}
             onCheckedChange={(checked) => onToggle(setting.id, checked)}
           />

@@ -261,7 +261,8 @@ function ReportTemplateDetailContent() {
           <div className="px-4 py-4">
             <ToggleSetting
               title="Continuous monitoring"
-              description="Automatically re-screen on a recurring schedule"
+              description="Automatically re-screen on a recurring schedule."
+              switchLabel="Enable continuous monitoring"
               checked={form.settings.continuousMonitoring}
               onCheckedChange={(c) => patchSettings({ continuousMonitoring: c })}
             />
@@ -284,7 +285,8 @@ function ReportTemplateDetailContent() {
           <div className="px-4 py-4">
             <ToggleSetting
               title="Fuzzy matching"
-              description="Allow approximate name matching for broader coverage"
+              description="Allow approximate name matching for broader coverage."
+              switchLabel="Enable fuzzy matching"
               checked={form.settings.enableFuzzyMatch}
               onCheckedChange={(c) => patchSettings({ enableFuzzyMatch: c })}
             />

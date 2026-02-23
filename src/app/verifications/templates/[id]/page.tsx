@@ -910,8 +910,9 @@ function CheckConfigPanel({
     case "barcode":
       return (
         <ToggleSetting
-          title="Require successful barcode extraction"
+          title="Barcode extraction"
           description="Require that information be successfully extracted from the barcode on the ID."
+          switchLabel="Require successful extraction"
           checked={subConfig?.requireSuccessfulExtraction ?? false}
           onCheckedChange={(v) => onUpdate({ requireSuccessfulExtraction: v })}
         />
@@ -920,8 +921,9 @@ function CheckConfigPanel({
     case "mrz":
       return (
         <ToggleSetting
-          title="Require full and valid MRZ"
+          title="MRZ validation"
           description="Require that the Machine Readable Zone (MRZ) on the ID be fully detected and contains valid, well-formed data."
+          switchLabel="Require full and valid MRZ"
           checked={subConfig?.requireFullMrz ?? false}
           onCheckedChange={(v) => onUpdate({ requireFullMrz: v })}
         />
@@ -930,8 +932,9 @@ function CheckConfigPanel({
     case "country":
       return (
         <ToggleSetting
-          title="Map to sovereign country"
-          description="Map territory codes to their sovereign country codes (e.g., PR → US)"
+          title="Sovereign country mapping"
+          description="Map territory codes to their sovereign country codes (e.g., PR → US)."
+          switchLabel="Map to sovereign country"
           checked={subConfig?.mapToSovereignCountry ?? false}
           onCheckedChange={(v) => onUpdate({ mapToSovereignCountry: v })}
         />

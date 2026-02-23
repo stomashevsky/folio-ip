@@ -92,8 +92,8 @@ export default function ProjectGeneralPage() {
         <SectionHeading size="xs">Automation</SectionHeading>
 
         <div className="mb-8 space-y-6">
-          <ToggleSetting title="Continuous monitoring" description="Automatically re-screen accounts on a recurring schedule" checked={continuousMonitoring} onCheckedChange={setContinuousMonitoring} />
-          <ToggleSetting title="Auto-approve low risk" description="Automatically approve inquiries with a risk score below the threshold" checked={autoApprove} onCheckedChange={setAutoApprove} />
+          <ToggleSetting title="Continuous monitoring" description="Automatically re-screen accounts on a recurring schedule." switchLabel="Enable continuous monitoring" checked={continuousMonitoring} onCheckedChange={setContinuousMonitoring} />
+          <ToggleSetting title="Low-risk auto-approval" description="Automatically approve inquiries with a risk score below the threshold." switchLabel="Enable auto-approve" checked={autoApprove} onCheckedChange={setAutoApprove} />
         </div>
 
         <SectionHeading size="xs">Allowed origins</SectionHeading>

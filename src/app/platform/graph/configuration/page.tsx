@@ -97,8 +97,9 @@ export default function GraphConfigurationPage() {
 
         <div className="mb-6">
           <ToggleSetting
-            title="Show orphan nodes"
+            title="Orphan nodes"
             description="Display nodes with no connections"
+            switchLabel="Show orphan nodes"
             checked={showOrphanNodes}
             onCheckedChange={setShowOrphanNodes}
           />
@@ -106,8 +107,9 @@ export default function GraphConfigurationPage() {
 
         <div className="mb-8">
           <ToggleSetting
-            title="Auto-cluster related nodes"
+            title="Auto-clustering"
             description="Group closely connected nodes into visual clusters"
+            switchLabel="Enable auto-clustering"
             checked={autoCluster}
             onCheckedChange={setAutoCluster}
           />
@@ -141,8 +143,9 @@ export default function GraphConfigurationPage() {
 
         <div className="mb-6">
           <ToggleSetting
-            title="Show weak connections"
+            title="Weak connections"
             description="Display edges below the minimum strength as dashed lines"
+            switchLabel="Show weak connections"
             checked={showWeakConnections}
             onCheckedChange={setShowWeakConnections}
           />
@@ -150,8 +153,9 @@ export default function GraphConfigurationPage() {
 
         <div className="mb-8">
           <ToggleSetting
-            title="Directional edges"
+            title="Edge direction"
             description="Show arrows indicating relationship direction"
+            switchLabel="Show directional edges"
             checked={directionalEdges}
             onCheckedChange={setDirectionalEdges}
           />
@@ -209,8 +213,9 @@ export default function GraphConfigurationPage() {
 
         <div className="mb-6">
           <ToggleSetting
-            title="Show labels"
+            title="Node labels"
             description="Display entity names on nodes"
+            switchLabel="Show node labels"
             checked={showLabels}
             onCheckedChange={setShowLabels}
           />
@@ -218,8 +223,9 @@ export default function GraphConfigurationPage() {
 
         <div className="mb-6">
           <ToggleSetting
-            title="Enable animation"
+            title="Animation"
             description="Animate layout transitions and interactions"
+            switchLabel="Enable animation"
             checked={enableAnimation}
             onCheckedChange={setEnableAnimation}
           />
@@ -227,8 +233,9 @@ export default function GraphConfigurationPage() {
 
         <div className="mb-8">
           <ToggleSetting
-            title="Highlight neighbors on hover"
+            title="Hover highlight"
             description="Highlight connected nodes when hovering over a node"
+            switchLabel="Highlight neighbors on hover"
             checked={highlightNeighbors}
             onCheckedChange={setHighlightNeighbors}
           />

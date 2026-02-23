@@ -127,10 +127,10 @@ export default function YourProfilePage() {
         <div className="mt-10">
           <SectionHeading size="xs">Notifications</SectionHeading>
           <div className="space-y-6">
-            <ToggleSetting title="Email notifications" description="Receive email alerts for important account events" checked={notifyEmail} onCheckedChange={setNotifyEmail} />
-            <ToggleSetting title="Inquiry status updates" description="Get notified when inquiries change status" checked={notifyInquiry} onCheckedChange={setNotifyInquiry} />
-            <ToggleSetting title="Report matches" description="Get notified when a report returns new matches" checked={notifyReport} onCheckedChange={setNotifyReport} />
-            <ToggleSetting title="Weekly summary" description="Receive a weekly digest of activity across your organization" checked={notifyWeekly} onCheckedChange={setNotifyWeekly} />
+            <ToggleSetting title="Email notifications" description="Receive email alerts for important account events." switchLabel="Enable email alerts" checked={notifyEmail} onCheckedChange={setNotifyEmail} />
+            <ToggleSetting title="Inquiry updates" description="Get notified when inquiries change status." switchLabel="Enable status notifications" checked={notifyInquiry} onCheckedChange={setNotifyInquiry} />
+            <ToggleSetting title="Report matches" description="Get notified when a report returns new matches." switchLabel="Enable match alerts" checked={notifyReport} onCheckedChange={setNotifyReport} />
+            <ToggleSetting title="Weekly summary" description="Receive a weekly digest of activity across your organization." switchLabel="Enable weekly digest" checked={notifyWeekly} onCheckedChange={setNotifyWeekly} />
           </div>
         </div>
 

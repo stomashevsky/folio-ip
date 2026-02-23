@@ -26,9 +26,9 @@ export function ToggleSetting({
     <div>
       <p className="heading-xs">{title}</p>
       {description && (
-        <p className="mt-1 text-sm text-[var(--color-text-secondary)]">{description}</p>
+        <p className="mt-1 text-xs text-[var(--color-text-secondary)]">{description}</p>
       )}
-      <div className="mt-3">
+      <div className="mt-2">
         <Switch label={switchLabel ?? title} checked={checked} onCheckedChange={onCheckedChange} />
       </div>
     </div>
