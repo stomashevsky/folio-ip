@@ -7,12 +7,11 @@ interface ToggleSettingProps {
   title?: string;
   /** Description text below the heading */
   description?: string;
-  /** Inline label rendered next to the switch (PlexUI Switch `label` prop) */
+  /** Label text next to the switch — defaults to title when title is present */
   switchLabel?: string;
   checked: boolean;
   onCheckedChange: (checked: boolean) => void;
 }
-
 export function ToggleSetting({
   title,
   description,
@@ -20,20 +19,17 @@ export function ToggleSetting({
   checked,
   onCheckedChange,
 }: ToggleSettingProps) {
-
   if (!title) {
     return <Switch label={switchLabel} checked={checked} onCheckedChange={onCheckedChange} />;
   }
-
-
   return (
     <div>
       <p className="heading-xs">{title}</p>
       {description && (
         <p className="mt-1 text-sm text-[var(--color-text-secondary)]">{description}</p>
       )}
-      <div className={description ? "mt-3" : "mt-2"}>
-        <Switch label={switchLabel} checked={checked} onCheckedChange={onCheckedChange} />
+      <div className="mt-3">
+        <Switch label={switchLabel ?? title} checked={checked} onCheckedChange={onCheckedChange} />
       </div>
     </div>
   );
