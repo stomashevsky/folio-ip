@@ -853,15 +853,13 @@ function CheckConfigPanel({
   switch (configType) {
     case "age_range":
       return (
-        <div className="flex flex-col gap-2">
-          <ConfigLabel description="This default age range will be used for every country and ID type. You can override this default on a per-country basis in Countries and ID Types.">Default age range</ConfigLabel>
+        <Field label="Default age range" description="This default age range will be used for every country and ID type. You can override this default on a per-country basis in Countries and ID Types.">
           <div className="flex gap-4">
             <div className="flex flex-1 flex-col gap-2">
               <ConfigLabel>Min</ConfigLabel>
               <Input
                 type="number"
                 placeholder=""
-
                 value={subConfig?.ageRange?.min != null ? String(subConfig.ageRange.min) : ""}
                 onChange={(e) => {
                   const val = e.target.value === "" ? undefined : Number(e.target.value);
@@ -874,7 +872,6 @@ function CheckConfigPanel({
               <Input
                 type="number"
                 placeholder=""
-
                 value={subConfig?.ageRange?.max != null ? String(subConfig.ageRange.max) : ""}
                 onChange={(e) => {
                   const val = e.target.value === "" ? undefined : Number(e.target.value);
@@ -883,14 +880,13 @@ function CheckConfigPanel({
               />
             </div>
           </div>
-        </div>
+        </Field>
       );
 
     case "expiration":
       return (
-        <div className="flex flex-col gap-2">
+        <Field label="Default expiration" description="The default expiration will be used for every country and ID type. You can override this default on a per-country and per-ID basis in Countries and ID Types.">
           <div className="flex items-center gap-2">
-            <ConfigLabel>Default expiration</ConfigLabel>
             <div className="w-24">
               <Input
                 type="number"
@@ -904,8 +900,7 @@ function CheckConfigPanel({
             </div>
             <span className="text-sm text-[var(--color-text-secondary)]">days</span>
           </div>
-          <p className="text-xs text-[var(--color-text-tertiary)]">The default expiration will be used for every country and ID type. You can override this default on a per-country and per-ID basis in Countries and ID Types.</p>
-        </div>
+        </Field>
       );
 
     case "barcode":
@@ -932,19 +927,17 @@ function CheckConfigPanel({
 
     case "country":
       return (
-        <div className="flex items-center gap-2">
+        <Field label="Map to sovereign country" description="Map territory codes to their sovereign country codes (e.g., PR → US)">
           <Switch
             checked={subConfig?.mapToSovereignCountry ?? false}
             onCheckedChange={(v) => onUpdate({ mapToSovereignCountry: v })}
           />
-          <ConfigLabel>Map to sovereign country</ConfigLabel>
-        </div>
+        </Field>
       );
 
     case "repeat":
       return (
-        <div className="flex flex-col gap-2">
-          <ConfigLabel description="Scope for detecting repeated submissions">Detection scope</ConfigLabel>
+        <Field label="Detection scope" description="Scope for detecting repeated submissions">
           <div className="w-52">
             <Select
               options={CHECK_SCOPE_OPTIONS}
@@ -954,7 +947,7 @@ function CheckConfigPanel({
               block
             />
           </div>
-        </div>
+        </Field>
       );
 
     case "id_type":
@@ -1009,8 +1002,7 @@ function ExtractedPropertiesPanel({
 
   return (
     <div className="flex flex-col gap-5">
-      <div className="flex flex-col gap-1.5">
-        <ConfigLabel description="These default required attributes will be used for every country and ID type. You can override this default on a per-country and per-ID basis in Countries and ID Types.">Default Required Attributes</ConfigLabel>
+      <Field label="Default Required Attributes" description="These default required attributes will be used for every country and ID type. You can override this default on a per-country and per-ID basis in Countries and ID Types.">
         <div className="flex flex-wrap items-center gap-2">
           <div className="w-52">
             <Select
@@ -1046,7 +1038,7 @@ function ExtractedPropertiesPanel({
             );
           })}
         </div>
-      </div>
+      </Field>
 
       <div className="flex items-center gap-2">
         <Switch
