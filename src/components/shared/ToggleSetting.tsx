@@ -24,7 +24,7 @@ export function ToggleSetting({
   }
   return (
     <div>
-      <p className="heading-xs">{title}</p>
+      <p className="text-sm font-semibold">{title}</p>
       {description && (
         <p className="mt-1 text-xs text-[var(--color-text-secondary)]">{description}</p>
       )}
