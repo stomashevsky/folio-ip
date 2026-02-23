@@ -1,3 +1,5 @@
+import type { ControlSize } from "@plexui/ui/types";
+
 export const TABLE_PAGE_WRAPPER = "flex h-full flex-col overflow-hidden";
 export const TABLE_PAGE_CONTENT = "flex min-h-0 flex-1 flex-col px-4 pt-4 md:px-6";
 
@@ -20,3 +22,21 @@ export const TABLE_TD = "truncate py-0 pr-2 align-middle text-sm text-[var(--col
 
 /** <td> className for CountriesTab rows (taller row height than DataTable) */
 export const COUNTRIES_TD = "py-2 pr-2 align-middle";
+
+
+/* ─── Modal / settings panel control constants ─── */
+
+/** Control size for all Input, Select, Tabs inside modals and settings panels */
+export const MODAL_CONTROL_SIZE: ControlSize = "sm";
+
+/** Width for small number inputs (age, days, etc.) inside modals */
+export const MODAL_NUMBER_INPUT_WIDTH = "w-20";
+
+/** Width for Select dropdowns inside per-row modal settings */
+export const MODAL_ROW_SELECT_WIDTH = "w-[320px]";
+
+/** Width for Select dropdowns inside split-panel modal settings */
+export const MODAL_PANEL_SELECT_WIDTH = "w-64";
+
+/** Width for left panel in split-layout modals */
+export const MODAL_SPLIT_LEFT_WIDTH = "w-[280px]";

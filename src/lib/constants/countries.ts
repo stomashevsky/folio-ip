@@ -1,3 +1,5 @@
+import type { ExtractedProperty } from "@/lib/types";
+
 export const COUNTRY_OPTIONS: { value: string; label: string }[] = [
   { value: "AF", label: "Afghanistan" },
   { value: "AL", label: "Albania" },
@@ -345,15 +347,45 @@ export const COUNTRY_REGIONS: Record<string, Region> = {
 };
 
 /* ─── Country Settings (per-country config for verification templates) ─── */
+/** Which additional document sides/features are applicable per ID type category */
+export const ID_TYPE_HAS_BACK = new Set<IdDocType>(["dl", "id", "rp", "pr", "foid", "nric", "vid", "hic", "munid", "tribalid", "cid", "cct", "wp", "keyp"]);
+export const ID_TYPE_HAS_BARCODE = new Set<IdDocType>(["dl", "id"]);
+export const ID_TYPE_HAS_PASSPORT_SIGNATURE = new Set<IdDocType>(["pp", "ppc", "td", "ipp", "ltpass"]);
 
-export type RequiredSides = "front_only" | "back_only" | "front_and_back";
+/** Extracted document attributes available for requirement configuration */
+export const EXTRACTED_ATTRIBUTE_OPTIONS: { value: ExtractedProperty; label: string }[] = [
+  { value: "name_first", label: "First name" },
+  { value: "name_last", label: "Last name" },
+  { value: "name_middle", label: "Middle name" },
+  { value: "birthdate", label: "Date of birth" },
+  { value: "address_street", label: "Street address" },
+  { value: "address_city", label: "City" },
+  { value: "address_subdivision", label: "State / Province" },
+  { value: "address_postal_code", label: "Postal code" },
+  { value: "identification_number", label: "ID number" },
+  { value: "document_number", label: "Document number" },
+  { value: "issuing_country", label: "Issuing country" },
+  { value: "expiration_date", label: "Expiration date" },
+  { value: "issue_date", label: "Issue date" },
+  { value: "nationality", label: "Nationality" },
+];
 
 export interface IdTypeConfig {
-  requiredSides?: RequiredSides;
-  requireExpiry?: boolean;
-  requireMrz?: boolean;
+  /** Require front image capture */
+  requireFront?: boolean;
+  /** Require back image capture (applicable to DL, ID, RP, etc.) */
+  requireBack?: boolean;
+  /** Require barcode scan (applicable to DL, ID) */
+  requireBarcode?: boolean;
+  /** Require passport signature page (applicable to PP, PPC, TD) */
+  requirePassportSignature?: boolean;
+  /** Expiration grace period in days (0 = reject expired) */
+  expirationDays?: number;
+  /** Required extracted attributes (e.g. name_first, birthdate) */
+  requiredAttributes?: string[];
+  /** Other ID types accepted as alternatives */
+  acceptedAlternatives?: IdDocType[];
 }
-
 export interface CountrySettings {
   /** Which ID types are accepted for this country. undefined = all available */
   allowedIdTypes?: IdDocType[];
