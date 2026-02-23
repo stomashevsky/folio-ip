@@ -519,33 +519,35 @@ function ChecksTab({
         cell: ({ row }) => {
           const { check, description, formIndex } = row.original;
           return (
-            <div className="flex items-center gap-2.5">
-              <div onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-start gap-2.5">
+              <div className="mt-[3.5px]" onClick={(e) => e.stopPropagation()}>
                 <Switch
                   checked={check.enabled}
                   onCheckedChange={(v) => onUpdateCheck(formIndex, { ...check, enabled: v })}
                 />
               </div>
-              <span className="text-sm font-medium text-[var(--color-text)]">{check.name}</span>
-              {description && (
-                <Tooltip content={description} side="top" sideOffset={4}>
-                  <InfoCircle className="size-3.5 shrink-0 cursor-help text-[var(--color-text-tertiary)]" />
-                </Tooltip>
-              )}
-              {check.lifecycle === "beta" && (
-                <Tooltip content="Available to the public, but may be constantly tuned by Persona with different thresholds. Geographic coverage may also be limited." side="top" sideOffset={4}>
-                  <Badge pill color="discovery" variant="soft" size="sm">
-                    <span className="flex items-center gap-1">Beta <InfoCircle style={{ width: 12, height: 12 }} /></span>
-                  </Badge>
-                </Tooltip>
-              )}
-              {check.lifecycle === "sunset" && (
-                <Tooltip content="Deprecated in favor of other checks." side="top" sideOffset={4}>
-                  <Badge pill color="warning" variant="soft" size="sm">
-                    <span className="flex items-center gap-1">Sunset <InfoCircle style={{ width: 12, height: 12 }} /></span>
-                  </Badge>
-                </Tooltip>
-              )}
+              <div className="flex flex-col">
+                <div className="flex min-h-[26px] items-center gap-2">
+                  <span className="text-sm font-medium text-[var(--color-text)]">{check.name}</span>
+                  {check.lifecycle === "beta" && (
+                    <Tooltip content="Available to the public, but may be constantly tuned by Persona with different thresholds. Geographic coverage may also be limited." side="top" sideOffset={4}>
+                      <Badge pill color="discovery" variant="soft" size="sm">
+                        <span className="flex items-center gap-1">Beta <InfoCircle style={{ width: 12, height: 12 }} /></span>
+                      </Badge>
+                    </Tooltip>
+                  )}
+                  {check.lifecycle === "sunset" && (
+                    <Tooltip content="Deprecated in favor of other checks." side="top" sideOffset={4}>
+                      <Badge pill color="warning" variant="soft" size="sm">
+                        <span className="flex items-center gap-1">Sunset <InfoCircle style={{ width: 12, height: 12 }} /></span>
+                      </Badge>
+                    </Tooltip>
+                  )}
+                </div>
+                {description && (
+                  <span className="text-xs text-[var(--color-text-tertiary)]">{description}</span>
+                )}
+              </div>
             </div>
           );
         },
@@ -554,11 +556,11 @@ function ChecksTab({
         id: "category",
         accessorFn: (row) => row.check.categories[0] ?? "",
         header: "Type",
-        size: 200,
+        size: 260,
         meta: { align: "right" },
         enableSorting: true,
         cell: ({ row }) => (
-          <div className="flex flex-wrap justify-end gap-1">
+          <div className="flex min-h-[26px] flex-wrap items-center justify-end gap-1">
             {row.original.requiresBiometric && (
               <Tooltip content="Biometric processing is required to use this feature. We recommend consulting with your legal team and compliance advisors to ensure that your business meets the proper requirements to process this biometric data." side="top" sideOffset={4}>
                 <Badge pill color="info" variant="soft" size="sm">
@@ -774,8 +776,8 @@ function ChecksTab({
                 {row.getVisibleCells().map((cell) => (
                   <td
                     key={cell.id}
-                    style={cell.column.getSize() !== 150 ? { minWidth: cell.column.getSize(), width: cell.column.getSize() } : undefined}
-                    className={`h-[50px] py-2.5 pr-2 align-middle${(cell.column.columnDef.meta as { tdClassName?: string })?.tdClassName ? ` ${(cell.column.columnDef.meta as { tdClassName?: string }).tdClassName}` : ""}`}
+                    style={{ verticalAlign: 'top', ...(cell.column.getSize() !== 150 ? { minWidth: cell.column.getSize(), width: cell.column.getSize() } : undefined) }}
+                    className={`py-2.5 pr-2${(cell.column.columnDef.meta as { tdClassName?: string })?.tdClassName ? ` ${(cell.column.columnDef.meta as { tdClassName?: string }).tdClassName}` : ""}`}
                   >
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </td>
