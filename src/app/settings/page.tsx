@@ -2,13 +2,12 @@
 
 import { useRef, useState } from "react";
 import { TopBar } from "@/components/layout/TopBar";
-import { SectionHeading } from "@/components/shared";
+import { SectionHeading, ToggleSetting } from "@/components/shared";
 import { Input } from "@plexui/ui/components/Input";
 import { Button } from "@plexui/ui/components/Button";
 import { Avatar } from "@plexui/ui/components/Avatar";
 import { Badge } from "@plexui/ui/components/Badge";
 import { Field } from "@plexui/ui/components/Field";
-import { Switch } from "@plexui/ui/components/Switch";
 import { Select } from "@plexui/ui/components/Select";
 import { MOCK_USER } from "@/lib/constants/mock-user";
 
@@ -127,35 +126,11 @@ export default function YourProfilePage() {
 
         <div className="mt-10">
           <SectionHeading size="xs">Notifications</SectionHeading>
-          <div className="space-y-4 rounded-xl border border-[var(--color-border)] p-4">
-            <div className="flex items-center justify-between">
-              <div className="min-w-0 flex-1">
-                <p className="text-sm font-medium text-[var(--color-text)]">Email notifications</p>
-                <p className="mt-0.5 text-sm text-[var(--color-text-secondary)]">Receive email alerts for important account events</p>
-              </div>
-              <Switch checked={notifyEmail} onCheckedChange={setNotifyEmail} />
-            </div>
-            <div className="flex items-center justify-between">
-              <div className="min-w-0 flex-1">
-                <p className="text-sm font-medium text-[var(--color-text)]">Inquiry status updates</p>
-                <p className="mt-0.5 text-sm text-[var(--color-text-secondary)]">Get notified when inquiries change status</p>
-              </div>
-              <Switch checked={notifyInquiry} onCheckedChange={setNotifyInquiry} />
-            </div>
-            <div className="flex items-center justify-between">
-              <div className="min-w-0 flex-1">
-                <p className="text-sm font-medium text-[var(--color-text)]">Report matches</p>
-                <p className="mt-0.5 text-sm text-[var(--color-text-secondary)]">Get notified when a report returns new matches</p>
-              </div>
-              <Switch checked={notifyReport} onCheckedChange={setNotifyReport} />
-            </div>
-            <div className="flex items-center justify-between">
-              <div className="min-w-0 flex-1">
-                <p className="text-sm font-medium text-[var(--color-text)]">Weekly summary</p>
-                <p className="mt-0.5 text-sm text-[var(--color-text-secondary)]">Receive a weekly digest of activity across your organization</p>
-              </div>
-              <Switch checked={notifyWeekly} onCheckedChange={setNotifyWeekly} />
-            </div>
+          <div className="space-y-6">
+            <ToggleSetting title="Email notifications" description="Receive email alerts for important account events" checked={notifyEmail} onCheckedChange={setNotifyEmail} />
+            <ToggleSetting title="Inquiry status updates" description="Get notified when inquiries change status" checked={notifyInquiry} onCheckedChange={setNotifyInquiry} />
+            <ToggleSetting title="Report matches" description="Get notified when a report returns new matches" checked={notifyReport} onCheckedChange={setNotifyReport} />
+            <ToggleSetting title="Weekly summary" description="Receive a weekly digest of activity across your organization" checked={notifyWeekly} onCheckedChange={setNotifyWeekly} />
           </div>
         </div>
 

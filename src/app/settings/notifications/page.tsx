@@ -2,8 +2,7 @@
 
 import { useRef, useState } from "react";
 import { TopBar } from "@/components/layout/TopBar";
-import { SectionHeading } from "@/components/shared";
-import { Switch } from "@plexui/ui/components/Switch";
+import { SectionHeading, ToggleSetting } from "@/components/shared";
 import { Button } from "@plexui/ui/components/Button";
 
 interface NotificationSetting {
@@ -83,25 +82,15 @@ function NotificationGroup({
   return (
     <div className="mb-8">
       <SectionHeading size="xs">{title}</SectionHeading>
-      <div className="divide-y divide-[var(--color-border)] rounded-lg border border-[var(--color-border)]">
+      <div className="mt-4 space-y-6">
         {settings.map((setting) => (
-          <div
+          <ToggleSetting
             key={setting.id}
-            className="flex items-center justify-between px-4 py-4"
-          >
-            <div className="mr-4">
-              <p className="text-sm font-medium text-[var(--color-text)]">
-                {setting.label}
-              </p>
-              <p className="text-sm text-[var(--color-text-secondary)]">
-                {setting.description}
-              </p>
-            </div>
-            <Switch
-              checked={enabled[setting.id]}
-              onCheckedChange={(checked) => onToggle(setting.id, checked)}
-            />
-          </div>
+            title={setting.label}
+            description={setting.description}
+            checked={enabled[setting.id]}
+            onCheckedChange={(checked) => onToggle(setting.id, checked)}
+          />
         ))}
       </div>
     </div>

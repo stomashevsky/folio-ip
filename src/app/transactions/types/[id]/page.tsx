@@ -2,13 +2,13 @@
 
 import { useParams } from "next/navigation";
 import { TopBar, TOPBAR_CONTROL_SIZE, TOPBAR_ACTION_PILL } from "@/components/layout/TopBar";
-import { NotFoundPage, SectionHeading } from "@/components/shared";
+import { NotFoundPage, SectionHeading, ToggleSetting } from "@/components/shared";
 import { Badge, type BadgeProps } from "@plexui/ui/components/Badge";
 import { Button } from "@plexui/ui/components/Button";
 import { Input } from "@plexui/ui/components/Input";
 import { Textarea } from "@plexui/ui/components/Textarea";
 import { Field } from "@plexui/ui/components/Field";
-import { Switch } from "@plexui/ui/components/Switch";
+
 import { Select } from "@plexui/ui/components/Select";
 import { getRiskColor } from "@/lib/utils/format";
 
@@ -86,10 +86,10 @@ export default function TransactionTypeDetailPage() {
                 />
               </div>
             </Field>
-            <Switch
+            <ToggleSetting
+              switchLabel="Requires manual review"
               checked={txType.requiresReview}
               onCheckedChange={() => {}}
-              label="Requires manual review"
             />
           </div>
         </div>

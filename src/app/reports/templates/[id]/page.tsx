@@ -4,7 +4,7 @@ import { Suspense, useRef, useState } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 
 import { TopBar, TOPBAR_CONTROL_SIZE, TOPBAR_ACTION_PILL } from "@/components/layout/TopBar";
-import { NotFoundPage, SectionHeading, ConfirmLeaveModal } from "@/components/shared";
+import { NotFoundPage, SectionHeading, ConfirmLeaveModal, ToggleSetting } from "@/components/shared";
 import { useTemplateForm } from "@/lib/hooks/useTemplateForm";
 import { REPORT_TYPE_LABELS } from "@/lib/constants/report-type-labels";
 import { REPORT_TEMPLATE_PRESETS } from "@/lib/constants/template-presets";
@@ -21,7 +21,7 @@ import { Input } from "@plexui/ui/components/Input";
 import { Menu } from "@plexui/ui/components/Menu";
 import { Select } from "@plexui/ui/components/Select";
 import { Slider } from "@plexui/ui/components/Slider";
-import { Switch } from "@plexui/ui/components/Switch";
+
 import { DotsHorizontal } from "@plexui/ui/components/Icon";
 
 const REPORT_TYPE_OPTIONS = Object.entries(REPORT_TYPE_LABELS).map(([value, label]) => ({ value, label }));
@@ -258,12 +258,13 @@ function ReportTemplateDetailContent() {
               />
             </div>
           </div>
-          <div className="flex items-center justify-between px-4 py-4">
-            <div className="mr-4">
-              <p className="text-sm font-medium text-[var(--color-text)]">Continuous monitoring</p>
-              <p className="text-sm text-[var(--color-text-secondary)]">Automatically re-screen on a recurring schedule</p>
-            </div>
-            <Switch checked={form.settings.continuousMonitoring} onCheckedChange={(c) => patchSettings({ continuousMonitoring: c })} />
+          <div className="px-4 py-4">
+            <ToggleSetting
+              title="Continuous monitoring"
+              description="Automatically re-screen on a recurring schedule"
+              checked={form.settings.continuousMonitoring}
+              onCheckedChange={(c) => patchSettings({ continuousMonitoring: c })}
+            />
           </div>
           {form.settings.continuousMonitoring && (
             <div className="flex items-center justify-between px-4 py-4">
@@ -280,12 +281,13 @@ function ReportTemplateDetailContent() {
               </div>
             </div>
           )}
-          <div className="flex items-center justify-between px-4 py-4">
-            <div className="mr-4">
-              <p className="text-sm font-medium text-[var(--color-text)]">Fuzzy matching</p>
-              <p className="text-sm text-[var(--color-text-secondary)]">Allow approximate name matching for broader coverage</p>
-            </div>
-            <Switch checked={form.settings.enableFuzzyMatch} onCheckedChange={(c) => patchSettings({ enableFuzzyMatch: c })} />
+          <div className="px-4 py-4">
+            <ToggleSetting
+              title="Fuzzy matching"
+              description="Allow approximate name matching for broader coverage"
+              checked={form.settings.enableFuzzyMatch}
+              onCheckedChange={(c) => patchSettings({ enableFuzzyMatch: c })}
+            />
           </div>
         </div>
       </div>

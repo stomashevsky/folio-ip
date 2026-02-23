@@ -2,9 +2,8 @@
 
 import { useState } from "react";
 import { TopBar, TOPBAR_CONTROL_SIZE, TOPBAR_ACTION_PILL } from "@/components/layout/TopBar";
-import { SectionHeading } from "@/components/shared";
+import { SectionHeading, ToggleSetting } from "@/components/shared";
 import { Input } from "@plexui/ui/components/Input";
-import { Switch } from "@plexui/ui/components/Switch";
 import { Field } from "@plexui/ui/components/Field";
 import { Select } from "@plexui/ui/components/Select";
 import { Button } from "@plexui/ui/components/Button";
@@ -97,29 +96,21 @@ export default function GraphConfigurationPage() {
         </div>
 
         <div className="mb-6">
-          <div className="flex items-center justify-between py-2">
-            <div>
-              <p className="text-sm font-medium text-[var(--color-text)]">Show orphan nodes</p>
-              <p className="text-xs text-[var(--color-text-tertiary)]">Display nodes with no connections</p>
-            </div>
-            <Switch
-              checked={showOrphanNodes}
-              onCheckedChange={setShowOrphanNodes}
-            />
-          </div>
+          <ToggleSetting
+            title="Show orphan nodes"
+            description="Display nodes with no connections"
+            checked={showOrphanNodes}
+            onCheckedChange={setShowOrphanNodes}
+          />
         </div>
 
         <div className="mb-8">
-          <div className="flex items-center justify-between py-2">
-            <div>
-              <p className="text-sm font-medium text-[var(--color-text)]">Auto-cluster related nodes</p>
-              <p className="text-xs text-[var(--color-text-tertiary)]">Group closely connected nodes into visual clusters</p>
-            </div>
-            <Switch
-              checked={autoCluster}
-              onCheckedChange={setAutoCluster}
-            />
-          </div>
+          <ToggleSetting
+            title="Auto-cluster related nodes"
+            description="Group closely connected nodes into visual clusters"
+            checked={autoCluster}
+            onCheckedChange={setAutoCluster}
+          />
         </div>
 
         <SectionHeading size="xs">Edge Settings</SectionHeading>
@@ -149,29 +140,21 @@ export default function GraphConfigurationPage() {
         </div>
 
         <div className="mb-6">
-          <div className="flex items-center justify-between py-2">
-            <div>
-              <p className="text-sm font-medium text-[var(--color-text)]">Show weak connections</p>
-              <p className="text-xs text-[var(--color-text-tertiary)]">Display edges below the minimum strength as dashed lines</p>
-            </div>
-            <Switch
-              checked={showWeakConnections}
-              onCheckedChange={setShowWeakConnections}
-            />
-          </div>
+          <ToggleSetting
+            title="Show weak connections"
+            description="Display edges below the minimum strength as dashed lines"
+            checked={showWeakConnections}
+            onCheckedChange={setShowWeakConnections}
+          />
         </div>
 
         <div className="mb-8">
-          <div className="flex items-center justify-between py-2">
-            <div>
-              <p className="text-sm font-medium text-[var(--color-text)]">Directional edges</p>
-              <p className="text-xs text-[var(--color-text-tertiary)]">Show arrows indicating relationship direction</p>
-            </div>
-            <Switch
-              checked={directionalEdges}
-              onCheckedChange={setDirectionalEdges}
-            />
-          </div>
+          <ToggleSetting
+            title="Directional edges"
+            description="Show arrows indicating relationship direction"
+            checked={directionalEdges}
+            onCheckedChange={setDirectionalEdges}
+          />
         </div>
 
         <SectionHeading size="xs">Layout</SectionHeading>
@@ -225,42 +208,30 @@ export default function GraphConfigurationPage() {
         </div>
 
         <div className="mb-6">
-          <div className="flex items-center justify-between py-2">
-            <div>
-              <p className="text-sm font-medium text-[var(--color-text)]">Show labels</p>
-              <p className="text-xs text-[var(--color-text-tertiary)]">Display entity names on nodes</p>
-            </div>
-            <Switch
-              checked={showLabels}
-              onCheckedChange={setShowLabels}
-            />
-          </div>
+          <ToggleSetting
+            title="Show labels"
+            description="Display entity names on nodes"
+            checked={showLabels}
+            onCheckedChange={setShowLabels}
+          />
         </div>
 
         <div className="mb-6">
-          <div className="flex items-center justify-between py-2">
-            <div>
-              <p className="text-sm font-medium text-[var(--color-text)]">Enable animation</p>
-              <p className="text-xs text-[var(--color-text-tertiary)]">Animate layout transitions and interactions</p>
-            </div>
-            <Switch
-              checked={enableAnimation}
-              onCheckedChange={setEnableAnimation}
-            />
-          </div>
+          <ToggleSetting
+            title="Enable animation"
+            description="Animate layout transitions and interactions"
+            checked={enableAnimation}
+            onCheckedChange={setEnableAnimation}
+          />
         </div>
 
         <div className="mb-8">
-          <div className="flex items-center justify-between py-2">
-            <div>
-              <p className="text-sm font-medium text-[var(--color-text)]">Highlight neighbors on hover</p>
-              <p className="text-xs text-[var(--color-text-tertiary)]">Highlight connected nodes when hovering over a node</p>
-            </div>
-            <Switch
-              checked={highlightNeighbors}
-              onCheckedChange={setHighlightNeighbors}
-            />
-          </div>
+          <ToggleSetting
+            title="Highlight neighbors on hover"
+            description="Highlight connected nodes when hovering over a node"
+            checked={highlightNeighbors}
+            onCheckedChange={setHighlightNeighbors}
+          />
         </div>
       </div>
     </div>

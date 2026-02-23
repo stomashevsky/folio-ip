@@ -2,7 +2,7 @@
 
 import { useParams } from "next/navigation";
 import { TopBar, TOPBAR_CONTROL_SIZE, TOPBAR_ACTION_PILL } from "@/components/layout/TopBar";
-import { NotFoundPage, SectionHeading } from "@/components/shared";
+import { NotFoundPage, SectionHeading, ToggleSetting } from "@/components/shared";
 import { Badge, type BadgeProps } from "@plexui/ui/components/Badge";
 import { Button } from "@plexui/ui/components/Button";
 import { Input } from "@plexui/ui/components/Input";
@@ -70,13 +70,12 @@ export default function GraphTemplateDetailPage() {
           <Field label="Description">
             <Textarea defaultValue={template.description} rows={2} />
           </Field>
-          <div className="flex items-center justify-between py-2">
-            <div>
-              <p className="text-sm font-medium text-[var(--color-text)]">Set as default</p>
-              <p className="text-xs text-[var(--color-text-tertiary)]">Use this template when opening the Graph Explorer</p>
-            </div>
-            <Switch checked={template.isDefault} onCheckedChange={() => {}} />
-          </div>
+          <ToggleSetting
+            title="Set as default"
+            description="Use this template when opening the Graph Explorer"
+            checked={template.isDefault}
+            onCheckedChange={() => {}}
+          />
           <p className="text-xs text-[var(--color-text-tertiary)]">
             Created {formatDateTime(template.createdAt)}
           </p>

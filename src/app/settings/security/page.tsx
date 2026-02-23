@@ -2,9 +2,8 @@
 
 import { useState, useRef } from "react";
 import { TopBar } from "@/components/layout/TopBar";
-import { SectionHeading } from "@/components/shared";
+import { SectionHeading, ToggleSetting } from "@/components/shared";
 import { Field } from "@plexui/ui/components/Field";
-import { Switch } from "@plexui/ui/components/Switch";
 import { Input } from "@plexui/ui/components/Input";
 import { Textarea } from "@plexui/ui/components/Textarea";
 import { Button } from "@plexui/ui/components/Button";
@@ -39,18 +38,11 @@ export default function SecurityPage() {
         <SectionHeading size="xs">Authentication</SectionHeading>
 
         <div className="mb-6">
-          <Field label="Require two-factor authentication">
-            <Switch
-              checked={twoFactorRequired}
-              onCheckedChange={setTwoFactorRequired}
-            />
-          </Field>
+          <ToggleSetting switchLabel="Require two-factor authentication" checked={twoFactorRequired} onCheckedChange={setTwoFactorRequired} />
         </div>
 
         <div className="mb-8">
-          <Field label="Allow SSO login">
-            <Switch checked={ssoEnabled} onCheckedChange={setSsoEnabled} />
-          </Field>
+          <ToggleSetting switchLabel="Allow SSO login" checked={ssoEnabled} onCheckedChange={setSsoEnabled} />
         </div>
 
         {/* Session Management */}
@@ -69,12 +61,7 @@ export default function SecurityPage() {
         </div>
 
         <div className="mb-8">
-          <Field label="Force logout on browser close">
-            <Switch
-              checked={forceLogoutOnClose}
-              onCheckedChange={setForceLogoutOnClose}
-            />
-          </Field>
+          <ToggleSetting switchLabel="Force logout on browser close" checked={forceLogoutOnClose} onCheckedChange={setForceLogoutOnClose} />
         </div>
 
         {/* IP Allowlist */}
@@ -95,30 +82,15 @@ export default function SecurityPage() {
         <SectionHeading size="xs">Password Policy</SectionHeading>
 
         <div className="mb-6">
-          <Field label="Require uppercase letters">
-            <Switch
-              checked={requireUppercase}
-              onCheckedChange={setRequireUppercase}
-            />
-          </Field>
+          <ToggleSetting switchLabel="Require uppercase letters" checked={requireUppercase} onCheckedChange={setRequireUppercase} />
         </div>
 
         <div className="mb-6">
-          <Field label="Require numbers">
-            <Switch
-              checked={requireNumbers}
-              onCheckedChange={setRequireNumbers}
-            />
-          </Field>
+          <ToggleSetting switchLabel="Require numbers" checked={requireNumbers} onCheckedChange={setRequireNumbers} />
         </div>
 
         <div className="mb-6">
-          <Field label="Require special characters">
-            <Switch
-              checked={requireSpecialChars}
-              onCheckedChange={setRequireSpecialChars}
-            />
-          </Field>
+          <ToggleSetting switchLabel="Require special characters" checked={requireSpecialChars} onCheckedChange={setRequireSpecialChars} />
         </div>
 
         <div className="mb-8">

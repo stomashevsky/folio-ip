@@ -13,7 +13,7 @@ import {
 } from "@tanstack/react-table";
 
 import { TopBar, TOPBAR_CONTROL_SIZE, TOPBAR_ACTION_PILL, TOPBAR_TOOLBAR_PILL } from "@/components/layout/TopBar";
-import { NotFoundPage, SectionHeading, ConfirmLeaveModal, CopyButton, SettingsModal } from "@/components/shared";
+import { NotFoundPage, SectionHeading, ConfirmLeaveModal, CopyButton, SettingsModal, ToggleSetting } from "@/components/shared";
 import { useTemplateForm } from "@/lib/hooks/useTemplateForm";
 
 import { checkDescriptions } from "@/lib/data/check-descriptions";
@@ -839,20 +839,7 @@ function ChecksTab({
   );
 }
 
-/* ─── Config Label ─── */
 
-function ConfigLabel({ children, description }: { children: React.ReactNode; description?: string }) {
-  return (
-    <div className="flex items-center gap-1.5">
-      <span className="text-sm font-medium text-[var(--color-text)]">{children}</span>
-      {description && (
-        <Tooltip content={description} side="top" sideOffset={4}>
-          <InfoCircle className="size-3.5 shrink-0 cursor-help text-[var(--color-text-tertiary)]" />
-        </Tooltip>
-      )}
-    </div>
-  );
-}
 
 /* ─── Check Config Panel ─── */
 
@@ -922,32 +909,32 @@ function CheckConfigPanel({
 
     case "barcode":
       return (
-        <Field label="Require successful barcode extraction" description="Require that information be successfully extracted from the barcode on the ID.">
-          <Switch
-            checked={subConfig?.requireSuccessfulExtraction ?? false}
-            onCheckedChange={(v) => onUpdate({ requireSuccessfulExtraction: v })}
-          />
-        </Field>
+        <ToggleSetting
+          title="Require successful barcode extraction"
+          description="Require that information be successfully extracted from the barcode on the ID."
+          checked={subConfig?.requireSuccessfulExtraction ?? false}
+          onCheckedChange={(v) => onUpdate({ requireSuccessfulExtraction: v })}
+        />
       );
 
     case "mrz":
       return (
-        <Field label="Require full and valid MRZ" description="Require that the Machine Readable Zone (MRZ) on the ID be fully detected and contains valid, well-formed data.">
-          <Switch
-            checked={subConfig?.requireFullMrz ?? false}
-            onCheckedChange={(v) => onUpdate({ requireFullMrz: v })}
-          />
-        </Field>
+        <ToggleSetting
+          title="Require full and valid MRZ"
+          description="Require that the Machine Readable Zone (MRZ) on the ID be fully detected and contains valid, well-formed data."
+          checked={subConfig?.requireFullMrz ?? false}
+          onCheckedChange={(v) => onUpdate({ requireFullMrz: v })}
+        />
       );
 
     case "country":
       return (
-        <Field label="Map to sovereign country" description="Map territory codes to their sovereign country codes (e.g., PR → US)">
-          <Switch
-            checked={subConfig?.mapToSovereignCountry ?? false}
-            onCheckedChange={(v) => onUpdate({ mapToSovereignCountry: v })}
-          />
-        </Field>
+        <ToggleSetting
+          title="Map to sovereign country"
+          description="Map territory codes to their sovereign country codes (e.g., PR → US)"
+          checked={subConfig?.mapToSovereignCountry ?? false}
+          onCheckedChange={(v) => onUpdate({ mapToSovereignCountry: v })}
+        />
       );
 
     case "repeat":
@@ -1055,13 +1042,11 @@ function ExtractedPropertiesPanel({
         </div>
       </Field>
 
-      <div className="flex items-center gap-2">
-        <Switch
-          checked={passWhenMissing}
-          onCheckedChange={(v) => onUpdate({ passWhenPropertyMissing: v })}
-        />
-        <ConfigLabel>Pass when required property does not appear on the ID</ConfigLabel>
-      </div>
+      <ToggleSetting
+        switchLabel="Pass when required property does not appear on the ID"
+        checked={passWhenMissing}
+        onCheckedChange={(v) => onUpdate({ passWhenPropertyMissing: v })}
+      />
     </div>
   );
 }

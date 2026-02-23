@@ -2,12 +2,11 @@
 
 import { useRef, useState } from "react";
 import { TopBar } from "@/components/layout/TopBar";
-import { SectionHeading } from "@/components/shared";
+import { SectionHeading, ToggleSetting } from "@/components/shared";
 import { Input } from "@plexui/ui/components/Input";
 import { Button } from "@plexui/ui/components/Button";
 import { Badge } from "@plexui/ui/components/Badge";
 import { Field } from "@plexui/ui/components/Field";
-import { Switch } from "@plexui/ui/components/Switch";
 
 const INITIAL_PROJECT_NAME = "Default project";
 
@@ -92,25 +91,9 @@ export default function ProjectGeneralPage() {
 
         <SectionHeading size="xs">Automation</SectionHeading>
 
-        <div className="mb-8 space-y-4 rounded-xl border border-[var(--color-border)] p-4">
-          <div className="flex items-center justify-between">
-            <div className="min-w-0 flex-1">
-              <p className="text-sm font-medium text-[var(--color-text)]">Continuous monitoring</p>
-              <p className="mt-0.5 text-sm text-[var(--color-text-secondary)]">
-                Automatically re-screen accounts on a recurring schedule
-              </p>
-            </div>
-            <Switch checked={continuousMonitoring} onCheckedChange={setContinuousMonitoring} />
-          </div>
-          <div className="flex items-center justify-between">
-            <div className="min-w-0 flex-1">
-              <p className="text-sm font-medium text-[var(--color-text)]">Auto-approve low risk</p>
-              <p className="mt-0.5 text-sm text-[var(--color-text-secondary)]">
-                Automatically approve inquiries with a risk score below the threshold
-              </p>
-            </div>
-            <Switch checked={autoApprove} onCheckedChange={setAutoApprove} />
-          </div>
+        <div className="mb-8 space-y-6">
+          <ToggleSetting title="Continuous monitoring" description="Automatically re-screen accounts on a recurring schedule" checked={continuousMonitoring} onCheckedChange={setContinuousMonitoring} />
+          <ToggleSetting title="Auto-approve low risk" description="Automatically approve inquiries with a risk score below the threshold" checked={autoApprove} onCheckedChange={setAutoApprove} />
         </div>
 
         <SectionHeading size="xs">Allowed origins</SectionHeading>

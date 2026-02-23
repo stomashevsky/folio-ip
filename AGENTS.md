@@ -59,6 +59,36 @@ Extension installed at `~/.dev-browser-extension`, skill at `~/.opencode/skills/
 
 ---
 
+
+## CRITICAL RULE: Toggle/Switch Settings — OpenAI Pattern (heading + description + switch below)
+
+**Every settings-style toggle MUST use the `<ToggleSetting>` shared component** (`src/components/shared/ToggleSetting.tsx`). This follows the OpenAI pattern: bold heading, description text below, switch on its own row beneath.
+
+**Pattern (via shared component):**
+```tsx
+import { ToggleSetting } from "@/components/shared";
+
+<ToggleSetting
+  title="Setting name"
+  description="What this setting controls."
+  checked={value}
+  onCheckedChange={setValue}
+/>
+```
+
+**When NOT to use ToggleSetting (keep raw `<Switch>`):**
+- Table cell on/off toggles (enable/disable row item)
+- Tiny toolbar toggles (snap-to-grid, group-by)
+- Column visibility toggles
+- List item include/exclude toggles (node types, edge types)
+
+**NEVER:**
+- `<Field label="..."><Switch /></Field>` — Field is for text inputs, selects, textareas
+- Inline row with switch on the right (`flex justify-between`) for settings — switch goes BELOW the heading/description
+- Hardcoded heading/description + bare Switch — use the shared component
+
+---
+
 ## CRITICAL RULE: No Hardcoding — Everything Shared
 
 **Every repeated value, pattern, or UI element MUST be extracted into a shared module.** This is the #1 architectural principle of the codebase. Hardcoded one-offs cause drift and break consistency.
@@ -113,6 +143,7 @@ Extension installed at `~/.dev-browser-extension`, skill at `~/.opencode/skills/
 | `SettingsTable` | Settings table with actions |
 | `ColumnSettings` | Column visibility toggle panel |
 | `InfoRow` | Single info row |
+| `ToggleSetting` | OpenAI-pattern toggle: `title` + `description` + switch below, or just `switchLabel` |
 
 All exported from barrel: `src/components/shared/index.ts`
 

@@ -2,13 +2,13 @@
 
 import { useParams } from "next/navigation";
 import { TopBar, TOPBAR_CONTROL_SIZE, TOPBAR_ACTION_PILL } from "@/components/layout/TopBar";
-import { NotFoundPage, SectionHeading } from "@/components/shared";
+import { NotFoundPage, SectionHeading, ToggleSetting } from "@/components/shared";
 import { Badge } from "@plexui/ui/components/Badge";
 import { Button } from "@plexui/ui/components/Button";
 import { Input } from "@plexui/ui/components/Input";
 import { Textarea } from "@plexui/ui/components/Textarea";
 import { Field } from "@plexui/ui/components/Field";
-import { Switch } from "@plexui/ui/components/Switch";
+
 import { Checkbox } from "@plexui/ui/components/Checkbox";
 
 interface AccountType {
@@ -88,10 +88,10 @@ export default function AccountTypeDetailPage() {
         <div className="mt-10">
           <SectionHeading size="xs">Approval</SectionHeading>
           <div className="mt-4">
-            <Switch
+            <ToggleSetting
+              switchLabel="Auto-approve accounts of this type"
               checked={accountType.autoApprove}
               onCheckedChange={() => {}}
-              label="Auto-approve accounts of this type"
             />
           </div>
         </div>
