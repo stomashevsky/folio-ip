@@ -59,8 +59,7 @@ import { Menu } from "@plexui/ui/components/Menu";
 import { SegmentedControl } from "@plexui/ui/components/SegmentedControl";
 import { Select } from "@plexui/ui/components/Select";
 import { SelectControl } from "@plexui/ui/components/SelectControl";
-import { Tabs } from "@plexui/ui/components/Tabs";
-import { Popover } from "@plexui/ui/components/Popover";
+
 import { Tooltip } from "@plexui/ui/components/Tooltip";
 import { Switch } from "@plexui/ui/components/Switch";
 import { ArrowDownSm, ArrowUpSm, CheckMd, DotsHorizontal, Search, SettingsCog, Sort } from "@plexui/ui/components/Icon";
@@ -1325,66 +1324,11 @@ function BulkConfigModal({
   onApply: (patch: BulkConfigPatch) => void;
 }) {
   const [activeTab, setActiveTab] = useState("id_types");
-  const [idTypes, setIdTypes] = useState<Set<IdDocType>>(new Set(["pp", "dl", "id"]));
+  const [idTypes, setIdTypes] = useState<Set<IdDocType>>(new Set());
   const [ageMin, setAgeMin] = useState("");
   const [ageMax, setAgeMax] = useState("");
   const [requiredSides, setRequiredSides] = useState<Partial<Record<IdDocType, RequiredSides>>>({});
   const [requireExpiry, setRequireExpiry] = useState<Set<IdDocType>>(new Set());
-
-  const [prevOpen, setPrevOpen] = useState(open);
-  if (open && !prevOpen) {
-    const allTypes = new Set<IdDocType>();
-    for (const code of selectedCodes) {
-      const cs = countrySettings[code];
-      const types = cs?.allowedIdTypes ?? getCountryIdTypes(code);
-      for (const t of types) allTypes.add(t);
-    }
-    setIdTypes(allTypes.size > 0 ? allTypes : new Set(["pp", "dl", "id"]));
-    setAgeMin("");
-    setAgeMax("");
-    setRequiredSides({});
-    setRequireExpiry(new Set());
-    setActiveTab("id_types");
-  }
-  if (open !== prevOpen) setPrevOpen(open);
-
-  function toggleIdType(type: IdDocType) {
-    setIdTypes((prev) => {
-      const next = new Set(prev);
-      if (next.has(type)) next.delete(type);
-      else next.add(type);
-      return next;
-    });
-  }
-
-  function handleApply() {
-    const patch: BulkConfigPatch = {};
-
-    if (activeTab === "id_types" || true) {
-      patch.allowedIdTypes = Array.from(idTypes);
-    }
-
-    if (ageMin || ageMax) {
-      patch.ageRange = {
-        min: ageMin ? Number(ageMin) : undefined,
-        max: ageMax ? Number(ageMax) : undefined,
-      };
-    }
-
-    if (Object.keys(requiredSides).length > 0 || requireExpiry.size > 0) {
-      const config: Partial<Record<IdDocType, IdTypeConfig>> = {};
-      for (const type of idTypes) {
-        const entry: IdTypeConfig = {};
-        if (requiredSides[type]) entry.requiredSides = requiredSides[type];
-        if (requireExpiry.has(type)) entry.requireExpiry = true;
-        if (Object.keys(entry).length > 0) config[type] = entry;
-      }
-      if (Object.keys(config).length > 0) patch.idTypeConfig = config;
-    }
-
-    onApply(patch);
-    onOpenChange(false);
-  }
 
   const allDocTypes = useMemo(() => {
     const types = new Set<IdDocType>();
@@ -1395,6 +1339,46 @@ function BulkConfigModal({
       ? ALL_ID_DOC_TYPES.filter((t) => types.has(t))
       : [...ALL_ID_DOC_TYPES];
   }, [selectedCodes]);
+
+  const [prevOpen, setPrevOpen] = useState(open);
+  if (open && !prevOpen) {
+    const activeTypes = new Set<IdDocType>();
+    for (const code of selectedCodes) {
+      const cs = countrySettings[code];
+      const types = cs?.allowedIdTypes?.length ? cs.allowedIdTypes : getCountryIdTypes(code);
+      for (const t of types) activeTypes.add(t);
+    }
+    setIdTypes(activeTypes.size > 0 ? activeTypes : new Set(allDocTypes));
+    setAgeMin("");
+    setAgeMax("");
+    setRequiredSides({});
+    setRequireExpiry(new Set());
+    setActiveTab("id_types");
+  }
+  if (open !== prevOpen) setPrevOpen(open);
+
+  function handleApply() {
+    const patch: BulkConfigPatch = {};
+    patch.allowedIdTypes = idTypes.size === allDocTypes.length ? [] : Array.from(idTypes);
+    if (ageMin || ageMax) {
+      patch.ageRange = {
+        min: ageMin ? Number(ageMin) : undefined,
+        max: ageMax ? Number(ageMax) : undefined,
+      };
+    }
+    if (Object.keys(requiredSides).length > 0 || requireExpiry.size > 0) {
+      const config: Partial<Record<IdDocType, IdTypeConfig>> = {};
+      for (const type of idTypes) {
+        const entry: IdTypeConfig = {};
+        if (requiredSides[type]) entry.requiredSides = requiredSides[type];
+        if (requireExpiry.has(type)) entry.requireExpiry = true;
+        if (Object.keys(entry).length > 0) config[type] = entry;
+      }
+      if (Object.keys(config).length > 0) patch.idTypeConfig = config;
+    }
+    onApply(patch);
+    onOpenChange(false);
+  }
 
   return (
     <SettingsModal
@@ -1410,33 +1394,27 @@ function BulkConfigModal({
       }
     >
 
-        <Tabs
+        <SegmentedControl
           aria-label="Bulk configuration sections"
           value={activeTab}
           onChange={setActiveTab}
-          variant="underline"
           size="sm"
+          pill
         >
-          <Tabs.Tab value="id_types">ID Types</Tabs.Tab>
-          <Tabs.Tab value="requirements">Requirements</Tabs.Tab>
-          <Tabs.Tab value="age_range">Age Range</Tabs.Tab>
-        </Tabs>
-
+          <SegmentedControl.Tab value="id_types">ID Types</SegmentedControl.Tab>
+          <SegmentedControl.Tab value="requirements">Requirements</SegmentedControl.Tab>
+          <SegmentedControl.Tab value="age_range">Age Range</SegmentedControl.Tab>
+        </SegmentedControl>
         {activeTab === "id_types" && (
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-3">
             <p className="text-sm text-[var(--color-text-secondary)]">
               Select which document types to accept across all selected countries.
             </p>
-            <div className="flex flex-col gap-1.5">
-              {allDocTypes.map((type) => (
-                <Checkbox
-                  key={type}
-                  label={ID_DOC_TYPE_LABELS[type]}
-                  checked={idTypes.has(type)}
-                  onCheckedChange={() => toggleIdType(type)}
-                />
-              ))}
-            </div>
+            <IdTypeBadges
+              availableTypes={allDocTypes}
+              activeTypes={idTypes.size === allDocTypes.length ? [] : Array.from(idTypes)}
+              onChange={(types) => setIdTypes(new Set(types.length === 0 ? allDocTypes : types))}
+            />
           </div>
         )}
 
@@ -1525,8 +1503,7 @@ function BulkConfigModal({
 
 /* ─── Country Row ─── */
 
-/* ─── ID Type Badges with Popover ─── */
-
+/* ─── ID Type Badges with Menu ─── */
 function IdTypeBadges({
   availableTypes,
   activeTypes,
@@ -1537,73 +1514,55 @@ function IdTypeBadges({
   onChange: (types: IdDocType[]) => void;
 }) {
   const allSelected = activeTypes.length === 0 || activeTypes.length === availableTypes.length;
-  const displayTypes = allSelected ? availableTypes : activeTypes;
+  const activeSet = new Set(allSelected ? availableTypes : activeTypes);
 
   function toggleType(t: IdDocType) {
     const current = allSelected ? [...availableTypes] : [...activeTypes];
     const idx = current.indexOf(t);
     if (idx >= 0) {
+      if (current.length <= 1) return;
       current.splice(idx, 1);
     } else {
       current.push(t);
     }
-    // If all selected again, clear to mean "all"
-    if (current.length === availableTypes.length) {
-      onChange([]);
-    } else {
-      onChange(current);
-    }
+    onChange(current.length === availableTypes.length ? [] : current);
   }
-
-  function selectAll() {
-    onChange([]);
-  }
-
-  function clearAll() {
-    onChange([availableTypes[0]]);
-  }
-
   return (
-    <Popover>
-      <Popover.Trigger>
-        <button type="button" className="flex max-w-72 cursor-pointer flex-wrap gap-1">
-          {displayTypes.map((t) => (
-            <Badge pill key={t}
-            color={ID_DOC_TYPE_COLORS[t] as "info" | "discovery" | "warning" | "success" | "caution" | "secondary" | "danger"}
-            variant="soft"
-            size="sm">{ID_DOC_TYPE_SHORT[t]}</Badge>
+    <Menu>
+      <Menu.Trigger>
+        <button type="button" className="flex max-w-80 cursor-pointer flex-wrap gap-1">
+          {availableTypes.map((t) => (
+            <Badge
+              pill
+              key={t}
+              color={activeSet.has(t)
+                ? ID_DOC_TYPE_COLORS[t] as "info" | "discovery" | "warning" | "success" | "caution" | "secondary" | "danger"
+                : "secondary"
+              }
+              variant={activeSet.has(t) ? "soft" : "outline"}
+              size="sm"
+              className={activeSet.has(t) ? undefined : "opacity-40"}
+            >
+              {ID_DOC_TYPE_SHORT[t]}
+            </Badge>
           ))}
         </button>
-      </Popover.Trigger>
-      <Popover.Content side="bottom" align="start" sideOffset={4} className="w-64">
-        <div className="flex flex-col gap-2 p-3">
-          <div className="flex items-center justify-between">
-            <p className="text-xs font-medium text-[var(--color-text-tertiary)]">Accepted ID types</p>
-            <div className="flex gap-2">
-              <button type="button" className="text-xs text-[var(--color-primary-solid-bg)] hover:underline" onClick={selectAll}>
-                All
-              </button>
-              <button type="button" className="text-xs text-[var(--color-text-tertiary)] hover:underline" onClick={clearAll}>
-                Clear
-              </button>
-            </div>
-          </div>
-          <div className="flex max-h-64 flex-col gap-0.5 overflow-auto">
-            {availableTypes.map((t) => {
-              const isActive = allSelected || activeTypes.includes(t);
-              return (
-                <Checkbox
-                  key={t}
-                  label={ID_DOC_TYPE_LABELS[t]}
-                  checked={isActive}
-                  onCheckedChange={() => toggleType(t)}
-                />
-              );
-            })}
-          </div>
-        </div>
-      </Popover.Content>
-    </Popover>
+      </Menu.Trigger>
+      <Menu.Content width={260} side="bottom" align="start">
+        {availableTypes.map((t) => (
+          <Menu.CheckboxItem
+            key={t}
+            checked={activeSet.has(t)}
+            onCheckedChange={() => toggleType(t)}
+            onSelect={(e) => e.preventDefault()}
+          >
+            {ID_DOC_TYPE_LABELS[t]}
+          </Menu.CheckboxItem>
+        ))}
+        <Menu.Separator />
+        <Menu.Item onSelect={() => onChange([])}>Select all</Menu.Item>
+      </Menu.Content>
+    </Menu>
   );
 }
 
