@@ -15,7 +15,7 @@ import {
 import { aggregateVolume, aggregateCaseRates } from "@/lib/utils/analytics";
 import { DASHBOARD_DATE_SHORTCUTS, type DateRange } from "@/lib/constants/date-shortcuts";
 import type { AnalyticsInterval } from "@/lib/types";
-import { SegmentedControl } from "@plexui/ui/components/SegmentedControl";
+import { Tabs } from "@plexui/ui/components/Tabs";
 import { Select } from "@plexui/ui/components/Select";
 import { DateRangePicker } from "@plexui/ui/components/DateRangePicker";
 import { ANALYTICS_INTERVAL_OPTIONS } from "@/lib/constants/filter-options";
@@ -79,16 +79,16 @@ function CaseAnalyticsContent() {
         title="Case Analytics"
         toolbar={
           <div className="flex w-full items-center justify-between">
-            <SegmentedControl
+            <Tabs
               aria-label="Analytics views"
               value={activeTab}
               onChange={(v) => setActiveTab(v as Tab)}
               size={TOPBAR_CONTROL_SIZE}
               pill={TOPBAR_TOOLBAR_PILL}
             >
-              <SegmentedControl.Tab value="Overview">Overview</SegmentedControl.Tab>
-              <SegmentedControl.Tab value="SLA">SLA &amp; Performance</SegmentedControl.Tab>
-            </SegmentedControl>
+              <Tabs.Tab value="Overview">Overview</Tabs.Tab>
+              <Tabs.Tab value="SLA">SLA &amp; Performance</Tabs.Tab>
+            </Tabs>
             <DateRangePicker
               value={dateRange}
               onChange={handleRangeChange}

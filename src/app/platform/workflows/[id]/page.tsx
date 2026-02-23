@@ -6,7 +6,7 @@ import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { TopBar, TOPBAR_CONTROL_SIZE, TOPBAR_ACTION_PILL, TOPBAR_TOOLBAR_PILL } from "@/components/layout/TopBar";
 import { NotFoundPage, ConfirmLeaveModal } from "@/components/shared";
 import { FlowEditor, type FlowEditorPanel } from "@/components/flow/FlowEditor";
-import { SegmentedControl } from "@plexui/ui/components/SegmentedControl";
+import { Tabs } from "@plexui/ui/components/Tabs";
 import { useTemplateForm } from "@/lib/hooks/useTemplateForm";
 import { WORKFLOW_PRESETS } from "@/lib/constants/template-presets";
 import { WORKFLOW_FLOW_TEMPLATES, DEFAULT_WORKFLOW_YAML } from "@/lib/constants/flow-templates";
@@ -187,17 +187,17 @@ function WorkflowDetailContent() {
         onBackClick={() => confirmNavigation(backHref)}
         toolbar={
           <div className="flex w-full items-center justify-between">
-            <SegmentedControl
+            <Tabs
               aria-label="Editor panel"
               value={editorPanel}
               onChange={(v) => setEditorPanel(v as FlowEditorPanel)}
               size={TOPBAR_CONTROL_SIZE}
               pill={TOPBAR_TOOLBAR_PILL}
             >
-              <SegmentedControl.Tab value="chat">{FLOW_CHAT_EMPTY_STATE_TITLE}</SegmentedControl.Tab>
-              <SegmentedControl.Tab value="code">Code</SegmentedControl.Tab>
-              <SegmentedControl.Tab value="settings">Settings</SegmentedControl.Tab>
-            </SegmentedControl>
+              <Tabs.Tab value="chat">{FLOW_CHAT_EMPTY_STATE_TITLE}</Tabs.Tab>
+              <Tabs.Tab value="code">Code</Tabs.Tab>
+              <Tabs.Tab value="settings">Settings</Tabs.Tab>
+            </Tabs>
             <div className="flex shrink-0 items-center gap-2">
               <Button
                 color="secondary"

@@ -21,7 +21,7 @@ import { Field } from "@plexui/ui/components/Field";
 import { Input } from "@plexui/ui/components/Input";
 import { Menu } from "@plexui/ui/components/Menu";
 import { Select } from "@plexui/ui/components/Select";
-import { SegmentedControl } from "@plexui/ui/components/SegmentedControl";
+import { Tabs } from "@plexui/ui/components/Tabs";
 import { DotsHorizontal, Plus } from "@plexui/ui/components/Icon";
 import {
   FLOW_CHAT_ACTIVE_KEY_ID_STORAGE_KEY,
@@ -505,16 +505,16 @@ export default function ApiKeysPage() {
 
   const toolbar = (
     <>
-      <SegmentedControl
+      <Tabs
         aria-label="API key type"
         value={activeTab}
         onChange={setActiveTab}
         size={TOPBAR_CONTROL_SIZE}
         pill={TOPBAR_TOOLBAR_PILL}
       >
-        <SegmentedControl.Tab value="platform">Platform</SegmentedControl.Tab>
-        <SegmentedControl.Tab value="providers">AI Providers</SegmentedControl.Tab>
-      </SegmentedControl>
+        <Tabs.Tab value="platform">Platform</Tabs.Tab>
+        <Tabs.Tab value="providers">AI Providers</Tabs.Tab>
+      </Tabs>
 
       <div className="mx-1 h-5 w-px bg-[var(--color-border)]" />
 

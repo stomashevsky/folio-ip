@@ -266,7 +266,7 @@ Each has 5 variants: `-soft`, `-solid`, `-outline`, `-ghost`, `-surface` (with `
 **Shadows:** hairline · 100 · 200 · 300 · 400 (each with `-strong` and `-stronger`)
 **Breakpoints:** xs(380px) · sm(576px) · md(768px) · lg(1024px) · xl(1280px) · 2xl(1536px)
 
-### 9-Step Size Scale (Button, Input, Select, SegmentedControl, SelectControl)
+### 9-Step Size Scale (Button, Input, Select, Tabs, SelectControl)
 
 3xs(22px) · 2xs(26px) · xs(28px) · sm(30px) · **md(32px)** · lg(36px) · xl(40px) · 2xl(44px) · 3xl(48px)
 
@@ -291,7 +291,6 @@ Each has 5 variants: `-soft`, `-solid`, `-outline`, `-ghost`, `-surface` (with `
 | Switch | `@plexui/ui/components/Switch` | `checked`, `onCheckedChange`, `label`, `size` |
 | RadioGroup | `@plexui/ui/components/RadioGroup` | `value`, `onValueChange`, `options`, `orientation` |
 | Slider | `@plexui/ui/components/Slider` | `value`, `onValueChange`, `min`, `max`, `step` |
-| SegmentedControl | `@plexui/ui/components/SegmentedControl` | `options`, `value`, `onChange`, `size`, `pill` |
 | DatePicker | `@plexui/ui/components/DatePicker` | `value`(Luxon), `onChange`, `min`, `max` |
 | DateRangePicker | `@plexui/ui/components/DateRangePicker` | `value`, `onChange`, `shortcuts`, `min`, `max` |
 | Menu | `@plexui/ui/components/Menu` | Compound: `.Trigger`, `.Content`, `.Item`, `.Separator` |

@@ -56,7 +56,7 @@ import { Checkbox } from "@plexui/ui/components/Checkbox";
 import { Field } from "@plexui/ui/components/Field";
 import { Input } from "@plexui/ui/components/Input";
 import { Menu } from "@plexui/ui/components/Menu";
-import { SegmentedControl } from "@plexui/ui/components/SegmentedControl";
+import { Tabs } from "@plexui/ui/components/Tabs";
 import { Select } from "@plexui/ui/components/Select";
 import { SelectControl } from "@plexui/ui/components/SelectControl";
 
@@ -307,17 +307,17 @@ function VerificationTemplateDetailContent() {
         onBackClick={() => confirmNavigation(backHref)}
         toolbar={
           <div className="flex w-full items-center justify-between">
-            <SegmentedControl
+            <Tabs
               aria-label="Template sections"
               value={activeTab}
               onChange={(v) => setActiveTab(v as TemplateTab)}
               size={TOPBAR_CONTROL_SIZE}
               pill={TOPBAR_TOOLBAR_PILL}
             >
-              <SegmentedControl.Tab value="Checks">Checks</SegmentedControl.Tab>
-              <SegmentedControl.Tab value="Allowed Countries">Countries</SegmentedControl.Tab>
-              <SegmentedControl.Tab value="Settings">Settings</SegmentedControl.Tab>
-            </SegmentedControl>
+              <Tabs.Tab value="Checks">Checks</Tabs.Tab>
+              <Tabs.Tab value="Allowed Countries">Countries</Tabs.Tab>
+              <Tabs.Tab value="Settings">Settings</Tabs.Tab>
+            </Tabs>
             <div className="flex shrink-0 items-center gap-2">
               {!isNew && (
                 <Menu>
@@ -1394,17 +1394,17 @@ function BulkConfigModal({
       }
     >
 
-        <SegmentedControl
+        <Tabs
           aria-label="Bulk configuration sections"
           value={activeTab}
           onChange={setActiveTab}
           size="sm"
           pill
         >
-          <SegmentedControl.Tab value="id_types">ID Types</SegmentedControl.Tab>
-          <SegmentedControl.Tab value="requirements">Requirements</SegmentedControl.Tab>
-          <SegmentedControl.Tab value="age_range">Age Range</SegmentedControl.Tab>
-        </SegmentedControl>
+          <Tabs.Tab value="id_types">ID Types</Tabs.Tab>
+          <Tabs.Tab value="requirements">Requirements</Tabs.Tab>
+          <Tabs.Tab value="age_range">Age Range</Tabs.Tab>
+        </Tabs>
         {activeTab === "id_types" && (
           <div className="flex flex-col gap-3">
             <p className="text-sm text-[var(--color-text-secondary)]">

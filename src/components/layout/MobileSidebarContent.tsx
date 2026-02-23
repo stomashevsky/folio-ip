@@ -13,7 +13,7 @@ import {
 } from "@plexui/ui/components/Sidebar";
 import { Avatar } from "@plexui/ui/components/Avatar";
 import { Menu } from "@plexui/ui/components/Menu";
-import { SegmentedControl } from "@plexui/ui/components/SegmentedControl";
+import { Tabs } from "@plexui/ui/components/Tabs";
 import { Sun, Moon, SystemMode } from "@plexui/ui/components/Icon";
 import { usePathname, useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
@@ -28,21 +28,21 @@ function MobileThemeSwitcher() {
   const { theme, setTheme } = useTheme();
 
   return (
-    <SegmentedControl
+    <Tabs
       value={theme ?? "system"}
       onChange={setTheme}
       aria-label="Theme"
       size="xs"
       pill={false}
     >
-      <SegmentedControl.Tab value="light" icon={<Sun />} aria-label="Light" />
-      <SegmentedControl.Tab value="dark" icon={<Moon />} aria-label="Dark" />
-      <SegmentedControl.Tab
+      <Tabs.Tab value="light" icon={<Sun />} aria-label="Light" />
+      <Tabs.Tab value="dark" icon={<Moon />} aria-label="Dark" />
+      <Tabs.Tab
         value="system"
         icon={<SystemMode />}
         aria-label="System"
       />
-    </SegmentedControl>
+    </Tabs>
   );
 }
 

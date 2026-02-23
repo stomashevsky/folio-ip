@@ -34,7 +34,7 @@ import {
   ANALYTICS_FUNNEL_METRIC_OPTIONS,
   ANALYTICS_TEMPLATE_VERSION_OPTIONS,
 } from "@/lib/constants/filter-options";
-import { SegmentedControl } from "@plexui/ui/components/SegmentedControl";
+import { Tabs } from "@plexui/ui/components/Tabs";
 import { Select } from "@plexui/ui/components/Select";
 import { Button } from "@plexui/ui/components/Button";
 import { DateRangePicker } from "@plexui/ui/components/DateRangePicker";
@@ -235,16 +235,16 @@ function InquiryAnalyticsContent() {
           </>
         }
         toolbar={
-          <SegmentedControl
+          <Tabs
             aria-label="Analytics views"
             value={activeTab}
             onChange={(v) => setActiveTab(v as Tab)}
             size={TOPBAR_CONTROL_SIZE}
             pill={TOPBAR_TOOLBAR_PILL}
           >
-            <SegmentedControl.Tab value="Overview">Overview</SegmentedControl.Tab>
-            <SegmentedControl.Tab value="Conversion Funnel">Conversion Funnel</SegmentedControl.Tab>
-          </SegmentedControl>
+            <Tabs.Tab value="Overview">Overview</Tabs.Tab>
+            <Tabs.Tab value="Conversion Funnel">Conversion Funnel</Tabs.Tab>
+          </Tabs>
         }
       />
       <div className="px-4 pb-6 pt-6 md:px-6">
@@ -439,16 +439,16 @@ function InquiryAnalyticsContent() {
                 title="Verification Flow"
                 description={SANKEY_METRIC_DESCRIPTIONS[funnelMetric]}
                 actions={
-                  <SegmentedControl
+                  <Tabs
                     aria-label="Sankey metric"
                     value={funnelMetric}
                     onChange={(v) => setFunnelMetric(v as SankeyMetric)}
                     size="xs"
                     pill
                   >
-                    <SegmentedControl.Tab value="counts">Counts</SegmentedControl.Tab>
-                    <SegmentedControl.Tab value="rates">Rates</SegmentedControl.Tab>
-                  </SegmentedControl>
+                    <Tabs.Tab value="counts">Counts</Tabs.Tab>
+                    <Tabs.Tab value="rates">Rates</Tabs.Tab>
+                  </Tabs>
                 }
               >
                 <FunnelSankey data={sankeyData} metric={funnelMetric} />

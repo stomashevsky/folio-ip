@@ -3,7 +3,7 @@
 import { useCallback, useMemo, useState } from "react";
 import { Button } from "@plexui/ui/components/Button";
 import { Menu } from "@plexui/ui/components/Menu";
-import { SegmentedControl } from "@plexui/ui/components/SegmentedControl";
+import { Tabs } from "@plexui/ui/components/Tabs";
 import { ChevronDownSm } from "@plexui/ui/components/Icon";
 import { SettingsModal } from "@/components/shared";
 import type { AttributeMatchRequirement } from "@/lib/types";
@@ -130,10 +130,10 @@ export function CheckCodeEditor({ requirements, onChange, defaultOpen = false, o
         footer={footer}
       >
         <div className="flex items-center justify-between gap-2">
-          <SegmentedControl aria-label="Editor panel" value={panel} onChange={(value) => setPanel(value as EditorPanel)} size="xs" pill={false}>
-            <SegmentedControl.Tab value="code">Code</SegmentedControl.Tab>
-            <SegmentedControl.Tab value="ai">AI</SegmentedControl.Tab>
-          </SegmentedControl>
+          <Tabs aria-label="Editor panel" value={panel} onChange={(value) => setPanel(value as EditorPanel)} size="xs" pill={false}>
+            <Tabs.Tab value="code">Code</Tabs.Tab>
+            <Tabs.Tab value="ai">AI</Tabs.Tab>
+          </Tabs>
 
           <Menu>
             <Menu.Trigger asChild>

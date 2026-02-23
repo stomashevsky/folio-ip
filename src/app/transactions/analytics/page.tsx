@@ -27,7 +27,7 @@ import {
   TRANSACTION_STATUS_OPTIONS,
   ANALYTICS_INTERVAL_OPTIONS,
 } from "@/lib/constants/filter-options";
-import { SegmentedControl } from "@plexui/ui/components/SegmentedControl";
+import { Tabs } from "@plexui/ui/components/Tabs";
 import { Select } from "@plexui/ui/components/Select";
 import { Button } from "@plexui/ui/components/Button";
 import { DateRangePicker } from "@plexui/ui/components/DateRangePicker";
@@ -170,16 +170,16 @@ function TransactionAnalyticsContent() {
           </>
         }
         toolbar={
-          <SegmentedControl
+          <Tabs
             aria-label="Analytics views"
             value={activeTab}
             onChange={(v) => setActiveTab(v as Tab)}
             size={TOPBAR_CONTROL_SIZE}
             pill={TOPBAR_TOOLBAR_PILL}
           >
-            <SegmentedControl.Tab value="Volume">Volume</SegmentedControl.Tab>
-            <SegmentedControl.Tab value="Risk">Risk</SegmentedControl.Tab>
-          </SegmentedControl>
+            <Tabs.Tab value="Volume">Volume</Tabs.Tab>
+            <Tabs.Tab value="Risk">Risk</Tabs.Tab>
+          </Tabs>
         }
       />
       <div className="px-4 pb-6 pt-6 md:px-6">

@@ -12,7 +12,7 @@ import type { ColumnDef, VisibilityState } from "@tanstack/react-table";
 import type { VerificationTemplate } from "@/lib/types";
 import { Button } from "@plexui/ui/components/Button";
 import { Select } from "@plexui/ui/components/Select";
-import { SegmentedControl } from "@plexui/ui/components/SegmentedControl";
+import { Tabs } from "@plexui/ui/components/Tabs";
 import { Menu } from "@plexui/ui/components/Menu";
 import { Plus } from "@plexui/ui/components/Icon";
 import { VERIFICATION_TYPE_LABELS } from "@/lib/constants/verification-type-labels";
@@ -146,7 +146,7 @@ export default function VerificationTemplatesPage() {
         }
         toolbar={
           <>
-            <SegmentedControl
+            <Tabs
               aria-label="Template status"
               value={statusTab}
               onChange={setStatusTab}
@@ -154,11 +154,11 @@ export default function VerificationTemplatesPage() {
               pill={TOPBAR_TOOLBAR_PILL}
             >
               {STATUS_TABS.map((tab) => (
-                <SegmentedControl.Tab key={tab.value} value={tab.value}>
+                <Tabs.Tab key={tab.value} value={tab.value}>
                   {tab.label}
-                </SegmentedControl.Tab>
+                </Tabs.Tab>
               ))}
-            </SegmentedControl>
+            </Tabs>
 
             <div className="mx-1 h-5 w-px bg-[var(--color-border)]" />
 

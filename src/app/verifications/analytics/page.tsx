@@ -25,7 +25,7 @@ import { useTabParam } from "@/lib/hooks/useTabParam";
 import { Button } from "@plexui/ui/components/Button";
 import { DateRangePicker } from "@plexui/ui/components/DateRangePicker";
 import { Download, InfoCircle } from "@plexui/ui/components/Icon";
-import { SegmentedControl } from "@plexui/ui/components/SegmentedControl";
+import { Tabs } from "@plexui/ui/components/Tabs";
 import { Select } from "@plexui/ui/components/Select";
 import { Switch } from "@plexui/ui/components/Switch";
 import { Tooltip } from "@plexui/ui/components/Tooltip";
@@ -217,16 +217,16 @@ function VerificationsAnalyticsContent() {
           </>
         }
         toolbar={
-          <SegmentedControl
+          <Tabs
             aria-label="Analytics views"
             value={activeTab}
             onChange={(value) => setActiveTab(value as Tab)}
             size={TOPBAR_CONTROL_SIZE}
             pill={TOPBAR_TOOLBAR_PILL}
           >
-            <SegmentedControl.Tab value="Volume">Volume</SegmentedControl.Tab>
-            <SegmentedControl.Tab value="Checks">Checks</SegmentedControl.Tab>
-          </SegmentedControl>
+            <Tabs.Tab value="Volume">Volume</Tabs.Tab>
+            <Tabs.Tab value="Checks">Checks</Tabs.Tab>
+          </Tabs>
         }
       />
 

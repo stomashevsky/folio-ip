@@ -13,7 +13,7 @@ import type { Workflow } from "@/lib/types";
 import { Button } from "@plexui/ui/components/Button";
 import { Badge } from "@plexui/ui/components/Badge";
 import { Select } from "@plexui/ui/components/Select";
-import { SegmentedControl } from "@plexui/ui/components/SegmentedControl";
+import { Tabs } from "@plexui/ui/components/Tabs";
 import { Plus } from "@plexui/ui/components/Icon";
 import { WORKFLOW_STATUS_OPTIONS, WORKFLOW_TRIGGER_OPTIONS } from "@/lib/constants/filter-options";
 import { TemplatePickerModal } from "@/components/shared";
@@ -179,16 +179,16 @@ export default function WorkflowsPage() {
         }
         toolbar={
           <>
-             <SegmentedControl
+             <Tabs
                aria-label="Workflow sections"
                value={activeTab}
                onChange={setActiveTab}
                size={TOPBAR_CONTROL_SIZE}
                pill={TOPBAR_TOOLBAR_PILL}
              >
-              <SegmentedControl.Tab value="workflows">Workflows</SegmentedControl.Tab>
-              <SegmentedControl.Tab value="modules">Modules</SegmentedControl.Tab>
-            </SegmentedControl>
+              <Tabs.Tab value="workflows">Workflows</Tabs.Tab>
+              <Tabs.Tab value="modules">Modules</Tabs.Tab>
+            </Tabs>
 
             {activeTab === "workflows" && (
               <>

@@ -4,7 +4,7 @@ import { Avatar } from "@plexui/ui/components/Avatar";
 import { Button } from "@plexui/ui/components/Button";
 import { Menu } from "@plexui/ui/components/Menu";
 import { Sun, Moon, SystemMode } from "@plexui/ui/components/Icon";
-import { SegmentedControl } from "@plexui/ui/components/SegmentedControl";
+import { Tabs } from "@plexui/ui/components/Tabs";
 import { SidebarMobileMenuButton } from "@plexui/ui/components/Sidebar";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -17,21 +17,21 @@ function ThemeSwitcher() {
   const { theme, setTheme } = useTheme();
 
   return (
-    <SegmentedControl
+    <Tabs
       value={theme ?? "system"}
       onChange={setTheme}
       aria-label="Theme"
       size="xs"
       pill={false}
     >
-      <SegmentedControl.Tab value="light" icon={<Sun />} aria-label="Light" />
-      <SegmentedControl.Tab value="dark" icon={<Moon />} aria-label="Dark" />
-      <SegmentedControl.Tab
+      <Tabs.Tab value="light" icon={<Sun />} aria-label="Light" />
+      <Tabs.Tab value="dark" icon={<Moon />} aria-label="Dark" />
+      <Tabs.Tab
         value="system"
         icon={<SystemMode />}
         aria-label="System"
       />
-    </SegmentedControl>
+    </Tabs>
   );
 }
 
