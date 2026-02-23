@@ -1,5 +1,15 @@
 # Agents Configuration — Folio App
 
+## CRITICAL RULE: Build Check Before Commit
+
+**ALWAYS run `npm run build` before committing or after any significant code change.** A passing `next build` is the minimum bar — if it fails, the deploy will fail in production.
+
+ Before every `git commit`: run `npm run build` and confirm 0 errors
+ If build fails: fix ALL errors before committing, no exceptions
+ Do NOT rely on dev server (`npm run dev`) as proof of correctness — it is lenient and skips full static analysis
+
+---
+
 ## CRITICAL RULE: Dev Browser — relay mode, NOT standalone
 
 **Dev Browser uses the Chrome extension + relay server.** It controls the user's real Chrome (with logged-in sessions), NOT a separate Chromium.

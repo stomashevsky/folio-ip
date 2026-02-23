@@ -854,7 +854,7 @@ function CheckConfigPanel({
     case "age_range":
       return (
         <div className="flex flex-col gap-2">
-          <ConfigLabel>Default age range</ConfigLabel>
+          <ConfigLabel description="This default age range will be used for every country and ID type. You can override this default on a per-country basis in Countries and ID Types.">Default age range</ConfigLabel>
           <div className="flex gap-4">
             <div className="flex flex-1 flex-col gap-2">
               <ConfigLabel>Min</ConfigLabel>
@@ -889,19 +889,22 @@ function CheckConfigPanel({
     case "expiration":
       return (
         <div className="flex flex-col gap-2">
-          <ConfigLabel description="Number of days past expiration to still accept">Grace period</ConfigLabel>
-          <div className="w-32">
-            <Input
-              type="number"
-              placeholder="0"
-
-              value={subConfig?.gracePeriodDays != null ? String(subConfig.gracePeriodDays) : ""}
-              onChange={(e) => {
-                const val = e.target.value === "" ? undefined : Number(e.target.value);
-                onUpdate({ gracePeriodDays: val });
-              }}
-            />
+          <div className="flex items-center gap-2">
+            <ConfigLabel>Default expiration</ConfigLabel>
+            <div className="w-24">
+              <Input
+                type="number"
+                placeholder="0"
+                value={subConfig?.gracePeriodDays != null ? String(subConfig.gracePeriodDays) : ""}
+                onChange={(e) => {
+                  const val = e.target.value === "" ? undefined : Number(e.target.value);
+                  onUpdate({ gracePeriodDays: val });
+                }}
+              />
+            </div>
+            <span className="text-sm text-[var(--color-text-secondary)]">days</span>
           </div>
+          <p className="text-xs text-[var(--color-text-tertiary)]">The default expiration will be used for every country and ID type. You can override this default on a per-country and per-ID basis in Countries and ID Types.</p>
         </div>
       );
 
@@ -912,7 +915,7 @@ function CheckConfigPanel({
             checked={subConfig?.requireSuccessfulExtraction ?? false}
             onCheckedChange={(v) => onUpdate({ requireSuccessfulExtraction: v })}
           />
-          <ConfigLabel description="Fail the check if barcode data cannot be extracted">Require successful extraction</ConfigLabel>
+          <ConfigLabel>Require successful barcode extraction</ConfigLabel>
         </div>
       );
 
@@ -923,7 +926,7 @@ function CheckConfigPanel({
             checked={subConfig?.requireFullMrz ?? false}
             onCheckedChange={(v) => onUpdate({ requireFullMrz: v })}
           />
-          <ConfigLabel description="Fail the check if a full and valid MRZ cannot be detected">Require full and valid MRZ</ConfigLabel>
+          <ConfigLabel>Require full and valid MRZ</ConfigLabel>
         </div>
       );
 
@@ -934,7 +937,7 @@ function CheckConfigPanel({
             checked={subConfig?.mapToSovereignCountry ?? false}
             onCheckedChange={(v) => onUpdate({ mapToSovereignCountry: v })}
           />
-          <ConfigLabel description="Map territories and dependencies to their sovereign country">Map to sovereign country</ConfigLabel>
+          <ConfigLabel>Map to sovereign country</ConfigLabel>
         </div>
       );
 
@@ -1007,7 +1010,7 @@ function ExtractedPropertiesPanel({
   return (
     <div className="flex flex-col gap-5">
       <div className="flex flex-col gap-1.5">
-        <ConfigLabel description="These default required attributes will be used for every country and ID type. You can override this default on a per-country and per-ID basis in Countries and ID Types.">Default required attributes</ConfigLabel>
+        <ConfigLabel description="These default required attributes will be used for every country and ID type. You can override this default on a per-country and per-ID basis in Countries and ID Types.">Default Required Attributes</ConfigLabel>
         <div className="flex flex-wrap items-center gap-2">
           <div className="w-52">
             <Select

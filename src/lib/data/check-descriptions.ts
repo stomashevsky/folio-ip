@@ -49,9 +49,9 @@ export const checkDescriptions: Record<string, string> = {
     "Detect if either the ID details or face portrait match that of a previously submitted ID within the last year.",
   "Inquiry comparison":
     "Compare if ID details like name or birthdate are inconsistent between different submission attempts.",
-  "MRZ detected":
+  "MRZ Detected":
     "Detect if there is encoded, machine-readable text on the ID.",
-  "MRZ inconsistency":
+  "MRZ Inconsistency":
     "Detect if the encoded, machine-readable text on the ID is well-formed.",
   "Paper detection": "Detect if the ID is a paper copy",
   "PO box":
