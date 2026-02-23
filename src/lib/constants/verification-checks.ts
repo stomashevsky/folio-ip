@@ -16,7 +16,7 @@ export const AVAILABLE_CHECKS: Record<VerificationType, AvailableCheck[]> = {
     { name: "Account comparison", categories: ["user_action_required"], defaultRequired: false, defaultEnabled: true, configurable: true, configType: "comparison" },
     { name: "Age comparison", categories: ["user_action_required"], defaultRequired: false, defaultEnabled: false, configurable: true, configType: "age_range" },
     { name: "Allowed country", categories: ["user_action_required"], defaultRequired: true, defaultEnabled: true, configurable: true, configType: "country" },
-    { name: "Allowed ID type", categories: ["user_action_required"], defaultRequired: true, defaultEnabled: true, configurable: true, configType: "id_type" },
+    { name: "Allowed ID type", categories: ["user_action_required"], defaultRequired: true, defaultEnabled: true },
     { name: "Attribute comparison", categories: ["user_action_required"], defaultRequired: false, defaultEnabled: true, configurable: true, configType: "comparison" },
     { name: "Barcode", categories: ["user_action_required"], defaultRequired: false, defaultEnabled: true, configurable: true, configType: "barcode" },
     { name: "Barcode inconsistency", categories: ["fraud"], defaultRequired: false, defaultEnabled: true },

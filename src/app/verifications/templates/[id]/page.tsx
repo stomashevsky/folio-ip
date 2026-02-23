@@ -855,7 +855,7 @@ function CheckConfigPanel({
   switch (configType) {
     case "age_range":
       return (
-        <Field label="Default age range" description="This default age range will be used for every country and ID type. You can override this default on a per-country basis in Countries and ID Types.">
+        <Field label="Default age range" description="The default age restriction for verifying the ID holder's age. This default will be used for every country and ID type. You can override it on a per-country basis in Countries and ID Types.">
           <div className="flex gap-4">
             <div className="flex-1">
               <Field label="Min">
@@ -889,7 +889,7 @@ function CheckConfigPanel({
 
     case "expiration":
       return (
-        <Field label="Default expiration" description="The default expiration will be used for every country and ID type. You can override this default on a per-country and per-ID basis in Countries and ID Types.">
+        <Field label="Default expiration" description="The default grace period for accepting expired IDs. This default will be used for every country and ID type. You can override it on a per-country and per-ID basis in Countries and ID Types.">
           <div className="flex items-center gap-2">
             <div className="w-24">
               <Input
@@ -955,12 +955,6 @@ function CheckConfigPanel({
         </Field>
       );
 
-    case "id_type":
-      return (
-        <p className="text-sm text-[var(--color-text-secondary)]">
-          Configure accepted ID types in the Countries tab.
-        </p>
-      );
 
     case "comparison":
       return (
@@ -1007,7 +1001,7 @@ function ExtractedPropertiesPanel({
 
   return (
     <div className="flex flex-col gap-5">
-      <Field label="Default Required Attributes" description="These default required attributes will be used for every country and ID type. You can override this default on a per-country and per-ID basis in Countries and ID Types.">
+      <Field label="Default Required Attributes" description="The ID details that must be successfully extracted for this check to pass. These defaults will be used for every country and ID type. You can override them on a per-country and per-ID basis in Countries and ID Types.">
         <div className="flex flex-wrap items-center gap-2">
           <div className="w-52">
             <Select

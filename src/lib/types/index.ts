@@ -188,7 +188,6 @@ export type CheckConfigType =
   | "barcode"
   | "mrz"
   | "country"
-  | "id_type"
   | "repeat"
   | "extracted_properties";
 
