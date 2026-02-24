@@ -24,6 +24,9 @@ import {
 import {
   MODAL_CONTROL_SIZE,
   MODAL_NUMBER_INPUT_WIDTH,
+  COLUMN_HEADER,
+  COLUMN_HEADER_LABEL,
+  COLUMN_HEADER_VALUE,
 } from "@/lib/constants/page-layout";
 
 import { Badge } from "@plexui/ui/components/Badge";
@@ -185,7 +188,7 @@ export function CountriesTab({
       ? COUNTRY_OPTIONS.find((country) => country.value === selectedCountryCode)
       : undefined;
   const selectedCountrySettings = selectedCountry ? countrySettings[selectedCountry.value] : undefined;
-  const selectedCountryTypes = selectedCountry ? getCountryIdTypes(selectedCountry.value) : [];
+  const selectedCountryTypes = useMemo(() => selectedCountry ? getCountryIdTypes(selectedCountry.value) : [], [selectedCountry]);
   const selectedCountryActiveSet = useMemo(
     () => getActiveTypeSet(selectedCountrySettings, selectedCountryTypes),
     [selectedCountrySettings, selectedCountryTypes],
@@ -272,7 +275,7 @@ export function CountriesTab({
   return (
     <div className="flex h-full min-h-0 flex-col" data-suppress-anim={suppressAnim || undefined}>
       {/* ── Shared Toolbar ── */}
-      <div className="flex flex-wrap items-center gap-2 px-4 py-3 md:px-6">
+      <div className="flex flex-wrap items-center gap-2 px-4 pt-6 pb-3 md:px-6">
         <div className="w-60">
           <Input
             size="sm"
@@ -363,13 +366,13 @@ export function CountriesTab({
       <div className="mx-4 mb-4 flex min-h-0 flex-1 overflow-hidden rounded-xl border border-[var(--color-border)] md:mx-6">
         {/* Column 1: Countries */}
         <div className="flex min-h-0 min-w-0 flex-1 flex-col border-r border-[var(--color-border)]">
-          <div className="flex shrink-0 items-center gap-2.5 border-b border-[var(--color-border)] bg-[var(--color-surface-secondary)] pl-4.5 pr-3 py-2.5">
+          <div className={`${COLUMN_HEADER} pl-4.5 pr-3`}>
             <Checkbox
               checked={allFilteredSelected ? true : someFilteredSelected ? "indeterminate" : false}
               onCheckedChange={handleSelectAll}
             />
-            <span className="flex-1 text-xs font-semibold uppercase tracking-[0.5px] text-[var(--color-text-tertiary)]">Countries</span>
-            <span className="text-sm text-[var(--color-text)]">
+            <span className={COLUMN_HEADER_LABEL}>Countries</span>
+            <span className={COLUMN_HEADER_VALUE}>
               Enabled · {selected.length} / {COUNTRY_OPTIONS.length}
             </span>
           </div>
@@ -390,9 +393,21 @@ export function CountriesTab({
                     if (e.key === "Enter" || e.key === " ") {
                       e.preventDefault();
                       setSelectedCountryCode(country.value);
+                    } else if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+                      e.preventDefault();
+                      const idx = filtered.findIndex((c) => c.value === country.value);
+                      const next = e.key === "ArrowDown" ? idx + 1 : idx - 1;
+                      const target = filtered[next];
+                      if (target) {
+                        setSelectedCountryCode(target.value);
+                        const container = e.currentTarget.parentElement;
+                        const el = container?.children[next] as HTMLElement | undefined;
+                        el?.focus();
+                        el?.scrollIntoView({ block: "nearest" });
+                      }
                     }
                   }}
-                  className={`flex cursor-pointer items-start gap-2.5 rounded-lg px-3 py-2 transition-colors ${
+                  className={`flex cursor-pointer items-start gap-2.5 rounded-lg px-3 py-2 outline-none transition-colors ${
                     isSelected
                       ? "bg-[var(--gray-100)]"
                       : "hover:bg-[var(--color-surface-secondary)]"
@@ -449,16 +464,16 @@ export function CountriesTab({
 
         {/* Column 2: Document Types */}
         <div className="flex min-h-0 min-w-0 flex-1 flex-col border-r border-[var(--color-border)]">
-          <div className="flex shrink-0 items-center border-b border-[var(--color-border)] bg-[var(--color-surface-secondary)] px-4 py-2.5">
+          <div className={COLUMN_HEADER}>
             {selectedCountry ? (
               <>
-                <span className="flex-1 text-xs font-semibold uppercase tracking-[0.5px] text-[var(--color-text-tertiary)]">{selectedCountry.label}</span>
-                <span className="text-sm text-[var(--color-text)]">
+                <span className={COLUMN_HEADER_LABEL}>{selectedCountry.label}</span>
+                <span className={COLUMN_HEADER_VALUE}>
                   Accepted ID Types · {selectedCountryActiveSet.size} / {selectedCountryTypes.length}
                 </span>
               </>
             ) : (
-              <span className="text-xs font-semibold uppercase tracking-[0.5px] text-[var(--color-text-tertiary)]">Document Types</span>
+              <span className={COLUMN_HEADER_LABEL}>Document Types</span>
             )}
           </div>
 
@@ -485,9 +500,21 @@ export function CountriesTab({
                         if (e.key === "Enter" || e.key === " ") {
                           e.preventDefault();
                           setSelectedIdType(type);
+                        } else if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+                          e.preventDefault();
+                          const idx = selectedCountryTypes.indexOf(type);
+                          const next = e.key === "ArrowDown" ? idx + 1 : idx - 1;
+                          const target = selectedCountryTypes[next];
+                          if (target) {
+                            setSelectedIdType(target);
+                            const container = e.currentTarget.parentElement;
+                            const el = container?.children[next] as HTMLElement | undefined;
+                            el?.focus();
+                            el?.scrollIntoView({ block: "nearest" });
+                          }
                         }
                       }}
-                      className={`flex cursor-pointer items-center gap-2.5 rounded-lg px-3 py-2 transition-colors ${
+                      className={`flex cursor-pointer items-center gap-2.5 rounded-lg px-3 py-2 outline-none transition-colors ${
                         isDocSelected
                           ? "bg-[var(--gray-100)]"
                           : "hover:bg-[var(--color-surface-secondary)]"
@@ -562,14 +589,14 @@ export function CountriesTab({
 
         {/* Column 3: Document Settings */}
         <div className="flex min-h-0 min-w-0 flex-1 flex-col">
-          <div className="flex shrink-0 items-center border-b border-[var(--color-border)] bg-[var(--color-surface-secondary)] px-4 py-2.5">
+          <div className={COLUMN_HEADER}>
             {selectedIdType ? (
               <>
-                <span className="flex-1 text-xs font-semibold uppercase tracking-[0.5px] text-[var(--color-text-tertiary)]">{ID_DOC_TYPE_LABELS[selectedIdType]}</span>
-                <span className="text-sm text-[var(--color-text)]">{selectedCountry?.label}</span>
+                <span className={COLUMN_HEADER_LABEL}>{ID_DOC_TYPE_LABELS[selectedIdType]}</span>
+                <span className={COLUMN_HEADER_VALUE}>{selectedCountry?.label}</span>
               </>
             ) : (
-              <span className="text-xs font-semibold uppercase tracking-[0.5px] text-[var(--color-text-tertiary)]">Document Settings</span>
+              <span className={COLUMN_HEADER_LABEL}>Document Settings</span>
             )}
           </div>
 

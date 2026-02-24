@@ -5,14 +5,16 @@ export const CHECK_CATEGORY_LABELS: Record<CheckCategory, string> = {
   user_action_required: "User Action Required",
 };
 
+export const BIOMETRIC_DESCRIPTION = "Biometric processing is required to use this feature. We recommend consulting with your legal team and compliance advisors to ensure that your business meets the proper requirements to process this biometric data.";
+
 export const CHECK_CATEGORY_COLORS: Record<CheckCategory, string> = {
   fraud: "danger",
   user_action_required: "caution",
 };
 
 export const CHECK_CATEGORY_DESCRIPTIONS: Record<CheckCategory, string> = {
-  fraud: "The individual may be trying to verify with false or altered information. For instance, if the face portrait from the ID doesn't match the face from the selfie.",
-  user_action_required: "The individual did not submit the minimum high-quality and unobstructed images needed for verification. These checks are surfaced as hints to help individuals submit better images.",
+  fraud: "Fraud",
+  user_action_required: "User Action Required",
 };
 
 export const CHECK_LIFECYCLE_HINTS: Record<Exclude<CheckLifecycle, "ga">, string> = {

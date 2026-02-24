@@ -3,25 +3,16 @@
 import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 
-import {
-  useReactTable,
-  getCoreRowModel,
-  getSortedRowModel,
-  flexRender,
-  type ColumnDef,
-  type SortingState,
-} from "@tanstack/react-table";
-
 import { TopBar, TOPBAR_CONTROL_SIZE, TOPBAR_ACTION_PILL, TOPBAR_TOOLBAR_PILL } from "@/components/layout/TopBar";
-import { NotFoundPage, SectionHeading, ConfirmLeaveModal, CopyButton, SettingsModal, ToggleSetting } from "@/components/shared";
+import { NotFoundPage, SectionHeading, ConfirmLeaveModal, CopyButton, ToggleSetting } from "@/components/shared";
 import { useTemplateForm } from "@/lib/hooks/useTemplateForm";
 
 import { checkDescriptions } from "@/lib/data/check-descriptions";
-import { CHECK_CATEGORY_LABELS, CHECK_CATEGORY_COLORS, CHECK_CATEGORY_DESCRIPTIONS, CHECK_LIFECYCLE_HINTS } from "@/lib/constants/check-category-labels";
+import { CHECK_CATEGORY_LABELS, CHECK_CATEGORY_COLORS, CHECK_LIFECYCLE_HINTS, BIOMETRIC_DESCRIPTION } from "@/lib/constants/check-category-labels";
 
 import { EXTRACTED_ATTRIBUTE_OPTIONS, type CountrySettings } from "@/lib/constants/countries";
 import { VERIFICATION_TYPE_OPTIONS, CHECK_TYPE_OPTIONS } from "@/lib/constants/filter-options";
-import { TABLE_TH, TABLE_TH_SORTABLE, TABLE_SORT_ICON_SIZE, MODAL_CONTROL_SIZE } from "@/lib/constants/page-layout";
+import { MODAL_CONTROL_SIZE, COLUMN_HEADER, COLUMN_HEADER_LABEL, COLUMN_HEADER_VALUE } from "@/lib/constants/page-layout";
 import { VERIFICATION_TEMPLATE_PRESETS } from "@/lib/constants/template-presets";
 import { AVAILABLE_CHECKS } from "@/lib/constants/verification-checks";
 import { useUnsavedChanges } from "@/lib/hooks/useUnsavedChanges";
@@ -45,13 +36,14 @@ import { Button } from "@plexui/ui/components/Button";
 import { Field } from "@plexui/ui/components/Field";
 import { Input } from "@plexui/ui/components/Input";
 import { Menu } from "@plexui/ui/components/Menu";
+import { RadioGroup } from "@plexui/ui/components/RadioGroup";
 import { Tabs } from "@plexui/ui/components/Tabs";
 import { Select } from "@plexui/ui/components/Select";
 import { SelectControl } from "@plexui/ui/components/SelectControl";
 
 import { Tooltip } from "@plexui/ui/components/Tooltip";
-import { Switch } from "@plexui/ui/components/Switch";
-import { ArrowDownSm, ArrowUpSm, CheckMd, DotsHorizontal, Search, SettingsCog, Sort } from "@plexui/ui/components/Icon";
+import { Checkbox } from "@plexui/ui/components/Checkbox";
+import { DotsHorizontal, Search, SettingsCog } from "@plexui/ui/components/Icon";
 
 /* ─── Constants ─── */
 
@@ -342,7 +334,7 @@ function VerificationTemplateDetailContent() {
         }
       />
 
-      <div className={`flex-1 ${activeTab === "Allowed Countries" ? "overflow-hidden" : "overflow-auto px-4 md:px-6"}`}>
+      <div className={`flex-1 ${activeTab === "Settings" ? "overflow-auto px-4 md:px-6" : "overflow-hidden"}`}>
         {activeTab === "Checks" && (
           <ChecksTab checks={form.checks} type={form.type} onUpdateCheck={updateCheck} />
         )}
@@ -379,9 +371,7 @@ const CHECK_SCOPE_OPTIONS = [
   { value: "all_accounts", label: "All accounts" },
 ];
 
-
-
-/** Row data shape used by TanStack Table in ChecksTab */
+/** Row data shape for checks list */
 interface CheckRow {
   check: VerificationCheckConfig;
   formIndex: number;
@@ -403,10 +393,8 @@ function ChecksTab({
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string[]>([]);
   const [typeFilter, setTypeFilter] = useState<string[]>([]);
-  const [settingsCheckName, setSettingsCheckName] = useState<string | null>(null);
+  const [selectedCheckName, setSelectedCheckName] = useState<string | null>(null);
   const [matchReqCheckName, setMatchReqCheckName] = useState<string | null>(null);
-  const [sorting, setSorting] = useState<SortingState>([{ id: "name", desc: false }]);
-  const [draftSubConfig, setDraftSubConfig] = useState<CheckSubConfig | undefined>(undefined);
 
   // Suppress checkbox entry animation on initial mount — @starting-style in PlexUI
   // Checkbox CSS causes all pre-checked checkboxes to animate in simultaneously.
@@ -416,9 +404,8 @@ function ChecksTab({
     return () => cancelAnimationFrame(id);
   }, []);
 
-  const enabledCount = checks.filter((c) => c.enabled).length;
-  const requiredCount = checks.filter((c) => c.required).length;
 
+  const enabledCount = checks.filter((c) => c.enabled).length;
   const data = useMemo<CheckRow[]>(() => {
     return checks
       .map((check, formIndex) => {
@@ -458,328 +445,195 @@ function ChecksTab({
       .filter((r): r is CheckRow => r !== null);
   }, [checks, search, statusFilter, typeFilter, type]);
 
-  // Find the current check data for the settings modal
-  const settingsRow = settingsCheckName ? data.find((r) => r.check.name === settingsCheckName) : null;
+  const sortedData = useMemo(() => [...data].sort((a, b) => a.check.name.localeCompare(b.check.name)), [data]);
 
-  // Sync draft config when settings modal opens
-  const [prevSettingsOpen, setPrevSettingsOpen] = useState(false);
-  const isSettingsOpen = !!settingsCheckName;
-  if (isSettingsOpen && !prevSettingsOpen && settingsRow) {
-    setDraftSubConfig(settingsRow.check.subConfig ? structuredClone(settingsRow.check.subConfig) : undefined);
-  }
-  if (isSettingsOpen !== prevSettingsOpen) setPrevSettingsOpen(isSettingsOpen);
+  // Auto-select first check on initial mount
+  useEffect(() => {
+    if (selectedCheckName !== null) return;
+    const first = sortedData[0]?.check.name ?? null;
+    setSelectedCheckName(first);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  const columns = useMemo<ColumnDef<CheckRow, unknown>[]>(
-    () => [
-      {
-        id: "name",
-        accessorFn: (row) => row.check.name,
-        header: "Checks",
-        enableSorting: true,
-        cell: ({ row }) => {
-          const { check, description, formIndex } = row.original;
-          return (
-            <div className="flex items-start gap-2.5">
-              <div className="mt-[3.5px]" onClick={(e) => e.stopPropagation()}>
-                <Switch
-                  checked={check.enabled}
-                  onCheckedChange={(v) => onUpdateCheck(formIndex, { ...check, enabled: v })}
-                />
-              </div>
-              <div className="flex flex-col">
-                <div className="flex min-h-[26px] items-center gap-2">
-                  <span className="text-sm font-medium text-[var(--color-text)]">{check.name}</span>
-                  {check.lifecycle === "beta" && (
-                    <Tooltip content={CHECK_LIFECYCLE_HINTS.beta} side="top" sideOffset={4}>
-                      <Badge pill color="discovery" variant="soft" size="sm">
-                        Beta
-                      </Badge>
-                    </Tooltip>
-                  )}
-                  {check.lifecycle === "sunset" && (
-                    <Tooltip content={CHECK_LIFECYCLE_HINTS.sunset} side="top" sideOffset={4}>
-                      <Badge pill color="warning" variant="soft" size="sm">
-                        Sunset
-                      </Badge>
-                    </Tooltip>
-                  )}
-                </div>
-                {description && (
-                  <span className="text-xs text-[var(--color-text-tertiary)]">{description}</span>
-                )}
-              </div>
-            </div>
-          );
-        },
-      },
-      {
-        id: "category",
-        accessorFn: (row) => row.check.categories[0] ?? "",
-        header: "Type",
-        size: 260,
-        meta: { align: "right" },
-        enableSorting: true,
-        cell: ({ row }) => (
-          <div className="flex min-h-[26px] flex-wrap items-center justify-end gap-1">
-            {row.original.requiresBiometric && (
-              <Tooltip content="Biometric processing is required to use this feature. We recommend consulting with your legal team and compliance advisors to ensure that your business meets the proper requirements to process this biometric data." side="top" sideOffset={4}>
-                <Badge pill color="info" variant="soft" size="sm">
-                  Biometric
-                </Badge>
-              </Tooltip>
-            )}
-            {row.original.check.categories.map((cat) => {
-              const catDescription = CHECK_CATEGORY_DESCRIPTIONS[cat] ?? "";
-              return (
-                <Tooltip key={cat} content={catDescription} side="top" sideOffset={4}>
-                  <Badge pill color={(CHECK_CATEGORY_COLORS[cat] ?? "secondary") as "info" | "secondary" | "danger" | "discovery" | "warning" | "caution"} variant="soft" size="sm">
-                    {CHECK_CATEGORY_LABELS[cat] ?? cat}
-                  </Badge>
-                </Tooltip>
-              );
-            })}
-          </div>
-        ),
-      },
-      {
-        id: "required",
-        accessorFn: (row) => row.check.required,
-        header: () => (
-          <Tooltip content="If a required check fails, the associated Verification Check will fail." side="top" sideOffset={4}>
-            <span className="cursor-help border-b border-dashed border-[var(--color-text-tertiary)]">Requirement</span>
-          </Tooltip>
-        ),
-        size: 140,
-        meta: { align: "right" },
-        enableSorting: true,
-        sortDescFirst: true,
-        cell: ({ row }) => {
-          const { check, formIndex } = row.original;
-          return (
-            <div className="flex justify-end" onClick={(e) => e.stopPropagation()}>
-              <Menu>
-                <Menu.Trigger>
-                  <SelectControl variant="ghost" selected size="xs" block={false} className={check.required ? undefined : "text-[var(--color-text-tertiary)]"}>
-                    {check.required ? "Required" : "Optional"}
-                  </SelectControl>
-                </Menu.Trigger>
-                <Menu.Content minWidth={120}>
-                  <Menu.Item onSelect={() => onUpdateCheck(formIndex, { ...check, required: true })}>
-                    <span className="flex items-center gap-2">
-                      {check.required ? <CheckMd className="size-3.5" /> : <span className="w-3.5" />}
-                      Required
-                    </span>
-                  </Menu.Item>
-                  <Menu.Item onSelect={() => onUpdateCheck(formIndex, { ...check, required: false })}>
-                    <span className="flex items-center gap-2">
-                      {!check.required ? <CheckMd className="size-3.5" /> : <span className="w-3.5" />}
-                      Optional
-                    </span>
-                  </Menu.Item>
-                </Menu.Content>
-              </Menu>
-            </div>
-          );
-        },
-      },
-      {
-        id: "settings",
-        header: "Config",
-        accessorFn: (row) => row.hasConfig,
-        size: 100,
-        meta: { align: "right" },
-        enableSorting: true,
-        cell: ({ row }) => {
-          const { check, hasConfig, configType } = row.original;
-          if (!hasConfig) return null;
-          return (
-            <div className="flex justify-end" onClick={(e) => e.stopPropagation()}>
-              <Button
-                color="secondary"
-                variant="ghost"
-                size="xs"
-                onClick={() => {
-                  if (configType === "comparison") {
-                    setMatchReqCheckName(check.name);
-                  } else {
-                    setSettingsCheckName(check.name);
-                  }
-                }}
-              >
-                <SettingsCog />
-              </Button>
-            </div>
-          );
-        },
-      },
-    ],
-    [onUpdateCheck],
-  );
+  // If selected check is no longer in filtered list, pick first available
+  useEffect(() => {
+    if (selectedCheckName === null) return;
+    const stillVisible = sortedData.some((r) => r.check.name === selectedCheckName);
+    if (!stillVisible) {
+      setSelectedCheckName(sortedData[0]?.check.name ?? null);
+    }
+  }, [sortedData, selectedCheckName]);
 
-  // eslint-disable-next-line react-hooks/incompatible-library -- TanStack Table API is intentionally non-memoizable
-  const table = useReactTable({
-    data,
-    columns,
-    state: { sorting },
-    meta: {},
-    onSortingChange: setSorting,
-    getRowId: (row) => row.check.name,
-    getCoreRowModel: getCoreRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-  });
+  const selectedRow = selectedCheckName ? sortedData.find((r) => r.check.name === selectedCheckName) : null;
+
+  const hasActiveFilters = statusFilter.length > 0 || typeFilter.length > 0;
 
   return (
-    <div data-suppress-anim={suppressAnim || undefined}>
-      <table className="-mb-px w-full" data-datatable>
-        <thead className="sticky top-0 z-10 bg-[var(--color-surface)]">
-          <tr>
-            <th colSpan={4} className="pt-6 pb-3 text-left font-normal">
-              <div className="flex flex-wrap items-center gap-2">
-                <div className="w-56">
-                  <Input
-                    size="sm"
-                    pill
-                    placeholder="Search checks..."
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                    onClear={search ? () => setSearch("") : undefined}
-                    startAdornment={<Search style={{ width: 16, height: 16 }} />}
-                  />
-                </div>
-                <div className="w-52">
-                  <Select
-                    options={CHECK_STATUS_FILTER_OPTIONS}
-                    value={statusFilter}
-                    onChange={(opts) => setStatusFilter(opts.map((o) => o.value))}
-                    multiple
-                    clearable
-                    placeholder="All check statuses"
-                    size="sm"
-                    pill
-                    variant="outline"
-                    block
-                    listMinWidth={220}
-                  />
-                </div>
-                <div className="w-48">
-                  <Select
-                    options={CHECK_TYPE_OPTIONS}
-                    value={typeFilter}
-                    onChange={(opts) => setTypeFilter(opts.map((o) => o.value))}
-                    multiple
-                    clearable
-                    placeholder="All check types"
-                    size="sm"
-                    pill
-                    variant="outline"
-                    block
-                    listMinWidth={180}
-                  />
-                </div>
-                {(statusFilter.length > 0 || typeFilter.length > 0) && (
-                  <Button color="secondary" variant="soft" size="sm" pill onClick={() => { setStatusFilter([]); setTypeFilter([]); }}>
-                    Clear filters
-                  </Button>
-                )}
-                <p className="ml-auto text-sm text-[var(--color-text-tertiary)]">
-                  {enabledCount} of {checks.length} enabled · {requiredCount} required
-                </p>
-              </div>
-            </th>
-          </tr>
-          {table.getHeaderGroups().map((headerGroup) => (
-            <tr key={headerGroup.id} style={{ boxShadow: "inset 0 -1px 0 var(--color-border)" }}>
-              {headerGroup.headers.map((header) => (
-                <th
-                  key={header.id}
-                  style={header.getSize() !== 150 ? { minWidth: header.getSize(), width: header.getSize() } : undefined}
-                  className={`${TABLE_TH}${(header.column.columnDef.meta as { thClassName?: string })?.thClassName ? ` ${(header.column.columnDef.meta as { thClassName?: string }).thClassName}` : ""}`}
-                >
-                  {header.isPlaceholder ? null : (
-                    <div
-                      className={`flex items-center gap-1${(header.column.columnDef.meta as { align?: string })?.align === "right" ? " justify-end" : ""} ${
-                        header.column.getCanSort()
-                          ? TABLE_TH_SORTABLE
-                          : ""
-                      }`}
-                      onClick={header.column.getToggleSortingHandler()}
-                    >
-                      {flexRender(header.column.columnDef.header, header.getContext())}
-                      {header.column.getCanSort() && (
-                        <span>
-                          {header.column.getIsSorted() === "asc" ? (
-                            <ArrowUpSm style={{ width: TABLE_SORT_ICON_SIZE, height: TABLE_SORT_ICON_SIZE }} />
-                          ) : header.column.getIsSorted() === "desc" ? (
-                            <ArrowDownSm style={{ width: TABLE_SORT_ICON_SIZE, height: TABLE_SORT_ICON_SIZE }} />
-                          ) : (
-                            <Sort style={{ width: TABLE_SORT_ICON_SIZE, height: TABLE_SORT_ICON_SIZE }} className="opacity-40" />
-                          )}
-                        </span>
-                      )}
-                    </div>
-                  )}
-                </th>
-              ))}
-            </tr>
-          ))}
-        </thead>
-        <tbody>
-          {table.getRowModel().rows.length === 0 ? (
-            <tr>
-              <td colSpan={4} className="py-12 text-center text-sm text-[var(--color-text-tertiary)]">
-                No checks match your filters.
-              </td>
-            </tr>
-          ) : (
-            table.getRowModel().rows.map((row) => (
-              <tr key={row.id} className="border-b border-[var(--color-border)]">
-                {row.getVisibleCells().map((cell) => (
-                  <td
-                    key={cell.id}
-                    style={{ verticalAlign: 'top', ...(cell.column.getSize() !== 150 ? { minWidth: cell.column.getSize(), width: cell.column.getSize() } : undefined) }}
-                    className={`py-2.5 pr-2${(cell.column.columnDef.meta as { tdClassName?: string })?.tdClassName ? ` ${(cell.column.columnDef.meta as { tdClassName?: string }).tdClassName}` : ""}`}
-                  >
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </td>
-                ))}
-              </tr>
-            ))
-          )}
-        </tbody>
-      </table>
-
-      {/* Check Settings Modal */}
-      {settingsRow && (
-        <SettingsModal
-          open={!!settingsRow}
-          onOpenChange={(open) => { if (!open) setSettingsCheckName(null); }}
-          title={settingsRow.check.name}
-          footer={
-            <>
-              <Button color="primary" variant="soft" onClick={() => setSettingsCheckName(null)}>
-                Cancel
-              </Button>
-              <Button color="primary" onClick={() => {
-                onUpdateCheck(settingsRow.formIndex, {
-                  ...settingsRow.check,
-                  subConfig: draftSubConfig,
-                });
-                setSettingsCheckName(null);
-              }}>
-                Save
-              </Button>
-            </>
-          }
-        >
-          <CheckConfigPanel
-            configType={settingsRow.configType!}
-            subConfig={draftSubConfig}
-            onUpdate={(patch) => setDraftSubConfig((prev) => ({ ...prev, ...patch }))}
+    <div className="flex h-full min-h-0 flex-col" data-suppress-anim={suppressAnim || undefined}>
+      {/* ── Toolbar ── */}
+      <div className="flex flex-wrap items-center gap-2 px-4 pt-6 pb-3 md:px-6">
+        <div className="w-56">
+          <Input
+            size="sm"
+            pill
+            placeholder="Search checks..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            onClear={search ? () => setSearch("") : undefined}
+            startAdornment={<Search style={{ width: 16, height: 16 }} />}
           />
-        </SettingsModal>
-      )}
+        </div>
+        <div className="w-52">
+          <Select
+            options={CHECK_STATUS_FILTER_OPTIONS}
+            value={statusFilter}
+            onChange={(opts) => setStatusFilter(opts.map((o) => o.value))}
+            multiple
+            clearable
+            placeholder="All check statuses"
+            size="sm"
+            pill
+            variant="outline"
+            block
+            listMinWidth={220}
+          />
+        </div>
+        <div className="w-48">
+          <Select
+            options={CHECK_TYPE_OPTIONS}
+            value={typeFilter}
+            onChange={(opts) => setTypeFilter(opts.map((o) => o.value))}
+            multiple
+            clearable
+            placeholder="All check types"
+            size="sm"
+            pill
+            variant="outline"
+            block
+            listMinWidth={180}
+          />
+        </div>
+        {hasActiveFilters && (
+          <Button color="secondary" variant="soft" size="sm" pill onClick={() => { setStatusFilter([]); setTypeFilter([]); }}>
+            Clear filters
+          </Button>
+        )}
 
-      {/* Match Requirements — direct modal for comparison checks */}
+      </div>
+
+      {/* ── 2-Column Layout ── */}
+      <div className="mx-4 mb-4 flex min-h-0 flex-1 overflow-hidden rounded-xl border border-[var(--color-border)] md:mx-6">
+        {/* Column 1: Check list */}
+        <div className="flex min-h-0 min-w-0 flex-1 flex-col border-r border-[var(--color-border)]">
+          <div className={COLUMN_HEADER}>
+            <span className={COLUMN_HEADER_LABEL}>Checks</span>
+            <span className={COLUMN_HEADER_VALUE}>
+              Enabled · {enabledCount} / {checks.length}
+            </span>
+          </div>
+          <div className="flex-1 overflow-y-auto p-1.5">
+            {sortedData.map((row) => {
+              const { check, formIndex, hasConfig } = row;
+              const isSelected = selectedCheckName === check.name;
+
+              return (
+                <div
+                  key={check.name}
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => setSelectedCheckName(check.name)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      setSelectedCheckName(check.name);
+                    } else if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+                      e.preventDefault();
+                      const idx = sortedData.findIndex((r) => r.check.name === check.name);
+                      const next = e.key === "ArrowDown" ? idx + 1 : idx - 1;
+                      const target = sortedData[next];
+                      if (target) {
+                        setSelectedCheckName(target.check.name);
+                        const container = e.currentTarget.parentElement;
+                        const el = container?.children[next] as HTMLElement | undefined;
+                        el?.focus();
+                        el?.scrollIntoView({ block: "nearest" });
+                      }
+                    }
+                  }}
+                  className={`flex cursor-pointer items-center gap-2.5 rounded-lg px-3 py-2 outline-none transition-colors ${
+                    isSelected
+                      ? "bg-[var(--gray-100)]"
+                      : "hover:bg-[var(--color-surface-secondary)]"
+                  }`}
+                >
+                  <div
+                    className="shrink-0"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <Checkbox
+                      checked={check.enabled}
+                      onCheckedChange={(v) => onUpdateCheck(formIndex, { ...check, enabled: v })}
+                    />
+                  </div>
+                  <span className="min-w-0 truncate text-sm font-medium text-[var(--color-text)]">{check.name}</span>
+                  <div className="ml-auto flex shrink-0 items-center gap-1.5">
+                    {hasConfig && (
+                      <Badge pill color="secondary" variant="soft" size="sm"><SettingsCog className="size-3" /></Badge>
+                    )}
+                    {check.required && (
+                      <Badge pill color="info" variant="soft" size="sm">Required</Badge>
+                    )}
+                    {check.lifecycle === "beta" && (
+                      <Tooltip content={CHECK_LIFECYCLE_HINTS.beta} side="top" sideOffset={4}>
+                        <Badge pill color="discovery" variant="soft" size="sm">Beta</Badge>
+                      </Tooltip>
+                    )}
+                    {check.lifecycle === "sunset" && (
+                      <Tooltip content={CHECK_LIFECYCLE_HINTS.sunset} side="top" sideOffset={4}>
+                        <Badge pill color="warning" variant="soft" size="sm">Sunset</Badge>
+                      </Tooltip>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+
+            {sortedData.length === 0 && (
+              <div className="p-6 text-center text-sm text-[var(--color-text-tertiary)]">
+                No checks match your filters.
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Column 2: Check details & settings */}
+        <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+          <div className={COLUMN_HEADER}>
+            <span className={COLUMN_HEADER_LABEL}>{selectedRow ? selectedRow.check.name : "Check Settings"}</span>
+            <span className={COLUMN_HEADER_VALUE}>
+              {selectedRow ? (selectedRow.check.required ? "Required" : "Optional") : "\u00a0"}
+            </span>
+          </div>
+
+          <div className="flex-1 overflow-y-auto p-4">
+            {!selectedRow && (
+              <div className="flex h-full items-center justify-center text-sm text-[var(--color-text-tertiary)]">
+                Select a check to configure.
+              </div>
+            )}
+
+            {selectedRow && (
+              <CheckDetailPanel
+                row={selectedRow}
+                onUpdateCheck={onUpdateCheck}
+                onOpenMatchReq={() => setMatchReqCheckName(selectedRow.check.name)}
+              />
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Match Requirements — modal for comparison checks */}
       {(() => {
         const mqRow = matchReqCheckName ? data.find((r) => r.check.name === matchReqCheckName) : null;
         if (!mqRow) return null;
@@ -797,6 +651,94 @@ function ChecksTab({
           />
         );
       })()}
+    </div>
+  );
+}
+
+/* ─── Check Detail Panel (right column) ─── */
+
+function CheckDetailPanel({
+  row,
+  onUpdateCheck,
+  onOpenMatchReq,
+}: {
+  row: CheckRow;
+  onUpdateCheck: (index: number, check: VerificationCheckConfig) => void;
+  onOpenMatchReq: () => void;
+}) {
+  const { check, formIndex, description, requiresBiometric, hasConfig, configType } = row;
+
+  function updateSubConfig(patch: Partial<CheckSubConfig>) {
+    onUpdateCheck(formIndex, {
+      ...check,
+      subConfig: { ...check.subConfig, ...patch },
+    });
+  }
+
+  return (
+    <div className="flex flex-col gap-5">
+      {/* Description */}
+      {description && (
+        <p className="text-sm text-[var(--color-text-secondary)]">{description}</p>
+      )}
+
+
+      {/* Type */}
+      {(check.categories.length > 0 || requiresBiometric) && (
+        <Field label="Type">
+          <div className="flex flex-wrap gap-1.5">
+            {check.categories.map((cat) => (
+              <Badge key={cat} pill color={(CHECK_CATEGORY_COLORS[cat] ?? "secondary") as "info" | "secondary" | "danger" | "discovery" | "warning" | "caution"} variant="soft" size="sm">
+                {CHECK_CATEGORY_LABELS[cat] ?? cat}
+              </Badge>
+            ))}
+            {requiresBiometric && (
+              <Tooltip content={BIOMETRIC_DESCRIPTION} side="top" sideOffset={4} maxWidth={320}>
+                <Badge pill color="info" variant="soft" size="sm">Biometric</Badge>
+              </Tooltip>
+            )}
+          </div>
+        </Field>
+      )}
+      {/* Required / Optional */}
+      <Field label="Requirement" description="If a required check fails, the associated verification will fail.">
+        <RadioGroup
+          value={check.required ? "required" : "optional"}
+          onChange={(v) => onUpdateCheck(formIndex, { ...check, required: v === "required" })}
+          direction="row"
+        >
+          <RadioGroup.Item value="required">Required</RadioGroup.Item>
+          <RadioGroup.Item value="optional">Optional</RadioGroup.Item>
+        </RadioGroup>
+      </Field>
+
+      {/* Config section — only for configurable checks */}
+      {hasConfig && configType && (
+        <>
+          <div className="border-t border-[var(--color-border)]" />
+          {configType === "comparison" ? (
+            <div>
+              <p className="mb-2 text-sm text-[var(--color-text-secondary)]">
+                Match requirements define how attributes are compared between sources.
+              </p>
+              <Button
+                color="secondary"
+                variant="outline"
+                size={MODAL_CONTROL_SIZE}
+                onClick={onOpenMatchReq}
+              >
+                Configure match requirements
+              </Button>
+            </div>
+          ) : (
+            <CheckConfigPanel
+              configType={configType}
+              subConfig={check.subConfig}
+              onUpdate={updateSubConfig}
+            />
+          )}
+        </>
+      )}
     </div>
   );
 }
@@ -964,7 +906,7 @@ function ExtractedPropertiesPanel({
   return (
     <div className="flex flex-col gap-5">
       <Field label="Default Required Attributes" description="The ID details that must be successfully extracted for this check to pass. These defaults will be used for every country and ID type. You can override them on a per-country and per-ID basis in Countries and ID Types.">
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-col gap-2">
           <div className="w-52">
             <Select
               options={EXTRACTED_ATTRIBUTE_OPTIONS}
@@ -982,22 +924,26 @@ function ExtractedPropertiesPanel({
               TriggerView={() => <span className="truncate">{requiredAttributes.length === 0 ? 'No required attributes' : `${requiredAttributes.length} selected`}</span>}
             />
           </div>
-          {requiredAttributes.map((attr) => {
-            const label = EXTRACTED_ATTRIBUTE_OPTIONS.find((o) => o.value === attr)?.label ?? attr;
-            return (
-              <SelectControl
-                key={attr}
-                variant="soft"
-                size="xs"
-                selected
-                pill
-                dropdownIconType="none"
-                onClearClick={() => removeAttribute(attr)}
-              >
-                {label}
-              </SelectControl>
-            );
-          })}
+          {requiredAttributes.length > 0 && (
+            <div className="flex flex-wrap gap-1.5">
+              {requiredAttributes.map((attr) => {
+                const label = EXTRACTED_ATTRIBUTE_OPTIONS.find((o) => o.value === attr)?.label ?? attr;
+                return (
+                  <SelectControl
+                    key={attr}
+                    variant="soft"
+                    size="xs"
+                    selected
+                    pill
+                    dropdownIconType="none"
+                    onClearClick={() => removeAttribute(attr)}
+                  >
+                    {label}
+                  </SelectControl>
+                );
+              })}
+            </div>
+          )}
         </div>
       </Field>
 
