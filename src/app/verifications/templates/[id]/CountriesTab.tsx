@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 
-import { BulkConfigureModal } from "./BulkConfigureModal";
+import { ByIdTypeView } from "./ByIdTypeView";
 
 import {
   ALL_ID_DOC_TYPES,
@@ -37,6 +37,7 @@ import { Field } from "@plexui/ui/components/Field";
 import { Input } from "@plexui/ui/components/Input";
 import { Select } from "@plexui/ui/components/Select";
 import { SelectControl } from "@plexui/ui/components/SelectControl";
+import { Tabs } from "@plexui/ui/components/Tabs";
 import { ChevronLeftMd, Search } from "@plexui/ui/components/Icon";
 import { useIsMobile } from "@/lib/hooks";
 
@@ -90,7 +91,7 @@ export function CountriesTab({
   const [statusFilters, setStatusFilters] = useState<string[]>([]);
   const [regionFilters, setRegionFilters] = useState<string[]>([]);
   const [idTypeFilters, setIdTypeFilters] = useState<string[]>([]);
-  const [bulkConfigOpen, setBulkConfigOpen] = useState(false);
+  const [viewMode, setViewMode] = useState<"country" | "idType">("country");
   const [selectedCountryCode, setSelectedCountryCode] = useState<string | null>(null);
   const [selectedIdType, setSelectedIdType] = useState<IdDocType | null>(null);
 
@@ -283,101 +284,114 @@ export function CountriesTab({
   // Mobile navigation: 3-level stack
   // Level 1 = country list, Level 2 = doc types, Level 3 = doc settings
   const mobileLevel: 1 | 2 | 3 = !selectedCountryCode ? 1 : !selectedIdType ? 2 : 3;
-  const showToolbar = !isMobile || mobileLevel === 1;
+  const showToolbar = !isMobile || mobileLevel === 1 || viewMode === "idType";
 
+
+  const visibleCountries = useMemo(() => {
+    if (!hasActiveFilters) return COUNTRY_OPTIONS;
+    return filtered;
+  }, [filtered, hasActiveFilters]);
   return (
     <div className="flex h-full min-h-0 flex-col" data-suppress-anim={suppressAnim || undefined}>
-      {/* ── Shared Toolbar (hidden on mobile when not at country list) ── */}
-      {showToolbar && (
-        <div className="flex flex-wrap items-center gap-2 px-4 pt-6 pb-3 md:px-6">
+      {/* ── View Toggle + Toolbar (single row with separator) ── */}
+      <div className="flex flex-wrap items-center gap-2 px-4 pt-4 pb-3 md:px-6">
+        <Tabs
+          aria-label="View mode"
+          value={viewMode}
+          onChange={(v) => {
+            setViewMode(v as "country" | "idType");
+            if (v === "idType") setIdTypeFilters([]);
+          }}
+          variant="segmented"
+          size="sm"
+        >
+          <Tabs.Tab value="country">By Country</Tabs.Tab>
+          <Tabs.Tab value="idType">By ID Type</Tabs.Tab>
+        </Tabs>
+
+        {showToolbar && (
+          <>
+            <div className="mx-1 h-5 w-px bg-[var(--color-border)]" />
           <div className="w-60">
-            <Input
-              size="sm"
-              pill
-              placeholder="Search countries..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              onClear={search ? () => setSearch("") : undefined}
-              startAdornment={<Search style={{ width: 16, height: 16 }} />}
-            />
-          </div>
-          <div className="w-36">
-            <Select
-              options={STATUS_FILTER_OPTIONS}
-              value={statusFilters}
-              onChange={(opts) => setStatusFilters(opts.map((o) => o.value))}
-              multiple
-              clearable
-              placeholder="Status"
-              size="sm"
-              pill
-              variant="outline"
-              block
-              listMinWidth={160}
-            />
-          </div>
-          <div className="w-40">
-            <Select
-              options={REGION_OPTIONS}
-              value={regionFilters}
-              onChange={(opts) => setRegionFilters(opts.map((o) => o.value))}
-              multiple
-              clearable
-              placeholder="Region"
-              size="sm"
-              pill
-              variant="outline"
-              block
-              listMinWidth={180}
-            />
-          </div>
-          <div className="w-40">
-            <Select
-              options={ID_DOC_TYPE_FILTER_OPTIONS}
-              value={idTypeFilters}
-              onChange={(opts) => setIdTypeFilters(opts.map((o) => o.value))}
-              multiple
-              clearable
-              placeholder="ID types"
-              size="sm"
-              pill
-              variant="outline"
-              block
-              listMinWidth={260}
-            />
-          </div>
-          {hasActiveFilters && (
-            <Button
-              color="secondary"
-              variant="soft"
-              size="sm"
-              pill
-              onClick={() => {
-                setSearch("");
-                setStatusFilters([]);
-                setRegionFilters([]);
-                setIdTypeFilters([]);
-              }}
-            >
-              Clear filters
-            </Button>
-          )}
-          {selected.length >= 2 && (
-            <Button
-              color="secondary"
-              variant="outline"
-              size="sm"
-              pill
-              className="ml-auto"
-              onClick={() => setBulkConfigOpen(true)}
-            >
-              Bulk ({selected.length})
-            </Button>
-          )}
-        </div>
-      )}
+              <Input
+                size="sm"
+                pill
+                placeholder="Search countries..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                onClear={search ? () => setSearch("") : undefined}
+                startAdornment={<Search style={{ width: 16, height: 16 }} />}
+              />
+            </div>
+            <div className="w-36">
+              <Select
+                options={STATUS_FILTER_OPTIONS}
+                value={statusFilters}
+                onChange={(opts) => setStatusFilters(opts.map((o) => o.value))}
+                multiple
+                clearable
+                placeholder="Status"
+                size="sm"
+                pill
+                variant="outline"
+                block
+                listMinWidth={160}
+              />
+            </div>
+            <div className="w-40">
+              <Select
+                options={REGION_OPTIONS}
+                value={regionFilters}
+                onChange={(opts) => setRegionFilters(opts.map((o) => o.value))}
+                multiple
+                clearable
+                placeholder="Region"
+                size="sm"
+                pill
+                variant="outline"
+                block
+                listMinWidth={180}
+              />
+            </div>
+            {viewMode !== "idType" && (
+              <div className="w-40">
+                <Select
+                  options={ID_DOC_TYPE_FILTER_OPTIONS}
+                  value={idTypeFilters}
+                  onChange={(opts) => setIdTypeFilters(opts.map((o) => o.value))}
+                  multiple
+                  clearable
+                  placeholder="ID types"
+                  size="sm"
+                  pill
+                  variant="outline"
+                  block
+                  listMinWidth={260}
+                />
+              </div>
+            )}
+            {hasActiveFilters && (
+              <Button
+                color="secondary"
+                variant="soft"
+                size="sm"
+                pill
+                onClick={() => {
+                  setSearch("");
+                  setStatusFilters([]);
+                  setRegionFilters([]);
+                  setIdTypeFilters([]);
+                }}
+              >
+                Clear filters
+              </Button>
+            )}
+          </>
+        )}
+      </div>
 
 
+      {viewMode === "country" && (<>
       {/* ── Mobile back button (above the card, OpenAI pattern) ── */}
       {isMobile && mobileLevel === 2 && (
         <div className="px-4 pt-4 pb-2">
@@ -766,32 +780,18 @@ export function CountriesTab({
         )}
       </div>
 
-      <BulkConfigureModal
-        open={bulkConfigOpen}
-        onOpenChange={setBulkConfigOpen}
-        selectedCodes={selected}
-        countrySettings={countrySettings}
-        onApply={(patch) => {
-          for (const code of selected) {
-            const existing = countrySettings[code] ?? {};
-            const merged: CountrySettings = { ...existing };
-            if (patch.allowedIdTypes !== undefined) {
-              merged.allowedIdTypes = patch.allowedIdTypes;
-            }
-            if (patch.ageRange !== undefined) {
-              if (patch.ageRange.min === undefined && patch.ageRange.max === undefined) {
-                delete merged.ageRange;
-              } else {
-                merged.ageRange = patch.ageRange;
-              }
-            }
-            if (patch.idTypeConfig !== undefined) {
-              merged.idTypeConfig = { ...existing.idTypeConfig, ...patch.idTypeConfig };
-            }
-            onUpdateCountrySettings(code, merged);
-          }
-        }}
-      />
+      </>)}
+
+      {viewMode === "idType" && (
+        <div className="mx-4 mb-4 flex min-h-0 flex-1 overflow-hidden rounded-xl border border-[var(--color-border)] md:mx-6">
+          <ByIdTypeView
+            selected={selected}
+            visibleCountries={visibleCountries}
+            countrySettings={countrySettings}
+            onUpdateCountrySettings={onUpdateCountrySettings}
+          />
+        </div>
+      )}
     </div>
   );
 }
