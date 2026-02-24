@@ -376,6 +376,25 @@ export function CountriesTab({
         </div>
       )}
 
+
+      {/* ── Mobile back button (above the card, OpenAI pattern) ── */}
+      {isMobile && mobileLevel === 2 && (
+        <div className="px-4 pt-4 pb-2">
+          <Button color="secondary" variant="soft" size="sm" pill onClick={() => { setSelectedCountryCode(null); setSelectedIdType(null); }}>
+            <ChevronLeftMd className="size-4" />
+            Countries
+          </Button>
+        </div>
+      )}
+      {isMobile && mobileLevel === 3 && (
+        <div className="px-4 pt-4 pb-2">
+          <Button color="secondary" variant="soft" size="sm" pill onClick={() => setSelectedIdType(null)}>
+            <ChevronLeftMd className="size-4" />
+            {selectedCountry?.label ?? "Back"}
+          </Button>
+        </div>
+      )}
+
       {/* ── 3-Column Layout ── */}
       <div className="mx-4 mb-4 flex min-h-0 flex-1 overflow-hidden rounded-xl border border-[var(--color-border)] md:mx-6">
         {/* Column 1: Countries — hidden on mobile when deeper level is shown */}
@@ -432,10 +451,10 @@ export function CountriesTab({
                       onClick={(e) => {
                         e.stopPropagation();
                         onToggle(country.value);
-                        setSelectedCountryCode(country.value);
                       }}
+                      onPointerDown={(e) => e.stopPropagation()}
                     >
-                      <Checkbox checked={isEnabled} onCheckedChange={() => { onToggle(country.value); setSelectedCountryCode(country.value); }} />
+                      <Checkbox checked={isEnabled} onCheckedChange={() => onToggle(country.value)} />
                     </div>
                     <div className="min-w-0 flex-1">
                       <div className="truncate text-sm text-[var(--color-text)]">
@@ -480,20 +499,9 @@ export function CountriesTab({
         {(!isMobile || mobileLevel === 2) && (
           <div className={`flex min-h-0 min-w-0 flex-1 flex-col ${!isMobile ? 'border-r border-[var(--color-border)]' : ''}`}>
             <div className={COLUMN_HEADER}>
-              {isMobile && (
-                <button
-                  type="button"
-                  className="flex items-center gap-1 text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-text)]"
-                  onClick={() => { setSelectedCountryCode(null); setSelectedIdType(null); }}
-                >
-                  <ChevronLeftMd className="size-4" />
-                  <span>Countries</span>
-                </button>
-              )}
               {selectedCountry ? (
                 <>
-                  {!isMobile && <span className={COLUMN_HEADER_LABEL}>{selectedCountry.label}</span>}
-                  {isMobile && <span className={`${COLUMN_HEADER_LABEL} text-right`}>{selectedCountry.label}</span>}
+                  <span className={COLUMN_HEADER_LABEL}>{selectedCountry.label}</span>
                   <span className={COLUMN_HEADER_VALUE}>
                     Accepted ID Types · {selectedCountryActiveSet.size} / {selectedCountryTypes.length}
                   </span>
@@ -549,15 +557,12 @@ export function CountriesTab({
                           onClick={(e) => {
                             e.stopPropagation();
                             toggleSelectedCountryIdType(type);
-                            setSelectedIdType(type);
                           }}
+                          onPointerDown={(e) => e.stopPropagation()}
                         >
                           <Checkbox
                             checked={isActive}
-                            onCheckedChange={() => {
-                              toggleSelectedCountryIdType(type);
-                              setSelectedIdType(type);
-                            }}
+                            onCheckedChange={() => toggleSelectedCountryIdType(type)}
                           />
                         </div>
                         <span className="flex-1 text-sm text-[var(--color-text)]">
@@ -616,20 +621,9 @@ export function CountriesTab({
         {(!isMobile || mobileLevel === 3) && (
           <div className="flex min-h-0 min-w-0 flex-1 flex-col">
             <div className={COLUMN_HEADER}>
-              {isMobile && (
-                <button
-                  type="button"
-                  className="flex items-center gap-1 text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-text)]"
-                  onClick={() => setSelectedIdType(null)}
-                >
-                  <ChevronLeftMd className="size-4" />
-                  <span>{selectedCountry?.label ?? "Back"}</span>
-                </button>
-              )}
               {selectedIdType ? (
                 <>
-                  {!isMobile && <span className={COLUMN_HEADER_LABEL}>{ID_DOC_TYPE_LABELS[selectedIdType]}</span>}
-                  {isMobile && <span className={`${COLUMN_HEADER_LABEL} text-right`}>{ID_DOC_TYPE_LABELS[selectedIdType]}</span>}
+                  <span className={COLUMN_HEADER_LABEL}>{ID_DOC_TYPE_LABELS[selectedIdType]}</span>
                   <span className={COLUMN_HEADER_VALUE}>{selectedCountry?.label}</span>
                 </>
               ) : (

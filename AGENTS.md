@@ -70,6 +70,37 @@ Extension installed at `~/.dev-browser-extension`, skill at `~/.opencode/skills/
 1. **Inline tables in cards** (inside `<div class="rounded-xl border ...">`) — `<thead><tr>` gets gray background via global CSS rule `thead tr { background: var(--color-surface-secondary) }`. NEVER hardcode `bg-[var(--color-surface-secondary)]` on individual thead rows.
 2. **Full-page DataTable** (no outer border container) — no thead background. The global rule is overridden by `table[data-datatable] thead tr { background: transparent }`. DataTable component has `data-datatable` attribute on its `<table>` element.
 
+## CRITICAL RULE: Mobile Back Button — Above the Card, Not Inside
+
+**On mobile (<768px), back navigation buttons go ABOVE the bordered card/table, never inside column headers.** This follows the OpenAI Platform pattern (e.g. Assistants detail page): the back button is a standalone soft pill between the page header and the card content.
+
+**Pattern:**
+```tsx
+// Mobile back button — above the card
+{isMobile && showingDetail && (
+  <div className="px-4 pt-4 pb-2">
+    <Button color="secondary" variant="soft" size="sm" pill onClick={goBack}>
+      <ChevronLeftMd className="size-4" />
+      {parentLabel}
+    </Button>
+  </div>
+)}
+
+// Bordered card — no back button in its header
+<div className="mx-4 mb-4 ... rounded-xl border ...">
+  <div className={COLUMN_HEADER}>
+    <span className={COLUMN_HEADER_LABEL}>{title}</span>
+    ...
+  </div>
+  ...
+</div>
+```
+
+**NEVER:**
+- Back button inside `COLUMN_HEADER` on mobile
+- Plain text back link instead of `Button color="secondary" variant="soft" size="sm" pill`
+- Missing `onPointerDown={(e) => e.stopPropagation()}` on checkbox wrappers inside clickable rows (prevents checkbox click from triggering row navigation)
+
 ---
 
 

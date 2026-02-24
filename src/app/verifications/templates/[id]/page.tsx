@@ -528,6 +528,17 @@ function ChecksTab({
         </div>
       )}
 
+
+      {/* ── Mobile back button (above the card, OpenAI pattern) ── */}
+      {mobileDetail && (
+        <div className="px-4 pt-4 pb-2">
+          <Button color="secondary" variant="soft" size="sm" pill onClick={() => setSelectedCheckName(null)}>
+            <ChevronLeftMd className="size-4" />
+            Checks
+          </Button>
+        </div>
+      )}
+
       {/* ── 2-Column Layout ── */}
       <div className="mx-4 mb-4 flex min-h-0 flex-1 overflow-hidden rounded-xl border border-[var(--color-border)] md:mx-6">
         {/* Column 1: Check list — hidden on mobile when detail is shown */}
@@ -576,6 +587,7 @@ function ChecksTab({
                     <div
                       className="shrink-0"
                       onClick={(e) => e.stopPropagation()}
+                      onPointerDown={(e) => e.stopPropagation()}
                     >
                       <Checkbox
                         checked={check.enabled}
@@ -617,22 +629,7 @@ function ChecksTab({
         {(!isMobile || selectedCheckName) && (
           <div className="flex min-h-0 min-w-0 flex-1 flex-col">
             <div className={COLUMN_HEADER}>
-              {isMobile && (
-                <button
-                  type="button"
-                  className="flex items-center gap-1 text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-text)]"
-                  onClick={() => setSelectedCheckName(null)}
-                >
-                  <ChevronLeftMd className="size-4" />
-                  <span>Checks</span>
-                </button>
-              )}
-              {!isMobile && (
-                <span className={COLUMN_HEADER_LABEL}>{selectedRow ? selectedRow.check.name : "Check Settings"}</span>
-              )}
-              {isMobile && selectedRow && (
-                <span className={`${COLUMN_HEADER_LABEL} text-right`}>{selectedRow.check.name}</span>
-              )}
+              <span className={COLUMN_HEADER_LABEL}>{selectedRow ? selectedRow.check.name : "Check Settings"}</span>
               <span className={COLUMN_HEADER_VALUE}>
                 {selectedRow ? (selectedRow.check.required ? "Required" : "Optional") : "\u00a0"}
               </span>
