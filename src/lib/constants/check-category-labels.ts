@@ -18,6 +18,6 @@ export const CHECK_CATEGORY_DESCRIPTIONS: Record<CheckCategory, string> = {
 };
 
 export const CHECK_LIFECYCLE_HINTS: Record<Exclude<CheckLifecycle, "ga">, string> = {
-  beta: "Available to the public, but may be constantly tuned with different thresholds. Geographic coverage may also be limited.",
-  sunset: "Deprecated in favor of other checks.",
+  beta: "This feature is in beta. Please don't rely on it for critical checks or automation. Manual review is suggested. Please share your feedback with us.",
+  sunset: "This feature is being sunset. Please reach out to support for more info and alternatives.",
 };
