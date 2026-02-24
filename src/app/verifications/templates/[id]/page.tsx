@@ -12,8 +12,9 @@ import { CHECK_CATEGORY_LABELS, CHECK_CATEGORY_COLORS, CHECK_LIFECYCLE_HINTS, BI
 
 import { EXTRACTED_ATTRIBUTE_OPTIONS, type CountrySettings } from "@/lib/constants/countries";
 import { VERIFICATION_TYPE_OPTIONS, CHECK_TYPE_OPTIONS } from "@/lib/constants/filter-options";
-import { MODAL_CONTROL_SIZE, COLUMN_HEADER, COLUMN_HEADER_LABEL, COLUMN_HEADER_VALUE } from "@/lib/constants/page-layout";
+import { MODAL_CONTROL_SIZE, MODAL_NUMBER_INPUT_WIDTH, COLUMN_HEADER, COLUMN_HEADER_LABEL, COLUMN_HEADER_VALUE } from "@/lib/constants/page-layout";
 import { VERIFICATION_TEMPLATE_PRESETS } from "@/lib/constants/template-presets";
+import { BREAKPOINT_LG } from "@/lib/constants/breakpoints";
 import { AVAILABLE_CHECKS } from "@/lib/constants/verification-checks";
 import { useUnsavedChanges } from "@/lib/hooks/useUnsavedChanges";
 import { useTemplateStore } from "@/lib/stores/template-store";
@@ -397,7 +398,7 @@ function ChecksTab({
   const [selectedCheckName, setSelectedCheckName] = useState<string | null>(null);
   const [matchReqCheckName, setMatchReqCheckName] = useState<string | null>(null);
 
-  const isMobile = useIsMobile();
+  const isMobile = useIsMobile(BREAKPOINT_LG);
 
   // Suppress checkbox entry animation on initial mount — @starting-style in PlexUI
   // Checkbox CSS causes all pre-checked checkboxes to animate in simultaneously.
@@ -779,32 +780,31 @@ function CheckConfigPanel({
     case "age_range":
       return (
         <Field label="Default age range" description="The default age restriction for verifying the ID holder's age. This default will be used for every country and ID type. You can override it on a per-country basis in Countries and ID Types.">
-          <div className="flex gap-4">
-            <div className="flex-1">
-              <Field label="Min">
-                <Input
-                  type="number"
-                  placeholder=""
-                  value={subConfig?.ageRange?.min != null ? String(subConfig.ageRange.min) : ""}
-                  onChange={(e) => {
-                    const val = e.target.value === "" ? undefined : Number(e.target.value);
-                    onUpdate({ ageRange: { ...subConfig?.ageRange, min: val } });
-                  }}
-                />
-              </Field>
+          <div className="flex items-center gap-2">
+            <div className={MODAL_NUMBER_INPUT_WIDTH}>
+              <Input
+                size={MODAL_CONTROL_SIZE}
+                type="number"
+                placeholder="Min"
+                value={subConfig?.ageRange?.min != null ? String(subConfig.ageRange.min) : ""}
+                onChange={(e) => {
+                  const val = e.target.value === "" ? undefined : Number(e.target.value);
+                  onUpdate({ ageRange: { ...subConfig?.ageRange, min: val } });
+                }}
+              />
             </div>
-            <div className="flex-1">
-              <Field label="Max">
-                <Input
-                  type="number"
-                  placeholder=""
-                  value={subConfig?.ageRange?.max != null ? String(subConfig.ageRange.max) : ""}
-                  onChange={(e) => {
-                    const val = e.target.value === "" ? undefined : Number(e.target.value);
-                    onUpdate({ ageRange: { ...subConfig?.ageRange, max: val } });
-                  }}
-                />
-              </Field>
+            <span className="text-sm text-[var(--color-text-tertiary)]">to</span>
+            <div className={MODAL_NUMBER_INPUT_WIDTH}>
+              <Input
+                size={MODAL_CONTROL_SIZE}
+                type="number"
+                placeholder="Max"
+                value={subConfig?.ageRange?.max != null ? String(subConfig.ageRange.max) : ""}
+                onChange={(e) => {
+                  const val = e.target.value === "" ? undefined : Number(e.target.value);
+                  onUpdate({ ageRange: { ...subConfig?.ageRange, max: val } });
+                }}
+              />
             </div>
           </div>
         </Field>

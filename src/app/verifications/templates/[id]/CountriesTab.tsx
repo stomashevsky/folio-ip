@@ -28,6 +28,7 @@ import {
   COLUMN_HEADER_LABEL,
   COLUMN_HEADER_VALUE,
 } from "@/lib/constants/page-layout";
+import { BREAKPOINT_XL } from "@/lib/constants/breakpoints";
 
 import { Badge } from "@plexui/ui/components/Badge";
 import { Button } from "@plexui/ui/components/Button";
@@ -93,7 +94,7 @@ export function CountriesTab({
   const [selectedCountryCode, setSelectedCountryCode] = useState<string | null>(null);
   const [selectedIdType, setSelectedIdType] = useState<IdDocType | null>(null);
 
-  const isMobile = useIsMobile();
+  const isMobile = useIsMobile(BREAKPOINT_XL);
 
   const [suppressAnim, setSuppressAnim] = useState(true);
   useEffect(() => {
@@ -457,7 +458,7 @@ export function CountriesTab({
                       <Checkbox checked={isEnabled} onCheckedChange={() => onToggle(country.value)} />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <div className="truncate text-sm text-[var(--color-text)]">
+                      <div className="truncate text-sm font-medium text-[var(--color-text)]">
                         {country.label}
                         <span className="text-[var(--color-text-tertiary)]"> · {country.value}</span>
                       </div>
@@ -565,7 +566,7 @@ export function CountriesTab({
                             onCheckedChange={() => toggleSelectedCountryIdType(type)}
                           />
                         </div>
-                        <span className="flex-1 text-sm text-[var(--color-text)]">
+                        <span className="flex-1 text-sm font-medium text-[var(--color-text)]">
                           {ID_DOC_TYPE_LABELS[type]}
                         </span>
                         <div className="flex shrink-0 items-center gap-1">

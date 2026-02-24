@@ -48,7 +48,7 @@ export const MODAL_SPLIT_LEFT_WIDTH = "w-[280px]";
 export const COLUMN_HEADER = "flex shrink-0 items-center gap-2.5 border-b border-[var(--color-border)] bg-[var(--color-surface-secondary)] px-4 py-2.5";
 
 /** Column header label (uppercase, tertiary) */
-export const COLUMN_HEADER_LABEL = "flex-1 text-xs font-semibold uppercase tracking-[0.5px] text-[var(--color-text-tertiary)]";
+export const COLUMN_HEADER_LABEL = "flex-1 truncate text-xs font-semibold uppercase tracking-[0.5px] text-[var(--color-text-tertiary)]";
 
 /** Column header value (right side counter / status text). Sets text-sm which drives min row height. */
-export const COLUMN_HEADER_VALUE = "text-sm text-[var(--color-text)]";
+export const COLUMN_HEADER_VALUE = "shrink-0 whitespace-nowrap text-sm text-[var(--color-text)]";
