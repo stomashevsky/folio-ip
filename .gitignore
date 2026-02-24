@@ -43,6 +43,9 @@ next-env.d.ts
 # skills (opencode plugins)
 /skills/
 scripts/
+!scripts/
+scripts/*
+!scripts/playwright-mcp-preflight.sh
 
 # screenshots / debug artifacts
 /*.png

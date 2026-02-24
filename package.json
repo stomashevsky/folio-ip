@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev --port 3100",
     "dev:restart": "lsof -ti:3100 | xargs kill -9 2>/dev/null; next dev --port 3100",
+    "mcp:playwright:preflight": "bash ./scripts/playwright-mcp-preflight.sh",
     "build": "next build",
     "start": "next start --port 3100",
     "lint": "eslint",
