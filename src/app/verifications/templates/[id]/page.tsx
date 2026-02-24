@@ -43,7 +43,8 @@ import { SelectControl } from "@plexui/ui/components/SelectControl";
 
 import { Tooltip } from "@plexui/ui/components/Tooltip";
 import { Checkbox } from "@plexui/ui/components/Checkbox";
-import { DotsHorizontal, Search, SettingsCog } from "@plexui/ui/components/Icon";
+import { ChevronLeftMd, DotsHorizontal, Search, SettingsCog } from "@plexui/ui/components/Icon";
+import { useIsMobile } from "@/lib/hooks";
 
 /* ─── Constants ─── */
 
@@ -396,6 +397,8 @@ function ChecksTab({
   const [selectedCheckName, setSelectedCheckName] = useState<string | null>(null);
   const [matchReqCheckName, setMatchReqCheckName] = useState<string | null>(null);
 
+  const isMobile = useIsMobile();
+
   // Suppress checkbox entry animation on initial mount — @starting-style in PlexUI
   // Checkbox CSS causes all pre-checked checkboxes to animate in simultaneously.
   const [suppressAnim, setSuppressAnim] = useState(true);
@@ -447,190 +450,209 @@ function ChecksTab({
 
   const sortedData = useMemo(() => [...data].sort((a, b) => a.check.name.localeCompare(b.check.name)), [data]);
 
-  // Auto-select first check on initial mount
+  // Auto-select first check on initial mount (desktop only)
   useEffect(() => {
+    if (isMobile) return;
     if (selectedCheckName !== null) return;
     const first = sortedData[0]?.check.name ?? null;
     setSelectedCheckName(first);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [isMobile]);
 
-  // If selected check is no longer in filtered list, pick first available
+  // If selected check is no longer in filtered list, pick first available (desktop only)
   useEffect(() => {
+    if (isMobile) return;
     if (selectedCheckName === null) return;
     const stillVisible = sortedData.some((r) => r.check.name === selectedCheckName);
     if (!stillVisible) {
       setSelectedCheckName(sortedData[0]?.check.name ?? null);
     }
-  }, [sortedData, selectedCheckName]);
+  }, [sortedData, selectedCheckName, isMobile]);
 
   const selectedRow = selectedCheckName ? sortedData.find((r) => r.check.name === selectedCheckName) : null;
 
   const hasActiveFilters = statusFilter.length > 0 || typeFilter.length > 0;
 
+  const mobileDetail = isMobile && selectedCheckName !== null;
   return (
     <div className="flex h-full min-h-0 flex-col" data-suppress-anim={suppressAnim || undefined}>
-      {/* ── Toolbar ── */}
-      <div className="flex flex-wrap items-center gap-2 px-4 pt-6 pb-3 md:px-6">
-        <div className="w-56">
-          <Input
-            size="sm"
-            pill
-            placeholder="Search checks..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            onClear={search ? () => setSearch("") : undefined}
-            startAdornment={<Search style={{ width: 16, height: 16 }} />}
-          />
+      {/* ── Toolbar (hidden on mobile when viewing detail) ── */}
+      {!mobileDetail && (
+        <div className="flex flex-wrap items-center gap-2 px-4 pt-6 pb-3 md:px-6">
+          <div className="w-56">
+            <Input
+              size="sm"
+              pill
+              placeholder="Search checks..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              onClear={search ? () => setSearch("") : undefined}
+              startAdornment={<Search style={{ width: 16, height: 16 }} />}
+            />
+          </div>
+          <div className="w-52">
+            <Select
+              options={CHECK_STATUS_FILTER_OPTIONS}
+              value={statusFilter}
+              onChange={(opts) => setStatusFilter(opts.map((o) => o.value))}
+              multiple
+              clearable
+              placeholder="All check statuses"
+              size="sm"
+              pill
+              variant="outline"
+              block
+              listMinWidth={220}
+            />
+          </div>
+          <div className="w-48">
+            <Select
+              options={CHECK_TYPE_OPTIONS}
+              value={typeFilter}
+              onChange={(opts) => setTypeFilter(opts.map((o) => o.value))}
+              multiple
+              clearable
+              placeholder="All check types"
+              size="sm"
+              pill
+              variant="outline"
+              block
+              listMinWidth={180}
+            />
+          </div>
+          {hasActiveFilters && (
+            <Button color="secondary" variant="soft" size="sm" pill onClick={() => { setStatusFilter([]); setTypeFilter([]); }}>
+              Clear filters
+            </Button>
+          )}
         </div>
-        <div className="w-52">
-          <Select
-            options={CHECK_STATUS_FILTER_OPTIONS}
-            value={statusFilter}
-            onChange={(opts) => setStatusFilter(opts.map((o) => o.value))}
-            multiple
-            clearable
-            placeholder="All check statuses"
-            size="sm"
-            pill
-            variant="outline"
-            block
-            listMinWidth={220}
-          />
-        </div>
-        <div className="w-48">
-          <Select
-            options={CHECK_TYPE_OPTIONS}
-            value={typeFilter}
-            onChange={(opts) => setTypeFilter(opts.map((o) => o.value))}
-            multiple
-            clearable
-            placeholder="All check types"
-            size="sm"
-            pill
-            variant="outline"
-            block
-            listMinWidth={180}
-          />
-        </div>
-        {hasActiveFilters && (
-          <Button color="secondary" variant="soft" size="sm" pill onClick={() => { setStatusFilter([]); setTypeFilter([]); }}>
-            Clear filters
-          </Button>
-        )}
-
-      </div>
+      )}
 
       {/* ── 2-Column Layout ── */}
       <div className="mx-4 mb-4 flex min-h-0 flex-1 overflow-hidden rounded-xl border border-[var(--color-border)] md:mx-6">
-        {/* Column 1: Check list */}
-        <div className="flex min-h-0 min-w-0 flex-1 flex-col border-r border-[var(--color-border)]">
-          <div className={COLUMN_HEADER}>
-            <span className={COLUMN_HEADER_LABEL}>Checks</span>
-            <span className={COLUMN_HEADER_VALUE}>
-              Enabled · {enabledCount} / {checks.length}
-            </span>
-          </div>
-          <div className="flex-1 overflow-y-auto p-1.5">
-            {sortedData.map((row) => {
-              const { check, formIndex, hasConfig } = row;
-              const isSelected = selectedCheckName === check.name;
-
+        {/* Column 1: Check list — hidden on mobile when detail is shown */}
+        {(!isMobile || !selectedCheckName) && (
+          <div className={`flex min-h-0 min-w-0 flex-1 flex-col ${!isMobile ? 'border-r border-[var(--color-border)]' : ''}`}>
+            <div className={COLUMN_HEADER}>
+              <span className={COLUMN_HEADER_LABEL}>Checks</span>
+              <span className={COLUMN_HEADER_VALUE}>
+                Enabled · {enabledCount} / {checks.length}
+              </span>
+            </div>
+            <div className="flex-1 overflow-y-auto p-1.5">
+              {sortedData.map((row) => {
+                const { check, formIndex, hasConfig } = row;
+                const isSelected = !isMobile && selectedCheckName === check.name;
               return (
-                <div
-                  key={check.name}
-                  role="button"
-                  tabIndex={0}
-                  onClick={() => setSelectedCheckName(check.name)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" || e.key === " ") {
-                      e.preventDefault();
-                      setSelectedCheckName(check.name);
-                    } else if (e.key === "ArrowDown" || e.key === "ArrowUp") {
-                      e.preventDefault();
-                      const idx = sortedData.findIndex((r) => r.check.name === check.name);
-                      const next = e.key === "ArrowDown" ? idx + 1 : idx - 1;
-                      const target = sortedData[next];
-                      if (target) {
-                        setSelectedCheckName(target.check.name);
-                        const container = e.currentTarget.parentElement;
-                        const el = container?.children[next] as HTMLElement | undefined;
-                        el?.focus();
-                        el?.scrollIntoView({ block: "nearest" });
-                      }
-                    }
-                  }}
-                  className={`flex cursor-pointer items-center gap-2.5 rounded-lg px-3 py-2 outline-none transition-colors ${
-                    isSelected
-                      ? "bg-[var(--gray-100)]"
-                      : "hover:bg-[var(--color-surface-secondary)]"
-                  }`}
-                >
                   <div
-                    className="shrink-0"
-                    onClick={(e) => e.stopPropagation()}
+                    key={check.name}
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => setSelectedCheckName(check.name)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        setSelectedCheckName(check.name);
+                      } else if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+                        e.preventDefault();
+                        const idx = sortedData.findIndex((r) => r.check.name === check.name);
+                        const next = e.key === "ArrowDown" ? idx + 1 : idx - 1;
+                        const target = sortedData[next];
+                        if (target) {
+                          setSelectedCheckName(target.check.name);
+                          const container = e.currentTarget.parentElement;
+                          const el = container?.children[next] as HTMLElement | undefined;
+                          el?.focus();
+                          el?.scrollIntoView({ block: "nearest" });
+                        }
+                      }
+                    }}
+                    className={`flex cursor-pointer items-center gap-2.5 rounded-lg px-3 py-2 outline-none transition-colors ${
+                      isSelected
+                        ? "bg-[var(--gray-100)]"
+                        : "hover:bg-[var(--color-surface-secondary)]"
+                    }`}
                   >
-                    <Checkbox
-                      checked={check.enabled}
-                      onCheckedChange={(v) => onUpdateCheck(formIndex, { ...check, enabled: v })}
-                    />
+                    <div
+                      className="shrink-0"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <Checkbox
+                        checked={check.enabled}
+                        onCheckedChange={(v) => onUpdateCheck(formIndex, { ...check, enabled: v })}
+                      />
+                    </div>
+                    <span className="min-w-0 truncate text-sm font-medium text-[var(--color-text)]">{check.name}</span>
+                    <div className="ml-auto flex shrink-0 items-center gap-1.5">
+                      {hasConfig && (
+                        <Badge pill color="secondary" variant="soft" size="sm"><SettingsCog className="size-3" /></Badge>
+                      )}
+                      {check.required && (
+                        <Badge pill color="info" variant="soft" size="sm">Required</Badge>
+                      )}
+                      {check.lifecycle === "beta" && (
+                        <Tooltip content={CHECK_LIFECYCLE_HINTS.beta} side="top" sideOffset={4}>
+                          <Badge pill color="discovery" variant="soft" size="sm">Beta</Badge>
+                        </Tooltip>
+                      )}
+                      {check.lifecycle === "sunset" && (
+                        <Tooltip content={CHECK_LIFECYCLE_HINTS.sunset} side="top" sideOffset={4}>
+                          <Badge pill color="warning" variant="soft" size="sm">Sunset</Badge>
+                        </Tooltip>
+                      )}
+                    </div>
                   </div>
-                  <span className="min-w-0 truncate text-sm font-medium text-[var(--color-text)]">{check.name}</span>
-                  <div className="ml-auto flex shrink-0 items-center gap-1.5">
-                    {hasConfig && (
-                      <Badge pill color="secondary" variant="soft" size="sm"><SettingsCog className="size-3" /></Badge>
-                    )}
-                    {check.required && (
-                      <Badge pill color="info" variant="soft" size="sm">Required</Badge>
-                    )}
-                    {check.lifecycle === "beta" && (
-                      <Tooltip content={CHECK_LIFECYCLE_HINTS.beta} side="top" sideOffset={4}>
-                        <Badge pill color="discovery" variant="soft" size="sm">Beta</Badge>
-                      </Tooltip>
-                    )}
-                    {check.lifecycle === "sunset" && (
-                      <Tooltip content={CHECK_LIFECYCLE_HINTS.sunset} side="top" sideOffset={4}>
-                        <Badge pill color="warning" variant="soft" size="sm">Sunset</Badge>
-                      </Tooltip>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
-
+                );
+              })}
             {sortedData.length === 0 && (
-              <div className="p-6 text-center text-sm text-[var(--color-text-tertiary)]">
-                No checks match your filters.
-              </div>
-            )}
+                <div className="p-6 text-center text-sm text-[var(--color-text-tertiary)]">
+                  No checks match your filters.
+                </div>
+              )}
+            </div>
           </div>
-        </div>
+        )}
 
-        {/* Column 2: Check details & settings */}
-        <div className="flex min-h-0 min-w-0 flex-1 flex-col">
-          <div className={COLUMN_HEADER}>
-            <span className={COLUMN_HEADER_LABEL}>{selectedRow ? selectedRow.check.name : "Check Settings"}</span>
-            <span className={COLUMN_HEADER_VALUE}>
-              {selectedRow ? (selectedRow.check.required ? "Required" : "Optional") : "\u00a0"}
-            </span>
-          </div>
-
+        {/* Column 2: Check details & settings — hidden on mobile when list is shown */}
+        {(!isMobile || selectedCheckName) && (
+          <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+            <div className={COLUMN_HEADER}>
+              {isMobile && (
+                <button
+                  type="button"
+                  className="flex items-center gap-1 text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-text)]"
+                  onClick={() => setSelectedCheckName(null)}
+                >
+                  <ChevronLeftMd className="size-4" />
+                  <span>Checks</span>
+                </button>
+              )}
+              {!isMobile && (
+                <span className={COLUMN_HEADER_LABEL}>{selectedRow ? selectedRow.check.name : "Check Settings"}</span>
+              )}
+              {isMobile && selectedRow && (
+                <span className={`${COLUMN_HEADER_LABEL} text-right`}>{selectedRow.check.name}</span>
+              )}
+              <span className={COLUMN_HEADER_VALUE}>
+                {selectedRow ? (selectedRow.check.required ? "Required" : "Optional") : "\u00a0"}
+              </span>
+            </div>
           <div className="flex-1 overflow-y-auto p-4">
-            {!selectedRow && (
-              <div className="flex h-full items-center justify-center text-sm text-[var(--color-text-tertiary)]">
-                Select a check to configure.
-              </div>
-            )}
-
+              {!selectedRow && (
+                <div className="flex h-full items-center justify-center text-sm text-[var(--color-text-tertiary)]">
+                  Select a check to configure.
+                </div>
+              )}
             {selectedRow && (
-              <CheckDetailPanel
-                row={selectedRow}
-                onUpdateCheck={onUpdateCheck}
-                onOpenMatchReq={() => setMatchReqCheckName(selectedRow.check.name)}
-              />
-            )}
+                <CheckDetailPanel
+                  row={selectedRow}
+                  onUpdateCheck={onUpdateCheck}
+                  onOpenMatchReq={() => setMatchReqCheckName(selectedRow.check.name)}
+                />
+              )}
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       {/* Match Requirements — modal for comparison checks */}

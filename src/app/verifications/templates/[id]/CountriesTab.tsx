@@ -36,7 +36,8 @@ import { Field } from "@plexui/ui/components/Field";
 import { Input } from "@plexui/ui/components/Input";
 import { Select } from "@plexui/ui/components/Select";
 import { SelectControl } from "@plexui/ui/components/SelectControl";
-import { Search } from "@plexui/ui/components/Icon";
+import { ChevronLeftMd, Search } from "@plexui/ui/components/Icon";
+import { useIsMobile } from "@/lib/hooks";
 
 type BadgeColor = "secondary" | "info" | "discovery" | "warning" | "success" | "caution" | "danger";
 
@@ -91,6 +92,8 @@ export function CountriesTab({
   const [bulkConfigOpen, setBulkConfigOpen] = useState(false);
   const [selectedCountryCode, setSelectedCountryCode] = useState<string | null>(null);
   const [selectedIdType, setSelectedIdType] = useState<IdDocType | null>(null);
+
+  const isMobile = useIsMobile();
 
   const [suppressAnim, setSuppressAnim] = useState(true);
   useEffect(() => {
@@ -153,35 +156,38 @@ export function CountriesTab({
     idTypeFilters.length > 0 ||
     search.trim() !== "";
 
-  // Auto-select first enabled country only on initial mount
+  // Auto-select first enabled country only on initial mount (desktop only)
   useEffect(() => {
+    if (isMobile) return;
     if (selectedCountryCode !== null) return;
     const firstEnabled = COUNTRY_OPTIONS.find((c) => selectedSet.has(c.value))?.value ?? null;
     setSelectedCountryCode(firstEnabled);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [isMobile]);
 
 
-  // If current selection is no longer in filtered list, pick first available
+  // If current selection is no longer in filtered list, pick first available (desktop only)
   useEffect(() => {
+    if (isMobile) return;
     if (selectedCountryCode === null) return;
     const stillVisible = filtered.some((c) => c.value === selectedCountryCode);
     if (!stillVisible) {
       setSelectedCountryCode(filtered[0]?.value ?? null);
     }
-  }, [filtered, selectedCountryCode]);
+  }, [filtered, selectedCountryCode, isMobile]);
 
-  // Auto-select first doc type only when selected country changes
+  // Auto-select first doc type only when selected country changes (desktop only)
   useEffect(() => {
     if (!selectedCountryCode) {
       setSelectedIdType(null);
       return;
     }
+    if (isMobile) return;
     const availableTypes = getCountryIdTypes(selectedCountryCode);
     const activeTypes = getActiveTypes(countrySettings[selectedCountryCode], availableTypes);
     setSelectedIdType(activeTypes[0] ?? availableTypes[0] ?? null);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedCountryCode]);
+  }, [selectedCountryCode, isMobile]);
 
   const selectedCountry =
     selectedCountryCode != null
@@ -272,470 +278,497 @@ export function CountriesTab({
     updateSelectedTypeConfig({ requiredAttributes: next.length > 0 ? next : undefined });
   }
 
+
+  // Mobile navigation: 3-level stack
+  // Level 1 = country list, Level 2 = doc types, Level 3 = doc settings
+  const mobileLevel: 1 | 2 | 3 = !selectedCountryCode ? 1 : !selectedIdType ? 2 : 3;
+  const showToolbar = !isMobile || mobileLevel === 1;
+
   return (
     <div className="flex h-full min-h-0 flex-col" data-suppress-anim={suppressAnim || undefined}>
-      {/* ── Shared Toolbar ── */}
-      <div className="flex flex-wrap items-center gap-2 px-4 pt-6 pb-3 md:px-6">
-        <div className="w-60">
-          <Input
-            size="sm"
-            pill
-            placeholder="Search countries..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            onClear={search ? () => setSearch("") : undefined}
-            startAdornment={<Search style={{ width: 16, height: 16 }} />}
-          />
+      {/* ── Shared Toolbar (hidden on mobile when not at country list) ── */}
+      {showToolbar && (
+        <div className="flex flex-wrap items-center gap-2 px-4 pt-6 pb-3 md:px-6">
+          <div className="w-60">
+            <Input
+              size="sm"
+              pill
+              placeholder="Search countries..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              onClear={search ? () => setSearch("") : undefined}
+              startAdornment={<Search style={{ width: 16, height: 16 }} />}
+            />
+          </div>
+          <div className="w-36">
+            <Select
+              options={STATUS_FILTER_OPTIONS}
+              value={statusFilters}
+              onChange={(opts) => setStatusFilters(opts.map((o) => o.value))}
+              multiple
+              clearable
+              placeholder="Status"
+              size="sm"
+              pill
+              variant="outline"
+              block
+              listMinWidth={160}
+            />
+          </div>
+          <div className="w-40">
+            <Select
+              options={REGION_OPTIONS}
+              value={regionFilters}
+              onChange={(opts) => setRegionFilters(opts.map((o) => o.value))}
+              multiple
+              clearable
+              placeholder="Region"
+              size="sm"
+              pill
+              variant="outline"
+              block
+              listMinWidth={180}
+            />
+          </div>
+          <div className="w-40">
+            <Select
+              options={ID_DOC_TYPE_FILTER_OPTIONS}
+              value={idTypeFilters}
+              onChange={(opts) => setIdTypeFilters(opts.map((o) => o.value))}
+              multiple
+              clearable
+              placeholder="ID types"
+              size="sm"
+              pill
+              variant="outline"
+              block
+              listMinWidth={260}
+            />
+          </div>
+          {hasActiveFilters && (
+            <Button
+              color="secondary"
+              variant="soft"
+              size="sm"
+              pill
+              onClick={() => {
+                setSearch("");
+                setStatusFilters([]);
+                setRegionFilters([]);
+                setIdTypeFilters([]);
+              }}
+            >
+              Clear filters
+            </Button>
+          )}
+          {selected.length >= 2 && (
+            <Button
+              color="secondary"
+              variant="outline"
+              size="sm"
+              pill
+              className="ml-auto"
+              onClick={() => setBulkConfigOpen(true)}
+            >
+              Bulk ({selected.length})
+            </Button>
+          )}
         </div>
-        <div className="w-36">
-          <Select
-            options={STATUS_FILTER_OPTIONS}
-            value={statusFilters}
-            onChange={(opts) => setStatusFilters(opts.map((o) => o.value))}
-            multiple
-            clearable
-            placeholder="Status"
-            size="sm"
-            pill
-            variant="outline"
-            block
-            listMinWidth={160}
-          />
-        </div>
-        <div className="w-40">
-          <Select
-            options={REGION_OPTIONS}
-            value={regionFilters}
-            onChange={(opts) => setRegionFilters(opts.map((o) => o.value))}
-            multiple
-            clearable
-            placeholder="Region"
-            size="sm"
-            pill
-            variant="outline"
-            block
-            listMinWidth={180}
-          />
-        </div>
-        <div className="w-40">
-          <Select
-            options={ID_DOC_TYPE_FILTER_OPTIONS}
-            value={idTypeFilters}
-            onChange={(opts) => setIdTypeFilters(opts.map((o) => o.value))}
-            multiple
-            clearable
-            placeholder="ID types"
-            size="sm"
-            pill
-            variant="outline"
-            block
-            listMinWidth={260}
-          />
-        </div>
-        {hasActiveFilters && (
-          <Button
-            color="secondary"
-            variant="soft"
-            size="sm"
-            pill
-            onClick={() => {
-              setSearch("");
-              setStatusFilters([]);
-              setRegionFilters([]);
-              setIdTypeFilters([]);
-            }}
-          >
-            Clear filters
-          </Button>
-        )}
-        {selected.length >= 2 && (
-          <Button
-            color="secondary"
-            variant="outline"
-            size="sm"
-            pill
-            className="ml-auto"
-            onClick={() => setBulkConfigOpen(true)}
-          >
-            Bulk ({selected.length})
-          </Button>
-        )}
-      </div>
+      )}
 
       {/* ── 3-Column Layout ── */}
       <div className="mx-4 mb-4 flex min-h-0 flex-1 overflow-hidden rounded-xl border border-[var(--color-border)] md:mx-6">
-        {/* Column 1: Countries */}
-        <div className="flex min-h-0 min-w-0 flex-1 flex-col border-r border-[var(--color-border)]">
-          <div className={`${COLUMN_HEADER} pl-4.5 pr-3`}>
-            <Checkbox
-              checked={allFilteredSelected ? true : someFilteredSelected ? "indeterminate" : false}
-              onCheckedChange={handleSelectAll}
-            />
-            <span className={COLUMN_HEADER_LABEL}>Countries</span>
-            <span className={COLUMN_HEADER_VALUE}>
-              Enabled · {selected.length} / {COUNTRY_OPTIONS.length}
-            </span>
-          </div>
-          <div className="flex-1 overflow-y-auto p-1.5">
-            {filtered.map((country) => {
-              const isEnabled = selectedSet.has(country.value);
-              const isSelected = selectedCountryCode === country.value;
-              const availableTypes = getCountryIdTypes(country.value);
+        {/* Column 1: Countries — hidden on mobile when deeper level is shown */}
+        {(!isMobile || mobileLevel === 1) && (
+          <div className={`flex min-h-0 min-w-0 flex-1 flex-col ${!isMobile ? 'border-r border-[var(--color-border)]' : ''}`}>
+            <div className={`${COLUMN_HEADER} pl-4.5 pr-3`}>
+              <Checkbox
+                checked={allFilteredSelected ? true : someFilteredSelected ? "indeterminate" : false}
+                onCheckedChange={handleSelectAll}
+              />
+              <span className={COLUMN_HEADER_LABEL}>Countries</span>
+              <span className={COLUMN_HEADER_VALUE}>
+                Enabled · {selected.length} / {COUNTRY_OPTIONS.length}
+              </span>
+            </div>
+            <div className="flex-1 overflow-y-auto p-1.5">
+              {filtered.map((country) => {
+                const isEnabled = selectedSet.has(country.value);
+                const isSelected = !isMobile && selectedCountryCode === country.value;
+                const availableTypes = getCountryIdTypes(country.value);
               const activeSet = getActiveTypeSet(countrySettings[country.value], availableTypes);
-
-              return (
-                <div
-                  key={country.value}
-                  role="button"
-                  tabIndex={0}
-                  onClick={() => setSelectedCountryCode(country.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" || e.key === " ") {
-                      e.preventDefault();
-                      setSelectedCountryCode(country.value);
-                    } else if (e.key === "ArrowDown" || e.key === "ArrowUp") {
-                      e.preventDefault();
-                      const idx = filtered.findIndex((c) => c.value === country.value);
-                      const next = e.key === "ArrowDown" ? idx + 1 : idx - 1;
-                      const target = filtered[next];
-                      if (target) {
-                        setSelectedCountryCode(target.value);
-                        const container = e.currentTarget.parentElement;
-                        const el = container?.children[next] as HTMLElement | undefined;
-                        el?.focus();
-                        el?.scrollIntoView({ block: "nearest" });
-                      }
-                    }
-                  }}
-                  className={`flex cursor-pointer items-start gap-2.5 rounded-lg px-3 py-2 outline-none transition-colors ${
-                    isSelected
-                      ? "bg-[var(--gray-100)]"
-                      : "hover:bg-[var(--color-surface-secondary)]"
-                  }`}
-                >
+                return (
                   <div
-                    className="mt-px"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onToggle(country.value);
-                      setSelectedCountryCode(country.value);
-                    }}
-                  >
-                    <Checkbox checked={isEnabled} onCheckedChange={() => { onToggle(country.value); setSelectedCountryCode(country.value); }} />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <div className="truncate text-sm text-[var(--color-text)]">
-                      {country.label}
-                      <span className="text-[var(--color-text-tertiary)]"> · {country.value}</span>
-                    </div>
-                    <div className="mt-1 flex flex-wrap gap-1">
-                      {availableTypes.map((type) => {
-                        const isActive = activeSet.has(type);
-                        return (
-                          <Badge
-                            key={`${country.value}-${type}`}
-                            pill
-                            color={
-                              isActive
-                                ? (ID_DOC_TYPE_COLORS[type] as BadgeColor)
-                                : "secondary"
-                            }
-                            variant={isActive ? "soft" : "outline"}
-                            size="sm"
-                            className={isActive ? undefined : "opacity-40"}
-                          >
-                            {ID_DOC_TYPE_SHORT[type]}
-                          </Badge>
-                        );
-                      })}
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-
-            {filtered.length === 0 && (
-              <div className="p-6 text-center text-sm text-[var(--color-text-tertiary)]">
-                No countries match your filters.
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Column 2: Document Types */}
-        <div className="flex min-h-0 min-w-0 flex-1 flex-col border-r border-[var(--color-border)]">
-          <div className={COLUMN_HEADER}>
-            {selectedCountry ? (
-              <>
-                <span className={COLUMN_HEADER_LABEL}>{selectedCountry.label}</span>
-                <span className={COLUMN_HEADER_VALUE}>
-                  Accepted ID Types · {selectedCountryActiveSet.size} / {selectedCountryTypes.length}
-                </span>
-              </>
-            ) : (
-              <span className={COLUMN_HEADER_LABEL}>Document Types</span>
-            )}
-          </div>
-
-          <div className="flex-1 overflow-y-auto p-1.5">
-            {!selectedCountry && (
-              <div className="flex h-full items-center justify-center text-sm text-[var(--color-text-tertiary)]">
-                Select a country to configure.
-              </div>
-            )}
-
-            {selectedCountry && (
-              <>
-                {selectedCountryTypes.map((type) => {
-                  const isActive = selectedCountryActiveSet.has(type);
-                  const isDocSelected = selectedIdType === type;
-
-                  return (
-                    <div
-                      key={type}
-                      role="button"
-                      tabIndex={0}
-                      onClick={() => setSelectedIdType(type)}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter" || e.key === " ") {
-                          e.preventDefault();
-                          setSelectedIdType(type);
-                        } else if (e.key === "ArrowDown" || e.key === "ArrowUp") {
-                          e.preventDefault();
-                          const idx = selectedCountryTypes.indexOf(type);
-                          const next = e.key === "ArrowDown" ? idx + 1 : idx - 1;
-                          const target = selectedCountryTypes[next];
-                          if (target) {
-                            setSelectedIdType(target);
-                            const container = e.currentTarget.parentElement;
-                            const el = container?.children[next] as HTMLElement | undefined;
-                            el?.focus();
-                            el?.scrollIntoView({ block: "nearest" });
-                          }
+                    key={country.value}
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => setSelectedCountryCode(country.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        setSelectedCountryCode(country.value);
+                      } else if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+                        e.preventDefault();
+                        const idx = filtered.findIndex((c) => c.value === country.value);
+                        const next = e.key === "ArrowDown" ? idx + 1 : idx - 1;
+                        const target = filtered[next];
+                        if (target) {
+                          setSelectedCountryCode(target.value);
+                          const container = e.currentTarget.parentElement;
+                          const el = container?.children[next] as HTMLElement | undefined;
+                          el?.focus();
+                          el?.scrollIntoView({ block: "nearest" });
                         }
+                      }
+                    }}
+                    className={`flex cursor-pointer items-start gap-2.5 rounded-lg px-3 py-2 outline-none transition-colors ${
+                      isSelected
+                        ? "bg-[var(--gray-100)]"
+                        : "hover:bg-[var(--color-surface-secondary)]"
+                    }`}
+                  >
+                    <div
+                      className="mt-px"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onToggle(country.value);
+                        setSelectedCountryCode(country.value);
                       }}
-                      className={`flex cursor-pointer items-center gap-2.5 rounded-lg px-3 py-2 outline-none transition-colors ${
-                        isDocSelected
-                          ? "bg-[var(--gray-100)]"
-                          : "hover:bg-[var(--color-surface-secondary)]"
-                      }`}
                     >
+                      <Checkbox checked={isEnabled} onCheckedChange={() => { onToggle(country.value); setSelectedCountryCode(country.value); }} />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="truncate text-sm text-[var(--color-text)]">
+                        {country.label}
+                        <span className="text-[var(--color-text-tertiary)]"> · {country.value}</span>
+                      </div>
+                      <div className="mt-1 flex flex-wrap gap-1">
+                        {availableTypes.map((type) => {
+                          const isActive = activeSet.has(type);
+                          return (
+                            <Badge
+                              key={`${country.value}-${type}`}
+                              pill
+                              color={
+                                isActive
+                                  ? (ID_DOC_TYPE_COLORS[type] as BadgeColor)
+                                  : "secondary"
+                              }
+                              variant={isActive ? "soft" : "outline"}
+                              size="sm"
+                              className={isActive ? undefined : "opacity-40"}
+                            >
+                              {ID_DOC_TYPE_SHORT[type]}
+                            </Badge>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            {filtered.length === 0 && (
+                <div className="p-6 text-center text-sm text-[var(--color-text-tertiary)]">
+                  No countries match your filters.
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Column 2: Document Types — hidden on mobile when at level 1 or 3 */}
+        {(!isMobile || mobileLevel === 2) && (
+          <div className={`flex min-h-0 min-w-0 flex-1 flex-col ${!isMobile ? 'border-r border-[var(--color-border)]' : ''}`}>
+            <div className={COLUMN_HEADER}>
+              {isMobile && (
+                <button
+                  type="button"
+                  className="flex items-center gap-1 text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-text)]"
+                  onClick={() => { setSelectedCountryCode(null); setSelectedIdType(null); }}
+                >
+                  <ChevronLeftMd className="size-4" />
+                  <span>Countries</span>
+                </button>
+              )}
+              {selectedCountry ? (
+                <>
+                  {!isMobile && <span className={COLUMN_HEADER_LABEL}>{selectedCountry.label}</span>}
+                  {isMobile && <span className={`${COLUMN_HEADER_LABEL} text-right`}>{selectedCountry.label}</span>}
+                  <span className={COLUMN_HEADER_VALUE}>
+                    Accepted ID Types · {selectedCountryActiveSet.size} / {selectedCountryTypes.length}
+                  </span>
+                </>
+              ) : (
+                <span className={COLUMN_HEADER_LABEL}>Document Types</span>
+              )}
+            </div>
+
+            <div className="flex-1 overflow-y-auto p-1.5">
+              {!selectedCountry && (
+                <div className="flex h-full items-center justify-center text-sm text-[var(--color-text-tertiary)]">
+                  Select a country to configure.
+                </div>
+              )}
+            {selectedCountry && (
+                <>
+                  {selectedCountryTypes.map((type) => {
+                    const isActive = selectedCountryActiveSet.has(type);
+                    const isDocSelected = !isMobile && selectedIdType === type;
+
+                    return (
                       <div
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          toggleSelectedCountryIdType(type);
-                          setSelectedIdType(type);
+                        key={type}
+                        role="button"
+                        tabIndex={0}
+                        onClick={() => setSelectedIdType(type)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            e.preventDefault();
+                            setSelectedIdType(type);
+                          } else if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+                            e.preventDefault();
+                            const idx = selectedCountryTypes.indexOf(type);
+                            const next = e.key === "ArrowDown" ? idx + 1 : idx - 1;
+                            const target = selectedCountryTypes[next];
+                            if (target) {
+                              setSelectedIdType(target);
+                              const container = e.currentTarget.parentElement;
+                              const el = container?.children[next] as HTMLElement | undefined;
+                              el?.focus();
+                              el?.scrollIntoView({ block: "nearest" });
+                            }
+                          }
                         }}
+                        className={`flex cursor-pointer items-center gap-2.5 rounded-lg px-3 py-2 outline-none transition-colors ${
+                          isDocSelected
+                            ? "bg-[var(--gray-100)]"
+                            : "hover:bg-[var(--color-surface-secondary)]"
+                        }`}
                       >
-                        <Checkbox
-                          checked={isActive}
-                          onCheckedChange={() => {
+                        <div
+                          onClick={(e) => {
+                            e.stopPropagation();
                             toggleSelectedCountryIdType(type);
                             setSelectedIdType(type);
                           }}
-                        />
+                        >
+                          <Checkbox
+                            checked={isActive}
+                            onCheckedChange={() => {
+                              toggleSelectedCountryIdType(type);
+                              setSelectedIdType(type);
+                            }}
+                          />
+                        </div>
+                        <span className="flex-1 text-sm text-[var(--color-text)]">
+                          {ID_DOC_TYPE_LABELS[type]}
+                        </span>
+                        <div className="flex shrink-0 items-center gap-1">
+                          {getRequiredSidesParts(type, countrySettings[selectedCountry.value]?.idTypeConfig?.[type]).map((side) => (
+                            <Badge key={side} color="secondary" variant="soft" size="sm" pill>
+                              {side}
+                            </Badge>
+                          ))}
+                        </div>
                       </div>
-                      <span className="flex-1 text-sm text-[var(--color-text)]">
-                        {ID_DOC_TYPE_LABELS[type]}
-                      </span>
-                      <div className="flex shrink-0 items-center gap-1">
-                        {getRequiredSidesParts(type, countrySettings[selectedCountry.value]?.idTypeConfig?.[type]).map((side) => (
-                          <Badge key={side} color="secondary" variant="soft" size="sm" pill>
-                            {side}
-                          </Badge>
-                        ))}
-                      </div>
-                    </div>
-                  );
-                })}
-
+                    );
+                  })}
                 <div className="px-3 py-4">
-                  <Field label="Age Range" size={MODAL_CONTROL_SIZE}>
+                    <Field label="Age Range" size={MODAL_CONTROL_SIZE}>
+                      <div className="flex items-center gap-2">
+                        <div className={MODAL_NUMBER_INPUT_WIDTH}>
+                          <Input
+                            size={MODAL_CONTROL_SIZE}
+                            type="number"
+                            placeholder="Min"
+                            value={
+                              selectedCountrySettings?.ageRange?.min != null
+                                ? String(selectedCountrySettings.ageRange.min)
+                                : ""
+                            }
+                            onChange={(e) => setAgeMin(e.target.value)}
+                          />
+                        </div>
+                        <span className="text-sm text-[var(--color-text-tertiary)]">to</span>
+                        <div className={MODAL_NUMBER_INPUT_WIDTH}>
+                          <Input
+                            size={MODAL_CONTROL_SIZE}
+                            type="number"
+                            placeholder="Max"
+                            value={
+                              selectedCountrySettings?.ageRange?.max != null
+                                ? String(selectedCountrySettings.ageRange.max)
+                                : ""
+                            }
+                            onChange={(e) => setAgeMax(e.target.value)}
+                          />
+                        </div>
+                      </div>
+                    </Field>
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Column 3: Document Settings — hidden on mobile when at level 1 or 2 */}
+        {(!isMobile || mobileLevel === 3) && (
+          <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+            <div className={COLUMN_HEADER}>
+              {isMobile && (
+                <button
+                  type="button"
+                  className="flex items-center gap-1 text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-text)]"
+                  onClick={() => setSelectedIdType(null)}
+                >
+                  <ChevronLeftMd className="size-4" />
+                  <span>{selectedCountry?.label ?? "Back"}</span>
+                </button>
+              )}
+              {selectedIdType ? (
+                <>
+                  {!isMobile && <span className={COLUMN_HEADER_LABEL}>{ID_DOC_TYPE_LABELS[selectedIdType]}</span>}
+                  {isMobile && <span className={`${COLUMN_HEADER_LABEL} text-right`}>{ID_DOC_TYPE_LABELS[selectedIdType]}</span>}
+                  <span className={COLUMN_HEADER_VALUE}>{selectedCountry?.label}</span>
+                </>
+              ) : (
+                <span className={COLUMN_HEADER_LABEL}>Document Settings</span>
+              )}
+            </div>
+          <div className="flex-1 overflow-y-auto p-4">
+              {!selectedIdType && (
+                <div className="flex h-full items-center justify-center text-sm text-[var(--color-text-tertiary)]">
+                  Select a document type to configure.
+                </div>
+              )}
+            {selectedIdType && selectedTypeConfig && (
+                <div className="flex flex-col gap-5">
+                  <Field label="Required Sides" size={MODAL_CONTROL_SIZE}>
+                    <div className="flex flex-col gap-2">
+                      <Checkbox
+                        checked={selectedTypeConfig.requireFront ?? true}
+                        label="Require front"
+                        onCheckedChange={(checked) => updateSelectedTypeConfig({ requireFront: checked })}
+                      />
+                      {ID_TYPE_HAS_BACK.has(selectedIdType) && (
+                        <Checkbox
+                          checked={selectedTypeConfig.requireBack ?? false}
+                          label="Require back"
+                          onCheckedChange={(checked) => updateSelectedTypeConfig({ requireBack: checked })}
+                        />
+                      )}
+                      {ID_TYPE_HAS_BARCODE.has(selectedIdType) && (
+                        <Checkbox
+                          checked={selectedTypeConfig.requireBarcode ?? false}
+                          label="Require barcode"
+                          onCheckedChange={(checked) => updateSelectedTypeConfig({ requireBarcode: checked })}
+                        />
+                      )}
+                      {ID_TYPE_HAS_PASSPORT_SIGNATURE.has(selectedIdType) && (
+                        <Checkbox
+                          checked={selectedTypeConfig.requirePassportSignature ?? false}
+                          label="Require passport signature"
+                          onCheckedChange={(checked) =>
+                            updateSelectedTypeConfig({ requirePassportSignature: checked })
+                          }
+                        />
+                      )}
+                    </div>
+                  </Field>
+                <Field label="Expiration" size={MODAL_CONTROL_SIZE}>
                     <div className="flex items-center gap-2">
                       <div className={MODAL_NUMBER_INPUT_WIDTH}>
                         <Input
                           size={MODAL_CONTROL_SIZE}
                           type="number"
-                          placeholder="Min"
+                          placeholder="0"
                           value={
-                            selectedCountrySettings?.ageRange?.min != null
-                              ? String(selectedCountrySettings.ageRange.min)
+                            selectedTypeConfig.expirationDays != null
+                              ? String(selectedTypeConfig.expirationDays)
                               : ""
                           }
-                          onChange={(e) => setAgeMin(e.target.value)}
+                          onChange={(e) => {
+                            const value = e.target.value;
+                            updateSelectedTypeConfig({
+                              expirationDays: value === "" ? undefined : Number(value),
+                            });
+                          }}
                         />
                       </div>
-                      <span className="text-sm text-[var(--color-text-tertiary)]">to</span>
-                      <div className={MODAL_NUMBER_INPUT_WIDTH}>
-                        <Input
-                          size={MODAL_CONTROL_SIZE}
-                          type="number"
-                          placeholder="Max"
-                          value={
-                            selectedCountrySettings?.ageRange?.max != null
-                              ? String(selectedCountrySettings.ageRange.max)
-                              : ""
-                          }
-                          onChange={(e) => setAgeMax(e.target.value)}
-                        />
-                      </div>
+                      <span className="text-sm text-[var(--color-text-secondary)]">days</span>
                     </div>
                   </Field>
-                </div>
-              </>
-            )}
-          </div>
-        </div>
-
-        {/* Column 3: Document Settings */}
-        <div className="flex min-h-0 min-w-0 flex-1 flex-col">
-          <div className={COLUMN_HEADER}>
-            {selectedIdType ? (
-              <>
-                <span className={COLUMN_HEADER_LABEL}>{ID_DOC_TYPE_LABELS[selectedIdType]}</span>
-                <span className={COLUMN_HEADER_VALUE}>{selectedCountry?.label}</span>
-              </>
-            ) : (
-              <span className={COLUMN_HEADER_LABEL}>Document Settings</span>
-            )}
-          </div>
-
-          <div className="flex-1 overflow-y-auto p-4">
-            {!selectedIdType && (
-              <div className="flex h-full items-center justify-center text-sm text-[var(--color-text-tertiary)]">
-                Select a document type to configure.
-              </div>
-            )}
-
-            {selectedIdType && selectedTypeConfig && (
-              <div className="flex flex-col gap-5">
-                <Field label="Required Sides" size={MODAL_CONTROL_SIZE}>
-                  <div className="flex flex-col gap-2">
-                    <Checkbox
-                      checked={selectedTypeConfig.requireFront ?? true}
-                      label="Require front"
-                      onCheckedChange={(checked) => updateSelectedTypeConfig({ requireFront: checked })}
-                    />
-                    {ID_TYPE_HAS_BACK.has(selectedIdType) && (
-                      <Checkbox
-                        checked={selectedTypeConfig.requireBack ?? false}
-                        label="Require back"
-                        onCheckedChange={(checked) => updateSelectedTypeConfig({ requireBack: checked })}
-                      />
-                    )}
-                    {ID_TYPE_HAS_BARCODE.has(selectedIdType) && (
-                      <Checkbox
-                        checked={selectedTypeConfig.requireBarcode ?? false}
-                        label="Require barcode"
-                        onCheckedChange={(checked) => updateSelectedTypeConfig({ requireBarcode: checked })}
-                      />
-                    )}
-                    {ID_TYPE_HAS_PASSPORT_SIGNATURE.has(selectedIdType) && (
-                      <Checkbox
-                        checked={selectedTypeConfig.requirePassportSignature ?? false}
-                        label="Require passport signature"
-                        onCheckedChange={(checked) =>
-                          updateSelectedTypeConfig({ requirePassportSignature: checked })
-                        }
-                      />
-                    )}
-                  </div>
-                </Field>
-
-                <Field label="Expiration" size={MODAL_CONTROL_SIZE}>
-                  <div className="flex items-center gap-2">
-                    <div className={MODAL_NUMBER_INPUT_WIDTH}>
-                      <Input
-                        size={MODAL_CONTROL_SIZE}
-                        type="number"
-                        placeholder="0"
-                        value={
-                          selectedTypeConfig.expirationDays != null
-                            ? String(selectedTypeConfig.expirationDays)
-                            : ""
-                        }
-                        onChange={(e) => {
-                          const value = e.target.value;
+                <Field label="Required Attributes" size={MODAL_CONTROL_SIZE}>
+                    <div className="flex flex-col gap-2">
+                      <Select
+                        options={EXTRACTED_ATTRIBUTE_OPTIONS}
+                        value={selectedTypeConfig.requiredAttributes ?? []}
+                        onChange={(opts) => {
+                          const next = opts.map((o) => o.value);
                           updateSelectedTypeConfig({
-                            expirationDays: value === "" ? undefined : Number(value),
+                            requiredAttributes: next.length > 0 ? next : undefined,
                           });
                         }}
+                        multiple
+                        clearable
+                        placeholder="Select attributes"
+                        size={MODAL_CONTROL_SIZE}
+                        variant="outline"
+                        block
+                        listMinWidth={220}
+                        pill={false}
                       />
+                      {(selectedTypeConfig.requiredAttributes ?? []).length > 0 && (
+                        <div className="flex flex-wrap gap-1.5">
+                          {(selectedTypeConfig.requiredAttributes ?? []).map((attr) => {
+                            const label =
+                              EXTRACTED_ATTRIBUTE_OPTIONS.find((o) => o.value === attr)?.label ?? attr;
+                            return (
+                              <SelectControl
+                                key={attr}
+                                variant="soft"
+                                size="xs"
+                                selected
+                                pill={false}
+                                dropdownIconType="none"
+                                onClearClick={() => removeRequiredAttribute(attr)}
+                              >
+                                {label}
+                              </SelectControl>
+                            );
+                          })}
+                        </div>
+                      )}
                     </div>
-                    <span className="text-sm text-[var(--color-text-secondary)]">days</span>
-                  </div>
-                </Field>
-
-                <Field label="Required Attributes" size={MODAL_CONTROL_SIZE}>
-                  <div className="flex flex-col gap-2">
+                  </Field>
+                <Field label="Accepted Alternatives" size={MODAL_CONTROL_SIZE}>
                     <Select
-                      options={EXTRACTED_ATTRIBUTE_OPTIONS}
-                      value={selectedTypeConfig.requiredAttributes ?? []}
+                      options={selectedCountryTypes
+                        .filter((type) => type !== selectedIdType)
+                        .map((type) => ({ value: type, label: ID_DOC_TYPE_LABELS[type] }))}
+                      value={selectedTypeConfig.acceptedAlternatives ?? []}
                       onChange={(opts) => {
-                        const next = opts.map((o) => o.value);
+                        const next = opts.map((option) => option.value as IdDocType);
                         updateSelectedTypeConfig({
-                          requiredAttributes: next.length > 0 ? next : undefined,
+                          acceptedAlternatives: next.length > 0 ? next : undefined,
                         });
                       }}
                       multiple
                       clearable
-                      placeholder="Select attributes"
+                      placeholder="None"
                       size={MODAL_CONTROL_SIZE}
                       variant="outline"
                       block
-                      listMinWidth={220}
+                      listMinWidth={240}
                       pill={false}
                     />
-                    {(selectedTypeConfig.requiredAttributes ?? []).length > 0 && (
-                      <div className="flex flex-wrap gap-1.5">
-                        {(selectedTypeConfig.requiredAttributes ?? []).map((attr) => {
-                          const label =
-                            EXTRACTED_ATTRIBUTE_OPTIONS.find((o) => o.value === attr)?.label ?? attr;
-                          return (
-                            <SelectControl
-                              key={attr}
-                              variant="soft"
-                              size="xs"
-                              selected
-                              pill={false}
-                              dropdownIconType="none"
-                              onClearClick={() => removeRequiredAttribute(attr)}
-                            >
-                              {label}
-                            </SelectControl>
-                          );
-                        })}
-                      </div>
-                    )}
-                  </div>
-                </Field>
-
-                <Field label="Accepted Alternatives" size={MODAL_CONTROL_SIZE}>
-                  <Select
-                    options={selectedCountryTypes
-                      .filter((type) => type !== selectedIdType)
-                      .map((type) => ({ value: type, label: ID_DOC_TYPE_LABELS[type] }))}
-                    value={selectedTypeConfig.acceptedAlternatives ?? []}
-                    onChange={(opts) => {
-                      const next = opts.map((option) => option.value as IdDocType);
-                      updateSelectedTypeConfig({
-                        acceptedAlternatives: next.length > 0 ? next : undefined,
-                      });
-                    }}
-                    multiple
-                    clearable
-                    placeholder="None"
-                    size={MODAL_CONTROL_SIZE}
-                    variant="outline"
-                    block
-                    listMinWidth={240}
-                    pill={false}
-                  />
-                </Field>
-              </div>
-            )}
+                  </Field>
+                </div>
+              )}
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       <BulkConfigureModal
